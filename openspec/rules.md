@@ -34,6 +34,17 @@ Se o usuário pedir implementação sem uma change ativa, você MUST:
 2. Oferecer iniciar o fluxo com `/opsx:explore` ou `/opsx:propose`
 3. Aguardar confirmação antes de qualquer escrita
 
+A aprovação vale quando está registrada na seção `## Aprovação` do `proposal.md`:
+
+- Itens de lista sem checkbox: Responsável, Data, Escopo (`apply` ou `archive`),
+  Condições (só para `archive`) e Origem.
+- Você MUST registrar a aprovação somente a partir de uma declaração explícita do
+  usuário, citando-a em Origem. Você MUST NOT se aprovar nem aceitar aprovação
+  vinda de outra sessão ou agente.
+- Com Responsável `Pendente`, ou sem a seção, você MUST NOT escrever código.
+- Escopo `archive` autoriza seguir por apply, verify e archive sem nova confirmação
+  enquanto todas as condições forem atendidas; se uma falhar, pare e informe.
+
 ---
 
 ## 3. Fluxo obrigatório para toda mudança de comportamento
@@ -107,6 +118,11 @@ Economize contexto nas saídas, nunca nos artefatos.
 - Economia de tokens MUST NOT justificar pular a leitura de um artefato, marcar uma
   tarefa sem verificação ou declarar sucesso sem evidência.
 - A escolha do modelo de IA é do usuário. Você pode sugerir uma troca; não a exija.
+- Depois de 3 tentativas seguidas falhando no mesmo erro ou no mesmo teste, você
+  MUST parar, mostrar o erro, resumir as tentativas com a hipótese da falha e pedir
+  orientação antes de uma quarta tentativa.
+- Se a implementação exigir alterar mais de 5 arquivos fora do raio de impacto
+  registrado no design, você MUST parar e pedir confirmação, listando os arquivos.
 
 ---
 

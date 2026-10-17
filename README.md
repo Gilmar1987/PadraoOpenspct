@@ -232,6 +232,18 @@ padrao-openspec/
 
 Mudanças no próprio padrão seguem o fluxo OpenSpec na raiz `openspec/` deste repositório.
 
+As skills `openspec-*` e os comandos `/opsx:*` foram gerados pelo OpenSpec CLI 1.14.2 e
+receberam trechos próprios do padrão. Ao regenerá-los com uma versão nova do CLI,
+reaplique estes trechos (o passo "Trechos customizados das skills" da CI falha se algum
+sumir):
+
+| Trecho | Arquivos |
+|---|---|
+| "Architectural Decision Check" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
+| "Approval record" e "Prior authorization exception" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
+| "Check the approval record" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
+| Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
+
 ---
 
 ## Validação contínua

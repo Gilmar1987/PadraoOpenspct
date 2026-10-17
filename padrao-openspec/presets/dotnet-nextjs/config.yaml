@@ -43,6 +43,7 @@ rules:
     - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
     - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
     - Identificar se a change afeta o back-end, o front-end ou ambos, e se altera o contrato entre eles (endpoints, payloads, códigos de erro, autenticação)
+    - "Terminar com a seção ## Aprovação, sem checkboxes, em itens de lista: Responsável (Pendente até o usuário aprovar), Data, Escopo (apply ou archive), Condições (só para archive) e Origem (citação da declaração explícita do usuário). Nunca preencher a aprovação sem essa declaração"
   specs:
     - Escrever requisitos observáveis, sem prescrever implementação desnecessariamente
     - Todo requisito deve ter ao menos um cenário verificável, incluindo erros e limites quando relevantes
@@ -54,11 +55,14 @@ rules:
     - Descrever a mudança no contrato da API (rota, payload, erros, autorização) e como o front-end passa a consumi-lo, incluindo compatibilidade durante o deploy das duas partes
     - "No back-end, indicar a camada, a injeção de dependência e a configuração; no front-end, indicar onde cada parte executa (Server Component, Client Component, Server Action, Route Handler)"
     - Quando o modelo do EF Core ou o esquema do banco mudar, prever a migration; operações destrutivas exigem decisão explícita e plano de dados
+    - "Listar o raio de impacto: arquivos-alvo (que serão alterados) e dependentes afetados (arquivos, rotas ou componentes que usam os alvos e podem quebrar)"
   tasks:
     - Dividir o trabalho em tarefas pequenas e ordenadas por dependência
     - Cada tarefa deve informar um critério objetivo de conclusão ou validação
     - Incluir tarefas explícitas para cada mitigação de risco do design e para criar ou atualizar as ADRs indicadas
     - Indicar em cada tarefa se ela é de back-end ou de front-end e o teste ou comando que comprova a conclusão (dotnet test ou script do package.json), ordenando a mudança de contrato antes do consumo no front-end
+    - Citar em cada tarefa os arquivos que ela toca
+    - Em cada grupo, a tarefa que cria ou atualiza os testes dos cenários vem antes da tarefa que implementa o comportamento
 
 operations:
   apply:
@@ -68,6 +72,8 @@ operations:
       - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
       - Cobrir regras de negócio com teste unitário no back-end, endpoints com teste de integração via WebApplicationFactory e fluxos críticos com teste E2E no front-end
       - Executar dotnet build e dotnet test, e lint, typecheck, testes e build do front-end, antes de concluir a última tarefa da change
+      - "Antes de alterar código, conferir a seção ## Aprovação do proposal: sem ela, ou com Responsável Pendente, parar e pedir a aprovação ao usuário"
+      - "Depois de 3 tentativas seguidas falhando no mesmo erro ou teste, parar, mostrar as tentativas e pedir orientação; se for preciso alterar mais de 5 arquivos fora do raio de impacto, parar e pedir confirmação"
   archive:
     guidance:
       - Executar /opsx:verify antes de arquivar e registrar eventuais limitações

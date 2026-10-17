@@ -65,6 +65,26 @@ jobs:
           node --check scripts/setup-project.mjs
           node --check scripts/sync-root.mjs
 
+      # Skills e comandos gerados pelo OpenSpec CLI levam trechos customizados do padrão;
+      # regenerá-los apaga esses trechos. A checagem falha se algum deles sumir.
+      - name: Trechos customizados das skills
+        run: |
+          missing=0
+          check() {
+            if ! grep -qF -- "$2" "$1"; then
+              echo "::error file=padrao-openspec/$1::Trecho customizado ausente: $2"
+              missing=1
+            fi
+          }
+          for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md; do
+            check "$f" "Architectural Decision Check"
+            check "$f" "Prior authorization exception"
+          done
+          for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
+            check "$f" "Check the approval record"
+          done
+          exit $missing
+
       - name: Smoke test do instalador
         run: |
           consumer="$(mktemp -d)"
