@@ -9,7 +9,12 @@ PadraoOpenspct/
 ├── padrao-openspec/          # Store neutro completo com scripts de setup, subagentes e presets
 ├── openspec-store-dotnet/    # Store para projetos .NET (Web API, Minimal API, Blazor, MVC)
 ├── openspec-store-nextjs/    # Store para projetos Next.js 15 (neutro, sem opiniões de UI/testes)
-└── openspec/                 # Projeto de referência: AgendaFácil (exemplo real em andamento)
+├── openspec/                 # Projeto de referência: AgendaFácil (exemplo real em andamento)
+├── .amazonq/rules/           # Stub de regras para Amazon Q
+├── .claude/                  # Slash commands, skills e stub de regras para Claude Code
+├── .github/                  # Stub de regras para GitHub Copilot
+├── .cursorrules              # Stub de regras para Cursor
+└── .windsurfrules            # Stub de regras para Windsurf
 ```
 
 ---
@@ -101,6 +106,7 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 | `openspec-sync-specs` | Sync sem arquivar |
 | `openspec-update-change` | Revisão de artefatos existentes |
 | `requesting-code-review` | Revisão de código via subagente isolado |
+| `docker` | Containerização com Dockerfile, docker-compose e boas práticas |
 
 ### Skills de stack (via `padrao-openspec`)
 
@@ -134,6 +140,30 @@ Disponíveis em `padrao-openspec/.github/agents/`:
 
 ---
 
+## Regras globais de agentes
+
+Todas as regras que governam o comportamento dos agentes de IA estão em uma única
+fonte da verdade:
+
+```
+openspec/rules.md    ← fonte única, agnóstica de agente
+```
+
+Cada agente carrega automaticamente um stub mínimo que aponta para esse arquivo:
+
+| Agente | Arquivo carregado automaticamente |
+|---|---|
+| Amazon Q | `.amazonq/rules/openspec-rules.md` |
+| Claude Code | `.claude/CLAUDE.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Cursor | `.cursorrules` |
+| Windsurf | `.windsurfrules` |
+
+Para atualizar uma regra, edite apenas `openspec/rules.md`. Os stubs não precisam
+ser alterados.
+
+---
+
 ## Estrutura de um store
 
 ```
@@ -141,6 +171,7 @@ store/
 ├── openspec/
 │   ├── config.yaml       # Stack, convenções e regras injetadas no agente
 │   ├── project.md        # Visão do produto, arquitetura e limites do sistema
+│   ├── rules.md          # Fonte única de regras globais para todos os agentes
 │   ├── specs/            # Fonte da verdade (preenchida após /opsx:archive)
 │   ├── changes/          # Changes ativas e arquivadas
 │   └── adrs/             # Decisões de arquitetura duradouras (padrao-openspec)
