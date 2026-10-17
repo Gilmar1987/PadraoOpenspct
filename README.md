@@ -32,41 +32,57 @@ PadraoOpenspct/
 
 ## Como iniciar um projeto novo
 
-### Opção A — Store neutro com setup interativo (recomendado)
+### Fluxo validado (recomendado)
 
 ```powershell
-# 1. Clone o store neutro com o nome do seu projeto
-git clone https://github.com/Gilmar1987/PadraoOpenspct padrao-openspec C:\openspec\meu-projeto-openspec
+# 1. Clone o store com o nome do projeto (sufixo -openspec por convenção)
+git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
 
-# 2. Rode o setup interativo
-node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\setup-project.mjs
+# 2. Crie e inicialize o repositório de código
+mkdir C:\openspec\<projeto>
+cd C:\openspec\<projeto>
+git init
+
+# 3. Rode o setup
+node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
+  C:\openspec\<projeto> `
+  --stack <dotnet|nextjs|dotnet-nextjs> `
+  --name "<Nome do Projeto>" `
+  --no-register `
+  --yes
 ```
 
-O setup pergunta a stack, o caminho do repositório de código e o nome do projeto, depois:
-- aplica o preset da stack em `openspec/project.md` e `openspec/config.yaml`
-- instala as skills e subagentes no repositório de código
-- registra o store na máquina com `openspec store register`
+Exemplo real (projeto Livraria, stack Next.js):
+
+```powershell
+git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\livraria-openspec
+mkdir C:\openspec\livraria && cd C:\openspec\livraria && git init
+node C:\openspec\livraria-openspec\padrao-openspec\scripts\setup-project.mjs `
+  C:\openspec\livraria `
+  --stack nextjs `
+  --name "Livraria" `
+  --no-register `
+  --yes
+```
+
+O setup:
+- instala as skills e subagentes em `C:\openspec\<projeto>\.agents\skills\` e `.github\agents\`
+- aplica o preset da stack em `<projeto>-openspec\padrao-openspec\openspec\project.md` e `config.yaml`
+- adiciona `/openspec/` ao `.gitignore` do repositório de código
+
+Resultado final:
+
+| Pasta | Conteúdo |
+|---|---|
+| `C:\openspec\<projeto>-openspec\` | Store OpenSpec (specs, changes, config, rules) |
+| `C:\openspec\<projeto>\` | Código da aplicação (skills e subagentes instalados) |
 
 Sem terminal interativo (CI, agentes):
 
 ```powershell
-node padrao-openspec\scripts\setup-project.mjs C:\caminho\do\codigo --stack dotnet --name "Meu Projeto" --register-id meu-projeto --yes
+node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
+  C:\openspec\<projeto> --stack dotnet --name "Meu Projeto" --no-register --yes
 ```
-
-### Opção B — Store de stack direto
-
-```powershell
-# Clone o store da stack desejada
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\meu-projeto
-
-# Registre o store na máquina
-openspec store setup meu-projeto --url https://github.com/Gilmar1987/PadraoOpenspct
-
-# No repositório de código, inicialize a integração com o agente
-openspec init --tools github-copilot
-```
-
-Depois preencha `openspec/project.md` e ajuste o `context` em `openspec/config.yaml` com as escolhas reais do projeto.
 
 ---
 
