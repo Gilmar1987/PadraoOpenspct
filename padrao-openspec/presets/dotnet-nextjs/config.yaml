@@ -25,6 +25,11 @@ context: |
   Decisões de arquitetura duradouras ficam em openspec/adrs/. ADRs com status Accepted
   são restrições vigentes; contrariá-las exige uma nova ADR que as substitua.
 
+  Inicialização do projeto: se openspec/project.md ainda contiver "A definir" ou
+  "{{Nome do Projeto}}" em qualquer campo, o projeto não está inicializado. Não inicie
+  nenhuma change antes da inicialização. Informe o dev e oriente a rodar /opsx:init,
+  que conduz a entrevista completa e gera os artefatos de configuração do projeto.
+
 rules:
   proposal:
     - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
