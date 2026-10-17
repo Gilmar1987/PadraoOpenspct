@@ -30,6 +30,13 @@ context: |
   nenhuma change antes da inicialização. Informe o dev e oriente a rodar /opsx:init,
   que conduz a entrevista completa e gera os artefatos de configuração do projeto.
 
+  Disciplina de contexto: leia por inteiro, sem resumir, config.yaml, project.md, as
+  ADRs Accepted relevantes, os artefatos da change e as specs afetadas. Filtre só
+  saídas volumosas (logs, build, testes, JSON/CSV grandes). Toda verificação
+  reportada traz o comando e o resultado; sem saída, é "não verificado". Economia de
+  tokens nunca justifica pular leitura, marcar tarefa sem verificação ou declarar
+  sucesso sem evidência.
+
 rules:
   proposal:
     - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo

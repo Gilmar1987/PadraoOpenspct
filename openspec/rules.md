@@ -91,7 +91,26 @@ Você MUST NOT:
 
 ---
 
-## 7. Quando em dúvida
+## 7. Disciplina de contexto
+
+Economize contexto nas saídas, nunca nos artefatos.
+
+- Você MUST ler por inteiro, sem resumir nem ler parcialmente: este arquivo,
+  `openspec/config.yaml`, `openspec/project.md`, as ADRs `Accepted` relevantes,
+  todos os artefatos da change ativa e as specs principais que ela afeta.
+- Você SHOULD filtrar saídas volumosas antes de lê-las (logs, saídas de build e de
+  testes, JSON e CSV grandes): busque o erro, leia o início ou o fim, extraia campos.
+- Em explorações amplas, você SHOULD localizar os arquivos por busca antes de abrir
+  arquivos inteiros; leia por inteiro os trechos que for alterar.
+- Toda verificação reportada MUST trazer o comando executado e o resultado relevante.
+  Sem saída, o resultado é "não verificado", nunca "passou".
+- Economia de tokens MUST NOT justificar pular a leitura de um artefato, marcar uma
+  tarefa sem verificação ou declarar sucesso sem evidência.
+- A escolha do modelo de IA é do usuário. Você pode sugerir uma troca; não a exija.
+
+---
+
+## 8. Quando em dúvida
 
 Se uma solicitação for ambígua quanto ao escopo, comportamento ou impacto:
 
