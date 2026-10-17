@@ -5,27 +5,13 @@ context: |
   All artifacts must be written in pt-BR.
   Keep OpenSpec structural headings and SHALL/MUST keywords in English.
 
-  Produto: AgendaFácil - agendamento online para pequenos negócios de serviço
-  (clínicas, salões, estúdios) com 1 a 20 profissionais.
-  Objetivos: autoagendamento 24h, redução de faltas com lembretes, visão da agenda por profissional.
+  Produto: {{Nome do Projeto}}
+  Objetivos: A definir
 
-  Stack: Next.js 15 (App Router) + TypeScript strict, PostgreSQL 16 + Prisma,
-  pg-boss (jobs), Auth.js, Resend (e-mail), WhatsApp/SMS via interface MessageSender,
-  Tailwind + shadcn/ui, Vitest + Playwright, deploy em Docker.
+  Stack: A definir
+  Arquitetura: A definir
 
-  Arquitetura: monólito modular em src/modules/<capability> (domain/, service/, api/).
-  Regras de negócio ficam nos serviços, nunca em componentes ou rotas. Entradas validadas com Zod.
-  Código em inglês; textos de interface em pt-BR. Datas em UTC, exibidas no fuso do negócio.
-
-  Domínio: Business (fuso, antecedências), Staff (jornada, bloqueios), Service (duração, preço),
-  Booking (cliente + serviço + profissional + horário), TimeOff.
-  Um horário só é disponível se o profissional está em jornada, sem bloqueio e sem agendamento sobreposto.
-
-  Restrições: LGPD (finalidade declarada e exclusão de dados do cliente);
-  nunca dois agendamentos sobrepostos para o mesmo profissional, nem sob concorrência;
-  página pública em menos de 2s em 4G.
-
-  Git: trunk-based, PR obrigatório, Conventional Commits. Toda mudança de comportamento
+  Git: Conventional Commits. Toda mudança de comportamento
   passa por /opsx:propose antes do código.
 
 rules:
@@ -39,8 +25,7 @@ rules:
 operations:
   apply:
     guidance:
-      - Toda regra de disponibilidade e de conflito de horário deve ter teste unitário
-      - Manter cobertura mínima de 80% nos módulos availability e booking
+      - Seguir as convenções de stack definidas em project.md
   archive:
     guidance:
       - Rodar /opsx:verify antes de arquivar e resumir o resultado
