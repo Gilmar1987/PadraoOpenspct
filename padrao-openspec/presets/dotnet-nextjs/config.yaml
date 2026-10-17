@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  Language: pt-BR
+  Escreva os artefatos em pt-BR, salvo quando o projeto definir outro idioma.
+  Preserve os títulos estruturais do OpenSpec e as palavras-chave SHALL/MUST em inglês.
+
+  Stack: back-end .NET com C# e front-end Next.js com TypeScript strict. As decisões
+  específicas deste projeto (versões, tipo de projeto .NET, router, banco, acesso a
+  dados, autenticação, contrato entre front-end e back-end, testes) estão na Stack
+  Summary de openspec/project.md. Use-as como fonte e não presuma uma opção que lá
+  esteja "A definir": pergunte ou registre explicitamente a suposição no artefato.
+  Na implementação e na verificação, siga a skill dotnet-implementation para o código
+  .NET e a skill nextjs-implementation para o código Next.js, quando estiverem
+  instaladas no repositório de código.
+
+  O back-end .NET é a fonte da verdade das regras de negócio e dos dados; o front-end
+  não duplica regras de negócio além da validação de experiência do usuário. Toda
+  entrada é validada e autorizada no back-end, mesmo quando o front-end já validou.
+
+  Toda mudança de comportamento deve ser planejada antes da implementação. Aplique
+  as convenções e ferramentas reais do projeto; não introduza dependências ou padrões
+  de implementação sem justificativa nos artefatos da change.
+
+  Decisões de arquitetura duradouras ficam em openspec/adrs/. ADRs com status Accepted
+  são restrições vigentes; contrariá-las exige uma nova ADR que as substitua.
+
+rules:
+  proposal:
+    - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
+    - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
+    - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
+    - Identificar se a change afeta o back-end, o front-end ou ambos, e se altera o contrato entre eles (endpoints, payloads, códigos de erro, autenticação)
+  specs:
+    - Escrever requisitos observáveis, sem prescrever implementação desnecessariamente
+    - Todo requisito deve ter ao menos um cenário verificável, incluindo erros e limites quando relevantes
+  design:
+    - Registrar decisões técnicas relevantes, alternativas consideradas e consequências
+    - Respeitar a arquitetura e as tecnologias registradas pelo projeto consumidor
+    - Citar as ADRs Accepted que se aplicam; se o design contrariar uma delas ou tomar uma decisão transversal nova, indicar a ADR a criar ou substituir
+    - "Para cada risco marcado como aplicável na proposal, descrever a mitigação (ex.: mascaramento em log, índice, migração, plano de rollback, criação prévia da configuração)"
+    - Descrever a mudança no contrato da API (rota, payload, erros, autorização) e como o front-end passa a consumi-lo, incluindo compatibilidade durante o deploy das duas partes
+    - "No back-end, indicar a camada, a injeção de dependência e a configuração; no front-end, indicar onde cada parte executa (Server Component, Client Component, Server Action, Route Handler)"
+    - Quando o modelo do EF Core ou o esquema do banco mudar, prever a migration; operações destrutivas exigem decisão explícita e plano de dados
+  tasks:
+    - Dividir o trabalho em tarefas pequenas e ordenadas por dependência
+    - Cada tarefa deve informar um critério objetivo de conclusão ou validação
+    - Incluir tarefas explícitas para cada mitigação de risco do design e para criar ou atualizar as ADRs indicadas
+    - Indicar em cada tarefa se ela é de back-end ou de front-end e o teste ou comando que comprova a conclusão (dotnet test ou script do package.json), ordenando a mudança de contrato antes do consumo no front-end
+
+operations:
+  apply:
+    guidance:
+      - Consultar todos os artefatos de planejamento antes de implementar
+      - Usar ferramentas de teste, lint e build existentes no projeto consumidor
+      - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
+      - Cobrir regras de negócio com teste unitário no back-end, endpoints com teste de integração via WebApplicationFactory e fluxos críticos com teste E2E no front-end
+      - Executar dotnet build e dotnet test, e lint, typecheck, testes e build do front-end, antes de concluir a última tarefa da change
+  archive:
+    guidance:
+      - Executar /opsx:verify antes de arquivar e registrar eventuais limitações
+      - Revisar as delta specs e o impacto esperado em openspec/specs/ antes de arquivar
+      - O arquivamento consolida as delta specs na fonte da verdade; conferir o resultado depois
+      - Confirmar que a descrição OpenAPI e o cliente do front-end refletem os endpoints novos ou alterados

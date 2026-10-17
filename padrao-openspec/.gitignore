@@ -1,0 +1,6 @@
+# Entradas brutas de negócio podem conter dados pessoais ou confidenciais.
+# Elas devem permanecer locais e nunca ser adicionadas ao repositório do store.
+openspec/changes/**/.inputs/
+
+# Backups criados por scripts/setup-project.mjs antes de substituir arquivos editados.
+openspec/*.bak

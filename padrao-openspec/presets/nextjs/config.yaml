@@ -1,0 +1,61 @@
+schema: spec-driven
+
+context: |
+  Language: pt-BR
+  Escreva os artefatos em pt-BR, salvo quando o projeto definir outro idioma.
+  Preserve os títulos estruturais do OpenSpec e as palavras-chave SHALL/MUST em inglês.
+
+  Stack: Next.js com TypeScript strict. As decisões específicas deste projeto (versão
+  do Next.js, router, estilização, UI, banco, acesso a dados, autenticação, validação,
+  testes) estão na Stack Summary de openspec/project.md. Use-as como fonte e não
+  presuma uma opção que lá esteja "A definir": pergunte ou registre explicitamente a
+  suposição no artefato. Na implementação e na verificação, siga a skill
+  nextjs-implementation quando ela estiver instalada no repositório de código.
+
+  Regras de negócio ficam em módulos server-side ou Server Actions que os chamam,
+  nunca em componentes. Toda Server Action e Route Handler valida a entrada e verifica
+  autorização. Código em inglês; textos de interface no idioma do produto.
+
+  Toda mudança de comportamento deve ser planejada antes da implementação. Aplique
+  as convenções e ferramentas reais do projeto; não introduza dependências ou padrões
+  de implementação sem justificativa nos artefatos da change.
+
+  Decisões de arquitetura duradouras ficam em openspec/adrs/. ADRs com status Accepted
+  são restrições vigentes; contrariá-las exige uma nova ADR que as substitua.
+
+rules:
+  proposal:
+    - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
+    - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
+    - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
+    - Identificar as rotas e páginas afetadas e se a change altera um contrato público (API de Route Handler, estrutura de URLs, esquema de banco, cookies, variáveis de ambiente)
+  specs:
+    - Escrever requisitos observáveis, sem prescrever implementação desnecessariamente
+    - Todo requisito deve ter ao menos um cenário verificável, incluindo erros e limites quando relevantes
+  design:
+    - Registrar decisões técnicas relevantes, alternativas consideradas e consequências
+    - Respeitar a arquitetura e as tecnologias registradas pelo projeto consumidor
+    - Citar as ADRs Accepted que se aplicam; se o design contrariar uma delas ou tomar uma decisão transversal nova, indicar a ADR a criar ou substituir
+    - "Para cada risco marcado como aplicável na proposal, descrever a mitigação (ex.: mascaramento em log, índice, migração, plano de rollback, criação prévia da configuração)"
+    - Indicar onde cada parte executa (Server Component, Client Component, Server Action, Route Handler ou middleware/proxy), a estratégia de cache e revalidação, o esquema de validação e a verificação de autorização de cada mutação
+    - Quando o esquema do banco mudar, prever a migration; operações destrutivas exigem decisão explícita e plano de dados
+  tasks:
+    - Dividir o trabalho em tarefas pequenas e ordenadas por dependência
+    - Cada tarefa deve informar um critério objetivo de conclusão ou validação
+    - Incluir tarefas explícitas para cada mitigação de risco do design e para criar ou atualizar as ADRs indicadas
+    - Informar em cada tarefa o teste ou script do package.json que comprova a conclusão, e criar tarefas separadas para cada migration e cada variável de ambiente nova em outros ambientes
+
+operations:
+  apply:
+    guidance:
+      - Consultar todos os artefatos de planejamento antes de implementar
+      - Usar ferramentas de teste, lint e build existentes no projeto consumidor
+      - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
+      - Cobrir regras de negócio com teste unitário isolado e fluxos críticos com teste E2E
+      - Executar lint, typecheck, testes e build antes de concluir a última tarefa da change
+  archive:
+    guidance:
+      - Executar /opsx:verify antes de arquivar e registrar eventuais limitações
+      - Revisar as delta specs e o impacto esperado em openspec/specs/ antes de arquivar
+      - O arquivamento consolida as delta specs na fonte da verdade; conferir o resultado depois
+      - Confirmar que variáveis de ambiente novas estão documentadas em .env.example

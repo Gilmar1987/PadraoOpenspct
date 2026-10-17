@@ -1,0 +1,49 @@
+schema: spec-driven
+
+context: |
+  Language: pt-BR
+  Escreva os artefatos em pt-BR, salvo quando o projeto consumidor definir outro idioma.
+  Preserve os títulos estruturais do OpenSpec e as palavras-chave SHALL/MUST em inglês.
+
+  Este é um template neutro. Não presuma domínio, linguagem, framework, arquitetura,
+  banco de dados, autenticação, observabilidade, testes ou ambiente de deploy.
+  Use openspec/project.md e o contexto fornecido pelo projeto consumidor para obter
+  as decisões específicas. Se uma decisão necessária estiver ausente, pergunte ou
+  registre explicitamente a suposição no artefato pertinente.
+
+  Toda mudança de comportamento deve ser planejada antes da implementação. Aplique
+  as convenções e ferramentas reais do projeto consumidor; não introduza dependências
+  ou padrões de implementação sem justificativa nos artefatos da change.
+
+  Decisões de arquitetura duradouras ficam em openspec/adrs/. ADRs com status Accepted
+  são restrições vigentes; contrariá-las exige uma nova ADR que as substitua.
+
+rules:
+  proposal:
+    - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
+    - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
+    - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
+  specs:
+    - Escrever requisitos observáveis, sem prescrever implementação desnecessariamente
+    - Todo requisito deve ter ao menos um cenário verificável, incluindo erros e limites quando relevantes
+  design:
+    - Registrar decisões técnicas relevantes, alternativas consideradas e consequências
+    - Respeitar a arquitetura e as tecnologias registradas pelo projeto consumidor
+    - Citar as ADRs Accepted que se aplicam; se o design contrariar uma delas ou tomar uma decisão transversal nova, indicar a ADR a criar ou substituir
+    - "Para cada risco marcado como aplicável na proposal, descrever a mitigação (ex.: mascaramento em log, índice, migração, plano de rollback, criação prévia da configuração)"
+  tasks:
+    - Dividir o trabalho em tarefas pequenas e ordenadas por dependência
+    - Cada tarefa deve informar um critério objetivo de conclusão ou validação
+    - Incluir tarefas explícitas para cada mitigação de risco do design e para criar ou atualizar as ADRs indicadas
+
+operations:
+  apply:
+    guidance:
+      - Consultar todos os artefatos de planejamento antes de implementar
+      - Usar ferramentas de teste, lint e build existentes no projeto consumidor
+      - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
+  archive:
+    guidance:
+      - Executar /opsx:verify antes de arquivar e registrar eventuais limitações
+      - Revisar as delta specs e o impacto esperado em openspec/specs/ antes de arquivar
+      - O arquivamento consolida as delta specs na fonte da verdade; conferir o resultado depois
