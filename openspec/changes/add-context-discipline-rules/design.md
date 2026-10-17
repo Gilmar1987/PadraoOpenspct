@@ -54,11 +54,11 @@ O parágrafo é acrescentado logo após o bloco "Inicialização do projeto", co
 
 ```text
   Disciplina de contexto: leia por inteiro, sem resumir, config.yaml, project.md, as
-  ADRs Accepted relevantes, os artefatos da change e as specs afetadas. Filtre só
-  saídas volumosas (logs, build, testes, JSON/CSV grandes). Toda verificação
-  reportada traz o comando e o resultado; sem saída, é "não verificado". Economia de
-  tokens nunca justifica pular leitura, marcar tarefa sem verificação ou declarar
-  sucesso sem evidência.
+  ADRs Accepted relevantes, os artefatos da change, as specs afetadas e o código
+  antes de alterá-lo. Filtre só saídas volumosas (logs, build, testes, JSON/CSV
+  grandes). Toda verificação reportada traz o comando e o resultado; sem saída, é
+  "não verificado". Economia de tokens nunca justifica pular leitura, marcar tarefa
+  sem verificação ou declarar sucesso sem evidência.
 ```
 
 - O texto é mais curto que a seção do `rules.md` porque é injetado em todas as instruções de artefato.
