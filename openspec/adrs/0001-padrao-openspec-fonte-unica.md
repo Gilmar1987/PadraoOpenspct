@@ -1,10 +1,10 @@
 ---
 id: ADR-0001
-status: Proposed
+status: Accepted
 date: 2026-10-17
 supersedes:
 superseded_by:
-related_changes: [consolidate-padrao-openspec-source]
+related_changes: [2026-10-17-consolidate-padrao-openspec-source]
 ---
 
 # ADR-0001: padrao-openspec como fonte única de skills, comandos e agentes

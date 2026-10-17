@@ -26,7 +26,7 @@ Estado atual observado (motivação em `proposal.md`):
 
 ## Architecture Decisions
 
-- [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md), `Proposed`: `padrao-openspec` como fonte única de skills, comandos e agentes. Ela é promovida a `Accepted` na revisão do PR, antes do archive.
+- [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md), `Accepted`: `padrao-openspec` como fonte única de skills, comandos e agentes. Promovida no PR #1, com a CI verde.
 
 ## Decisions
 

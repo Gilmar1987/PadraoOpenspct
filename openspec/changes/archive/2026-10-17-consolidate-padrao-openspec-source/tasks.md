@@ -44,7 +44,7 @@
 ## 7. Integração
 
 - [x] 7.1 Rodar de ponta a ponta, no Git Bash, os passos dos dois jobs da CI. Verificar que todos saem com código 0.
-- [ ] 7.2 Revisar a ADR-0001 e promovê-la de `Proposed` para `Accepted` no PR. Verificar que o frontmatter mostra `status: Accepted` antes do archive.
+- [x] 7.2 Revisar a ADR-0001 e promovê-la de `Proposed` para `Accepted` no PR. Verificar que o frontmatter mostra `status: Accepted` antes do archive.
 
 ## Workflow follow-up
 
