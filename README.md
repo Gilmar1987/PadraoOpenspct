@@ -153,6 +153,11 @@ Todas vivem em `padrao-openspec/.claude/skills/` e são instaladas pelo setup.
 |---|---|
 | .NET | `/plugin marketplace add dotnet/skills` |
 | Next.js | `npx skills add vercel-labs/agent-skills` |
+| Next.js (interface nova ou redesenhada) | `npx skills add https://github.com/anthropics/skills --skill frontend-design` |
+
+O instalador lista essas recomendações ao final da instalação com `--stack`, mas não
+as instala. A `frontend-design` (Anthropic, Apache 2.0) orienta o design visual; a `nextjs-implementation`
+pede que o plano visual de cada change com interface fique registrado no `design.md`.
 
 ---
 

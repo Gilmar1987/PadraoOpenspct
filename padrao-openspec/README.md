@@ -153,6 +153,7 @@ skills oficiais, instaladas à parte:
 | --- | --- | --- |
 | .NET | [dotnet/skills](https://github.com/dotnet/skills) (time .NET, MIT) | `/plugin marketplace add dotnet/skills` e `/plugin install <plugin>@dotnet-agent-skills` |
 | Next.js | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (Vercel, MIT) | `npx skills add vercel-labs/agent-skills` |
+| Next.js (design visual de interface) | [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) (Anthropic, Apache 2.0) | `npx skills add https://github.com/anthropics/skills --skill frontend-design` |
 
 O instalador não instala as skills oficiais: elas têm instalador e ciclo de
 atualização próprios.
