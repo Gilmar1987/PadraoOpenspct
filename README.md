@@ -96,6 +96,8 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 
 | Comando | O que faz |
 |---|---|
+| `/opsx:init` | Inicializa o projeto: entrevista estruturada, gera `project.md`, `config.yaml` e ADRs fundacionais |
+| `/opsx:ingest` | Ingere documentos externos (atas, requisitos, e-mails) e gera brief estruturado |
 | `/opsx:explore` | Explora o problema, limites e critérios de sucesso sem implementar nada |
 | `/opsx:propose <nome>` | Cria os artefatos de planejamento: proposal, delta specs, design e tasks |
 | `/opsx:apply` | Implementa as tarefas guiadas pelos artefatos |
@@ -105,6 +107,12 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 | `/opsx:sync` | Aplica deltas às specs principais sem arquivar |
 
 > Toda mudança de comportamento passa por `/opsx:propose` antes do código.
+
+Fluxo completo quando há documentos externos:
+
+```
+/opsx:init → /opsx:ingest → /opsx:explore → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+```
 
 ---
 
