@@ -161,6 +161,34 @@ After completing all artifacts, summarize:
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
 
+**Architectural Decision Check (before writing design.md)**
+
+Before creating or updating `design.md`, you MUST:
+
+1. Read `openspec/project-setup.md` if it exists — it contains the foundational decisions made at project initialization.
+2. Read all ADRs with `status: Accepted` in `openspec/adrs/` — they are active constraints.
+3. Evaluate whether this change:
+   - **Contradicts** any Accepted ADR or a foundational decision in `project-setup.md` (different database engine, different auth strategy, different architecture style, etc.)
+   - **Extends** the architecture in a way that survives this change and restricts future ones (new cross-cutting pattern, new external service, new data storage, new communication protocol)
+   - **Replaces** a previous foundational decision
+
+4. Apply the following rules:
+
+   | Situation | Action |
+   |---|---|
+   | Change contradicts an Accepted ADR | STOP. Inform the user. A new ADR superseding the existing one MUST be created and approved before `design.md` can be written. Do not proceed. |
+   | Change contradicts `project-setup.md` but no ADR exists yet | STOP. Inform the user. A new ADR documenting the change of decision MUST be created first. |
+   | Change introduces a new cross-cutting architectural decision | Create the ADR in `openspec/adrs/` with `status: Proposed` before writing `design.md`. Reference it in `design.md`. |
+   | Change is local to this capability only | Proceed normally. Record the decision in `design.md` only. |
+
+5. When creating a new ADR during propose:
+   - Use the next sequential number from existing ADRs in `openspec/adrs/`
+   - Follow the template in `openspec/adrs/template.md` strictly
+   - Set `status: Proposed` (not Accepted — the PR review promotes it)
+   - Add it to `related_changes` in the ADR frontmatter
+   - Reference the ADR filename in `design.md` under a dedicated "Architecture Decisions" section
+   - Add a task in `tasks.md` to review and promote the ADR to `Accepted` before archiving
+
 **Guardrails**
 - The request that invoked this workflow authorizes planning only. Any implementation or apply instruction in that request does not carry forward. Do NOT implement the change, start the apply workflow, or edit project code during this workflow. After presenting the artifacts, stop and wait for a new user request to start the apply workflow
 - Create every artifact the apply phase transitively depends on, not just the ids listed in `apply.requires`

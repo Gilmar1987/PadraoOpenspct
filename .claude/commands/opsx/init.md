@@ -714,6 +714,45 @@ Preencha o template do preset ativo com todas as escolhas confirmadas. Substitua
 
 Atualize o campo `context:` com as decisões reais de stack, arquitetura e convenções. Remova o bloco `Inicialização do projeto` após a conclusão — ele não é mais necessário.
 
+### Arquivo 4: ADRs fundacionais em `openspec/adrs/`
+
+Após gerar os três arquivos acima, analise as respostas confirmadas e gere automaticamente uma ADR para cada decisão que atenda a **pelo menos um** destes critérios:
+- afeta mais de uma capability ou sobrevive à change que a originou
+- é cara de reverter (stack, persistência, autenticação, integração, topologia de deploy)
+- restringe changes futuras
+
+Use numeração sequencial a partir de `0001`. Siga estritamente o template em `openspec/adrs/template.md`. Para cada ADR:
+- defina `status: Accepted` (decisões já confirmadas pelo dev)
+- preencha `date` com a data atual
+- preencha `Contexto` com o problema que a decisão resolve
+- preencha `Decisão` com a escolha confirmada, usando SHALL/MUST quando impõe regra a changes futuras
+- preencha `Alternativas consideradas` com as opções que não foram escolhidas
+- preencha `Consequências` com o que fica mais fácil, mais difícil e riscos aceitos
+
+ADRs obrigatórias (sempre gerar quando a resposta não for "Ainda não sei" ou "Não aplicável"):
+
+| Resposta | ADR a gerar |
+|---|---|
+| 2.1 — Estilo de arquitetura | `0001-estilo-de-arquitetura.md` |
+| 3.1 — Back-end (linguagem e framework) | `0002-stack-backend.md` |
+| 3.3 + 3.4 — Banco de dados e hospedagem | `0003-banco-de-dados.md` |
+| 3.5 — ORM / acesso a dados | `0004-acesso-a-dados.md` |
+| 3.6 — Autenticação | `0005-autenticacao.md` |
+| 4.2 — Docker | `0006-containerizacao.md` |
+| 4.1 — Deploy em produção | `0007-deploy-producao.md` |
+
+ADRs condicionais (gerar apenas se a resposta for relevante):
+
+| Condição | ADR a gerar |
+|---|---|
+| 1.6 — Multi-tenant (qualquer opção exceto "Não") | `NNNN-estrategia-multi-tenant.md` |
+| 2.4 — Mensageria assíncrona ou gRPC | `NNNN-comunicacao-entre-servicos.md` |
+| 3.2 — Front-end presente | `NNNN-stack-frontend.md` |
+| 1.5 — LGPD/GDPR aplicável | `NNNN-lgpd-gdpr.md` |
+| 2.2 — Monorepo | `NNNN-organizacao-repositorios.md` |
+
+Após gerar todas as ADRs, exiba a lista com nome e título de cada uma.
+
 ---
 
 ## Próximos passos (exibir ao final)
@@ -722,9 +761,12 @@ Atualize o campo `context:` com as decisões reais de stack, arquitetura e conve
 Inicialização concluída. Próximos passos:
 
   1. Revise openspec/project.md e complete os campos de domínio e capabilities.
-  2. Registre decisões transversais como ADRs em openspec/adrs/.
+  2. Revise as ADRs geradas em openspec/adrs/ — ajuste contexto e consequências
+     com detalhes que só você conhece do projeto.
   3. Faça commit dos artefatos gerados:
        git add openspec/
-       git commit -m "chore: initialize project setup"
+       git commit -m "chore: initialize project setup and foundational ADRs"
   4. Quando tiver uma funcionalidade para especificar, rode /opsx:explore.
+  5. Qualquer mudança de arquitetura futura MUST ser registrada como nova ADR
+     antes de ser implementada.
 ```
