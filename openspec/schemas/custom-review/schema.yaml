@@ -1,0 +1,25 @@
+id: custom-review
+name: Custom Review
+description: >
+  Ciclo de revisão de change com checklist de qualidade, critérios de aceite
+  e rastreabilidade de requisitos antes do arquivamento.
+
+lifecycle:
+  - id: review
+    label: Revisão técnica
+    artifact: review.md
+    required: true
+
+  - id: sign-off
+    label: Aprovação do PO
+    artifact: sign-off.md
+    required: false
+
+validation:
+  require_all_tasks_complete: true
+  require_specs_present: true
+  require_no_open_questions: true
+
+archive:
+  run_verify_before: true
+  block_on_verify_failure: true
