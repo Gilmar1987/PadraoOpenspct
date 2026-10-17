@@ -1,32 +1,37 @@
 # PadraoOpenspct
 
-Repositório central de padrões e stores OpenSpec para desenvolvimento orientado a especificação (spec-driven development). Serve como ponto de partida para qualquer projeto novo, garantindo que o agente de IA tenha contexto preciso, regras claras e fluxo de trabalho padronizado antes de tocar no código.
+Repositório central de padrões OpenSpec para desenvolvimento orientado a especificação (spec-driven development). Serve como ponto de partida para qualquer projeto novo, garantindo que o agente de IA tenha contexto preciso, regras claras e fluxo de trabalho padronizado antes de tocar no código.
 
 ## O que está aqui
 
-```
+```text
 PadraoOpenspct/
-├── padrao-openspec/          # Store neutro completo com scripts de setup, subagentes e presets
-├── openspec-store-dotnet/    # Store para projetos .NET (Web API, Minimal API, Blazor, MVC)
-├── openspec-store-nextjs/    # Store para projetos Next.js 15 (neutro, sem opiniões de UI/testes)
-├── openspec/                 # Projeto de referência: AgendaFácil (exemplo real em andamento)
+├── padrao-openspec/          # Fonte única: store neutro, skills, comandos /opsx:*, agentes, presets e scripts
+├── openspec/                 # Raiz OpenSpec deste repositório: regras globais, ADRs e changes do próprio padrão
+├── .claude/                  # Espelho gerado de padrao-openspec/.claude (+ CLAUDE.md)
+├── .github/                  # Workflow de CI, agentes espelhados e stub de regras para GitHub Copilot
 ├── .amazonq/rules/           # Stub de regras para Amazon Q
-├── .claude/                  # Slash commands, skills e stub de regras para Claude Code
-├── .github/                  # Stub de regras para GitHub Copilot
 ├── .cursorrules              # Stub de regras para Cursor
 └── .windsurfrules            # Stub de regras para Windsurf
 ```
 
+`padrao-openspec/` é a única fonte editável de skills, comandos, agentes e modelos de ADR
+([ADR-0001](openspec/adrs/0001-padrao-openspec-fonte-unica.md)). As cópias em `.claude/skills/`,
+`.claude/commands/opsx/`, `.github/agents/` e `openspec/adrs/{README,template}.md` são geradas
+por `padrao-openspec/scripts/sync-root.mjs`; veja [Manutenção do padrão](#manutenção-do-padrão).
+
 ---
 
-## Qual store usar
+## Qual preset usar
 
-| Situação | Store recomendado |
+Todo projeto parte de `padrao-openspec`. A stack é escolhida no setup com `--stack`:
+
+| Situação | `--stack` |
 |---|---|
-| Projeto novo, stack ainda não definida | `padrao-openspec` |
-| Projeto .NET (qualquer variante) | `openspec-store-dotnet` |
-| Projeto Next.js 15 | `openspec-store-nextjs` |
-| Full-stack .NET + Next.js | `padrao-openspec` com preset `dotnet-nextjs` |
+| Projeto novo, stack ainda não definida | `none` |
+| Projeto .NET (qualquer variante) | `dotnet` |
+| Projeto Next.js 15 | `nextjs` |
+| Full-stack .NET + Next.js | `dotnet-nextjs` |
 
 ---
 
@@ -35,7 +40,7 @@ PadraoOpenspct/
 ### Fluxo validado (recomendado)
 
 ```powershell
-# 1. Clone o store com o nome do projeto (sufixo -openspec por convenção)
+# 1. Clone o repositório com o nome do projeto (sufixo -openspec por convenção)
 git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
 
 # 2. Crie e inicialize o repositório de código
@@ -46,9 +51,9 @@ git init
 # 3. Rode o setup
 node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
   C:\openspec\<projeto> `
-  --stack <dotnet|nextjs|dotnet-nextjs> `
+  --stack <dotnet|nextjs|dotnet-nextjs|none> `
   --name "<Nome do Projeto>" `
-  --no-register `
+  --register-id <projeto> `
   --yes
 ```
 
@@ -61,28 +66,28 @@ node C:\openspec\livraria-openspec\padrao-openspec\scripts\setup-project.mjs `
   C:\openspec\livraria `
   --stack nextjs `
   --name "Livraria" `
-  --no-register `
+  --register-id livraria `
   --yes
 ```
 
 O setup:
-- instala as skills e subagentes em `C:\openspec\<projeto>\.agents\skills\` e `.github\agents\`
-- aplica o preset da stack em `<projeto>-openspec\padrao-openspec\openspec\project.md` e `config.yaml`
-- adiciona `/openspec/` ao `.gitignore` do repositório de código
+
+- instala no repositório de código as skills em `.agents/skills/` e `.claude/skills/` (padrão `--target both`), os comandos `/opsx:*` em `.claude/commands/opsx/` e os subagentes em `.github/agents/`;
+- aplica o preset da stack em `<projeto>-openspec\padrao-openspec\openspec\project.md` e `config.yaml`;
+- adiciona `/openspec/` ao `.gitignore` do repositório de código;
+- registra o store nesta máquina, grava `store: <projeto>` em `openspec/config.yaml` do repositório de código e confirma que o OpenSpec CLI encontra o store a partir dele.
 
 Resultado final:
 
 | Pasta | Conteúdo |
 |---|---|
-| `C:\openspec\<projeto>-openspec\` | Store OpenSpec (specs, changes, config, rules) |
-| `C:\openspec\<projeto>\` | Código da aplicação (skills e subagentes instalados) |
+| `C:\openspec\<projeto>-openspec\padrao-openspec\` | Store OpenSpec do projeto (specs, changes, config, ADRs) |
+| `C:\openspec\<projeto>\` | Código da aplicação (skills, comandos e subagentes instalados) |
 
-Sem terminal interativo (CI, agentes):
-
-```powershell
-node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
-  C:\openspec\<projeto> --stack dotnet --name "Meu Projeto" --no-register --yes
-```
+Sem registrar o store (por exemplo, em CI), troque `--register-id <projeto>` por
+`--no-register`. O setup mostra ao final o comando de registro e a linha `store:` a
+declarar quando você quiser ligar os dois repositórios. Use `--target agents` ou
+`--target claude` para instalar as skills em um único destino.
 
 ---
 
@@ -90,7 +95,7 @@ node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
 
 Todo projeto que usa este padrão segue o mesmo ciclo:
 
-```
+```text
 /opsx:explore   →   /opsx:propose   →   /opsx:apply   →   /opsx:verify   →   /opsx:archive
 ```
 
@@ -110,7 +115,7 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 
 Fluxo completo quando há documentos externos:
 
-```
+```text
 /opsx:init → /opsx:ingest → /opsx:explore → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
 ```
 
@@ -118,7 +123,9 @@ Fluxo completo quando há documentos externos:
 
 ## Skills disponíveis
 
-### Skills de workflow OpenSpec (todos os stores)
+Todas vivem em `padrao-openspec/.claude/skills/` e são instaladas pelo setup.
+
+### Skills de workflow e engenharia (sempre instaladas)
 
 | Skill | Papel |
 |---|---|
@@ -131,14 +138,14 @@ Fluxo completo quando há documentos externos:
 | `openspec-update-change` | Revisão de artefatos existentes |
 | `requesting-code-review` | Revisão de código via subagente isolado |
 | `docker` | Containerização com Dockerfile, docker-compose e boas práticas |
+| `versioning-ci-cd` | Versionamento, Git, CI, CD e deploy conforme a stack detectada |
 
-### Skills de stack (via `padrao-openspec`)
+### Skills de stack (instaladas com `--stack`)
 
 | Skill | Quando instalar |
 |---|---|
 | `dotnet-implementation` | Projetos .NET — `--stack dotnet` |
 | `nextjs-implementation` | Projetos Next.js — `--stack nextjs` |
-| `versioning-ci-cd` | Qualquer projeto com CI/CD |
 
 ### Skills oficiais externas (instalação separada)
 
@@ -151,7 +158,7 @@ Fluxo completo quando há documentos externos:
 
 ## Subagentes VS Code / GitHub Copilot
 
-Disponíveis em `padrao-openspec/.github/agents/`:
+Fonte em `padrao-openspec/.github/agents/`, espelhados em `.github/agents/`:
 
 | Subagente | Responsabilidade |
 |---|---|
@@ -169,7 +176,7 @@ Disponíveis em `padrao-openspec/.github/agents/`:
 Todas as regras que governam o comportamento dos agentes de IA estão em uma única
 fonte da verdade:
 
-```
+```text
 openspec/rules.md    ← fonte única, agnóstica de agente
 ```
 
@@ -190,36 +197,71 @@ ser alterados.
 
 ## Estrutura de um store
 
-```
-store/
+```text
+padrao-openspec/
 ├── openspec/
 │   ├── config.yaml       # Stack, convenções e regras injetadas no agente
 │   ├── project.md        # Visão do produto, arquitetura e limites do sistema
-│   ├── rules.md          # Fonte única de regras globais para todos os agentes
 │   ├── specs/            # Fonte da verdade (preenchida após /opsx:archive)
 │   ├── changes/          # Changes ativas e arquivadas
-│   └── adrs/             # Decisões de arquitetura duradouras (padrao-openspec)
-└── .claude/
-    ├── commands/opsx/    # Slash commands carregados no prompt do agente
-    └── skills/           # Skills detectadas automaticamente
+│   └── adrs/             # Decisões de arquitetura duradouras
+├── .claude/
+│   ├── commands/opsx/    # Slash commands /opsx:*
+│   └── skills/           # Skills instaladas no repositório de código
+├── .github/agents/       # Subagentes VS Code/Copilot
+├── presets/              # project.md + config.yaml por stack
+└── scripts/              # setup-project, install-skills, sync-root
 ```
 
 ---
 
-## Validação contínua (padrao-openspec)
+## Manutenção do padrão
+
+1. Edite skills, comandos, agentes e modelos de ADR **somente** em `padrao-openspec/`.
+2. Regenere as cópias da raiz:
+
+   ```powershell
+   node padrao-openspec/scripts/sync-root.mjs
+   ```
+
+3. Confira antes do commit (a CI faz a mesma checagem e falha em qualquer divergência):
+
+   ```powershell
+   node padrao-openspec/scripts/sync-root.mjs --check
+   ```
+
+Mudanças no próprio padrão seguem o fluxo OpenSpec na raiz `openspec/` deste repositório.
+
+---
+
+## Validação contínua
+
+O workflow `.github/workflows/validate.yml` roda em pull requests e na `main`, em dois jobs:
+
+| Job | O que valida |
+|---|---|
+| `store` (em `padrao-openspec/`) | `openspec validate --all --strict`, configs e presets sem avisos, lint de Markdown, sintaxe dos scripts e smoke tests do instalador, do setup e da declaração do store |
+| `root` | Raiz em dia com `padrao-openspec/` (`sync-root.mjs --check`), `openspec validate --all --strict` e lint de Markdown da raiz |
+
+Para rodar localmente:
 
 ```powershell
-# Validar estrutura e requisitos SHALL/MUST
+node padrao-openspec/scripts/sync-root.mjs --check
 npx @fission-ai/openspec@1.14.2 validate --all --strict
-
-# Lint de Markdown
 npx markdownlint-cli2@0.23.2 "**/*.md"
 ```
 
-O CI roda automaticamente em PRs via `.github/workflows/validate.yml`.
+Skills e comandos gerados pelo OpenSpec CLI e a skill `requesting-code-review` ficam fora do lint.
 
 ---
 
-## Projeto de referência
+## Migração dos stores removidos
 
-A pasta `openspec/` na raiz é o projeto **AgendaFácil** — um exemplo real e completo de como o padrão é aplicado em produção, com change ativa (`add-online-booking-mvp`), delta specs por domínio, `config.yaml` preenchido e `project.md` detalhado.
+`openspec-store-dotnet/` e `openspec-store-nextjs/` foram removidos: duplicavam o
+`padrao-openspec` e divergiam dele. Quem os usava passa a clonar este repositório e
+rodar o setup com `--stack dotnet` ou `--stack nextjs`. Projetos já configurados
+recebem os comandos e as skills atualizados com:
+
+```powershell
+node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\install-skills.mjs C:\openspec\<projeto> --force
+```

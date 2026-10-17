@@ -40,7 +40,7 @@ Se o usuário pedir implementação sem uma change ativa, você MUST:
 
 Toda mudança de comportamento observável do sistema MUST seguir este ciclo:
 
-```
+```text
 /opsx:explore → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
 ```
 
@@ -54,6 +54,11 @@ Você MUST NOT pular etapas. Especificamente:
 
 ## 4. Respeitar limites de cada agente
 
+Os agentes abaixo são subagentes VS Code/Copilot definidos em `.github/agents/` (fonte em
+`padrao-openspec/.github/agents/`) e instalados nos projetos consumidores. Em ferramentas sem
+esses subagentes, os mesmos limites valem para o papel equivalente que o agente principal
+assumir em cada etapa do fluxo.
+
 | Agente | Pode | Não pode |
 |---|---|---|
 | `spec-architect` | Analisar, rascunhar artefatos | Escrever código |
@@ -61,6 +66,7 @@ Você MUST NOT pular etapas. Especificamente:
 | `code-implementer` | Implementar tarefas aprovadas | Arquivar, fazer push, deploy |
 | `qa-validator` | Validar, gerar relatório | Corrigir código, arquivar |
 | `consistency-guardian` | Revisar, reportar conflitos | Editar qualquer arquivo |
+| `business-requirements-ingestor` | Extrair objetivos, atores, regras e dúvidas de material de negócio | Alterar arquivos, copiar documentos brutos para specs |
 
 ---
 

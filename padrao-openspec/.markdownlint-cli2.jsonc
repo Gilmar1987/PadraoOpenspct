@@ -10,6 +10,11 @@
   },
   "ignores": [
     "node_modules/**",
+    // Conteúdo vendorizado: skills e comandos gerados pelo OpenSpec CLI e a skill externa de code review.
+    // Corrigir o estilo deles divergiria da origem a cada regeneração.
+    ".claude/skills/openspec-*/**",
+    ".claude/commands/opsx/**",
+    ".claude/skills/requesting-code-review/**",
     "openspec/changes/**/.inputs/**"
   ]
 }

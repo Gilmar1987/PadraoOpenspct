@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sourceSkills = path.join(sourceRoot, '.claude', 'skills');
 const sourceAgents = path.join(sourceRoot, '.github', 'agents');
+const sourceCommands = path.join(sourceRoot, '.claude', 'commands', 'opsx');
 
 // Stack-specific skills are installed only when requested with --stack; every other skill is always installed.
 const stacks = {
@@ -26,13 +27,15 @@ const stackSkillNames = new Set(Object.values(stacks).map(({ skill }) => skill))
 function usage() {
   console.log(`Usage: node scripts/install-skills.mjs <consumer-project> [options]
 
-Install bundled skills and VS Code agents into a consumer project, and ignore its local openspec/ directory in Git.
+Install bundled skills, OPSX slash commands and VS Code agents into a consumer project, and ignore its local
+openspec/ directory in Git.
 
 Arguments:
   <consumer-project>  Path to the target project directory
 
 Options:
-  --target <agents|claude|both>  Skill destination (default: agents); VS Code agents go to .github/agents
+  --target <agents|claude|both>  Skill destination (default: both); OPSX commands always go to
+                                 .claude/commands/opsx and VS Code agents to .github/agents
   --stack <dotnet|nextjs>        Also install the stack implementation skill; repeat or use a comma list
                                  (e.g. --stack dotnet,nextjs). Without it, only stack-neutral skills are installed
   --force                        Overwrite colliding files; unrelated files are preserved
@@ -40,7 +43,7 @@ Options:
 }
 
 function parseArgs(args) {
-  const options = { project: null, target: 'agents', stacks: [], force: false };
+  const options = { project: null, target: 'both', stacks: [], force: false };
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -119,6 +122,24 @@ function listAgents() {
     throw new Error(`No .agent.md files were found under ${sourceAgents}`);
   }
   return entries;
+}
+
+function assertCommands() {
+  if (!existsSync(sourceCommands)) {
+    throw new Error(`OPSX command source directory not found: ${sourceCommands}`);
+  }
+
+  const entries = readdirSync(sourceCommands, { withFileTypes: true });
+  const invalidEntries = entries.filter((entry) => !entry.isFile() || !entry.name.endsWith('.md'));
+  if (invalidEntries.length > 0) {
+    throw new Error(
+      `Only .md files are allowed under ${sourceCommands}; unexpected entries: ` +
+      invalidEntries.map((entry) => entry.name).join(', '),
+    );
+  }
+  if (entries.length === 0) {
+    throw new Error(`No command files were found under ${sourceCommands}`);
+  }
 }
 
 function filesAreIdentical(source, destination) {
@@ -475,6 +496,7 @@ function main() {
     throw new Error(`No skills containing SKILL.md were found under ${sourceSkills}`);
   }
   listAgents();
+  assertCommands();
 
   const targets = options.target === 'both'
     ? ['.agents/skills', '.claude/skills']
@@ -487,6 +509,12 @@ function main() {
       source: skill.source,
       destination: path.join(projectRoot, target, skill.name),
     }))),
+    {
+      name: 'OPSX slash commands',
+      label: '.claude/commands/opsx (OPSX slash commands)',
+      source: sourceCommands,
+      destination: path.join(projectRoot, '.claude', 'commands', 'opsx'),
+    },
     {
       name: 'VS Code custom agents',
       label: '.github/agents (VS Code custom agents)',

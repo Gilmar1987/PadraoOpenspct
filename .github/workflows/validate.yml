@@ -1,0 +1,174 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # padrao-openspec/ é a fonte única de skills, comandos, agentes e presets (ADR-0001).
+  store:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: padrao-openspec
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar OpenSpec CLI
+        run: npm install --global @fission-ai/openspec@1.14.2
+
+      - name: Validar specs e changes OpenSpec
+        run: openspec validate --all --strict
+
+      # validate --strict não falha quando config.yaml tem regras malformadas; o CLI só avisa
+      # e descarta as regras do artefato. Gera as instruções de cada artefato com o config base
+      # e com cada preset, falha em qualquer aviso e exige que os presets mantenham as regras base.
+      - name: Configs base e presets carregam sem avisos
+        run: |
+          grep -E '^    - ' openspec/config.yaml | sed -E 's/^    - //; s/^"(.*)"$/\1/' > "$RUNNER_TEMP/base-rules.txt"
+          status=0
+          for config in openspec/config.yaml presets/*/config.yaml; do
+            probe="$(mktemp -d)"
+            cp -r openspec "$probe/"
+            cp "$config" "$probe/openspec/config.yaml"
+            mkdir -p "$probe/openspec/changes/ci-config-probe"
+            output="$(cd "$probe" && for artifact in proposal specs design tasks; do
+              openspec instructions "$artifact" --change ci-config-probe 2>&1
+            done)"
+            if printf '%s' "$output" | grep -iE "ignoring|invalid '"; then
+              echo "::error file=padrao-openspec/$config::OpenSpec ignorou parte da configuração"
+              status=1
+            fi
+            while IFS= read -r rule; do
+              if ! printf '%s' "$output" | grep -qF -- "$rule"; then
+                echo "::error file=padrao-openspec/$config::Regra do config base ausente: $rule"
+                status=1
+              fi
+            done < "$RUNNER_TEMP/base-rules.txt"
+          done
+          exit $status
+
+      - name: Lint de Markdown
+        run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"
+
+      - name: Sintaxe dos scripts
+        run: |
+          node --check scripts/install-skills.mjs
+          node --check scripts/setup-project.mjs
+          node --check scripts/sync-root.mjs
+
+      - name: Smoke test do instalador
+        run: |
+          consumer="$(mktemp -d)"
+          git -C "$consumer" init -q
+          node scripts/install-skills.mjs "$consumer" --target both
+          git -C "$consumer" check-ignore -q openspec/changes/demo/proposal.md
+          test "$(grep -cx '/openspec/' "$consumer/.gitignore")" -eq 1
+          test ! -e "$consumer/.agents/skills/dotnet-implementation"
+          node scripts/install-skills.mjs "$consumer" --target both | grep -q '^Done\. 0 installed'
+          test "$(grep -cx '/openspec/' "$consumer/.gitignore")" -eq 1
+          node scripts/install-skills.mjs "$consumer" --target both --stack dotnet,nextjs
+          for dir in .agents .claude; do
+            test -f "$consumer/$dir/skills/dotnet-implementation/SKILL.md"
+            test -f "$consumer/$dir/skills/nextjs-implementation/SKILL.md"
+          done
+          if node scripts/install-skills.mjs "$consumer" --stack java; then exit 1; fi
+          # Comandos OPSX instalados idênticos à fonte, incluindo init e ingest.
+          diff -r .claude/commands/opsx "$consumer/.claude/commands/opsx"
+          test -f "$consumer/.claude/commands/opsx/init.md"
+          test -f "$consumer/.claude/commands/opsx/ingest.md"
+          grep -q 'Architectural Decision Check' "$consumer/.claude/commands/opsx/propose.md"
+          for skill in docker requesting-code-review versioning-ci-cd; do
+            test -f "$consumer/.agents/skills/$skill/SKILL.md"
+          done
+          # Comando customizado no consumidor: sem --force nada é copiado.
+          echo customizado >> "$consumer/.claude/commands/opsx/propose.md"
+          if node scripts/install-skills.mjs "$consumer"; then exit 1; fi
+          grep -q '^customizado$' "$consumer/.claude/commands/opsx/propose.md"
+          # Sem --target, as skills vão para .agents/skills e .claude/skills.
+          default="$(mktemp -d)"
+          git -C "$default" init -q
+          node scripts/install-skills.mjs "$default"
+          test -f "$default/.agents/skills/openspec-propose/SKILL.md"
+          test -f "$default/.claude/skills/openspec-propose/SKILL.md"
+          cmp .claude/skills/openspec-propose/SKILL.md "$default/.claude/skills/openspec-propose/SKILL.md"
+          # --target agents não cria .claude/skills, mas instala os comandos.
+          agents_only="$(mktemp -d)"
+          git -C "$agents_only" init -q
+          node scripts/install-skills.mjs "$agents_only" --target agents
+          test ! -e "$agents_only/.claude/skills"
+          test -f "$agents_only/.claude/commands/opsx/init.md"
+
+      - name: Smoke test do setup de projeto
+        run: |
+          work="$(mktemp -d)"
+          cp -r . "$work/store"
+          # A cópia de padrao-openspec/ não leva o .git da raiz; o commit permite ao setup
+          # reconhecer project.md e config.yaml intactos e não gerar backups .bak.
+          git -C "$work/store" init -q
+          git -C "$work/store" add -A
+          git -C "$work/store" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
+          mkdir "$work/code"
+          git -C "$work/code" init -q
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet-nextjs --name "CI Project" --yes
+          cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+          head -n 1 "$work/store/openspec/project.md" | grep -q '^# CI Project '
+          test -f "$work/code/.agents/skills/dotnet-implementation/SKILL.md"
+          test -f "$work/code/.agents/skills/nextjs-implementation/SKILL.md"
+          test -z "$(find "$work/store/openspec" -maxdepth 1 -name '*.bak')"
+          # project.md já preenchido: sem --force o setup recusa e não altera nada.
+          if node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet --yes; then exit 1; fi
+          cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+
+      - name: Smoke test da declaração do store
+        run: |
+          work="$(mktemp -d)"
+          cp -r . "$work/store"
+          mkdir "$work/code"
+          git -C "$work/code" init -q
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --stack nextjs --name "CI Store" --register-id ci-store --yes
+          grep -qx 'store: ci-store' "$work/code/openspec/config.yaml"
+          # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
+          resolved="$(cd "$work/code" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
+          expected="$(cd "$work/store" && node -p 'require("fs").realpathSync(process.cwd())')"
+          test "$resolved" = "$expected"
+          # Declaração conflitante: o setup recusa sem --force e não altera o arquivo.
+          mkdir -p "$work/other/openspec"
+          git -C "$work/other" init -q
+          printf 'store: outro\n' > "$work/other/openspec/config.yaml"
+          if node "$work/store/scripts/setup-project.mjs" "$work/other" --stack none --register-id ci-store --yes; then exit 1; fi
+          grep -qx 'store: outro' "$work/other/openspec/config.yaml"
+          # Com --force, a declaração existente é substituída e o store volta a ser resolvido.
+          node "$work/store/scripts/setup-project.mjs" "$work/other" --stack none --register-id ci-store --force --yes
+          grep -qx 'store: ci-store' "$work/other/openspec/config.yaml"
+          test "$(grep -c '^store:' "$work/other/openspec/config.yaml")" -eq 1
+
+  # A raiz é espelho gerado de padrao-openspec/ e carrega as changes deste repositório.
+  root:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Raiz em dia com padrao-openspec
+        run: node padrao-openspec/scripts/sync-root.mjs --check
+
+      - name: Instalar OpenSpec CLI
+        run: npm install --global @fission-ai/openspec@1.14.2
+
+      - name: Validar specs e changes OpenSpec da raiz
+        run: openspec validate --all --strict
+
+      - name: Lint de Markdown da raiz
+        run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"

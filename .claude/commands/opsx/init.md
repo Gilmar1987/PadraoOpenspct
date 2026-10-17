@@ -8,7 +8,22 @@ tags: ["workflow", "init", "setup", "initialization"]
 
 Você está no modo de inicialização do projeto. Seu papel é conduzir uma entrevista estruturada com o desenvolvedor, registrar todas as decisões e gerar os artefatos de configuração do projeto.
 
-**IMPORTANTE:** Este comando só deve ser executado uma vez, no início do projeto. Se `openspec/project.md` já estiver preenchido sem placeholders, avise o dev e pergunte se deseja revisar as configurações existentes antes de continuar.
+**IMPORTANTE:** Este comando só deve ser executado uma vez, no início do projeto. Se `<root>/openspec/project.md` já estiver preenchido sem placeholders, avise o dev e pergunte se deseja revisar as configurações existentes antes de continuar.
+
+**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+
+**Project check:** These steps expect a project that already uses OpenSpec. Before the first step that writes anything (`new change`, `archive`, `sync specs`, or authoring an artifact file), confirm the project has a root: run `openspec list --json` (with `--store <id>` when a store is selected, since the store is then the root) and read `root`. A root object means the project is set up. `"root": null` means it is not - there is no `openspec/` directory here, and a write such as `openspec new change` would create one as a side effect. The command also exits non-zero, which is that answer rather than a broken CLI, so read the JSON instead of retrying or working around it.
+
+One `"root": null` is not about setup: when a `status` error message starts with `Declared in` or `Invalid store declaration in` and names this project's `openspec/config.yaml` (or `config.yml`), the project does use OpenSpec through a store it declares, which this machine cannot resolve (the store is not registered, or the `store:` line is malformed). Do not treat it as uninitialized and skip the branches below: stop before writing and show the user that error's `message` and `fix`.
+
+Otherwise, with no root, what happens next depends on how this workflow was reached:
+
+- **Auto-selected**: you chose this workflow yourself, without the user naming OpenSpec, naming this skill, or running its slash command. Stop using OpenSpec and answer the request normally, as you would with no OpenSpec installed. Do not ask them to set anything up and do not mention OpenSpec setup.
+- **Explicit OpenSpec request**: the user named OpenSpec, named this skill, or ran its slash command. Stop before writing and ask how to proceed: set this project up (`openspec init`), target a store they already have (`--store <id>`), or continue without OpenSpec for this request. Wait for their answer.
+
+In both branches, never create the root as a side effect: do not run `openspec init` until the user asks for it, do not hand-create `openspec/` files, and do not let a command create it.
+
+**Raiz OpenSpec:** antes de ler ou gravar qualquer arquivo, rode `openspec context --json` (com `--store <id>` quando um store estiver selecionado) e use `root.path` como `<root>`. A raiz pode ser um store separado, declarado pela linha `store:` em `openspec/config.yaml` do repositório de código; nunca presuma que é o diretório atual. Neste comando, todo caminho `<root>/openspec/...` é relativo a essa raiz.
 
 ---
 
@@ -618,7 +633,7 @@ Após todos os blocos confirmados:
 
 4. Gere os seguintes arquivos:
 
-### Arquivo 1: `openspec/project-setup.md`
+### Arquivo 1: `<root>/openspec/project-setup.md`
 
 ```markdown
 # Registro de Inicialização — {{Nome do Projeto}}
@@ -706,22 +721,22 @@ Após todos os blocos confirmados:
 > Para revisar as decisões, edite este arquivo e atualize `openspec/project.md` e `openspec/config.yaml`.
 ```
 
-### Arquivo 2: `openspec/project.md`
+### Arquivo 2: `<root>/openspec/project.md`
 
 Preencha o template do preset ativo com todas as escolhas confirmadas. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
 
-### Arquivo 3: `openspec/config.yaml`
+### Arquivo 3: `<root>/openspec/config.yaml`
 
 Atualize o campo `context:` com as decisões reais de stack, arquitetura e convenções. Remova o bloco `Inicialização do projeto` após a conclusão — ele não é mais necessário.
 
-### Arquivo 4: ADRs fundacionais em `openspec/adrs/`
+### Arquivo 4: ADRs fundacionais em `<root>/openspec/adrs/`
 
 Após gerar os três arquivos acima, analise as respostas confirmadas e gere automaticamente uma ADR para cada decisão que atenda a **pelo menos um** destes critérios:
 - afeta mais de uma capability ou sobrevive à change que a originou
 - é cara de reverter (stack, persistência, autenticação, integração, topologia de deploy)
 - restringe changes futuras
 
-Use numeração sequencial a partir de `0001`. Siga estritamente o template em `openspec/adrs/template.md`. Para cada ADR:
+Use numeração sequencial a partir de `0001`. Siga estritamente o template em `<root>/openspec/adrs/template.md`. Para cada ADR:
 - defina `status: Accepted` (decisões já confirmadas pelo dev)
 - preencha `date` com a data atual
 - preencha `Contexto` com o problema que a decisão resolve
@@ -760,12 +775,12 @@ Após gerar todas as ADRs, exiba a lista com nome e título de cada uma.
 ```
 Inicialização concluída. Próximos passos:
 
-  1. Revise openspec/project.md e complete os campos de domínio e capabilities.
-  2. Revise as ADRs geradas em openspec/adrs/ — ajuste contexto e consequências
+  1. Revise <root>/openspec/project.md e complete os campos de domínio e capabilities.
+  2. Revise as ADRs geradas em <root>/openspec/adrs/ — ajuste contexto e consequências
      com detalhes que só você conhece do projeto.
-  3. Faça commit dos artefatos gerados:
-       git add openspec/
-       git commit -m "chore: initialize project setup and foundational ADRs"
+  3. Faça commit dos artefatos gerados no repositório da raiz:
+       git -C <root> add openspec/
+       git -C <root> commit -m "chore: initialize project setup and foundational ADRs"
   4. Quando tiver uma funcionalidade para especificar, rode /opsx:explore.
   5. Qualquer mudança de arquitetura futura MUST ser registrada como nova ADR
      antes de ser implementada.
