@@ -8,7 +8,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova. A mudança segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md): a skill externa não é copiada para a fonte única, e a única skill alterada (`nextjs-implementation`) é editada em `padrao-openspec/` e espelhada pelo sync.
+Não há ADR nova. A mudança segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md): a skill externa não é copiada para a fonte única, e a única skill alterada (`nextjs-implementation`) é editada em `padrao-openspec/` e espelhada pelo sync.
 
 ## Goals / Non-Goals
 
