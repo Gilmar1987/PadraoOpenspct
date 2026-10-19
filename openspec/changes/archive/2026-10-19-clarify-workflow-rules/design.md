@@ -10,7 +10,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova: são regras de processo, registradas no `rules.md` e nas skills. A mudança segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md) e não contraria a ADR-0002.
+Não há ADR nova: são regras de processo, registradas no `rules.md` e nas skills. A mudança segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md) e não contraria a ADR-0002.
 
 ## Goals / Non-Goals
 
