@@ -34,7 +34,8 @@ Depois de um resumo e da sua confirmação, o setup:
 1. instala no repositório de código as skills (em `.agents/skills/` e
    `.claude/skills/`, padrão `--target both`), incluindo a skill da stack, os
    comandos `/opsx:*` em `.claude/commands/opsx/` e os agentes em `.github/agents/`,
-   e acrescenta `/openspec/` ao `.gitignore` dele;
+   e acrescenta ao `.gitignore` dele um bloco que ignora o conteúdo local de
+   `openspec/`, mas mantém no git o `openspec/config.yaml` com a declaração do store;
 2. aplica o preset da stack em `openspec/project.md` e `openspec/config.yaml` deste
    store (veja [presets/](presets/README.md));
 3. registra o store nesta máquina com `openspec store register`, grava
@@ -209,11 +210,17 @@ Copilot e agentes universais) e `.claude/skills/` (Claude Code). Use
 `--stack nextjs` ou `--stack dotnet,nextjs` para instalar também as skills de
 stack; sem `--stack`, só as skills neutras são instaladas, e uma skill de stack
 já instalada é preservada. Os agentes VS Code são instalados em
-`.github/agents/`. O instalador acrescenta uma regra canônica `/openspec/` ao
-final do `.gitignore` do projeto consumidor, prevalecendo sobre regras anteriores
-que possam reexpor essa pasta; se o bloco já existir mais acima, ele é movido
-para o final em vez de duplicado. Assim, os artefatos locais não são enviados junto
-com o código da aplicação. O store/template `padrao-openspec` continua sendo um
+`.github/agents/`. O instalador acrescenta ao final do `.gitignore` do projeto
+consumidor um bloco canônico com `/openspec/*` e `!/openspec/config.yaml`,
+prevalecendo sobre regras anteriores; se o bloco, ou a versão antiga que ignorava
+`/openspec/` inteiro, já existir mais acima, ele é substituído e movido para o final
+em vez de duplicado. Assim, os artefatos locais não são enviados junto com o código
+da aplicação, e a declaração do store (`openspec/config.yaml`) vai para o git, para
+que um clone novo saiba qual store usar.
+
+Em projeto Next.js novo, rode o `create-next-app` no repositório de código antes do
+setup: ele recusa pastas que já têm `.agents/`, `.github/` ou `openspec/`. Se o setup
+já rodou, gere o app numa pasta temporária e copie os arquivos. O store/template `padrao-openspec` continua sendo um
 repositório separado e versionado; compartilhe mudanças/specs pelo remoto desse
 store quando desejado.
 

@@ -154,9 +154,11 @@ function writeAtomic(target, content) {
   }
 }
 
+// "HEAD:./<path>" resolves from cwd (the store), so it also works when the store is a subfolder
+// of the git repository; "HEAD:<path>" would resolve from the repository root instead.
 function committedVersion(relativePath) {
   try {
-    return execFileSync('git', ['show', `HEAD:${relativePath}`], {
+    return execFileSync('git', ['show', `HEAD:./${relativePath}`], {
       cwd: storeRoot,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
