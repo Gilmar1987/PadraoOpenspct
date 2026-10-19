@@ -86,6 +86,10 @@ jobs:
           done
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
+            check "$f" "Evidence reuse"
+          done
+          for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
+            check "$f" "Update the project overview"
           done
           exit $missing
 

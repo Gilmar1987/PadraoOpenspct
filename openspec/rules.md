@@ -52,10 +52,12 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
 Toda mudança de comportamento observável do sistema MUST seguir este ciclo:
 
 ```text
-/opsx:explore → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+[/opsx:explore] → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
 ```
 
-Você MUST NOT pular etapas. Especificamente:
+O `/opsx:explore` é opcional: use-o quando o problema, o escopo ou a abordagem ainda não
+estiverem claros. As demais etapas são obrigatórias e nessa ordem; você MUST NOT pular
+nenhuma delas. Especificamente:
 
 - `/opsx:apply` MUST NOT ser executado sem `proposal.md` e `tasks.md` existentes
 - `/opsx:archive` MUST NOT ser executado sem `/opsx:verify` ter sido rodado
@@ -63,21 +65,23 @@ Você MUST NOT pular etapas. Especificamente:
 
 ---
 
-## 4. Respeitar limites de cada agente
+## 4. Respeitar os limites de cada papel
 
-Os agentes abaixo são subagentes VS Code/Copilot definidos em `.github/agents/` (fonte em
-`padrao-openspec/.github/agents/`) e instalados nos projetos consumidores. Em ferramentas sem
-esses subagentes, os mesmos limites valem para o papel equivalente que o agente principal
-assumir em cada etapa do fluxo.
+Os limites valem por papel, para qualquer agente que o assuma, com ou sem subagentes. Nos
+projetos consumidores, o VS Code/Copilot tem um subagente por papel em `.github/agents/`
+(fonte em `padrao-openspec/.github/agents/`).
 
-| Agente | Pode | Não pode |
-|---|---|---|
-| `spec-architect` | Analisar, rascunhar artefatos | Escrever código |
-| `task-planner` | Criar checklist de tarefas | Implementar, marcar tarefas concluídas |
-| `code-implementer` | Implementar tarefas aprovadas | Arquivar, fazer push, deploy |
-| `qa-validator` | Validar, gerar relatório | Corrigir código, arquivar |
-| `consistency-guardian` | Revisar, reportar conflitos | Editar qualquer arquivo |
-| `business-requirements-ingestor` | Extrair objetivos, atores, regras e dúvidas de material de negócio | Alterar arquivos, copiar documentos brutos para specs |
+| Papel | Pode | Não pode | Subagente VS Code |
+|---|---|---|---|
+| Planejar | Analisar e rascunhar artefatos de planejamento | Escrever código | `spec-architect`, `task-planner` |
+| Implementar | Implementar tarefas aprovadas e marcá-las com evidência | Arquivar, fazer push ou deploy sem pedido | `code-implementer` |
+| Verificar | Validar e gerar relatório | Corrigir código ou artefatos, arquivar | `qa-validator` |
+| Revisar consistência | Revisar e reportar conflitos | Editar arquivos | `consistency-guardian` |
+| Ingerir material | Extrair objetivos, atores, regras e dúvidas de material de negócio | Alterar arquivos, copiar documentos brutos para specs | `business-requirements-ingestor` |
+
+- Um mesmo agente pode assumir papéis diferentes em etapas diferentes, mas respeita os
+  limites do papel da etapa em que está.
+- Ajustar um artefato de change depois do verify MUST passar pelo `/opsx:update`.
 
 ---
 
