@@ -1,0 +1,9 @@
+# Verificações — add-frontend-design-skill
+
+## 2026-10-19
+
+- Críticos: 0
+- Warnings: 0
+- Sugestões: 0
+- Não verificado: —
+- Avaliação: Todas as checagens passaram (6/6 tarefas; 3/3 cenários cobertos pelo smoke do instalador; CI do PR #2 verde sobre o main).
