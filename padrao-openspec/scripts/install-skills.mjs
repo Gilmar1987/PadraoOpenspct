@@ -15,11 +15,16 @@ const sourceCommands = path.join(sourceRoot, '.claude', 'commands', 'opsx');
 const stacks = {
   dotnet: {
     skill: 'dotnet-implementation',
-    officialSkills: 'Official .NET skills: /plugin marketplace add dotnet/skills, then /plugin install <plugin>@dotnet-agent-skills (https://github.com/dotnet/skills)',
+    officialSkills: [
+      'Official .NET skills: /plugin marketplace add dotnet/skills, then /plugin install <plugin>@dotnet-agent-skills (https://github.com/dotnet/skills)',
+    ],
   },
   nextjs: {
     skill: 'nextjs-implementation',
-    officialSkills: 'Vercel React/Next.js skills: npx skills add vercel-labs/agent-skills (https://github.com/vercel-labs/agent-skills)',
+    officialSkills: [
+      'Vercel React/Next.js skills: npx skills add vercel-labs/agent-skills (https://github.com/vercel-labs/agent-skills)',
+      'Visual design for new or redesigned UI: npx skills add https://github.com/anthropics/skills --skill frontend-design',
+    ],
   },
 };
 const stackSkillNames = new Set(Object.values(stacks).map(({ skill }) => skill));
@@ -566,7 +571,9 @@ function main() {
   if (options.stacks.length > 0) {
     console.log('\nThe stack skills defer framework guidance to the official skills, which are installed separately:');
     for (const stack of options.stacks) {
-      console.log(`  ${stack}: ${stacks[stack].officialSkills}`);
+      for (const recommendation of stacks[stack].officialSkills) {
+        console.log(`  ${stack}: ${recommendation}`);
+      }
     }
   }
 }

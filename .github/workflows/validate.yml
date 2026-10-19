@@ -130,6 +130,23 @@ jobs:
           node scripts/install-skills.mjs "$agents_only" --target agents
           test ! -e "$agents_only/.claude/skills"
           test -f "$agents_only/.claude/commands/opsx/init.md"
+          # Skills oficiais externas são recomendadas por stack, nunca instaladas.
+          rec="$(mktemp -d)"
+          git -C "$rec" init -q
+          node scripts/install-skills.mjs "$rec" --stack nextjs > "$RUNNER_TEMP/rec-nextjs.txt"
+          grep -qF 'npx skills add vercel-labs/agent-skills' "$RUNNER_TEMP/rec-nextjs.txt"
+          grep -qF 'npx skills add https://github.com/anthropics/skills --skill frontend-design' "$RUNNER_TEMP/rec-nextjs.txt"
+          test ! -e "$rec/.agents/skills/frontend-design"
+          test ! -e "$rec/.claude/skills/frontend-design"
+          rec_dotnet="$(mktemp -d)"
+          git -C "$rec_dotnet" init -q
+          node scripts/install-skills.mjs "$rec_dotnet" --stack dotnet > "$RUNNER_TEMP/rec-dotnet.txt"
+          grep -qF 'dotnet/skills' "$RUNNER_TEMP/rec-dotnet.txt"
+          if grep -q 'frontend-design' "$RUNNER_TEMP/rec-dotnet.txt"; then exit 1; fi
+          rec_none="$(mktemp -d)"
+          git -C "$rec_none" init -q
+          node scripts/install-skills.mjs "$rec_none" > "$RUNNER_TEMP/rec-none.txt"
+          if grep -q 'npx skills add' "$RUNNER_TEMP/rec-none.txt"; then exit 1; fi
 
       - name: Smoke test do setup de projeto
         run: |
