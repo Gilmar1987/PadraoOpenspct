@@ -1,0 +1,3 @@
+# Arquivos de texto em LF na árvore de trabalho, em qualquer sistema. Sem isso, o core.autocrlf
+# do Windows mistura CRLF e LF e o sync-root.mjs --check acusa divergências que não existem.
+* text=auto eol=lf

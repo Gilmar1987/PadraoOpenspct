@@ -38,3 +38,12 @@ Em modo de checagem, o script SHALL apenas comparar origem e destino, sem altera
 
 - **WHEN** `.claude/skills/docker/SKILL.md` da raiz é editado sem alterar a fonte e a checagem roda
 - **THEN** o script termina com código diferente de zero, cita esse caminho e não altera nenhum arquivo
+
+### Requirement: Quebras de linha normalizadas
+
+O repositório SHALL normalizar os arquivos de texto para LF na árvore de trabalho, em qualquer sistema, para que a checagem de divergência do sync não acuse diferenças que existam só na quebra de linha.
+
+#### Scenario: Checkout no Windows
+
+- **WHEN** o repositório é clonado no Windows com `core.autocrlf` ligado
+- **THEN** os arquivos de texto ficam em LF na árvore de trabalho e o `sync-root.mjs --check` sai com código 0

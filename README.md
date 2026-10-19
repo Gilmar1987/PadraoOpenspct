@@ -257,6 +257,7 @@ sumir):
 | "Check the approval record" e trailer "OpenSpec-Change:" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Write the verification record" e "Evidence reuse" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Update the project overview" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
+| "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
 
 ---
@@ -281,6 +282,23 @@ npx markdownlint-cli2@0.23.2 "**/*.md"
 Skills e comandos gerados pelo OpenSpec CLI e a skill `requesting-code-review` ficam fora do lint.
 
 ---
+
+## Desempenho e ambiente
+
+O CLI do OpenSpec é rápido: na CI, o passo que gera as instruções de quatro configs faz
+16 chamadas em cerca de 4 segundos. Numa máquina Windows carregada, a mesma chamada levou de
+40 a 90 segundos, e um `npm install` com tudo em cache levou 35 minutos. Quando o fluxo
+ficar lento:
+
+- exclua do antivírus a pasta do projeto, a pasta do store e o cache do npm;
+- encerre processos `node` órfãos de tarefas interrompidas: no Windows, parar a tarefa
+  nem sempre encerra os processos filhos (`npm install`, `next start`);
+- evite rodar várias sessões pesadas (testes, builds, instalações) ao mesmo tempo.
+
+O `/opsx:apply` confirma o progresso no CLI ao fim de cada grupo de tarefas, e não depois de
+cada tarefa, para limitar o número de chamadas. O `.gitattributes` mantém os arquivos de
+texto em LF também no Windows, para que o `sync-root.mjs --check` não acuse divergências
+que existem só na quebra de linha.
 
 ## Migração dos stores removidos
 
