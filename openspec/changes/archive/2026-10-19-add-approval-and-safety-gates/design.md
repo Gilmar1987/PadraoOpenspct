@@ -10,7 +10,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova. O registro de aprovação e as proteções são regras de processo dos agentes, e o registro durável delas é o `rules.md` e o `config.yaml` (mesmo critério da `add-context-discipline-rules`). A mudança segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md): skills e comandos são editados em `padrao-openspec/` e espelhados pelo sync.
+Não há ADR nova. O registro de aprovação e as proteções são regras de processo dos agentes, e o registro durável delas é o `rules.md` e o `config.yaml` (mesmo critério da `add-context-discipline-rules`). A mudança segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md): skills e comandos são editados em `padrao-openspec/` e espelhados pelo sync.
 
 ## Goals / Non-Goals
 

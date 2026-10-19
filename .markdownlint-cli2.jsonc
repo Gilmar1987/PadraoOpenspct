@@ -17,6 +17,8 @@
     ".claude/skills/**",
     ".claude/commands/**",
     ".github/agents/**",
+    // Registro gerado pelo /opsx:verify: uma entrada por execução, com títulos de data que podem se repetir.
+    "openspec/changes/**/verification.md",
     "openspec/changes/**/.inputs/**"
   ]
 }
