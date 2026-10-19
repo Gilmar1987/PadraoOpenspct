@@ -9,7 +9,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova. A mudança corrige o instalador e o setup dentro das decisões existentes: segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md) (fonte única em `padrao-openspec/`, espelhada pelo sync).
+Não há ADR nova. A mudança corrige o instalador e o setup dentro das decisões existentes: segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md) (fonte única em `padrao-openspec/`, espelhada pelo sync).
 
 ## Goals / Non-Goals
 
