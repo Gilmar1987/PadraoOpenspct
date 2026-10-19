@@ -255,6 +255,8 @@ node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\flow-metrics.mjs `
 | `--code <repo>` | Repositório de código para medir retrabalho; pode ser repetida |
 | `--ci` | Conta as execuções da CI que falharam antes do verde, via `gh` autenticado |
 | `--out <dir>` | Onde gravar `metrics.csv` e `resumo.md`; o padrão é a pasta atual |
+| `--usage <pasta>` | Lê o consumo de IA das sessões locais do Claude Code abertas nessa pasta (código ou store) e grava `uso-ia.csv`; pode ser repetida |
+| `--usage-dir <dir>` | Pasta das sessões do Claude Code; o padrão é `~/.claude/projects` |
 
 O `metrics.csv` tem uma linha por change, e o `resumo.md` agrega por mês e semana:
 
@@ -273,6 +275,21 @@ Para o retrabalho funcionar, todo commit de código de uma change leva o trailer
 aparece como coluna vazia, nunca como zero, e a seção "Limites" do resumo diz o que não
 foi coletado. Os marcos guardam só a data, então os tempos são em dias. Use os números
 para entender o fluxo da equipe, não para comparar pessoas.
+
+Com `--usage`, o `uso-ia.csv` traz por change as respostas da IA e os tokens de entrada,
+saída, leitura e escrita de cache, lidos dos arquivos de sessão do Claude Code.
+
+- **Contagem:** cada resposta aparece em várias linhas do arquivo de sessão, e o script
+  conta cada uma uma única vez, por `message.id`. Somar linha a linha triplica os números.
+- **Atribuição:**
+  - pela branch, quando ela contém o nome de uma change;
+  - senão, pela janela de datas da change;
+  - o que cai em mais de uma janela, ou em nenhuma, fica de fora e é contado no resumo.
+- **Privacidade:** só os metadados de consumo são lidos. O conteúdo das conversas, os
+  nomes de branch e os caminhos não são lidos nem gravados.
+- **Escopo:** cobre só as sessões do Claude Code da máquina onde o script roda. Cada pessoa
+  roda na própria máquina e compartilha o CSV. Os números são tokens, não valores em
+  dinheiro.
 
 ## Decisões de arquitetura e riscos
 

@@ -6,6 +6,7 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -31,11 +32,17 @@ Options:
   --code <repo>   Code repository whose commits carry the OpenSpec-Change trailer; repeatable
   --ci            Count failed CI runs before the first green one, through gh (optional)
   --out <dir>     Output directory (default: current directory)
+  --usage <dir>   Folder (code repository or store) whose local Claude Code sessions are read to
+                  write uso-ia.csv; repeatable. Only usage metadata is read, never message content
+  --usage-dir <d> Claude Code sessions folder (default: ~/.claude/projects)
   -h, --help      Show this help`);
 }
 
 function parseArgs(args) {
-  const options = { store: scriptRoot, code: [], ci: false, out: process.cwd() };
+  const options = {
+    store: scriptRoot, code: [], ci: false, out: process.cwd(),
+    usage: [], usageDir: path.join(os.homedir(), '.claude', 'projects'),
+  };
   const valueOf = (index, flag) => {
     const value = args[index + 1];
     if (value === undefined || value.startsWith('--')) throw new Error(`${flag} requires a value.`);
@@ -48,6 +55,8 @@ function parseArgs(args) {
     else if (arg === '--code') options.code.push(valueOf(index++, arg));
     else if (arg === '--ci') options.ci = true;
     else if (arg === '--out') options.out = valueOf(index++, arg);
+    else if (arg === '--usage') options.usage.push(valueOf(index++, arg));
+    else if (arg === '--usage-dir') options.usageDir = valueOf(index++, arg);
     else throw new Error(`Unknown option: ${arg}`);
   }
   return options;
@@ -275,6 +284,124 @@ function show(value, suffix = '') {
   return value === null || value === undefined ? '—' : `${value}${suffix}`;
 }
 
+// Claude Code names a project's session folder after its working directory, with every character
+// outside [A-Za-z0-9] replaced by "-"; the drive letter case varies, so the match ignores case.
+function sessionFolders(paths, usageDir) {
+  const available = existsSync(usageDir) ? readdirSync(usageDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()) : [];
+  const folders = [];
+  let missing = 0;
+  for (const target of paths) {
+    const name = path.resolve(target).replace(/[^A-Za-z0-9]/g, '-').toLowerCase();
+    const match = available.find((entry) => entry.name.toLowerCase() === name);
+    if (match) folders.push(path.join(usageDir, match.name));
+    else missing += 1;
+  }
+  return { folders, missing };
+}
+
+// The change a session record belongs to: by branch name first, then by the date window of the changes.
+function attribute(record, changes, today) {
+  const segments = (record.branch ?? '').split('/').filter(Boolean);
+  const last = segments.at(-1) ?? '';
+  const byBranch = changes.filter((change) =>
+    segments.includes(change.name) || last.endsWith(`-${change.name}`));
+  if (byBranch.length === 1) return { change: byBranch[0] };
+  if (!record.date) return { unattributed: true };
+  const byWindow = changes.filter((change) =>
+    change.created && change.created <= record.date && record.date <= (change.archived ?? today));
+  if (byWindow.length === 1) return { change: byWindow[0] };
+  return byWindow.length > 1 ? { ambiguous: true } : { unattributed: true };
+}
+
+// Reads only usage metadata from the session files and counts each response once, by message.id.
+function readUsage(changes, paths, usageDir) {
+  const { folders, missing } = sessionFolders(paths, usageDir);
+  const today = new Date().toISOString().slice(0, 10);
+  const totals = new Map(changes.map((change) => [change.name, { responses: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }]));
+  const models = new Map();
+  const seen = new Set();
+  const counts = { responses: 0, ambiguous: 0, unattributed: 0, invalidLines: 0 };
+  for (const folder of folders) {
+    for (const file of readdirSync(folder).filter((name) => name.endsWith('.jsonl'))) {
+      for (const line of readFileSync(path.join(folder, file), 'utf8').split('\n')) {
+        if (!line.trim()) continue;
+        let entry;
+        try {
+          entry = JSON.parse(line);
+        } catch {
+          counts.invalidLines += 1;
+          continue;
+        }
+        const usage = entry?.message?.usage;
+        if (entry?.type !== 'assistant' || !usage) continue;
+        const key = entry.message.id ?? entry.requestId;
+        if (key) {
+          if (seen.has(key)) continue;
+          seen.add(key);
+        }
+        const record = {
+          date: typeof entry.timestamp === 'string' ? entry.timestamp.slice(0, 10) : null,
+          branch: typeof entry.gitBranch === 'string' ? entry.gitBranch : '',
+        };
+        const tokens = {
+          input: usage.input_tokens ?? 0,
+          output: usage.output_tokens ?? 0,
+          cacheRead: usage.cache_read_input_tokens ?? 0,
+          cacheWrite: usage.cache_creation_input_tokens ?? 0,
+        };
+        counts.responses += 1;
+        const model = typeof entry.message.model === 'string' ? entry.message.model : 'desconhecido';
+        const modelTotals = models.get(model) ?? { responses: 0, output: 0, cacheRead: 0 };
+        modelTotals.responses += 1;
+        modelTotals.output += tokens.output;
+        modelTotals.cacheRead += tokens.cacheRead;
+        models.set(model, modelTotals);
+        const result = attribute(record, changes, today);
+        if (result.ambiguous) counts.ambiguous += 1;
+        else if (result.unattributed) counts.unattributed += 1;
+        else {
+          const target = totals.get(result.change.name);
+          target.responses += 1;
+          target.input += tokens.input;
+          target.output += tokens.output;
+          target.cacheRead += tokens.cacheRead;
+          target.cacheWrite += tokens.cacheWrite;
+        }
+      }
+    }
+  }
+  return { collected: folders.length > 0, folders: folders.length, missing, totals, models, counts };
+}
+
+function toUsageCsv(changes, usage) {
+  const header = 'change,respostas,tokens_entrada,tokens_saida,tokens_cache_leitura,tokens_cache_escrita';
+  const rows = changes.map((change) => {
+    const total = usage.collected ? usage.totals.get(change.name) : null;
+    return [change.name, total?.responses, total?.input, total?.output, total?.cacheRead, total?.cacheWrite].map(csvValue).join(',');
+  });
+  return `﻿${[header, ...rows].join('\n')}\n`;
+}
+
+function usageSummary(usage) {
+  const lines = ['', '## Consumo de IA', ''];
+  if (!usage.collected) {
+    lines.push(`- Não coletado: Nenhuma sessão encontrada para ${usage.missing} pasta(s) informada(s) com \`--usage\`.`);
+  } else {
+    if (usage.missing) lines.push(`- Nenhuma sessão encontrada para ${usage.missing} das pastas informadas com \`--usage\`.`);
+    lines.push(`- Respostas lidas (cada uma contada uma vez): ${usage.counts.responses}`);
+    lines.push(`- Respostas ambíguas (mais de uma change possível): ${usage.counts.ambiguous}`);
+    lines.push(`- Respostas não atribuídas: ${usage.counts.unattributed}`);
+    if (usage.counts.invalidLines) lines.push(`- Linhas ignoradas por não serem JSON válido: ${usage.counts.invalidLines}`);
+    lines.push('', '| Modelo | Respostas | Tokens de saída | Tokens de leitura de cache |', '|---|---|---|---|');
+    for (const [model, total] of [...usage.models.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+      lines.push(`| ${model} | ${total.responses} | ${total.output} | ${total.cacheRead} |`);
+    }
+  }
+  lines.push('', '- Só metadados de consumo são lidos; o conteúdo das conversas não é lido nem gravado.');
+  lines.push('- Cobre só as sessões do Claude Code desta máquina.');
+  return `${lines.join('\n')}\n`;
+}
+
 function toSummary(changes, context) {
   const archived = changes.filter((change) => change.state === 'arquivada');
   const active = changes.filter((change) => change.state === 'ativa');
@@ -364,9 +491,15 @@ function main() {
   const outDir = path.resolve(options.out);
   mkdirSync(outDir, { recursive: true });
   writeFileSync(path.join(outDir, 'metrics.csv'), toCsv(changes));
-  writeFileSync(path.join(outDir, 'resumo.md'), toSummary(changes, {
+  let summary = toSummary(changes, {
     codeRepos: options.code.length, rework, unreadable, ci, ciRequested: options.ci,
-  }));
+  });
+  if (options.usage.length > 0) {
+    const usage = readUsage(changes, options.usage, path.resolve(options.usageDir));
+    writeFileSync(path.join(outDir, 'uso-ia.csv'), toUsageCsv(changes, usage));
+    summary += usageSummary(usage);
+  }
+  writeFileSync(path.join(outDir, 'resumo.md'), summary);
   console.log(`Wrote ${changes.length} changes to ${path.join(outDir, 'metrics.csv')} and ${path.join(outDir, 'resumo.md')}.`);
 }
 
