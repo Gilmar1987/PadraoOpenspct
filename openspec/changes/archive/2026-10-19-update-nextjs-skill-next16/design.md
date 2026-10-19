@@ -8,7 +8,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova: a mudança é de conteúdo da skill de stack. Segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md) (editada em `padrao-openspec/`, espelhada pelo sync).
+Não há ADR nova: a mudança é de conteúdo da skill de stack. Segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md) (editada em `padrao-openspec/`, espelhada pelo sync).
 
 ## Goals / Non-Goals
 
