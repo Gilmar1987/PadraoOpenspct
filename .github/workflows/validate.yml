@@ -83,6 +83,7 @@ jobs:
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
             check "$f" "OpenSpec-Change:"
+            check "$f" "Confirm progress per task group"
           done
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
