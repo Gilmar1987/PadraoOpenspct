@@ -1,10 +1,10 @@
 ---
 id: ADR-0002
-status: Proposed
+status: Accepted
 date: 2026-10-17
 supersedes:
 superseded_by:
-related_changes: [add-flow-metrics]
+related_changes: [2026-10-19-add-flow-metrics]
 ---
 
 # ADR-0002: Trailer `OpenSpec-Change` liga commits de código às changes

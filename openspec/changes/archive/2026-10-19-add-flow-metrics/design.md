@@ -12,8 +12,8 @@
 
 ## Architecture Decisions
 
-- [ADR-0002](../../adrs/0002-rastreabilidade-commit-change.md), `Proposed`: trailer `OpenSpec-Change` liga commits de código às changes. É promovida a `Accepted` na revisão do PR.
-- Segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md): skills e comandos são editados em `padrao-openspec/` e espelhados pelo sync.
+- [ADR-0002](../../../adrs/0002-rastreabilidade-commit-change.md), `Accepted`: trailer `OpenSpec-Change` liga commits de código às changes. Promovida em 2026-10-19, depois do merge do PR #5.
+- Segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md): skills e comandos são editados em `padrao-openspec/` e espelhados pelo sync.
 
 ## Goals / Non-Goals
 
