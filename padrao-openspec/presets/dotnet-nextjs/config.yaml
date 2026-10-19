@@ -70,7 +70,7 @@ operations:
       - Consultar todos os artefatos de planejamento antes de implementar
       - Usar ferramentas de teste, lint e build existentes no projeto consumidor
       - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
-      - Cobrir regras de negócio com teste unitário no back-end, endpoints com teste de integração via WebApplicationFactory e fluxos críticos com teste E2E no front-end
+      - Cobrir regras de negócio com teste unitário no back-end, endpoints com teste de integração via WebApplicationFactory e fluxos críticos com teste E2E no front-end; salvo decisão de testes registrada pelo projeto, que prevalece
       - Executar dotnet build e dotnet test, e lint, typecheck, testes e build do front-end, antes de concluir a última tarefa da change
       - "Antes de alterar código, conferir a seção ## Aprovação do proposal: sem ela, ou com Responsável Pendente, parar e pedir a aprovação ao usuário"
       - "Depois de 3 tentativas seguidas falhando no mesmo erro ou teste, parar, mostrar as tentativas e pedir orientação; se for preciso alterar mais de 5 arquivos fora do raio de impacto, parar e pedir confirmação"
