@@ -74,7 +74,7 @@ O setup:
 
 - instala no repositório de código as skills em `.agents/skills/` e `.claude/skills/` (padrão `--target both`), os comandos `/opsx:*` em `.claude/commands/opsx/` e os subagentes em `.github/agents/`;
 - aplica o preset da stack em `<projeto>-openspec\padrao-openspec\openspec\project.md` e `config.yaml`;
-- adiciona `/openspec/` ao `.gitignore` do repositório de código;
+- acrescenta ao `.gitignore` do repositório de código um bloco que ignora o conteúdo local de `openspec/`, mas mantém no git o `openspec/config.yaml` com a declaração do store (commite esse arquivo);
 - registra o store nesta máquina, grava `store: <projeto>` em `openspec/config.yaml` do repositório de código e confirma que o OpenSpec CLI encontra o store a partir dele.
 
 Resultado final:
@@ -83,6 +83,14 @@ Resultado final:
 |---|---|
 | `C:\openspec\<projeto>-openspec\padrao-openspec\` | Store OpenSpec do projeto (specs, changes, config, ADRs) |
 | `C:\openspec\<projeto>\` | Código da aplicação (skills, comandos e subagentes instalados) |
+
+**Projeto Next.js novo:** rode o `create-next-app` no repositório de código **antes** do
+setup. Ele recusa pastas que já têm `.agents/`, `.github/` ou `openspec/`. Se o setup já
+rodou, gere o app numa pasta temporária e copie os arquivos para o repositório de código.
+
+Quem clona um repositório de código já configurado recebe o `openspec/config.yaml` com o
+id do store. Para o CLI encontrar o store, clone o repositório do store e registre-o com o
+mesmo id: `openspec store register <caminho-do-store> --id <projeto>`.
 
 Sem registrar o store (por exemplo, em CI), troque `--register-id <projeto>` por
 `--no-register`. O setup mostra ao final o comando de registro e a linha `store:` a

@@ -778,7 +778,8 @@ Inicialização concluída. Próximos passos:
   1. Revise <root>/openspec/project.md e complete os campos de domínio e capabilities.
   2. Revise as ADRs geradas em <root>/openspec/adrs/ — ajuste contexto e consequências
      com detalhes que só você conhece do projeto.
-  3. Faça commit dos artefatos gerados no repositório da raiz:
+  3. Faça commit dos artefatos gerados. <root> pode ser uma subpasta do repositório git
+     (por exemplo, padrao-openspec/); o git -C <root> funciona a partir dela:
        git -C <root> add openspec/
        git -C <root> commit -m "chore: initialize project setup and foundational ADRs"
   4. Quando tiver uma funcionalidade para especificar, rode /opsx:explore.

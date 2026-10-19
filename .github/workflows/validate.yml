@@ -94,11 +94,22 @@ jobs:
           consumer="$(mktemp -d)"
           git -C "$consumer" init -q
           node scripts/install-skills.mjs "$consumer" --target both
+          # O conteúdo local de openspec/ fica ignorado; a declaração do store (config.yaml) vai para o git.
           git -C "$consumer" check-ignore -q openspec/changes/demo/proposal.md
-          test "$(grep -cx '/openspec/' "$consumer/.gitignore")" -eq 1
+          if git -C "$consumer" check-ignore -q openspec/config.yaml; then exit 1; fi
           test ! -e "$consumer/.agents/skills/dotnet-implementation"
           node scripts/install-skills.mjs "$consumer" --target both | grep -q '^Done\. 0 installed'
-          test "$(grep -cx '/openspec/' "$consumer/.gitignore")" -eq 1
+          test "$(grep -cx '/openspec/\*' "$consumer/.gitignore")" -eq 1
+          test "$(grep -cx '!/openspec/config.yaml' "$consumer/.gitignore")" -eq 1
+          # Migração do bloco antigo, que ignorava /openspec/ inteiro.
+          legacy="$(mktemp -d)"
+          git -C "$legacy" init -q
+          printf 'node_modules/\n# OpenSpec planning artifacts are maintained in the separate planning store.\n/openspec/\n' > "$legacy/.gitignore"
+          node scripts/install-skills.mjs "$legacy" --target agents
+          test "$(grep -cx '/openspec/' "$legacy/.gitignore")" -eq 0
+          test "$(grep -cx '/openspec/\*' "$legacy/.gitignore")" -eq 1
+          grep -qx 'node_modules/' "$legacy/.gitignore"
+          if git -C "$legacy" check-ignore -q openspec/config.yaml; then exit 1; fi
           node scripts/install-skills.mjs "$consumer" --target both --stack dotnet,nextjs
           for dir in .agents .claude; do
             test -f "$consumer/$dir/skills/dotnet-implementation/SKILL.md"
@@ -168,6 +179,23 @@ jobs:
           # project.md já preenchido: sem --force o setup recusa e não altera nada.
           if node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet --yes; then exit 1; fi
           cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+
+      # Fluxo recomendado: o store é uma subpasta (padrao-openspec/) de um repositório git.
+      # Arquivos iguais aos commitados não geram .bak; uma edição local gera.
+      - name: Smoke test do setup em subpasta
+        run: |
+          work="$(mktemp -d)"
+          mkdir -p "$work/repo" "$work/code"
+          cp -r . "$work/repo/padrao-openspec"
+          git -C "$work/repo" init -q
+          git -C "$work/repo" add -A
+          git -C "$work/repo" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
+          git -C "$work/code" init -q
+          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --stack nextjs --no-register --yes
+          test -z "$(find "$work/repo/padrao-openspec/openspec" -maxdepth 1 -name '*.bak')"
+          printf '\n# edição local\n' >> "$work/repo/padrao-openspec/openspec/config.yaml"
+          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --stack nextjs --no-register --force --yes
+          test -n "$(find "$work/repo/padrao-openspec/openspec" -maxdepth 1 -name 'config.yaml.*.bak')"
 
       - name: Smoke test da declaração do store
         run: |

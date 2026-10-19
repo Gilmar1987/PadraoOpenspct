@@ -381,19 +381,25 @@ function ensureConsumerGitignore(projectRoot) {
 
   const original = existingInfo ? readFileSync(gitignorePath, 'utf8') : '';
   const marker = '# OpenSpec planning artifacts are maintained in the separate planning store.';
+  // The contents of openspec/ stay local, but openspec/config.yaml carries the store declaration and is
+  // versioned. "/openspec/*" ignores the contents, not the folder, so the negation can re-include the file.
+  const managedLines = [marker, '/openspec/*', '!/openspec/config.yaml'];
   const nonemptyLines = original.split(/\r?\n/).filter((line) => line.length > 0);
-  const lastLine = nonemptyLines.at(-1)?.replace(/[ \t]+$/, '');
-  const precedingLine = nonemptyLines.at(-2)?.replace(/[ \t]+$/, '');
-  const alreadyIgnored = precedingLine === marker && lastLine === '/openspec/';
+  const tail = nonemptyLines.slice(-managedLines.length).map((line) => line.replace(/[ \t]+$/, ''));
+  const alreadyIgnored = tail.length === managedLines.length && tail.every((line, index) => line === managedLines[index]);
   if (alreadyIgnored) {
-    console.log('Unchanged: .gitignore already excludes the project openspec/ directory.');
+    console.log('Unchanged: .gitignore already excludes the local openspec/ contents and keeps the store declaration.');
   } else {
     const eol = original.includes('\r\n') ? '\r\n' : '\n';
-    // Drop earlier copies of the managed block so moving it to the end does not accumulate duplicates.
-    const previousBlocks = new RegExp(`^${escapeRegExp(marker)}[ \\t]*\\r?\\n/openspec/[ \\t]*(?:\\r?\\n|$)`, 'gm');
+    // Drop earlier copies of the managed block, including the legacy one that ignored /openspec/ entirely,
+    // so moving it to the end does not accumulate duplicates.
+    const previousBlocks = new RegExp(
+      `^${escapeRegExp(marker)}[ \\t]*\\r?\\n(?:/openspec/[ \\t]*(?:\\r?\\n|$)|/openspec/\\*[ \\t]*\\r?\\n!/openspec/config\\.yaml[ \\t]*(?:\\r?\\n|$))`,
+      'gm',
+    );
     const cleaned = original.replace(previousBlocks, '');
     const separator = cleaned.length === 0 || cleaned.endsWith('\n') || cleaned.endsWith('\r') ? '' : eol;
-    const block = [marker, '/openspec/'].join(eol);
+    const block = managedLines.join(eol);
     const updated = `${cleaned}${separator}${block}${eol}`;
     const stagedPath = path.join(projectRoot, `.gitignore-${randomUUID()}.tmp`);
     const backupPath = path.join(projectRoot, `.gitignore-${randomUUID()}.bak`);
@@ -429,7 +435,7 @@ function ensureConsumerGitignore(projectRoot) {
           console.warn(`Cleanup error: ${error.message}`);
         }
       }
-      console.log('Updated: .gitignore excludes /openspec/.');
+      console.log('Updated: .gitignore excludes the local openspec/ contents and keeps openspec/config.yaml.');
     } finally {
       if (existsSync(stagedPath)) rmSync(stagedPath, { force: true });
     }
