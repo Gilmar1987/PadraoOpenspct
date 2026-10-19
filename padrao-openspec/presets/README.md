@@ -13,7 +13,8 @@ substitui dois arquivos do store:
 
 Use o setup interativo descrito em [Usar em um novo projeto](../README.md#usar-em-um-novo-projeto):
 `node scripts/setup-project.mjs` pergunta a stack e aplica o preset, instala as
-skills no repositório de código e registra o store.
+skills, os comandos `/opsx:*` e os agentes no repositório de código, registra o
+store e declara-o no repositório de código.
 
 Para aplicar só o preset, sem o script, copie os dois arquivos no store do projeto
 antes de criar a primeira change:

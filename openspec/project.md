@@ -8,9 +8,11 @@
 ## System Boundaries
 
 **Dentro do escopo:**
+
 - A definir
 
 **Fora do escopo (próximas propostas):**
+
 - A definir
 
 ## Architecture

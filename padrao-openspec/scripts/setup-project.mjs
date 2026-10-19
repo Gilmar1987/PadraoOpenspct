@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { copyFileSync, existsSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -32,7 +32,7 @@ Arguments:
 Options:
   --stack <${Object.keys(presets).join('|')}>
   --name <project name>         Replaces ${namePlaceholder} in openspec/project.md
-  --target <agents|claude|both> Skill destination in the code repository (default: agents)
+  --target <agents|claude|both> Skill destination in the code repository (default: both)
   --register-id <id>            Register this store with this id (default when asked: folder name)
   --no-register                 Do not register this store
   --force                       Apply the preset even if openspec/project.md was already filled
@@ -41,7 +41,7 @@ Options:
 }
 
 function parseArgs(args) {
-  const options = { code: null, stack: null, name: null, target: 'agents', registerId: null, register: null, force: false, yes: false };
+  const options = { code: null, stack: null, name: null, target: 'both', registerId: null, register: null, force: false, yes: false };
   const valueOf = (index, flag) => {
     const value = args[index + 1];
     if (value === undefined || value.startsWith('--')) throw new Error(`${flag} requires a value.`);
@@ -88,6 +88,13 @@ function createPrompter() {
   };
 }
 
+// A clone of the whole repository keeps the store in <projeto>-openspec/padrao-openspec, so the
+// clone folder names the project better than the store folder itself.
+function defaultStoreId() {
+  const name = path.basename(storeRoot);
+  return name === 'padrao-openspec' ? path.basename(path.dirname(storeRoot)) : name;
+}
+
 function validateRegisterId(id) {
   if (!/^[a-z0-9][a-z0-9-]*$/i.test(id)) {
     throw new Error(`Invalid store id "${id}". Use letters, digits and hyphens.`);
@@ -118,7 +125,7 @@ async function askMissing(rl, options) {
     options.name = (await rl.question('Nome do projeto (Enter para preencher depois): ')).trim() || null;
   }
   if (options.register === null) {
-    const id = path.basename(storeRoot);
+    const id = defaultStoreId();
     const answer = (await rl.question(`Registrar este store nesta máquina como "${id}"? [S/n]: `)).trim().toLowerCase();
     options.register = answer === '' || answer.startsWith('s') || answer.startsWith('y');
     if (options.register) options.registerId = id;
@@ -184,6 +191,86 @@ function quoteForShell(value) {
   return `"${value}"`;
 }
 
+// On Windows the CLI is a .cmd shim, which spawnSync can only start through a shell.
+function runOpenspec(args, { cwd = storeRoot, capture = false } = {}) {
+  const spawnOptions = capture
+    ? { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+    : { cwd, stdio: 'inherit' };
+  return process.platform === 'win32'
+    ? spawnSync(['openspec', ...args.map(quoteForShell)].join(' '), { ...spawnOptions, shell: true })
+    : spawnSync('openspec', args, spawnOptions);
+}
+
+const storeDeclarationPattern = /^store:[ \t]*["']?([^"'\s#]*)["']?[ \t]*(?:#.*)?$/m;
+
+// The OpenSpec CLI resolves a declared store when the code repository's openspec/config.yaml
+// (or config.yml) carries a "store: <id>" line.
+function codeConfigPath(codeRoot) {
+  const yml = path.join(codeRoot, 'openspec', 'config.yml');
+  const yaml = path.join(codeRoot, 'openspec', 'config.yaml');
+  return !existsSync(yaml) && existsSync(yml) ? yml : yaml;
+}
+
+// Fails before anything is changed when the code repository already declares a different store.
+function checkStoreDeclaration(codeRoot, id, force) {
+  const configPath = codeConfigPath(codeRoot);
+  if (!existsSync(configPath)) return;
+  const declared = readFileSync(configPath, 'utf8').match(storeDeclarationPattern)?.[1];
+  if (declared !== undefined && declared !== id && !force) {
+    throw new Error(
+      `${configPath} already declares store "${declared}". Edit it, or rerun with --force to declare "${id}".`,
+    );
+  }
+}
+
+function writeStoreDeclaration(codeRoot, id) {
+  const configPath = codeConfigPath(codeRoot);
+  if (!existsSync(configPath)) {
+    mkdirSync(path.dirname(configPath), { recursive: true });
+    writeAtomic(configPath, `store: ${id}\n`);
+    return `Created ${configPath} declaring store "${id}".`;
+  }
+
+  const current = readFileSync(configPath, 'utf8');
+  const declared = current.match(storeDeclarationPattern)?.[1];
+  if (declared === id) return `Unchanged: ${configPath} already declares store "${id}".`;
+  if (declared !== undefined) {
+    writeAtomic(configPath, current.replace(storeDeclarationPattern, `store: ${id}`));
+    return `Replaced the store declaration in ${configPath} with "${id}".`;
+  }
+  const eol = current.includes('\r\n') ? '\r\n' : '\n';
+  const separator = current.length === 0 || current.endsWith('\n') ? '' : eol;
+  writeAtomic(configPath, `${current}${separator}store: ${id}${eol}`);
+  return `Added the store declaration "${id}" to ${configPath}.`;
+}
+
+// Runs the CLI from the code repository and requires it to resolve this store as the OpenSpec root.
+function verifyStoreResolution(codeRoot, id) {
+  const fix = [
+    `  openspec store register "${storeRoot}" --id ${id}`,
+    `  and make sure ${codeConfigPath(codeRoot)} contains: store: ${id}`,
+  ].join('\n');
+  const result = runOpenspec(['context', '--json'], { cwd: codeRoot, capture: true });
+  let resolved = null;
+  try {
+    resolved = JSON.parse(result.stdout ?? '').root?.path ?? null;
+  } catch {
+    resolved = null;
+  }
+  if (result.status !== 0 || !resolved) {
+    const details = `${result.stderr ?? ''}`.trim();
+    throw new Error(`The OpenSpec CLI could not resolve the store from ${codeRoot}.${details ? `\n${details}` : ''}\nFix:\n${fix}`);
+  }
+  if (realpathSync(resolved) !== realpathSync(storeRoot)) {
+    throw new Error(
+      `From ${codeRoot} the OpenSpec CLI resolves ${resolved}, not this store (${storeRoot}). ` +
+      `An openspec/ folder with specs/ or changes/ in the code repository makes the CLI ignore the declaration.\nFix:\n${fix}`,
+    );
+  }
+  return resolved;
+}
+
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -227,6 +314,8 @@ async function setup(rl, options) {
     }
   }
 
+  if (options.register) checkStoreDeclaration(codeRoot, options.registerId, options.force);
+
   const installArgs = [installScript, codeRoot, '--target', options.target];
   if (preset.stacks.length > 0) installArgs.push('--stack', preset.stacks.join(','));
 
@@ -237,7 +326,9 @@ async function setup(rl, options) {
       ? `Store: ${storeRoot} (substitui openspec/project.md e openspec/config.yaml pelo preset ${options.stack})`
       : `Store: ${storeRoot} (mantém project.md e config.yaml neutros)`,
     options.name ? `Nome do projeto: ${options.name}` : 'Nome do projeto: preencher depois em openspec/project.md',
-    options.register ? `Registrar o store nesta máquina como "${options.registerId}"` : 'Não registrar o store',
+    options.register
+      ? `Registrar o store nesta máquina como "${options.registerId}" e declará-lo em ${codeConfigPath(codeRoot)}`
+      : 'Não registrar o store',
   ];
   if (!(await confirm(rl, plan, options))) {
     console.log('Cancelado; nada foi alterado.');
@@ -271,16 +362,24 @@ async function setup(rl, options) {
   console.log('\n[3/3] Registro do store...');
   if (options.register) {
     console.log('Running openspec store register (the CLI can take a few seconds)...');
-    const args = ['store', 'register', storeRoot, '--id', options.registerId, '--yes'];
-    const register = process.platform === 'win32'
-      ? spawnSync(['openspec', ...args.map(quoteForShell)].join(' '), { stdio: 'inherit', shell: true })
-      : spawnSync('openspec', args, { stdio: 'inherit' });
+    const register = runOpenspec(['store', 'register', storeRoot, '--id', options.registerId, '--yes']);
     if (register.status !== 0) {
-      console.warn(`Warning: store registration failed. Run it later: openspec store register "${storeRoot}" --id ${options.registerId}`);
+      throw new Error(
+        `Store registration failed. Fix the reported problem and run:\n  openspec store register "${storeRoot}" --id ${options.registerId}`,
+      );
     }
+    console.log(writeStoreDeclaration(codeRoot, options.registerId));
+    console.log('Checking that the OpenSpec CLI resolves the store from the code repository...');
+    verifyStoreResolution(codeRoot, options.registerId);
+    console.log(`Resolved: from ${codeRoot} the OpenSpec CLI uses this store.`);
   } else {
-    console.log('Skipped.');
+    const id = options.registerId ?? defaultStoreId();
+    console.log(`Skipped. The code repository cannot resolve this store until you register and declare it:
+  openspec store register "${storeRoot}" --id ${id}
+  then add the line "store: ${id}" to ${codeConfigPath(codeRoot)}
+or rerun this setup with --register-id ${id}.`);
   }
+
 
   console.log(`
 Pronto. Próximos passos:

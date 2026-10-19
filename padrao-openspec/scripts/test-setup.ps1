@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Testa o fluxo completo: clone do repositório → setup → verificação dos artefatos.
@@ -91,13 +91,18 @@ New-Item $WorkDir -ItemType Directory | Out-Null
 
 Step "Fase 1 — Clone de $RepoUrl"
 
-git clone $RepoUrl $storeDir 2>&1 | ForEach-Object { Info $_ }
+# Sem 2>&1: no PowerShell 5.1 o stderr do git vira erro terminante com ErrorActionPreference Stop.
+git clone --quiet $RepoUrl $storeDir
 
 Check 'Clone concluído (pasta store existe)'           { Test-Path $storeDir }
 Check 'padrao-openspec/ presente'                      { Test-Path (Join-Path $storeDir 'padrao-openspec') }
-Check 'openspec-store-dotnet/ presente'                { Test-Path (Join-Path $storeDir 'openspec-store-dotnet') }
-Check 'openspec-store-nextjs/ presente'                { Test-Path (Join-Path $storeDir 'openspec-store-nextjs') }
-Check 'openspec/ (AgendaFácil) presente'               { Test-Path (Join-Path $storeDir 'openspec') }
+Check 'Stores removidos ausentes (dotnet/nextjs)'      {
+    -not (Test-Path (Join-Path $storeDir 'openspec-store-dotnet')) -and
+    -not (Test-Path (Join-Path $storeDir 'openspec-store-nextjs'))
+}
+Check 'openspec/ da raiz presente'                     { Test-Path (Join-Path $storeDir 'openspec') }
+Check 'openspec/adrs/template.md na raiz'              { Test-Path (Join-Path $storeDir 'openspec\adrs\template.md') }
+Check 'sync-root.mjs existe'                           { Test-Path (Join-Path $storeDir 'padrao-openspec\scripts\sync-root.mjs') }
 Check 'README.md na raiz'                              { Test-Path (Join-Path $storeDir 'README.md') }
 Check 'setup-project.mjs existe'                       { Test-Path $setupScript }
 Check '.amazonq/rules/openspec-rules.md existe'        { Test-Path (Join-Path $storeDir '.amazonq\rules\openspec-rules.md') }
@@ -115,7 +120,7 @@ Check 'Skills de workflow em .claude/skills/'          {
     $skills | ForEach-Object { Test-Path (Join-Path $base "$_\SKILL.md") } | Where-Object { -not $_ } | Measure-Object | Select-Object -ExpandProperty Count | ForEach-Object { $_ -eq 0 }
 }
 Check 'Slash commands em .claude/commands/opsx/'       {
-    $cmds = @('explore','propose','apply','verify','archive','sync','update')
+    $cmds = @('init','ingest','explore','propose','apply','verify','archive','sync','update')
     $base = Join-Path $storeDir '.claude\commands\opsx'
     $cmds | ForEach-Object { Test-Path (Join-Path $base "$_.md") } | Where-Object { -not $_ } | Measure-Object | Select-Object -ExpandProperty Count | ForEach-Object { $_ -eq 0 }
 }
@@ -134,7 +139,7 @@ Step 'Fase 2 — Criando repositório de código fictício'
 
 New-Item $codeDir -ItemType Directory | Out-Null
 Push-Location $codeDir
-git init 2>&1 | ForEach-Object { Info $_ }
+git init --quiet
 Pop-Location
 
 Check 'Diretório de código criado'  { Test-Path $codeDir }
@@ -153,14 +158,21 @@ $nodeArgs = @(
     '--yes'
 )
 
-$proc = Start-Process node -ArgumentList $nodeArgs -NoNewWindow -Wait -PassThru
-Check "setup-project.mjs saiu com código 0" { $proc.ExitCode -eq 0 }
+# Operador & em vez de Start-Process: no PowerShell 5.1, -ArgumentList não preserva argumentos com espaço.
+& node @nodeArgs
+$setupExitCode = $LASTEXITCODE
+Check "setup-project.mjs saiu com código 0" { $setupExitCode -eq 0 }
 
 # ── fase 4: verificação dos artefatos ─────────────────────────────────────────
 
 Step 'Fase 4 — Verificando artefatos instalados no repositório de código'
 
 Check '.agents/skills/ criado no código'               { Test-Path (Join-Path $codeDir '.agents\skills') }
+Check '.claude/skills/ criado no código (padrão both)'  { Test-Path (Join-Path $codeDir '.claude\skills\openspec-propose\SKILL.md') }
+Check 'Comandos init e ingest instalados no código'     {
+    (Test-Path (Join-Path $codeDir '.claude\commands\opsx\init.md')) -and
+    (Test-Path (Join-Path $codeDir '.claude\commands\opsx\ingest.md'))
+}
 Check '.github/agents/ criado no código'               { Test-Path (Join-Path $codeDir '.github\agents') }
 Check 'Skills de workflow instaladas no código'        {
     $skills = @(

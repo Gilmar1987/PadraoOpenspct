@@ -1,0 +1,22 @@
+{
+  // Mesmas regras de padrao-openspec/.markdownlint-cli2.jsonc.
+  "config": {
+    "default": true,
+    // Prosa em pt-BR quebra linhas livremente; comprimento não indica erro.
+    "MD013": false,
+    // Arquivos de agente/skill começam com frontmatter seguido de instruções, sem título H1.
+    "MD041": false,
+    // Tabelas com placeholders vazios não seguem um estilo de coluna único.
+    "MD060": false
+  },
+  "ignores": [
+    "node_modules/**",
+    // Validado pelo job store da CI, com a própria configuração.
+    "padrao-openspec/**",
+    // Espelhos gerados de padrao-openspec/ por scripts/sync-root.mjs.
+    ".claude/skills/**",
+    ".claude/commands/**",
+    ".github/agents/**",
+    "openspec/changes/**/.inputs/**"
+  ]
+}

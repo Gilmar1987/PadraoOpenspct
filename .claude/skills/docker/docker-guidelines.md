@@ -52,6 +52,7 @@ ENTRYPOINT ["./entrypoint.sh"]
 ```
 
 `entrypoint.sh`:
+
 ```bash
 #!/bin/sh
 dotnet MeuProjeto.Api.dll migrate
@@ -61,6 +62,7 @@ exec dotnet MeuProjeto.Api.dll
 ### Next.js 15 — App Router (standalone)
 
 Requer em `next.config.ts`:
+
 ```ts
 const nextConfig = {
   output: 'standalone',
@@ -196,13 +198,15 @@ volumes:
 ### Produção — múltiplos ambientes com override
 
 Estrutura recomendada:
-```
+
+```text
 docker-compose.yml           # base (serviços e volumes)
 docker-compose.dev.yml       # overrides de desenvolvimento (volumes, hot reload)
 docker-compose.prod.yml      # overrides de produção (restart policy, limites)
 ```
 
 Uso:
+
 ```bash
 # Desenvolvimento
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up
@@ -212,6 +216,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 `docker-compose.prod.yml`:
+
 ```yaml
 services:
   app:
@@ -232,7 +237,7 @@ services:
 
 ## .dockerignore
 
-```
+```text
 # Controle de versão
 .git
 .gitignore

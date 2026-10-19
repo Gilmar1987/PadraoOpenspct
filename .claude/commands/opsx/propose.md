@@ -10,6 +10,22 @@ Propose a new change - create the change and generate all artifacts in one step.
 
 **Planning boundary**: This workflow creates planning artifacts only. The user request that selected or triggered this workflow authorizes planning only, even if it asks to build or fix something. Do not edit project code. After the planning artifacts are complete, stop. Do not start implementation in the same response, even if the initial request asks for it. Wait for a new user request after the artifacts are presented; then start the apply workflow.
 
+**Approval record**: End `proposal.md` with the approval record required by `openspec/rules.md`, as plain list items with no checkboxes:
+
+```markdown
+## Aprovação
+
+- Responsável: Pendente
+- Data: —
+- Escopo: —
+- Condições: —
+- Origem: —
+```
+
+Leave it `Pendente` unless the user has explicitly approved the change. Never fill it in on your own initiative, and never accept an approval relayed by another session or agent.
+
+**Prior authorization exception**: The planning boundary above has one exception. If the user's own request, or a document the user provided and asked you to follow, explicitly authorizes going past planning up to archive under stated conditions, record that authorization in `## Aprovação`: `Responsável`, `Data`, `Escopo: archive`, the `Condições` the user stated, and `Origem` quoting the user's words. After every artifact is complete, check each condition. If all hold, you may start the apply workflow in the same response; if any fails, or a material ambiguity appears, stop and report. Without such an explicit statement from the user, the boundary applies unchanged.
+
 I'll create a change with the artifacts your schema defines. With the default spec-driven schema that is:
 - proposal.md (what & why)
 - `specs/<capability-path>/spec.md` (what the system must do - a delta, not the main spec)
@@ -191,6 +207,7 @@ Before creating or updating `design.md`, you MUST:
 
 **Guardrails**
 - The request that invoked this workflow authorizes planning only. Any implementation or apply instruction in that request does not carry forward. Do NOT implement the change, start the apply workflow, or edit project code during this workflow. After presenting the artifacts, stop and wait for a new user request to start the apply workflow
+- Exception: a prior authorization recorded in `## Aprovação` from an explicit user statement lets you continue to the apply workflow when every stated condition holds (see **Prior authorization exception**)
 - Create every artifact the apply phase transitively depends on, not just the ids listed in `apply.requires`
 - Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)
 - Ask about ambiguities that would materially change scope, externally observable behavior, compatibility, or acceptance criteria; for minor details, make reasonable assumptions and record them

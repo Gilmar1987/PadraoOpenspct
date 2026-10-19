@@ -128,7 +128,7 @@ volumes:
 
 ## .dockerignore padrão
 
-```
+```text
 .git
 .gitignore
 node_modules
