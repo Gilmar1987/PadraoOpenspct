@@ -8,7 +8,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova. A mudança segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md) (skills editadas em `padrao-openspec/` e espelhadas pelo sync).
+Não há ADR nova. A mudança segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md) (skills editadas em `padrao-openspec/` e espelhadas pelo sync).
 
 ## Goals / Non-Goals
 
