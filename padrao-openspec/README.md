@@ -230,6 +230,42 @@ execução seguinte, cópias temporárias deixadas por uma interrupção
 (`.gitignore-<uuid>.tmp`, `.skill-tree-<uuid>.tmp`) são removidas; backups de
 skills (`.skill-tree-<uuid>.bak`) são apenas reportados para revisão manual.
 
+## Métricas de fluxo
+
+`scripts/flow-metrics.mjs` mede o fluxo das changes a partir de dados que o padrão e o
+Git já registram. Ele só lê: não altera nem apaga nada no store ou no código, não lê o
+autor dos commits e não grava nomes de pessoas.
+
+```powershell
+node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\flow-metrics.mjs `
+  --code C:\openspec\meu-projeto --out C:\relatorios\metricas
+```
+
+| Opção | Efeito |
+| --- | --- |
+| `--store <dir>` | Pasta que contém `openspec/`; o padrão é este `padrao-openspec/` |
+| `--code <repo>` | Repositório de código para medir retrabalho; pode ser repetida |
+| `--ci` | Conta as execuções da CI que falharam antes do verde, via `gh` autenticado |
+| `--out <dir>` | Onde gravar `metrics.csv` e `resumo.md`; o padrão é a pasta atual |
+
+O `metrics.csv` tem uma linha por change, e o `resumo.md` agrega por mês e semana:
+
+| Métrica | Fonte |
+| --- | --- |
+| Criação, aprovação e archive | `created` do `.openspec.yaml`, campo Data de `## Aprovação` e prefixo da pasta em `changes/archive/` |
+| Espera, execução e lead time (dias) | Diferença entre as datas acima |
+| Requisitos, cenários e tarefas | Delta specs e `tasks.md` da change |
+| Retrabalho | Commits `fix` com o trailer `OpenSpec-Change` de uma change já arquivada, depois do archive |
+| Críticos, warnings, sugestões e não verificados | Última entrada do `verification.md` gravado pelo `/opsx:verify` |
+| Falhas de CI antes do verde | `gh`, buscando o PR pelo nome da change (heurística) |
+
+Para o retrabalho funcionar, todo commit de código de uma change leva o trailer git
+`OpenSpec-Change: <nome-da-change>`, como o `/opsx:apply` pede
+([ADR-0002](../openspec/adrs/0002-rastreabilidade-commit-change.md)). Dado ausente
+aparece como coluna vazia, nunca como zero, e a seção "Limites" do resumo diz o que não
+foi coletado. Os marcos guardam só a data, então os tempos são em dias. Use os números
+para entender o fluxo da equipe, não para comparar pessoas.
+
 ## Decisões de arquitetura e riscos
 
 Decisões transversais e caras de reverter são registradas como ADRs em

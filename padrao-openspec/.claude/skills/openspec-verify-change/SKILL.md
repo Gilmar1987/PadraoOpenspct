@@ -205,6 +205,21 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - If any check was skipped and there are no CRITICAL issues: do not claim readiness. Say "No critical issues found in the checks that ran. <check(s)> not verified: <reason>." Include the warning count when nonzero.
    - Include the suggestion count when nonzero in every final assessment.
 
+   **Write the verification record**:
+   After presenting the report, append an entry to `verification.md` in the change directory (`changeRoot`), creating the file if it does not exist. Do this on every run, including a clean one. Never rewrite or remove earlier entries; the newest entry goes last. Write the `# Verificações` title only when you create the file, and do not copy the full report into it. Use exactly this format, one `##` section per run:
+
+   ```markdown
+   # Verificações — <change-name>
+
+   ## YYYY-MM-DD
+
+   - Críticos: <n>
+   - Warnings: <n>
+   - Sugestões: <n>
+   - Não verificado: <check (reason); check (reason)>, or — when every check ran
+   - Avaliação: <the final assessment in one line>
+   ```
+
 **Verification Heuristics**
 
 - **Completeness**: Focus on objective checklist items (checkboxes, requirements list)

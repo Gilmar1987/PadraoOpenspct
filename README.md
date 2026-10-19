@@ -241,7 +241,8 @@ sumir):
 |---|---|
 | "Architectural Decision Check" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Approval record" e "Prior authorization exception" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
-| "Check the approval record" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
+| "Check the approval record" e trailer "OpenSpec-Change:" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
+| "Write the verification record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
 
 ---
