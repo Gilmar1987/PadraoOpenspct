@@ -10,7 +10,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova: é uma opção nova do script de métricas, sem decisão transversal. Segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md). A atribuição por branch aproveita a convenção de nomes de branch já usada no repositório e não cria regra nova.
+Não há ADR nova: é uma opção nova do script de métricas, sem decisão transversal. Segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md). A atribuição por branch aproveita a convenção de nomes de branch já usada no repositório e não cria regra nova.
 
 ## Goals / Non-Goals
 
