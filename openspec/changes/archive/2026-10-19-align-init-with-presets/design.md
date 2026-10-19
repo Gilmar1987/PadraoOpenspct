@@ -9,7 +9,7 @@
 
 ## Architecture Decisions
 
-Não há ADR nova: a mudança é no comando de inicialização e em uma linha dos presets, sem decisão transversal. Segue a [ADR-0001](../../adrs/0001-padrao-openspec-fonte-unica.md) (comando editado em `padrao-openspec/`, espelhado pelo sync).
+Não há ADR nova: a mudança é no comando de inicialização e em uma linha dos presets, sem decisão transversal. Segue a [ADR-0001](../../../adrs/0001-padrao-openspec-fonte-unica.md) (comando editado em `padrao-openspec/`, espelhado pelo sync).
 
 ## Goals / Non-Goals
 
