@@ -104,18 +104,18 @@ declarar quando você quiser ligar os dois repositórios. Use `--target agents` 
 Todo projeto que usa este padrão segue o mesmo ciclo:
 
 ```text
-/opsx:explore   →   /opsx:propose   →   /opsx:apply   →   /opsx:verify   →   /opsx:archive
+[/opsx:explore]   →   /opsx:propose   →   /opsx:apply   →   /opsx:verify   →   /opsx:archive
 ```
 
 | Comando | O que faz |
 |---|---|
 | `/opsx:init` | Inicializa o projeto: entrevista estruturada, gera `project.md`, `config.yaml` e ADRs fundacionais |
 | `/opsx:ingest` | Ingere documentos externos (atas, requisitos, e-mails) e gera brief estruturado |
-| `/opsx:explore` | Explora o problema, limites e critérios de sucesso sem implementar nada |
+| `/opsx:explore` | Opcional: explora o problema, limites e critérios de sucesso sem implementar nada, quando algo ainda não está claro |
 | `/opsx:propose <nome>` | Cria os artefatos de planejamento: proposal, delta specs, design e tasks |
 | `/opsx:apply` | Implementa as tarefas guiadas pelos artefatos |
 | `/opsx:verify` | Confere conclusão de tarefas, requisitos, cenários e decisões de design |
-| `/opsx:archive` | Aplica as delta specs à fonte da verdade e arquiva a change |
+| `/opsx:archive` | Aplica as delta specs à fonte da verdade, atualiza a tabela de capabilities do `project.md` e arquiva a change. É o fluxo do agente, com avaliação da sincronização e confirmação; o `openspec archive` do CLI faz o mesmo de forma mecânica. Use um dos dois por change |
 | `/opsx:update` | Revisa artefatos de uma change existente |
 | `/opsx:sync` | Aplica deltas às specs principais sem arquivar |
 
@@ -124,7 +124,7 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 Fluxo completo quando há documentos externos:
 
 ```text
-/opsx:init → /opsx:ingest → /opsx:explore → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+/opsx:init → /opsx:ingest → [/opsx:explore] → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
 ```
 
 ---
@@ -255,7 +255,8 @@ sumir):
 | "Architectural Decision Check" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Approval record" e "Prior authorization exception" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Check the approval record" e trailer "OpenSpec-Change:" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
-| "Write the verification record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
+| "Write the verification record" e "Evidence reuse" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
+| "Update the project overview" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
 
 ---

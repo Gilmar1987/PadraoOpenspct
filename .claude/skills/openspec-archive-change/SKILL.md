@@ -192,6 +192,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Whether specs were synced (if applicable)
    - Note about any warnings (incomplete artifacts/tasks)
 
+**Update the project overview**: If the archived change created or modified capabilities and `<planningHome.root>/openspec/project.md` has a capabilities table, update it: add each new capability with its state and the archived change, and update the state of the modified ones. Mention the update in the summary. If the file has no such table, skip this step and say so.
+
 **Output On Success**
 
 ```markdown

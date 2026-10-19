@@ -22,7 +22,8 @@ uma ADR antes do arquivamento, porque o `design.md` passa a viver em
 - Arquivo: `NNNN-titulo-curto.md`, numeração sequencial com quatro dígitos. Copie [template.md](template.md).
 - Status: `Proposed` → `Accepted`; depois, se for o caso, `Superseded` ou `Deprecated`.
 - ADR aceita não é reescrita. Para mudar a decisão, crie uma nova ADR com `supersedes` e marque a anterior como `Superseded`, preenchendo `superseded_by`.
-- A aprovação é a revisão do pull request que muda o status para `Accepted`; o histórico do Git é o registro de autoria e data. Não duplique revisor, aprovação ou hash de commit no arquivo.
+- Com pull request, a aprovação é a revisão do PR que muda o status para `Accepted`. Em projetos sem pull request, a aprovação é a declaração explícita do responsável, citada na mensagem do commit que muda o status. Nos dois casos, o histórico do Git é o registro de autoria e data; não duplique revisor, aprovação ou hash de commit no arquivo.
+- As ADRs fundacionais geradas pelo `/opsx:init` nascem `Accepted`, porque as respostas da entrevista foram confirmadas bloco a bloco pelo responsável.
 
 ## Relação com os agentes
 

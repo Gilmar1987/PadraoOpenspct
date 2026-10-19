@@ -227,6 +227,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 - **Coherence**: Look for glaring inconsistencies, don't nitpick style
 - **False Positives**: When uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
 - **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
+- **Evidence reuse**: Reuse a result recorded during apply only when it names the command and its exit code and no code file changed after it (check with `git log` and `git status`); otherwise run the command again. A check kept outside the repository (a manual run, a script in a temp folder) is not automated coverage: report the scenario as covered outside the suite.
 
 **Output Format**
 
