@@ -277,6 +277,48 @@ jobs:
           grep -qx 'add-catalogo,arquivada,2026-10-01,2026-10-03,2026-10-08,2,5,7,2,3,3,3,,0,2,1,1,' "$work/out-sem-code/metrics.csv"
           grep -qi 'não coletado' "$work/out-sem-code/resumo.md"
 
+      # Sessões de exemplo do Claude Code: resposta repetida em duas linhas, atribuição por branch e
+      # por janela, registro ambíguo, não atribuído e conteúdo sensível que não pode vazar.
+      - name: Smoke test do consumo de IA
+        run: |
+          work="$(mktemp -d)"
+          s="$work/store/openspec/changes"
+          mkdir -p "$s/ativa-x" "$s/archive/2026-10-08-add-catalogo" "$s/archive/2026-10-20-add-busca" "$work/code" "$work/sessions"
+          printf 'schema: spec-driven\ncreated: 2026-10-05\n' > "$s/ativa-x/.openspec.yaml"
+          printf 'schema: spec-driven\ncreated: 2026-10-01\n' > "$s/archive/2026-10-08-add-catalogo/.openspec.yaml"
+          printf 'schema: spec-driven\ncreated: 2026-10-15\n' > "$s/archive/2026-10-20-add-busca/.openspec.yaml"
+          project="$(node -e 'console.log(require("path").resolve(process.argv[1]).replace(/[^A-Za-z0-9]/g, "-"))' "$work/code")"
+          mkdir -p "$work/sessions/$project"
+          line() { printf '{"type":"assistant","timestamp":"%sT12:00:00.000Z","gitBranch":"%s","cwd":"/x","message":{"id":"%s","model":"claude-test","content":[{"type":"text","text":"%s"}],"usage":{"input_tokens":%s,"output_tokens":%s,"cache_read_input_tokens":%s,"cache_creation_input_tokens":%s}}}\n' "$@"; }
+          {
+            line 2026-10-02 feat/add-catalogo m1 bloco-a 10 100 1000 50
+            line 2026-10-02 feat/add-catalogo m1 bloco-b 10 100 1000 50
+            line 2026-10-03 main m2 resposta 5 50 500 0
+            printf '{"type":"user","timestamp":"2026-10-16T11:00:00.000Z","gitBranch":"feat/cliente-acme-add-busca","message":{"role":"user","content":"segredo-xyz"}}\n'
+            line 2026-10-16 feat/cliente-acme-add-busca m3 segredo-xyz 1 10 100 0
+            line 2026-10-06 main m4 ambigua 2 20 200 0
+            line 2026-09-01 main m5 antiga 3 30 300 0
+            printf 'linha invalida\n'
+          } > "$work/sessions/$project/sessao.jsonl"
+
+          node scripts/flow-metrics.mjs --store "$work/store" --usage "$work/code" --usage-dir "$work/sessions" --out "$work/out"
+          u="$work/out/uso-ia.csv"
+          head -n 1 "$u" | sed 's/^\xEF\xBB\xBF//' | grep -qx 'change,respostas,tokens_entrada,tokens_saida,tokens_cache_leitura,tokens_cache_escrita'
+          grep -qx 'add-catalogo,2,15,150,1500,50' "$u"
+          grep -qx 'add-busca,1,1,10,100,0' "$u"
+          grep -qx 'ativa-x,0,0,0,0,0' "$u"
+          grep -qF 'Respostas ambíguas (mais de uma change possível): 1' "$work/out/resumo.md"
+          grep -qF 'Respostas não atribuídas: 1' "$work/out/resumo.md"
+          if grep -riE 'segredo-xyz|cliente-acme' "$work/out"; then exit 1; fi
+
+          # Pasta sem sessões: colunas vazias e aviso. Sem --usage: nenhum uso-ia.csv.
+          mkdir -p "$work/sem-sessao"
+          node scripts/flow-metrics.mjs --store "$work/store" --usage "$work/sem-sessao" --usage-dir "$work/sessions" --out "$work/out-vazio"
+          grep -qx 'add-catalogo,,,,,' "$work/out-vazio/uso-ia.csv"
+          grep -qF 'Nenhuma sessão encontrada' "$work/out-vazio/resumo.md"
+          node scripts/flow-metrics.mjs --store "$work/store" --out "$work/out-sem-usage"
+          test ! -e "$work/out-sem-usage/uso-ia.csv"
+
   # A raiz é espelho gerado de padrao-openspec/ e carrega as changes deste repositório.
   root:
     runs-on: ubuntu-latest
