@@ -48,8 +48,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: gilmar campelo
+- Data: 2026-10-20
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Origem: "Eu, gilmar campelo aprovo a change revisao-e-seguranca-por-change para apply"

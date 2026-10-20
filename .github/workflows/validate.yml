@@ -87,12 +87,15 @@ jobs:
             check "$f" "Confirm progress per task group"
             check "$f" "Record task evidence"
             check "$f" "Push only on explicit request"
+            check "$f" "Security checks"
+            check "$f" "Request code review"
           done
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
             check "$f" "Evidence reuse"
             check "$f" "Cobertura fora da suíte"
             check "$f" "Project validation commands"
+            check "$f" "Code review record"
           done
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"

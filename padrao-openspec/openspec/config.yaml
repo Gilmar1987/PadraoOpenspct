@@ -34,7 +34,7 @@ rules:
   proposal:
     - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
     - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
-    - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
+    - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Adiciona ou atualiza dependências? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
     - "Terminar com a seção ## Aprovação, sem checkboxes, em itens de lista: Responsável (Pendente até o usuário aprovar), Data, Escopo (apply ou archive), Condições (só para archive) e Origem (citação da declaração explícita do usuário e, quando a resposta depende dela, da pergunta). Nunca preencher a aprovação sem essa declaração"
   specs:
     - Escrever requisitos observáveis, sem prescrever implementação desnecessariamente

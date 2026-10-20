@@ -661,11 +661,13 @@ _(Múltipla escolha — separe os números por vírgula)_
 
 > O padrão não embute nenhuma stack: os comandos que validam o código vêm desta entrevista.
 
-**7.1 — Comandos de verificação.** Para cada finalidade da seção "Comandos de verificação" de `<root>/openspec/project.md` (instalar dependências, executar localmente, testes, lint, typecheck/build, migrações), pergunte o comando que o projeto usa, uma pergunta por vez. Ofereça até 3 sugestões coerentes com as respostas 3.1, 3.2, 3.5 e 5.4 (por exemplo, `pytest` quando a 5.4 for Pytest), mais:
+**7.1 — Comandos de verificação.** Para cada finalidade da seção "Comandos de verificação" de `<root>/openspec/project.md` (instalar dependências, executar localmente, testes, lint, typecheck/build, migrações, auditoria de dependências, varredura de secrets), pergunte o comando que o projeto usa, uma pergunta por vez. Ofereça até 3 sugestões coerentes com as respostas 3.1, 3.2, 3.5 e 5.4 (por exemplo, `pytest` quando a 5.4 for Pytest), mais:
 
 - **Não aplicável**: o projeto não tem essa etapa;
 - **Adiar**: grava "Adiado: definir na primeira change que precisar";
 - **Outro (digitar livremente)**.
+
+Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable` ou `osv-scanner`, que cobre vários). Para a varredura de secrets, sugira `gitleaks detect`, `trufflehog git file://.` ou `git-secrets --scan`. O apply roda a varredura antes de cada commit e a auditoria quando a change mexe em dependências.
 
 Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comandos rodam dentro do contêiner (por exemplo, `docker compose run --rm app pytest`) e registre a forma escolhida.
 

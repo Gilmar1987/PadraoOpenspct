@@ -115,6 +115,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Before editing, confirm the checkbox at the returned `sourcePath` and `line` still matches the task description; if it does not, rerun the apply instructions and use the refreshed location
    - Mark the task complete at its returned `sourcePath` and `line`: `- [ ]` → `- [x]`
    - **Record task evidence**: right below the marked task, add an indented line `  - Evidência: <command> → <relevant result> (exit <code>)`. If the written criterion could not be followed as is (a port in use, a tool version that is not installed, a step that depends on something missing), say what you did instead and why. A task whose criterion cannot be met at all stays unmarked: report it instead.
+   - **Security checks**: when `openspec/project.md` records a secret scan command, run it before every code commit; if it finds a secret, do not commit: stop and show the user the file and line, never the value. When the change adds or updates dependencies and `project.md` records a dependency audit command, run it before the code review; fix or justify every high or critical vulnerability in `review.md`. A missing or postponed command is reported as not verified, never replaced by an invented one.
    - **Confirm progress per task group**: after the last task of each `##` group, and once more at the end, rerun the apply instructions and confirm that the group's tasks are done and the progress changed. Between tasks of the same group, marking the checkbox at the returned `sourcePath` and `line` is enough.
    - Continue to next task
    - **Push only on explicit request**: push, open a pull request or deploy only when the user asks for it explicitly in this conversation, or when a `Condições` item in `## Aprovação` includes it. A repository URL, a newly created repository or a request to configure the remote is not a push request: configure the remote, then ask before publishing.
@@ -125,6 +126,28 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - A task needs work beyond what the spec and tasks describe, or you are tempted to drop, narrow, defer, or accept exceptions to specified behavior to make it fit → surface the added scope and ask; do not absorb it silently
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
+
+6a. **Request code review**: when the change altered code, get a review of its commit range before reporting the change as done. Use the `requesting-code-review` skill with `BASE_SHA` set to the commit before the change's first code commit (or `git merge-base` with the main branch) and `HEAD_SHA` to the current commit, and the proposal, specs and tasks as requirements. If you cannot dispatch a subagent, ask the user for a human review or a review in another session. Fix every Critical and Important finding, or justify it with technical reasoning, then write `review.md` in the change directory:
+
+   ```markdown
+   # Revisão de código — <change-name>
+
+   ## YYYY-MM-DD
+
+   - Intervalo: <BASE_SHA>..<HEAD_SHA>
+   - Revisor: <subagente requesting-code-review | pessoa: nome>
+   - Críticos: <n> (corrigidos <n>, justificados <n>)
+   - Importantes: <n> (corrigidos <n>, justificados <n>)
+   - Menores: <n>
+   - Segurança: <dependency audit and secret scan results, or "não verificado (motivo)">
+
+   Achados:
+
+   - [crítico] <summary> — corrigido em <sha>
+   - [importante] <summary> — justificado: <reason>
+   ```
+
+   A change that touched only documentation or planning artifacts writes a `review.md` entry with `- Revisão: não aplicável (<reason>)`. Append a new `##` entry on every new review; never rewrite earlier ones.
 
 7. **On completion or pause, show status**
 

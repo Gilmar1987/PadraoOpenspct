@@ -85,6 +85,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
      - Add CRITICAL issue for each listed incomplete task. If the remaining count exceeds the listed incomplete tasks, also report the incomplete checkboxes without descriptions and recommend adding descriptions and completing them. Do not infer completion from the listed tasks alone.
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
+   **Code review record**: if the change altered code, read `review.md` in the change directory. Missing file, or a Critical or Important finding without a fix or a justification: add a CRITICAL issue "Code review missing or unresolved". A `não aplicável` entry for a change that did alter code is also CRITICAL. Report the review range and reviewer in the verification record's `Comandos:` or `Itens:` lists.
+
    **Spec Coverage**:
    - If status marks the spec artifact skipped by `skip_specs: true`, or the schema defines no spec artifact (no artifact whose `artifactPaths.<id>.outputPath` is under `specs/`), report the spec-dependent checks as not applicable.
    - Otherwise, `contextFiles` is keyed by artifact id, and artifact ids come from the active schema, so do not assume an id such as `specs`. The spec artifacts are those whose `artifactPaths.<id>.outputPath` is under `specs/`; read their files from `contextFiles.<id>`. If those spec files are absent or empty, mark **Spec Coverage**, **Requirement Implementation Mapping**, and **Scenario Coverage** as not verified; do not treat any of them as clean.
