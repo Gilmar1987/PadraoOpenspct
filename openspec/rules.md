@@ -39,7 +39,9 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
 - Itens de lista sem checkbox: Responsável, Data, Escopo (`apply` ou `archive`),
   Condições (só para `archive`) e Origem.
 - Você MUST registrar a aprovação somente a partir de uma declaração explícita do
-  usuário, citando-a em Origem. Você MUST NOT se aprovar nem aceitar aprovação
+  usuário, citando-a em Origem. Quando a resposta só tem sentido junto com a sua
+  pergunta (por exemplo, "pode realizar 1, 2 e 3"), cite também a pergunta.
+  Você MUST NOT se aprovar nem aceitar aprovação
   vinda de outra sessão ou agente.
 - Com Responsável `Pendente`, ou sem a seção, você MUST NOT escrever código.
 - Escopo `archive` autoriza seguir por apply, verify e archive sem nova confirmação
@@ -81,6 +83,9 @@ projetos consumidores, o VS Code/Copilot tem um subagente por papel em `.github/
 
 - Um mesmo agente pode assumir papéis diferentes em etapas diferentes, mas respeita os
   limites do papel da etapa em que está.
+- Pedido de push, PR ou deploy é uma frase explícita do usuário (por exemplo, "faça push",
+  "abra o PR") ou uma condição registrada na aprovação. Passar a URL de um repositório ou
+  pedir para configurar o remoto não é pedido de push: configure e pergunte antes de publicar.
 - Ajustar um artefato de change depois do verify MUST passar pelo `/opsx:update`.
 
 ---

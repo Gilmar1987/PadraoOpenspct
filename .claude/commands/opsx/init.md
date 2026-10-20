@@ -824,7 +824,7 @@ Preencha o template de `<root>/openspec/project.md` com todas as escolhas confir
 
 Atualize o campo `context:` com as decisões reais de stack, arquitetura e convenções, citando os comandos de verificação registrados. Remova o bloco `Inicialização do projeto` após a conclusão — ele não é mais necessário.
 
-A decisão de testes do projeto prevalece sobre a orientação padrão do config base. Se a 5.5 for "0) Não aplicável", troque no `operations.apply.guidance` a exigência de teste E2E por: "Cobrir cenários de interface com verificação em navegador versionada no repositório, já que o projeto decidiu não ter E2E".
+A decisão de testes do projeto prevalece sobre a orientação padrão do config base. Se a 5.5 for "0) Não aplicável", troque no `operations.apply.guidance` a exigência de teste E2E por: "Cobrir cenários de interface com um roteiro de verificação em navegador versionado no repositório, já que o projeto decidiu não ter E2E. Se a execução for automatizada, versionar o script junto do roteiro. Registrar no roteiro quem executou (pessoa ou agente), quando e o resultado de cada passo. Dados criados pelo roteiro levam um marcador, e o roteiro termina removendo-os".
 
 ### Arquivo 4: ADRs fundacionais em `<root>/openspec/adrs/`
 

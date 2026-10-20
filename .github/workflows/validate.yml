@@ -79,11 +79,14 @@ jobs:
           for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md; do
             check "$f" "Architectural Decision Check"
             check "$f" "Prior authorization exception"
+            check "$f" "Commit the planning"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
             check "$f" "OpenSpec-Change:"
             check "$f" "Confirm progress per task group"
+            check "$f" "Record task evidence"
+            check "$f" "Push only on explicit request"
           done
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
@@ -93,6 +96,8 @@ jobs:
           done
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
+            check "$f" "Check the archive authorization"
+            check "$f" "Commit the archive"
           done
           exit $missing
 

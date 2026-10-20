@@ -70,7 +70,7 @@ No `rules.md`, seção 4, depois da tabela: "Pedido de push, PR ou deploy é uma
 
 No apply, depois de "Mark the task complete":
 
-> **Record task evidence**: right below the marked task, add an indented line `  - Evidência: <command> → <relevant result> (exit <code>)`. If the written criterion could not be followed as is (a port in use, a tool version that is not installed, a step that depends on something missing), say what you did instead and why. A task whose criterion cannot be met at all stays unmarked: report it instead.
+> **Record task evidence**: right below the marked task, add a line indented by two spaces, `- Evidência: <command> → <relevant result> (exit <code>)`. If the written criterion could not be followed as is (a port in use, a tool version that is not installed, a step that depends on something missing), say what you did instead and why. A task whose criterion cannot be met at all stays unmarked: report it instead.
 
 Uma sub-linha indentada não muda a contagem de tarefas do CLI (conferido nas changes anteriores desta branch).
 
