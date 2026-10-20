@@ -36,3 +36,16 @@ Achados:
 Achados:
 
 - Nenhum. Os textos corrigidos são iguais na skill e no comando de apply e de verify, o `design.md` foi alinhado (D1 a D4 e D7), o sync está em dia e os passos "Trechos customizados das skills" e "Lint de Markdown" passam.
+
+## 2026-10-20
+
+- Intervalo: 1f2f0a4..a9da030
+- Revisor: inspeção do coordenador sobre o commit de configuração de lint
+- Críticos: 0 (corrigidos 0, justificados 0)
+- Importantes: 0 (corrigidos 0, justificados 0)
+- Menores: 0
+- Segurança: não verificado (mesmo motivo das entradas anteriores)
+
+Achados:
+
+- Nenhum. O commit só acrescenta `openspec/changes/**/review.md` às exclusões das duas configurações do markdownlint, com comentário, igual à exclusão já existente do `verification.md`; `markdownlint-cli2 "**/*.md"` dá 0 issues na raiz e em `padrao-openspec/`.
