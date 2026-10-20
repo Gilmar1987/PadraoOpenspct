@@ -667,7 +667,7 @@ _(Múltipla escolha — separe os números por vírgula)_
 - **Adiar**: grava "Adiado: definir na primeira change que precisar";
 - **Outro (digitar livremente)**.
 
-Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable` ou `osv-scanner`, que cobre vários). Para a varredura de secrets, sugira `gitleaks detect`, `trufflehog git file://.` ou `git-secrets --scan`. O apply roda a varredura antes de cada commit e a auditoria quando a change mexe em dependências.
+Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable` ou `osv-scanner`, que cobre vários). Para a varredura de secrets, sugira uma ferramenta que examine o conteúdo preparado para commit, e não o histórico: `gitleaks git --staged` (ou `gitleaks protect --staged` em versões anteriores à 8.19), `trufflehog filesystem .` ou `git secrets --scan`. O apply roda a varredura antes de cada commit e a auditoria quando a change mexe em dependências.
 
 Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comandos rodam dentro do contêiner (por exemplo, `docker compose run --rm app pytest`) e registre a forma escolhida.
 

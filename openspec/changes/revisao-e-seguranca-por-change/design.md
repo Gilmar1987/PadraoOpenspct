@@ -34,13 +34,13 @@ Os textos em inglês entram iguais na skill e no comando correspondentes.
 
 No passo 6 do apply, depois de "Record task evidence":
 
-> **Security checks**: when `openspec/project.md` records a secret scan command, run it before every code commit; if it finds a secret, do not commit: stop and show the user the file and line, never the value. When the change adds or updates dependencies and `project.md` records a dependency audit command, run it before the code review; fix or justify every high or critical vulnerability in `review.md`. A missing or postponed command is reported as not verified, never replaced by an invented one.
+> **Security checks**: when `openspec/project.md` records a secret scan command, run it on the staged content before every code commit of the change, review fixes included: stage the files, run the scan, and commit only if it is clean. If it finds a secret, do not commit: stop and show the user the file and line, never the value. Record the scan command and its result in the task's `Evidência:` line. When the change adds or updates dependencies and `project.md` records a dependency audit command, run it before the code review; fix or justify in `review.md` every high or critical vulnerability in a dependency the change added or updated, and list older findings as pre-existing. A missing or postponed command is reported as not verified, never replaced by an invented one.
 
 ### D2. Revisão de código no apply
 
 Novo passo depois do loop de tarefas, antes de mostrar o status final:
 
-> **Request code review**: when the change altered code, get a review of its commit range before reporting the change as done. Use the `requesting-code-review` skill with `BASE_SHA` set to the commit before the change's first code commit (or `git merge-base` with the main branch) and `HEAD_SHA` to the current commit, and the proposal, specs and tasks as requirements. If you cannot dispatch a subagent, ask the user for a human review or a review in another session. Fix every Critical and Important finding, or justify it with technical reasoning, then write `review.md` in the change directory:
+> **Request code review**: when the change altered code (anything executed, loaded or interpreted by tools or agents: source, scripts, tests, CI, configuration, skills and commands), commit that code first, with the security checks above, and get a review of the change's commit range before reporting the change as done. Find the range with `git log --reverse --format=%H --grep "OpenSpec-Change: <change-name>"`: `BASE_SHA` is the parent of the first code commit and `HEAD_SHA` the last one. Use the `requesting-code-review` skill with that range and the proposal, specs and tasks as requirements. If you cannot dispatch a subagent, ask the user for a human review or a review in another session. Fix every Critical and Important finding, or justify it with technical reasoning, then write `review.md` in the change directory:
 >
 > ```markdown
 > # Revisão de código — <change-name>
@@ -60,18 +60,18 @@ Novo passo depois do loop de tarefas, antes de mostrar o status final:
 > - [importante] <summary> — justificado: <reason>
 > ```
 >
-> A change that touched only documentation or planning artifacts writes a `review.md` entry with `- Revisão: não aplicável (<reason>)`. Append a new `##` entry on every new review; never rewrite earlier ones.
+> A change that touched only its own planning artifacts and prose documentation (README, ADRs, guides) writes a `review.md` entry with `- Revisão: não aplicável (<reason>)`. Append a new `##` entry on every new review; never rewrite earlier ones.
 
 ### D3. Cobrança no verify
 
 Em "Verify Completeness", depois de Task Completion:
 
-> **Code review record**: if the change altered code, read `review.md` in the change directory. Missing file, or a Critical or Important finding without a fix or a justification: add a CRITICAL issue "Code review missing or unresolved". A `não aplicável` entry for a change that did alter code is also CRITICAL. Report the review range and reviewer in the verification record's `Comandos:` or `Itens:` lists.
+> **Code review record**: decide whether the change altered code from its commits (the `OpenSpec-Change:` trailer) or its diff, with the definition of apply step 6a (anything executed, loaded or interpreted by tools or agents), never from what `review.md` claims. If it did, read `review.md` in the change directory. Missing file, or a Critical or Important finding without a fix or a justification: add a CRITICAL issue "Code review missing or unresolved". A `não aplicável` entry for a change that did alter code is also CRITICAL. If code commits of the change come after the last review's `HEAD_SHA`, other than the fix commits it lists, add a WARNING "Code review is stale". Report the review range and reviewer under `Comandos:` (for example, `review.md → <BASE_SHA>..<HEAD_SHA>, <reviewer>`); only a missing, unresolved or stale review becomes an `Itens:` line.
 
 ### D4. Init e project.md neutro
 
 - O `project.md` neutro ganha duas linhas nos Comandos de verificação: "Auditoria de dependências" e "Varredura de secrets", com `<!-- A definir ou não aplicável -->`.
-- O bloco 7.1 do init lista essas finalidades. Sugestões: auditoria — `npm audit`, `pip-audit`, `dotnet list package --vulnerable`, `osv-scanner`; varredura — `gitleaks detect`, `trufflehog git file://.`, `git-secrets --scan`.
+- O bloco 7.1 do init lista essas finalidades. Sugestões: auditoria — `npm audit`, `pip-audit`, `dotnet list package --vulnerable`, `osv-scanner`; varredura (conteúdo preparado para commit, não o histórico) — `gitleaks git --staged` (ou `gitleaks protect --staged` antes da 8.19), `trufflehog filesystem .`, `git secrets --scan`.
 
 ### D5. Riscos e regras
 
@@ -82,6 +82,10 @@ Em "Verify Completeness", depois de Task Completion:
 
 - Trechos customizados: apply exige "Security checks" e "Request code review"; verify exige "Code review record".
 - Tabela de trechos customizados do `README.md` com os marcadores novos; o README cita o `review.md` no fluxo.
+
+### D7. Ajustes da revisão de código
+
+A revisão do intervalo `ef1e100..c732312` apontou cinco achados importantes, corrigidos nos textos do D1 a D4 acima: varredura sobre o conteúdo preparado (não sobre o histórico), código commitado antes da revisão e intervalo pelo trailer, definição de "alterou código", revisão limpa só em `Comandos:` e registro da varredura na evidência da tarefa. O passo 7 do apply deixa de tratar a revisão como opcional. Detalhes em `review.md`.
 
 ## Raio de impacto
 

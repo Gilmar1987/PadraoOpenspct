@@ -66,7 +66,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - If `state: "blocked"`: show the message and pause implementation.
      - If `missingArtifacts` is non-empty: suggest completing the missing artifacts. Run `openspec status --change "<name>" --json`, select the next `ready` artifact (not `skipped` or `blocked`), and use `openspec instructions "<artifact-id>" --change "<name>" --json` for its rules and template. Keep the selected `--store <id>` on both commands.
      - Otherwise, follow the CLI instruction to create or repair the schema-configured tracking file from existing planning artifacts. Do not assume another artifact is ready or start implementation while blocked.
-   - If `state: "all_done"`: report that all tracked tasks are complete and suggest review or verification as appropriate before archiving
+   - If `state: "all_done"`: report that all tracked tasks are complete; suggest the code review (step 6a) when `review.md` is missing, then verification before archiving
    - Otherwise: proceed to implementation
 
    Treat `context` as a required prompt-level input. Read and consider it, and
@@ -119,7 +119,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Before editing, confirm the checkbox at the returned `sourcePath` and `line` still matches the task description; if it does not, rerun the apply instructions and use the refreshed location
    - Mark the task complete at its returned `sourcePath` and `line`: `- [ ]` → `- [x]`
    - **Record task evidence**: right below the marked task, add an indented line `  - Evidência: <command> → <relevant result> (exit <code>)`. If the written criterion could not be followed as is (a port in use, a tool version that is not installed, a step that depends on something missing), say what you did instead and why. A task whose criterion cannot be met at all stays unmarked: report it instead.
-   - **Security checks**: when `openspec/project.md` records a secret scan command, run it before every code commit; if it finds a secret, do not commit: stop and show the user the file and line, never the value. When the change adds or updates dependencies and `project.md` records a dependency audit command, run it before the code review; fix or justify every high or critical vulnerability in `review.md`. A missing or postponed command is reported as not verified, never replaced by an invented one.
+   - **Security checks**: when `openspec/project.md` records a secret scan command, run it on the staged content before every code commit of the change, review fixes included: stage the files, run the scan, and commit only if it is clean. If it finds a secret, do not commit: stop and show the user the file and line, never the value. Record the scan command and its result in the task's `Evidência:` line. When the change adds or updates dependencies and `project.md` records a dependency audit command, run it before the code review; fix or justify in `review.md` every high or critical vulnerability in a dependency the change added or updated, and list older findings as pre-existing. A missing or postponed command is reported as not verified, never replaced by an invented one.
    - **Confirm progress per task group**: after the last task of each `##` group, and once more at the end, rerun the apply instructions and confirm that the group's tasks are done and the progress changed. Between tasks of the same group, marking the checkbox at the returned `sourcePath` and `line` is enough.
    - Continue to next task
    - **Push only on explicit request**: push, open a pull request or deploy only when the user asks for it explicitly in this conversation, or when a `Condições` item in `## Aprovação` includes it. A repository URL, a newly created repository or a request to configure the remote is not a push request: configure the remote, then ask before publishing.
@@ -131,7 +131,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
 
-6a. **Request code review**: when the change altered code, get a review of its commit range before reporting the change as done. Use the `requesting-code-review` skill with `BASE_SHA` set to the commit before the change's first code commit (or `git merge-base` with the main branch) and `HEAD_SHA` to the current commit, and the proposal, specs and tasks as requirements. If you cannot dispatch a subagent, ask the user for a human review or a review in another session. Fix every Critical and Important finding, or justify it with technical reasoning, then write `review.md` in the change directory:
+6a. **Request code review**: when the change altered code (anything executed, loaded or interpreted by tools or agents: source, scripts, tests, CI, configuration, skills and commands), commit that code first, with the security checks above, and get a review of the change's commit range before reporting the change as done. Find the range with `git log --reverse --format=%H --grep "OpenSpec-Change: <change-name>"`: `BASE_SHA` is the parent of the first code commit and `HEAD_SHA` the last one. Use the `requesting-code-review` skill with that range and the proposal, specs and tasks as requirements. If you cannot dispatch a subagent, ask the user for a human review or a review in another session. Fix every Critical and Important finding, or justify it with technical reasoning, then write `review.md` in the change directory:
 
    ```markdown
    # Revisão de código — <change-name>
@@ -151,14 +151,14 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - [importante] <summary> — justificado: <reason>
    ```
 
-   A change that touched only documentation or planning artifacts writes a `review.md` entry with `- Revisão: não aplicável (<reason>)`. Append a new `##` entry on every new review; never rewrite earlier ones.
+   A change that touched only its own planning artifacts and prose documentation (README, ADRs, guides) writes a `review.md` entry with `- Revisão: não aplicável (<reason>)`. Append a new `##` entry on every new review; never rewrite earlier ones.
 
 7. **On completion or pause, show status**
 
    Display:
    - Tasks completed this session
    - Overall progress: "N/M tasks complete"
-   - If all done: report that tracked tasks are complete and suggest review or verification as appropriate before archiving
+   - If all done: report that tracked tasks are complete; suggest the code review (step 6a) when `review.md` is missing, then verification before archiving
    - If paused: explain why and wait for guidance
 
 **Output During Implementation**
