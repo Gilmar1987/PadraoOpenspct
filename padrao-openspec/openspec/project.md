@@ -66,6 +66,17 @@
 | Deploy/infraestrutura | <!-- A definir ou não aplicável --> | |
 | Observabilidade | <!-- A definir --> | |
 
+## Comandos de verificação
+
+| Finalidade | Comando | Observações |
+|---|---|---|
+| Instalar dependências | <!-- A definir --> | |
+| Executar localmente | <!-- A definir --> | |
+| Testes | <!-- A definir --> | |
+| Lint | <!-- A definir ou não aplicável --> | |
+| Typecheck/build | <!-- A definir ou não aplicável --> | |
+| Migrações | <!-- A definir ou não aplicável --> | |
+
 ## Development Conventions
 
 - **Idioma do código:** <!-- A definir -->

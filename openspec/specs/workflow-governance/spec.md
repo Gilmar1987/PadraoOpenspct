@@ -69,3 +69,59 @@ Durante o apply, o agente SHALL marcar cada tarefa concluída no checkbox indica
 
 - **WHEN** o agente conclui a última tarefa da change
 - **THEN** ele consulta o CLI e confirma que o estado é `all_done` antes de reportar a conclusão
+
+### Requirement: Tarefas que dependem de remoto
+
+O `tasks.md` de uma change SHALL incluir tarefas que dependem de push, pull request ou CI remoto somente quando o `project.md` registra um remoto para o repositório de código. Sem remoto registrado, a tarefa MUST usar a verificação local equivalente e dizer qual é.
+
+#### Scenario: Projeto sem remoto
+
+- **WHEN** o `project.md` registra "sem remoto" e a change cria um workflow de CI
+- **THEN** a tarefa verifica o workflow localmente (por exemplo, validando o YAML e rodando os mesmos comandos) e não exige "CI verde no PR"
+
+#### Scenario: Projeto com remoto
+
+- **WHEN** o `project.md` registra o GitHub como remoto
+- **THEN** a change pode ter uma tarefa que exige o CI verde no PR
+
+### Requirement: Comandos de verificação do projeto no verify
+
+O verify SHALL obter a evidência de testes, lint, typecheck ou build pelos comandos da seção "Comandos de verificação" do `project.md` que se aplicam à change, rodando-os ou reaproveitando a evidência do apply pelas regras de reaproveitamento. Um comando ausente ou adiado no `project.md` MUST ser reportado como não verificado, com o motivo, e não substituído por um comando inventado.
+
+#### Scenario: Projeto com comando de testes
+
+- **WHEN** o `project.md` registra `pytest -q` como comando de testes e o código mudou depois do apply
+- **THEN** o verify roda `pytest -q` e registra o resultado na lista de comandos do `verification.md`
+
+#### Scenario: Comando adiado
+
+- **WHEN** o `project.md` registra o lint como "Adiado: definir na primeira change que precisar"
+- **THEN** o verify registra o lint como não verificado, com esse motivo
+
+### Requirement: Pedido explícito de push
+
+O agente SHALL fazer push, abrir pull request ou fazer deploy somente com pedido explícito do usuário na conversa ou quando uma condição registrada na `## Aprovação` os incluir. Fornecer a URL de um repositório, criar um repositório ou pedir para configurar o remoto MUST NOT ser tratado como pedido de push: o agente configura o remoto e pergunta antes de publicar.
+
+#### Scenario: Usuário passa a URL do repositório
+
+- **WHEN** o usuário informa a URL do repositório remoto recém-criado
+- **THEN** o agente configura o remoto e pergunta se deve fazer push, sem publicar nada
+
+#### Scenario: Usuário pede o PR
+
+- **WHEN** o usuário escreve "faça push e abra o PR"
+- **THEN** o agente faz o push e abre o PR
+
+### Requirement: Evidência registrada na tarefa
+
+Ao marcar uma tarefa como concluída, o apply SHALL registrar logo abaixo dela uma linha `Evidência:` com o comando executado e o resultado relevante. Quando o critério escrito não pôde ser seguido como estava, a linha MUST dizer o que foi feito no lugar e por quê.
+
+#### Scenario: Critério seguido
+
+- **WHEN** o agente conclui uma tarefa verificada por `pytest -q`
+- **THEN** a tarefa marcada tem abaixo a linha `Evidência:` com `pytest -q` e o resultado
+
+#### Scenario: Critério adaptado
+
+- **WHEN** a tarefa pede "web respondendo em localhost:8000" e a porta 8000 está ocupada por outro processo
+- **THEN** a linha `Evidência:` registra a porta usada, o motivo da troca e o resultado da checagem

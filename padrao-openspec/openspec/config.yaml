@@ -35,7 +35,7 @@ rules:
     - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
     - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
     - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
-    - "Terminar com a seção ## Aprovação, sem checkboxes, em itens de lista: Responsável (Pendente até o usuário aprovar), Data, Escopo (apply ou archive), Condições (só para archive) e Origem (citação da declaração explícita do usuário). Nunca preencher a aprovação sem essa declaração"
+    - "Terminar com a seção ## Aprovação, sem checkboxes, em itens de lista: Responsável (Pendente até o usuário aprovar), Data, Escopo (apply ou archive), Condições (só para archive) e Origem (citação da declaração explícita do usuário e, quando a resposta depende dela, da pergunta). Nunca preencher a aprovação sem essa declaração"
   specs:
     - Escrever requisitos observáveis, sem prescrever implementação desnecessariamente
     - Todo requisito deve ter ao menos um cenário verificável, incluindo erros e limites quando relevantes
@@ -51,12 +51,13 @@ rules:
     - Incluir tarefas explícitas para cada mitigação de risco do design e para criar ou atualizar as ADRs indicadas
     - Citar em cada tarefa os arquivos que ela toca
     - Em cada grupo, a tarefa que cria ou atualiza os testes dos cenários vem antes da tarefa que implementa o comportamento
+    - Tarefas que dependem de push, PR ou CI remoto só entram quando o project.md registra um remoto; sem ele, a tarefa usa a verificação local equivalente e diz qual é
 
 operations:
   apply:
     guidance:
       - Consultar todos os artefatos de planejamento antes de implementar
-      - Usar ferramentas de teste, lint e build existentes no projeto consumidor
+      - Usar os comandos da seção Comandos de verificação do openspec/project.md; se um comando necessário faltar, perguntar antes de inventar um
       - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
       - "Antes de alterar código, conferir a seção ## Aprovação do proposal: sem ela, ou com Responsável Pendente, parar e pedir a aprovação ao usuário"
       - "Depois de 3 tentativas seguidas falhando no mesmo erro ou teste, parar, mostrar as tentativas e pedir orientação; se for preciso alterar mais de 5 arquivos fora do raio de impacto, parar e pedir confirmação"

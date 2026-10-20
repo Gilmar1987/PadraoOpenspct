@@ -3,9 +3,6 @@
 .SYNOPSIS
     Testa o fluxo completo: clone do repositório → setup → verificação dos artefatos.
 
-.PARAMETER Stack
-    Stack a aplicar: dotnet | nextjs | dotnet-nextjs | none  (padrão: nextjs)
-
 .PARAMETER WorkDir
     Diretório base para o teste  (padrão: C:\teste-openspec)
 
@@ -17,12 +14,9 @@
 
 .EXAMPLE
     .\test-setup.ps1
-    .\test-setup.ps1 -Stack dotnet -WorkDir C:\tmp\teste
+    .\test-setup.ps1 -WorkDir C:\tmp\teste
 #>
 param(
-    [ValidateSet('dotnet','nextjs','dotnet-nextjs','none')]
-    [string]$Stack = 'nextjs',
-
     [string]$WorkDir = 'C:\teste-openspec',
 
     [string]$RepoUrl = 'https://github.com/Gilmar1987/PadraoOpenspct',
@@ -147,12 +141,11 @@ Check '.git inicializado no código' { Test-Path (Join-Path $codeDir '.git') }
 
 # ── fase 3: setup ─────────────────────────────────────────────────────────────
 
-Step "Fase 3 — Rodando setup-project.mjs (stack: $Stack)"
+Step 'Fase 3 — Rodando setup-project.mjs'
 
 $nodeArgs = @(
     $setupScript,
     $codeDir,
-    '--stack', $Stack,
     '--name', 'Projeto Teste',
     '--no-register',
     '--yes'
@@ -196,10 +189,10 @@ Check '.gitignore criado com /openspec/ ignorado'      {
     (Test-Path $gi) -and ((Get-Content $gi -Raw) -match '/openspec/')
 }
 
-Step 'Fase 4 — Verificando preset aplicado no store'
+Step 'Fase 4 — Verificando o store'
 
 $projectMd = Get-Content (Join-Path $storeDir 'padrao-openspec\openspec\project.md') -Raw -ErrorAction SilentlyContinue
-$configYaml = Get-Content (Join-Path $storeDir 'padrao-openspec\openspec\config.yaml') -Raw -ErrorAction SilentlyContinue
+$configChanged = git -C (Join-Path $storeDir 'padrao-openspec') status --porcelain -- openspec/config.yaml
 
 Check 'project.md não contém placeholder {{Nome do Projeto}}' {
     $projectMd -and ($projectMd -notmatch '\{\{Nome do Projeto\}\}')
@@ -207,8 +200,12 @@ Check 'project.md não contém placeholder {{Nome do Projeto}}' {
 Check 'project.md contém o nome "Projeto Teste"'             {
     $projectMd -and ($projectMd -match 'Projeto Teste')
 }
-Check 'config.yaml foi substituído pelo preset'              {
-    $configYaml -and ($configYaml.Length -gt 0)
+Check 'config.yaml continua neutro (sem preset)'             {
+    -not $configChanged
+}
+Check 'Skills de stack ausentes no código'                    {
+    -not (Test-Path (Join-Path $codeDir '.agents\skills\dotnet-implementation')) -and
+    -not (Test-Path (Join-Path $codeDir '.agents\skills\nextjs-implementation'))
 }
 
 # ── relatório final ───────────────────────────────────────────────────────────

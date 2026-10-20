@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  # padrao-openspec/ é a fonte única de skills, comandos, agentes e presets (ADR-0001).
+  # padrao-openspec/ é a fonte única de skills, comandos e agentes, sem stack embutida (ADR-0003).
   store:
     runs-on: ubuntu-latest
     defaults:
@@ -29,13 +29,13 @@ jobs:
         run: openspec validate --all --strict
 
       # validate --strict não falha quando config.yaml tem regras malformadas; o CLI só avisa
-      # e descarta as regras do artefato. Gera as instruções de cada artefato com o config base
-      # e com cada preset, falha em qualquer aviso e exige que os presets mantenham as regras base.
-      - name: Configs base e presets carregam sem avisos
+      # e descarta as regras do artefato. Gera as instruções de cada artefato com o config base,
+      # falha em qualquer aviso e exige que todas as regras base apareçam nas instruções.
+      - name: Config base carrega sem avisos
         run: |
           grep -E '^    - ' openspec/config.yaml | sed -E 's/^    - //; s/^"(.*)"$/\1/' > "$RUNNER_TEMP/base-rules.txt"
           status=0
-          for config in openspec/config.yaml presets/*/config.yaml; do
+          for config in openspec/config.yaml; do
             probe="$(mktemp -d)"
             cp -r openspec "$probe/"
             cp "$config" "$probe/openspec/config.yaml"
@@ -79,18 +79,25 @@ jobs:
           for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md; do
             check "$f" "Architectural Decision Check"
             check "$f" "Prior authorization exception"
+            check "$f" "Commit the planning"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
             check "$f" "OpenSpec-Change:"
             check "$f" "Confirm progress per task group"
+            check "$f" "Record task evidence"
+            check "$f" "Push only on explicit request"
           done
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
             check "$f" "Evidence reuse"
+            check "$f" "Cobertura fora da suíte"
+            check "$f" "Project validation commands"
           done
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
+            check "$f" "Check the archive authorization"
+            check "$f" "Commit the archive"
           done
           exit $missing
 
@@ -103,6 +110,7 @@ jobs:
           git -C "$consumer" check-ignore -q openspec/changes/demo/proposal.md
           if git -C "$consumer" check-ignore -q openspec/config.yaml; then exit 1; fi
           test ! -e "$consumer/.agents/skills/dotnet-implementation"
+          test ! -e "$consumer/.agents/skills/nextjs-implementation"
           node scripts/install-skills.mjs "$consumer" --target both | grep -q '^Done\. 0 installed'
           test "$(grep -cx '/openspec/\*' "$consumer/.gitignore")" -eq 1
           test "$(grep -cx '!/openspec/config.yaml' "$consumer/.gitignore")" -eq 1
@@ -115,12 +123,14 @@ jobs:
           test "$(grep -cx '/openspec/\*' "$legacy/.gitignore")" -eq 1
           grep -qx 'node_modules/' "$legacy/.gitignore"
           if git -C "$legacy" check-ignore -q openspec/config.yaml; then exit 1; fi
-          node scripts/install-skills.mjs "$consumer" --target both --stack dotnet,nextjs
-          for dir in .agents .claude; do
-            test -f "$consumer/$dir/skills/dotnet-implementation/SKILL.md"
-            test -f "$consumer/$dir/skills/nextjs-implementation/SKILL.md"
-          done
-          if node scripts/install-skills.mjs "$consumer" --stack java; then exit 1; fi
+          # --stack foi removido (ADR-0003): recusado antes de qualquer cópia.
+          stackless="$(mktemp -d)"
+          git -C "$stackless" init -q
+          if node scripts/install-skills.mjs "$stackless" --stack dotnet 2> "$RUNNER_TEMP/stack-err.txt"; then exit 1; fi
+          grep -qF -- '--stack was removed' "$RUNNER_TEMP/stack-err.txt"
+          test ! -e "$stackless/.agents"
+          test ! -e "$stackless/.claude"
+          test ! -e "$stackless/.gitignore"
           # Comandos OPSX instalados idênticos à fonte, incluindo init e ingest.
           diff -r .claude/commands/opsx "$consumer/.claude/commands/opsx"
           test -f "$consumer/.claude/commands/opsx/init.md"
@@ -146,19 +156,7 @@ jobs:
           node scripts/install-skills.mjs "$agents_only" --target agents
           test ! -e "$agents_only/.claude/skills"
           test -f "$agents_only/.claude/commands/opsx/init.md"
-          # Skills oficiais externas são recomendadas por stack, nunca instaladas.
-          rec="$(mktemp -d)"
-          git -C "$rec" init -q
-          node scripts/install-skills.mjs "$rec" --stack nextjs > "$RUNNER_TEMP/rec-nextjs.txt"
-          grep -qF 'npx skills add vercel-labs/agent-skills' "$RUNNER_TEMP/rec-nextjs.txt"
-          grep -qF 'npx skills add https://github.com/anthropics/skills --skill frontend-design' "$RUNNER_TEMP/rec-nextjs.txt"
-          test ! -e "$rec/.agents/skills/frontend-design"
-          test ! -e "$rec/.claude/skills/frontend-design"
-          rec_dotnet="$(mktemp -d)"
-          git -C "$rec_dotnet" init -q
-          node scripts/install-skills.mjs "$rec_dotnet" --stack dotnet > "$RUNNER_TEMP/rec-dotnet.txt"
-          grep -qF 'dotnet/skills' "$RUNNER_TEMP/rec-dotnet.txt"
-          if grep -q 'frontend-design' "$RUNNER_TEMP/rec-dotnet.txt"; then exit 1; fi
+          # Nenhuma skill externa é recomendada nem instalada.
           rec_none="$(mktemp -d)"
           git -C "$rec_none" init -q
           node scripts/install-skills.mjs "$rec_none" > "$RUNNER_TEMP/rec-none.txt"
@@ -175,18 +173,25 @@ jobs:
           git -C "$work/store" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
           mkdir "$work/code"
           git -C "$work/code" init -q
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet-nextjs --name "CI Project" --yes
-          cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+          # Sem preset (ADR-0003): o setup só grava o nome do projeto; o config.yaml continua neutro.
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Project" --yes
+          cmp "$work/store/openspec/config.yaml" openspec/config.yaml
           head -n 1 "$work/store/openspec/project.md" | grep -q '^# CI Project '
-          test -f "$work/code/.agents/skills/dotnet-implementation/SKILL.md"
-          test -f "$work/code/.agents/skills/nextjs-implementation/SKILL.md"
+          test "$(sed 1d "$work/store/openspec/project.md")" = "$(sed 1d openspec/project.md)"
+          test ! -e "$work/code/.agents/skills/dotnet-implementation"
+          test ! -e "$work/code/.agents/skills/nextjs-implementation"
           test -z "$(find "$work/store/openspec" -maxdepth 1 -name '*.bak')"
-          # project.md já preenchido: sem --force o setup recusa e não altera nada.
-          if node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet --yes; then exit 1; fi
-          cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+          # --stack foi removido: o setup recusa antes de alterar o store ou o código.
+          before="$(cat "$work/store/openspec/project.md")"
+          fresh="$(mktemp -d)"
+          git -C "$fresh" init -q
+          if node "$work/store/scripts/setup-project.mjs" "$fresh" --stack nextjs --yes 2> "$RUNNER_TEMP/setup-stack-err.txt"; then exit 1; fi
+          grep -qF -- '--stack was removed' "$RUNNER_TEMP/setup-stack-err.txt"
+          test "$(cat "$work/store/openspec/project.md")" = "$before"
+          test ! -e "$fresh/.agents"
 
       # Fluxo recomendado: o store é uma subpasta (padrao-openspec/) de um repositório git.
-      # Arquivos iguais aos commitados não geram .bak; uma edição local gera.
+      # Sem --name, o setup não altera project.md nem config.yaml.
       - name: Smoke test do setup em subpasta
         run: |
           work="$(mktemp -d)"
@@ -196,11 +201,36 @@ jobs:
           git -C "$work/repo" add -A
           git -C "$work/repo" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
           git -C "$work/code" init -q
-          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --stack nextjs --no-register --yes
-          test -z "$(find "$work/repo/padrao-openspec/openspec" -maxdepth 1 -name '*.bak')"
-          printf '\n# edição local\n' >> "$work/repo/padrao-openspec/openspec/config.yaml"
-          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --stack nextjs --no-register --force --yes
-          test -n "$(find "$work/repo/padrao-openspec/openspec" -maxdepth 1 -name 'config.yaml.*.bak')"
+          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --no-register --yes
+          test -z "$(git -C "$work/repo" status --porcelain -- padrao-openspec/openspec)"
+          test -f "$work/code/.claude/commands/opsx/init.md"
+
+      # Store clonado do padrão: o origin é renomeado para "padrao", para que um push no store
+      # não publique os artefatos do projeto no repositório do padrão.
+      - name: Smoke test do remote do padrão
+        run: |
+          prepare() {
+            local dir="$1" url="$2"
+            mkdir -p "$dir/repo" "$dir/code"
+            cp -r . "$dir/repo/padrao-openspec"
+            git -C "$dir/repo" init -q
+            git -C "$dir/code" init -q
+            if [ -n "$url" ]; then git -C "$dir/repo" remote add origin "$url"; fi
+          }
+          work="$(mktemp -d)"
+          prepare "$work/padrao" https://github.com/Gilmar1987/PadraoOpenspct.git
+          node "$work/padrao/repo/padrao-openspec/scripts/setup-project.mjs" "$work/padrao/code" --no-register --yes > "$RUNNER_TEMP/remote.txt"
+          test "$(git -C "$work/padrao/repo" remote)" = "padrao"
+          grep -qF 'remote add origin' "$RUNNER_TEMP/remote.txt"
+          grep -qF 'remote rename padrao origin' "$RUNNER_TEMP/remote.txt"
+          # --keep-origin mantém o origin.
+          prepare "$work/keep" https://github.com/Gilmar1987/PadraoOpenspct
+          node "$work/keep/repo/padrao-openspec/scripts/setup-project.mjs" "$work/keep/code" --no-register --keep-origin --yes
+          test "$(git -C "$work/keep/repo" remote)" = "origin"
+          # origin de outro repositório: nada muda.
+          prepare "$work/proprio" https://github.com/acme/livraria-openspec.git
+          node "$work/proprio/repo/padrao-openspec/scripts/setup-project.mjs" "$work/proprio/code" --no-register --yes
+          test "$(git -C "$work/proprio/repo" remote)" = "origin"
 
       - name: Smoke test da declaração do store
         run: |
@@ -208,7 +238,7 @@ jobs:
           cp -r . "$work/store"
           mkdir "$work/code"
           git -C "$work/code" init -q
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --stack nextjs --name "CI Store" --register-id ci-store --yes
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Store" --register-id ci-store --yes
           grep -qx 'store: ci-store' "$work/code/openspec/config.yaml"
           # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
           resolved="$(cd "$work/code" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
@@ -218,10 +248,10 @@ jobs:
           mkdir -p "$work/other/openspec"
           git -C "$work/other" init -q
           printf 'store: outro\n' > "$work/other/openspec/config.yaml"
-          if node "$work/store/scripts/setup-project.mjs" "$work/other" --stack none --register-id ci-store --yes; then exit 1; fi
+          if node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store --yes; then exit 1; fi
           grep -qx 'store: outro' "$work/other/openspec/config.yaml"
           # Com --force, a declaração existente é substituída e o store volta a ser resolvido.
-          node "$work/store/scripts/setup-project.mjs" "$work/other" --stack none --register-id ci-store --force --yes
+          node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store --force --yes
           grep -qx 'store: ci-store' "$work/other/openspec/config.yaml"
           test "$(grep -c '^store:' "$work/other/openspec/config.yaml")" -eq 1
 
@@ -244,7 +274,7 @@ jobs:
           printf '# Proposal\n\n## Aprovação\n\n- Responsável: Fulana Silva\n- Data: 2026-10-03\n- Escopo: apply\n- Condições: —\n- Origem: mensagem\n' > "$c/proposal.md"
           printf '# Spec Delta\n\n## ADDED Requirements\n\n### Requirement: A\n\n#### Scenario: a1\n\n#### Scenario: a2\n\n### Requirement: B\n\n#### Scenario: b1\n' > "$c/specs/catalogo/spec.md"
           printf '# Tasks\n\n- [x] 1.1 a\n- [X] 1.2 b\n- [x] 1.3 c\n' > "$c/tasks.md"
-          printf '# Verificações — add-catalogo\n\n## 2026-10-07\n\n- Críticos: 1\n- Warnings: 0\n- Sugestões: 0\n- Não verificado: —\n- Avaliação: 1 crítico.\n\n## 2026-10-08\n\n- Críticos: 0\n- Warnings: 2\n- Sugestões: 1\n- Não verificado: CI (sem push)\n- Avaliação: Sem críticos; 2 warnings.\n' > "$c/verification.md"
+          printf '# Verificações — add-catalogo\n\n## 2026-10-07\n\n- Críticos: 1\n- Warnings: 0\n- Sugestões: 0\n- Não verificado: —\n- Avaliação: 1 crítico.\n\n## 2026-10-08\n\n- Críticos: 0\n- Warnings: 2\n- Sugestões: 1\n- Não verificado: CI (sem push)\n- Cobertura fora da suíte: roteiro de navegador (docs/roteiro.md; executado por pessoa)\n- Avaliação: Sem críticos; 2 warnings.\n\nItens:\n\n- [warning] cenário sem teste (`a.js:1`)\n- [warning] design divergente\n- [sugestão] nome de função\n\nComandos:\n\n- `npm test` → 12 passed (exit 0)\n' > "$c/verification.md"
           b="$s/changes/archive/2026-10-20-add-busca"
           printf 'schema: spec-driven\ncreated: 2026-10-15\n' > "$b/.openspec.yaml"
           printf '# Proposal\n' > "$b/proposal.md"

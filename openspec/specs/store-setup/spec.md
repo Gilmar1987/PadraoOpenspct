@@ -48,16 +48,35 @@ Após registrar e declarar o store, o setup SHALL executar o OpenSpec CLI de den
 - **WHEN** `/opsx:init` é executado em um repositório de código cujo `openspec/config.yaml` declara um store registrado
 - **THEN** `project.md`, `config.yaml`, `project-setup.md` e as ADRs são gravados no store resolvido, e não no `openspec/` local do repositório de código
 
-### Requirement: Backup apenas de arquivos editados
+### Requirement: Setup sem preset de stack
 
-Antes de substituir `openspec/project.md` e `openspec/config.yaml` pelo preset, o setup SHALL criar backup `.bak` somente quando o arquivo difere da versão commitada desse mesmo arquivo e de todos os presets. Isso MUST valer quando o store é a raiz do repositório git e quando é uma subpasta dele.
+O setup SHALL deixar `openspec/project.md` e `openspec/config.yaml` do store com o conteúdo neutro, alterando apenas o marcador `{{Nome do Projeto}}` quando o nome for informado. O setup SHALL recusar a opção `--stack` antes de alterar qualquer arquivo, com uma mensagem que oriente a definir a stack pelo `/opsx:init`.
 
-#### Scenario: Store como subpasta de um repositório
+#### Scenario: Setup com nome do projeto
 
-- **WHEN** o setup roda num clone do PadraoOpenspct, com o store em `padrao-openspec/` e `project.md` e `config.yaml` iguais aos commitados
-- **THEN** o preset é aplicado e nenhum arquivo `.bak` é criado em `padrao-openspec/openspec/`
+- **WHEN** o setup roda com `--name "Livraria"` num store recém-clonado
+- **THEN** o `project.md` do store troca `{{Nome do Projeto}}` por `Livraria` e continua igual ao neutro no resto, e o `config.yaml` não muda
 
-#### Scenario: Arquivo editado localmente
+#### Scenario: Automação antiga com --stack
 
-- **WHEN** o `config.yaml` do store tem uma edição local não commitada, diferente de todos os presets, e o setup roda com `--force`
-- **THEN** o setup cria um `.bak` do `config.yaml` antes de aplicar o preset
+- **WHEN** o setup roda com `--stack nextjs`
+- **THEN** ele termina com código diferente de zero antes de instalar skills, a mensagem cita o `/opsx:init`, e nenhum arquivo do store ou do repositório de código é alterado
+
+### Requirement: Remote do padrão desligado do store
+
+Quando o `origin` do repositório git do store aponta para o repositório PadraoOpenspct, o setup SHALL renomeá-lo para `padrao` e mostrar como adicionar o remoto do projeto e como desfazer a troca. Com `--keep-origin`, o setup MUST NOT alterar os remotes. Um `origin` que aponta para outro repositório MUST permanecer inalterado.
+
+#### Scenario: Store clonado do padrão
+
+- **WHEN** o setup roda com `--yes` num store cujo `origin` é `https://github.com/Gilmar1987/PadraoOpenspct.git`
+- **THEN** o repositório do store passa a ter o remote `padrao` com essa URL e nenhum `origin`, e a saída mostra `git remote add origin <url-do-projeto>` e `git remote rename padrao origin`
+
+#### Scenario: Opção para manter o origin
+
+- **WHEN** o setup roda com `--keep-origin` num store clonado do padrão
+- **THEN** o `origin` continua apontando para o PadraoOpenspct e nenhum remote `padrao` é criado
+
+#### Scenario: Store com remoto próprio
+
+- **WHEN** o `origin` do store aponta para `https://github.com/acme/livraria-openspec.git`
+- **THEN** o setup não altera os remotes
