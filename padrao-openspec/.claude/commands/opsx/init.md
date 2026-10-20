@@ -245,10 +245,10 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 ```
 0) Não há front-end próprio
 1) Next.js (React — App Router ou Pages Router)
-2) React puro (Vite + React Router)
-3) Vue.js (Nuxt ou Vite)
-4) Angular
-5) Blazor (WebAssembly ou Server)
+2) SPA em JavaScript/TypeScript (React com Vite, Vue/Nuxt, Angular, Svelte)
+3) Renderizado pelo back-end (templates do framework: Django, Rails, Laravel, Razor Pages, Thymeleaf)
+4) Blazor (.NET — WebAssembly ou Server)
+5) Aplicativo móvel ou desktop (React Native, Flutter, MAUI)
 6) Outro (digitar livremente)
 ```
 
@@ -284,11 +284,11 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 
 ```
 0) Nenhum: acesso direto (arquivo, API externa)
-1) Prisma (TypeScript)
-2) Drizzle (TypeScript)
-3) Entity Framework Core (.NET)
-4) Dapper (.NET)
-5) SQLAlchemy (Python)
+1) Prisma / Drizzle (TypeScript)
+2) Entity Framework Core / Dapper (.NET)
+3) ORM do próprio framework (Django ORM, Active Record, Eloquent)
+4) SQLAlchemy (Python)
+5) JPA / Hibernate (Java/Kotlin)
 6) Outro (digitar livremente)
 ```
 

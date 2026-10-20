@@ -82,6 +82,7 @@ Ajustes mínimos para não privilegiar uma stack, mantendo 5 opções numeradas 
 - 5.3: "Lint (ESLint, Ruff, dotnet format, golangci-lint etc.)" e "Typecheck/build (tsc, mypy, compilação .NET/Java/Go)".
 - 5.4: Vitest/Jest, Pytest, xUnit/NUnit, JUnit, Go test.
 - 4.1: "Vercel" deixa de dizer "ideal para Next.js" e passa a "Vercel / Netlify (front-end e funções)".
+- 3.2 e 3.5 (acrescentados depois da primeira verificação, que encontrou só dois ecossistemas no front-end): o front-end passa a oferecer Next.js, SPA em JavaScript/TypeScript, renderização pelo back-end (Django, Rails, Laravel, Razor Pages, Thymeleaf), Blazor e aplicativo móvel ou desktop; o ORM passa a oferecer Prisma/Drizzle, EF Core/Dapper, ORM do próprio framework (Django ORM, Active Record, Eloquent), SQLAlchemy e JPA/Hibernate.
 
 ### D6. Skill `docker` sem stack
 
