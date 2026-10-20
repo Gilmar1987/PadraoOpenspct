@@ -1,6 +1,7 @@
 # standard-versioning Specification
 
 ## Purpose
+
 Dá ao padrão uma versão identificável e um registro do que muda em cada versão, para que os projetos saibam o que instalaram, o que há de novo e o que precisam fazer ao atualizar.
 
 ## Requirements

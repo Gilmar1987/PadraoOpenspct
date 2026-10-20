@@ -1,6 +1,7 @@
 # standard-update Specification
 
 ## Purpose
+
 Avisa o projeto quando existe uma versão nova do padrão e entrega a atualização como um pull request revisável, sem sujar a branch de ninguém e sem exigir que o padrão tenha acesso aos projetos.
 
 ## Requirements
