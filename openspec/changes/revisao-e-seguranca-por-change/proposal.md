@@ -53,3 +53,4 @@ Nenhuma.
 - Escopo: apply
 - Condições: —
 - Origem: "Eu, gilmar campelo aprovo a change revisao-e-seguranca-por-change para apply"
+- Archive: 2026-10-20; Origem: "rode o verify e o archive,  faça push e abra o PR"
