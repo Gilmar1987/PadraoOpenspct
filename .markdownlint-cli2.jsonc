@@ -19,6 +19,8 @@
     ".github/agents/**",
     // Registro gerado pelo /opsx:verify: uma entrada por execução, com títulos de data que podem se repetir.
     "openspec/changes/**/verification.md",
+    // Registro gravado pelo /opsx:apply (revisão de código): mesmo formato, uma entrada datada por revisão.
+    "openspec/changes/**/review.md",
     "openspec/changes/**/.inputs/**"
   ]
 }

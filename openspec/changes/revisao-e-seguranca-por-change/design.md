@@ -97,6 +97,7 @@ A revisão do intervalo `ef1e100..c732312` apontou cinco achados importantes, co
 | `padrao-openspec/openspec/project.md`, `config.yaml` | D4, D5 | smoke do setup (compara o `project.md` com o neutro); CI de config base |
 | `openspec/rules.md` | D5 | stubs de agentes |
 | `.github/workflows/validate.yml`, `README.md` | D6 | nenhum |
+| `.markdownlint-cli2.jsonc` (raiz e `padrao-openspec/`) | descoberto no apply: o `review.md` repete o título de data a cada entrada, como o `verification.md`, e o lint (MD024) falhava; passa a ficar fora do lint | job `root` e passo de lint do job `store` |
 
 ## Risks / Trade-offs
 
