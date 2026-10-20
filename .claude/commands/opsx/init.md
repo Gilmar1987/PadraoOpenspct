@@ -537,6 +537,32 @@ _(Múltipla escolha — separe os números por vírgula. Se a 5.2 for "Não", re
 
 ---
 
+**5.8 — Onde o repositório de código fica hospedado (remoto)?**
+
+```
+1) GitHub
+2) GitLab
+3) Azure DevOps
+4) Bitbucket
+5) Sem remoto por enquanto (só local)
+6) Outro (digitar livremente)
+```
+
+---
+
+**5.9 — Quantas pessoas desenvolvem e revisam o código?**
+
+```
+1) Uma pessoa (projeto solo)
+2) Duas ou três
+3) De quatro a dez
+4) Mais de dez
+5) Ainda não sei
+6) Outro (digitar livremente)
+```
+
+---
+
 > **Resumo do Bloco 5** — exiba todas as respostas e pergunte: **"Confirma este bloco? [s/n]"**
 
 ---
@@ -651,6 +677,31 @@ O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo o
 
 ---
 
+## Checagem de coerência
+
+> Respostas válidas uma a uma podem ser incoerentes entre si. Aponte cada combinação antes da confirmação final.
+
+Avalie ao menos estas combinações:
+
+| Combinação | Consequência | Proposta |
+|---|---|---|
+| 5.7 exige aprovação de PR e 5.9 é "Uma pessoa" | A plataforma não deixa o autor aprovar o próprio PR; a regra vira letra morta | Revisão por subagente (`requesting-code-review`) com o resultado anexado ao PR, ou "merge sem revisão formal" registrado |
+| 5.2 tem CI, ou 5.1/5.7 dependem de PR, e 5.8 é "Sem remoto" | CI remoto e PR não existem sem remoto; tarefas que os exigem não fecham | Verificações locais obrigatórias até o remoto existir |
+| 3.8 tem biblioteca de filas e 2.5 é "Não" | Serviços e dependências sem uso | Adiar a biblioteca para a primeira change que precisar de fila |
+| 2.4 é REST/HTTP, gRPC ou mensageria e 2.1 é um monólito | Chamadas de rede onde uma chamada direta bastaria | Confirmar o motivo, ou trocar por chamada direta entre módulos |
+| 4.4 usa variáveis ou cofre da plataforma e 4.1/4.3 não têm produção | Configuração para uma plataforma que não existe | Registrar só o `.env` local por enquanto |
+| 5.5 tem framework de E2E e 5.3 não inclui E2E, ou o contrário | Testes que ninguém roda, ou exigência sem ferramenta | Alinhar as duas respostas |
+
+Para cada combinação encontrada:
+
+1. Mostre as respostas envolvidas, a consequência e a proposta.
+2. Pergunte: **"Ajustar ou manter?"**. "Ajustar" volta à pergunta e atualiza o resumo do bloco; "Manter" pede uma justificativa em uma frase.
+3. Registre a combinação, a decisão e a justificativa para a seção "Checagem de coerência" do `project-setup.md`.
+
+Se nenhuma combinação for encontrada, diga "Nenhuma incoerência encontrada" e siga. Com arquivo de respostas, a checagem também roda; a decisão de cada combinação é perguntada no chat.
+
+---
+
 ## Confirmação Final e Geração do Documento
 
 Após todos os blocos confirmados:
@@ -737,6 +788,8 @@ Após todos os blocos confirmados:
 | Testes E2E | {{resposta 5.5}} |
 | Cobertura mínima | {{resposta 5.6}} |
 | Revisão de código | {{resposta 5.7}} |
+| Remoto | {{resposta 5.8}} |
+| Time | {{resposta 5.9}} |
 
 ## 6. Observabilidade e Segurança
 
@@ -749,6 +802,14 @@ Após todos os blocos confirmados:
 | Controles LGPD/GDPR | {{resposta 6.5}} |
 | Dados em repouso | {{resposta 6.6}} |
 
+## Checagem de coerência
+
+| Combinação | Decisão | Justificativa |
+|---|---|---|
+| {{respostas envolvidas}} | {{Ajustada / Mantida}} | {{justificativa ou nova resposta}} |
+
+<!-- Sem combinações apontadas, substitua a tabela por: Nenhuma incoerência encontrada. -->
+
 ---
 
 > Documento gerado automaticamente pelo comando `/opsx:init`.
@@ -757,7 +818,7 @@ Após todos os blocos confirmados:
 
 ### Arquivo 2: `<root>/openspec/project.md`
 
-Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
+Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
 
 ### Arquivo 3: `<root>/openspec/config.yaml`
 

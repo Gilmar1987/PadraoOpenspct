@@ -2,7 +2,7 @@
 
 import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +15,10 @@ const namePlaceholder = '{{Nome do Projeto}}';
 const stackRemovedMessage =
   '--stack was removed: the standard has no stack presets. Define the stack and the validation ' +
   'commands with /opsx:init.';
+
+// A store cloned from the standard keeps "origin" pointing at it; a push would publish the
+// project's planning to the standard's repository.
+const standardRepoPattern = /[/:]PadraoOpenspct(?:\.git)?\/?$/i;
 
 function usage() {
   console.log(`Usage: node scripts/setup-project.mjs [code-repo] [options]
@@ -33,12 +37,17 @@ Options:
   --register-id <id>            Register this store with this id (default when asked: folder name)
   --no-register                 Do not register this store
   --force                       Replace a different store declaration in the code repository
+  --keep-origin                 Keep the store's "origin" remote even when it points to PadraoOpenspct
+                                (by default it is renamed to "padrao")
   --yes                         Do not ask for the final confirmation
   -h, --help                    Show this help`);
 }
 
 function parseArgs(args) {
-  const options = { code: null, name: null, target: 'both', registerId: null, register: null, force: false, yes: false };
+  const options = {
+    code: null, name: null, target: 'both', registerId: null, register: null, force: false, yes: false,
+    keepOrigin: false, detachRemote: null,
+  };
   const valueOf = (index, flag) => {
     const value = args[index + 1];
     if (value === undefined || value.startsWith('--')) throw new Error(`${flag} requires a value.`);
@@ -54,6 +63,7 @@ function parseArgs(args) {
     else if (arg === '--register-id') { options.registerId = valueOf(index++, arg); options.register = true; }
     else if (arg === '--no-register') options.register = false;
     else if (arg === '--force') options.force = true;
+    else if (arg === '--keep-origin') options.keepOrigin = true;
     else if (arg === '--yes') options.yes = true;
     else if (arg.startsWith('-')) throw new Error(`Unknown option: ${arg}`);
     else if (options.code === null) options.code = arg;
@@ -95,12 +105,46 @@ function validateRegisterId(id) {
   }
 }
 
+function git(args) {
+  return execFileSync('git', args, { cwd: storeRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+}
+
+// Returns the store's origin URL when it points to the standard's repository, otherwise null.
+function standardOrigin() {
+  try {
+    const url = git(['remote', 'get-url', 'origin']);
+    return standardRepoPattern.test(url) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+function hasRemote(name) {
+  try {
+    return git(['remote']).split(/\r?\n/).includes(name);
+  } catch {
+    return false;
+  }
+}
+
 async function askMissing(rl, options) {
+  const origin = options.keepOrigin ? null : standardOrigin();
+  if (!origin) options.detachRemote = false;
+
   if (!rl) {
     if (!options.code) throw new Error('No terminal to ask questions; pass <code-repo>.');
     options.register ??= false;
+    options.detachRemote ??= true;
     return;
   }
+
+  if (options.detachRemote === null && !options.yes) {
+    const answer = (await rl.question(
+      `O remote origin deste store aponta para o repositório do padrão (${origin}). Renomear para "padrao"? [S/n]: `,
+    )).trim().toLowerCase();
+    options.detachRemote = answer === '' || answer.startsWith('s') || answer.startsWith('y');
+  }
+  options.detachRemote ??= true;
 
   while (!options.code) {
     options.code = (await rl.question('Caminho do repositório de código do projeto: ')).trim() || null;
@@ -259,6 +303,7 @@ async function setup(rl, options) {
       ? `Registrar o store nesta máquina como "${options.registerId}" e declará-lo em ${codeConfigPath(codeRoot)}`
       : 'Não registrar o store',
   ];
+  if (options.detachRemote) plan.push('Renomear o remote origin do store (repositório do padrão) para "padrao"');
   if (!(await confirm(rl, plan, options))) {
     console.log('Cancelado; nada foi alterado.');
     return;
@@ -277,6 +322,19 @@ async function setup(rl, options) {
     console.log('Updated project name in openspec/project.md');
   } else {
     console.log('Unchanged: openspec/project.md and openspec/config.yaml');
+  }
+  let remoteNote = '';
+  if (options.detachRemote) {
+    if (hasRemote('padrao')) {
+      console.warn('Warning: the store already has a "padrao" remote; "origin" still points to the standard. Rename or remove it by hand.');
+    } else {
+      git(['remote', 'rename', 'origin', 'padrao']);
+      console.log('Renamed the store remote "origin" (the standard repository) to "padrao".');
+      remoteNote = `
+  3. O store não tem mais remote "origin". Para publicar o planejamento do projeto, crie um
+     repositório para o store e rode: git -C "${storeRoot}" remote add origin <url-do-store>
+     Para desfazer a troca: git -C "${storeRoot}" remote rename padrao origin`;
+    }
   }
 
   console.log('\n[3/3] Registro do store...');
@@ -305,7 +363,7 @@ or rerun this setup with --register-id ${id}.`);
 Pronto. Próximos passos:
   1. No repositório de código, rode /opsx:init: ele registra a stack, os comandos de
      verificação e as ADRs fundacionais no project.md deste store.
-  2. Faça commit das mudanças deste store e do repositório de código.`);
+  2. Faça commit das mudanças deste store e do repositório de código.${remoteNote}`);
 }
 
 try {

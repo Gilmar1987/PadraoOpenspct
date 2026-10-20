@@ -198,6 +198,33 @@ jobs:
           test -z "$(git -C "$work/repo" status --porcelain -- padrao-openspec/openspec)"
           test -f "$work/code/.claude/commands/opsx/init.md"
 
+      # Store clonado do padrão: o origin é renomeado para "padrao", para que um push no store
+      # não publique os artefatos do projeto no repositório do padrão.
+      - name: Smoke test do remote do padrão
+        run: |
+          prepare() {
+            local dir="$1" url="$2"
+            mkdir -p "$dir/repo" "$dir/code"
+            cp -r . "$dir/repo/padrao-openspec"
+            git -C "$dir/repo" init -q
+            git -C "$dir/code" init -q
+            if [ -n "$url" ]; then git -C "$dir/repo" remote add origin "$url"; fi
+          }
+          work="$(mktemp -d)"
+          prepare "$work/padrao" https://github.com/Gilmar1987/PadraoOpenspct.git
+          node "$work/padrao/repo/padrao-openspec/scripts/setup-project.mjs" "$work/padrao/code" --no-register --yes > "$RUNNER_TEMP/remote.txt"
+          test "$(git -C "$work/padrao/repo" remote)" = "padrao"
+          grep -qF 'remote add origin' "$RUNNER_TEMP/remote.txt"
+          grep -qF 'remote rename padrao origin' "$RUNNER_TEMP/remote.txt"
+          # --keep-origin mantém o origin.
+          prepare "$work/keep" https://github.com/Gilmar1987/PadraoOpenspct
+          node "$work/keep/repo/padrao-openspec/scripts/setup-project.mjs" "$work/keep/code" --no-register --keep-origin --yes
+          test "$(git -C "$work/keep/repo" remote)" = "origin"
+          # origin de outro repositório: nada muda.
+          prepare "$work/proprio" https://github.com/acme/livraria-openspec.git
+          node "$work/proprio/repo/padrao-openspec/scripts/setup-project.mjs" "$work/proprio/code" --no-register --yes
+          test "$(git -C "$work/proprio/repo" remote)" = "origin"
+
       - name: Smoke test da declaração do store
         run: |
           work="$(mktemp -d)"

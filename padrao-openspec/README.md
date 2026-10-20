@@ -38,6 +38,12 @@ Depois de um resumo e da sua confirmação, o setup:
    `store: <id>` em `openspec/config.yaml` do repositório de código e confirma, de
    dentro dele, que o OpenSpec CLI resolve este store. Se a resolução falhar, o
    setup termina com erro e mostra o comando que corrige.
+4. renomeia para `padrao` o remote `origin` do store quando ele aponta para o
+   PadraoOpenspct (pergunta antes, quando há terminal). Assim um `git push` no store
+   não publica o planejamento do projeto no repositório do padrão; as atualizações
+   do padrão continuam com `git fetch padrao`. Use `--keep-origin` para manter o
+   `origin`. Para publicar o store, crie um repositório para ele e rode
+   `git -C <store> remote add origin <url>`.
 
 Se o instalador encontrar conflito no repositório de código, o setup para antes de
 alterar o store. Se o repositório de código já declarar outro store, o setup
