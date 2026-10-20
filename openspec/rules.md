@@ -98,6 +98,8 @@ Você MUST NOT:
 - Remover ou contornar validações de entrada (Zod ou equivalente)
 - Implementar autenticação ou autorização sem spec aprovada
 - Expor dados pessoais em logs ou respostas de API
+- Commitar código sem rodar a varredura de secrets que o projeto registrou nos Comandos
+  de verificação do `project.md`
 
 ---
 

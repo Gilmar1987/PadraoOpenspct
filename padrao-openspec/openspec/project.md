@@ -76,6 +76,8 @@
 | Lint | <!-- A definir ou não aplicável --> | |
 | Typecheck/build | <!-- A definir ou não aplicável --> | |
 | Migrações | <!-- A definir ou não aplicável --> | |
+| Auditoria de dependências | <!-- A definir ou não aplicável --> | |
+| Varredura de secrets | <!-- A definir ou não aplicável --> | |
 
 ## Development Conventions
 
