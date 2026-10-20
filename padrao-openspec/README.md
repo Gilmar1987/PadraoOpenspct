@@ -209,8 +209,9 @@ temporária e copie os arquivos. O store/template `padrao-openspec` continua sen
 repositório separado e versionado; compartilhe mudanças/specs pelo remoto desse
 store quando desejado.
 
-O instalador é idempotente e interrompe sem copiar se encontrar customizações
-divergentes; `--force` atualiza os arquivos do store preservando arquivos extras.
+O instalador é idempotente: reinstalar sem mudanças não altera nada. Se a reinstalação
+mudaria arquivos já instalados, ele exige `--update` (branch `chore/padrao-vX.Y.Z` e commit,
+com a árvore limpa) ou `--in-place` (grava na branch atual), e preserva arquivos extras.
 O Git não executa scripts automaticamente durante `clone` ou ao criar um
 repositório a partir de template; execute este comando uma vez como etapa de
 bootstrap. Se `openspec/` já tiver arquivos rastreados, a regra de ignore não os
@@ -222,6 +223,18 @@ tenta recuperar um backup único se a execução for interrompida no meio. Na
 execução seguinte, cópias temporárias deixadas por uma interrupção
 (`.gitignore-<uuid>.tmp`, `.skill-tree-<uuid>.tmp`) são removidas; backups de
 skills (`.skill-tree-<uuid>.bak`) são apenas reportados para revisão manual.
+
+## Versões e atualização
+
+A versão do padrão fica em `VERSION`, e o que muda em cada versão, no `CHANGELOG.md` da raiz do
+repositório ([ADR-0004](../openspec/adrs/0004-distribuicao-versionada-do-padrao.md)). O instalador
+grava no repositório de código o manifesto `.openspec-padrao.json` (versão, commit, origem e
+arquivos gerenciados), o workflow `.github/workflows/openspec-padrao-update.yml`, que abre um PR a
+cada versão nova, e o guia `docs/openspec-padrao.md`. Os modelos desses dois arquivos ficam em
+`templates/`.
+
+`scripts/changelog-range.mjs --from <versão> --to <versão> [--actions]` imprime as seções do
+CHANGELOG entre duas versões (ou só as "Ações no projeto"); o workflow o usa para montar o PR.
 
 ## Métricas de fluxo
 

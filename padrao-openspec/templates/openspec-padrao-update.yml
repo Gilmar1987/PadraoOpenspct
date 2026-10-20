@@ -1,0 +1,132 @@
+# Gerenciado pelo padrão OpenSpec (PadraoOpenspct): não edite à mão; ele é substituído a cada
+# atualização. Veja docs/openspec-padrao.md.
+#
+# Toda segunda-feira (ou sob demanda), compara a versão do padrão instalada neste repositório
+# (.openspec-padrao.json) com a última release do padrão e, se houver versão nova, abre um PR
+# com a atualização na branch chore/padrao-vX.Y.Z.
+name: Atualização do padrão OpenSpec
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: openspec-padrao-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ler a versão instalada
+        id: installed
+        run: |
+          if [ ! -f .openspec-padrao.json ]; then
+            echo "::warning::.openspec-padrao.json não encontrado; nada a comparar."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          read_field() { node -e 'const m = JSON.parse(require("fs").readFileSync(".openspec-padrao.json", "utf8")); console.log(m[process.argv[1]] ?? "")' "$1"; }
+          source="$(read_field source)"
+          repo="$(printf '%s\n' "$source" | sed -E 's#^(https://github\.com/|git@github\.com:)##; s#\.git$##; s#/$##')"
+          {
+            echo "version=$(read_field version)"
+            echo "source=$source"
+            echo "repo=$repo"
+            echo "target=$(read_field target)"
+            echo "skip=false"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comparar com a última release
+        id: latest
+        if: steps.installed.outputs.skip != 'true'
+        env:
+          REPO: ${{ steps.installed.outputs.repo }}
+          INSTALLED: ${{ steps.installed.outputs.version }}
+        run: |
+          tag="$(gh release view --repo "$REPO" --json tagName -q .tagName 2>/dev/null || true)"
+          if [ -z "$tag" ]; then
+            echo "Nenhuma release publicada em $REPO."
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          latest="${tag#v}"
+          installed="$INSTALLED"
+          newest="$(printf '%s\n%s\n' "$installed" "$latest" | sort -V | tail -n 1)"
+          if [ "$latest" = "$installed" ] || [ "$newest" != "$latest" ]; then
+            echo "O padrão está em dia (v$installed)."
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          branch="chore/padrao-v$latest"
+          if [ -n "$(gh pr list --head "$branch" --state open --json number -q '.[].number')" ]; then
+            echo "Já existe um PR aberto de $branch."
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          {
+            echo "newer=true"
+            echo "tag=$tag"
+            echo "latest=$latest"
+            echo "branch=$branch"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Instalar a versão nova numa branch
+        if: steps.latest.outputs.newer == 'true'
+        env:
+          TAG: ${{ steps.latest.outputs.tag }}
+          SOURCE: ${{ steps.installed.outputs.source }}
+          TARGET: ${{ steps.installed.outputs.target }}
+          BRANCH: ${{ steps.latest.outputs.branch }}
+        run: |
+          git clone --quiet --depth 1 --branch "$TAG" "$SOURCE" "$RUNNER_TEMP/padrao"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          node "$RUNNER_TEMP/padrao/padrao-openspec/scripts/install-skills.mjs" . --update --target "$TARGET"
+          git push origin "$BRANCH"
+
+      - name: Abrir o PR
+        if: steps.latest.outputs.newer == 'true'
+        env:
+          FROM: ${{ steps.installed.outputs.version }}
+          TO: ${{ steps.latest.outputs.latest }}
+          BRANCH: ${{ steps.latest.outputs.branch }}
+        run: |
+          range="$RUNNER_TEMP/padrao/padrao-openspec/scripts/changelog-range.mjs"
+          from="$FROM"
+          to="$TO"
+          body="$RUNNER_TEMP/pr-body.md"
+          {
+            echo "Atualiza o padrão OpenSpec de v$from para v$to."
+            echo
+            echo "## Ações no projeto"
+            echo
+            actions="$(node "$range" --from "$from" --to "$to" --actions)"
+            if [ -n "$actions" ]; then printf '%s\n' "$actions"; else echo "Nenhuma."; fi
+            echo
+            echo "## Changelog"
+            echo
+            node "$range" --from "$from" --to "$to" | sed 's/^## /### /'
+            echo
+            echo "---"
+            echo
+            echo "Aberto pelo workflow \`openspec-padrao-update.yml\`. Um PR aberto com o \`GITHUB_TOKEN\` não dispara os outros workflows do repositório: para rodar a CI, faça um push na branch ou feche e reabra o PR. Veja \`docs/openspec-padrao.md\`."
+          } > "$body"
+          base="$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
+          gh pr create --base "$base" --head "$BRANCH" \
+            --title "chore: atualiza padrão OpenSpec para v$to" --body-file "$body"

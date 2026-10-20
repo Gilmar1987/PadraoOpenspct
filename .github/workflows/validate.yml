@@ -64,6 +64,40 @@ jobs:
           node --check scripts/install-skills.mjs
           node --check scripts/setup-project.mjs
           node --check scripts/sync-root.mjs
+          node --check scripts/changelog-range.mjs
+
+      # VERSION é a versão do padrão; a primeira seção do CHANGELOG da raiz tem de ser ela,
+      # com "O que mudou" e "Ações no projeto" (ADR-0004).
+      - name: Versão e changelog
+        run: |
+          v="$(tr -d '\r\n' < VERSION)"
+          if ! printf '%s\n' "$v" | grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error file=padrao-openspec/VERSION::VERSION não é semver: $v"; exit 1
+          fi
+          first="$(grep -m1 -E '^## [0-9]+\.[0-9]+\.[0-9]+' ../CHANGELOG.md | sed -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+          if [ "$first" != "$v" ]; then
+            echo "::error file=CHANGELOG.md::A primeira versão do CHANGELOG ($first) difere de VERSION ($v)"; exit 1
+          fi
+          section="$(awk -v head="## $v" 'index($0, head) == 1 {f = 1; next} f && /^## / {exit} f' ../CHANGELOG.md)"
+          for title in '### O que mudou' '### Ações no projeto'; do
+            if ! printf '%s\n' "$section" | grep -qxF "$title"; then
+              echo "::error file=CHANGELOG.md::A seção $v não tem \"$title\""; exit 1
+            fi
+          done
+
+      - name: Smoke test do changelog-range
+        run: |
+          f="$RUNNER_TEMP/CHANGELOG.md"
+          printf '# Changelog\n\n## 1.2.0 — 2026-11-01\n\n### O que mudou\n\n- c\n\n### Ações no projeto\n\n- Acrescentar X ao project.md\n\n## 1.1.0 — 2026-10-25\n\n### O que mudou\n\n- b\n\n### Ações no projeto\n\n- Nenhuma\n\n## 1.0.0 — 2026-10-20\n\n### O que mudou\n\n- a\n\n### Ações no projeto\n\n- Nenhuma\n' > "$f"
+          out="$(node scripts/changelog-range.mjs --file "$f" --from 1.0.0 --to v1.2.0)"
+          printf '%s\n' "$out" | grep -q '^## 1\.2\.0'
+          printf '%s\n' "$out" | grep -q '^## 1\.1\.0'
+          if printf '%s\n' "$out" | grep -q '^## 1\.0\.0'; then exit 1; fi
+          acts="$(node scripts/changelog-range.mjs --file "$f" --from v1.0.0 --to 1.2.0 --actions)"
+          printf '%s\n' "$acts" | grep -qF 'Acrescentar X ao project.md'
+          if printf '%s\n' "$acts" | grep -q 'Nenhuma'; then exit 1; fi
+          test -z "$(node scripts/changelog-range.mjs --file "$f" --from 1.2.0 --to 1.2.0)"
+          if node scripts/changelog-range.mjs --file "$f" --from 1.0.0 --to 9.9.9; then exit 1; fi
 
       # Skills e comandos gerados pelo OpenSpec CLI levam trechos customizados do padrão;
       # regenerá-los apaga esses trechos. A checagem falha se algum deles sumir.
@@ -79,12 +113,14 @@ jobs:
           for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md; do
             check "$f" "Architectural Decision Check"
             check "$f" "Prior authorization exception"
+            check "$f" "Standard version check"
             check "$f" "Commit the planning"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
             check "$f" "OpenSpec-Change:"
             check "$f" "Confirm progress per task group"
+            check "$f" "Standard version check"
             check "$f" "Record task evidence"
             check "$f" "Push only on explicit request"
             check "$f" "Security checks"
@@ -93,12 +129,14 @@ jobs:
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
             check "$f" "Evidence reuse"
+            check "$f" "Standard version check"
             check "$f" "Cobertura fora da suíte"
             check "$f" "Project validation commands"
             check "$f" "Code review record"
           done
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
+            check "$f" "Standard version check"
             check "$f" "Check the archive authorization"
             check "$f" "Commit the archive"
           done
@@ -164,6 +202,46 @@ jobs:
           git -C "$rec_none" init -q
           node scripts/install-skills.mjs "$rec_none" > "$RUNNER_TEMP/rec-none.txt"
           if grep -q 'npx skills add' "$RUNNER_TEMP/rec-none.txt"; then exit 1; fi
+          # Manifesto, workflow e guia de atualização chegam na primeira instalação (ADR-0004).
+          man="$(mktemp -d)"
+          git -C "$man" init -q -b main
+          node scripts/install-skills.mjs "$man" > /dev/null
+          test -f "$man/.github/workflows/openspec-padrao-update.yml"
+          test -f "$man/docs/openspec-padrao.md"
+          node -e '
+            const m = JSON.parse(require("fs").readFileSync(process.argv[1] + "/.openspec-padrao.json", "utf8"));
+            const v = require("fs").readFileSync("VERSION", "utf8").trim();
+            const need = [".claude/commands/opsx/apply.md", ".github/workflows/openspec-padrao-update.yml", "docs/openspec-padrao.md"];
+            if (m.version !== v || m.target !== "both" || !need.every((f) => m.managedFiles.includes(f))) process.exit(1);
+          ' "$man"
+          # Reinstalação sem mudança passa sem modo.
+          node scripts/install-skills.mjs "$man" | grep -q '^Done\. 0 installed'
+          git -C "$man" add -A
+          git -C "$man" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
+          # Versão nova da fonte (cópia com um comando alterado): sem modo, recusa sem mudar nada.
+          src="$(mktemp -d)/padrao-openspec"
+          cp -r . "$src"
+          printf '1.0.1\n' > "$src/VERSION"
+          printf '\nlinha nova\n' >> "$src/.claude/commands/opsx/apply.md"
+          if node "$src/scripts/install-skills.mjs" "$man" 2> "$RUNNER_TEMP/mode-err.txt"; then exit 1; fi
+          grep -qF -- '--update' "$RUNNER_TEMP/mode-err.txt"
+          grep -qF -- '--in-place' "$RUNNER_TEMP/mode-err.txt"
+          test -z "$(git -C "$man" status --porcelain)"
+          # --update com alteração pendente: recusa sem mudar nada.
+          printf 'pendente\n' > "$man/rascunho.txt"
+          if node "$src/scripts/install-skills.mjs" "$man" --update; then exit 1; fi
+          test "$(git -C "$man" branch --show-current)" = main
+          rm "$man/rascunho.txt"
+          # --update limpo: branch própria com um commit; a main não muda.
+          before="$(git -C "$man" rev-parse main)"
+          GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid \
+            node "$src/scripts/install-skills.mjs" "$man" --update
+          test "$(git -C "$man" branch --show-current)" = chore/padrao-v1.0.1
+          test "$(git -C "$man" rev-parse main)" = "$before"
+          test -z "$(git -C "$man" status --porcelain)"
+          git -C "$man" log -1 --format=%s | grep -qx 'chore: atualiza padrão OpenSpec para v1.0.1'
+          grep -q 'linha nova' "$man/.claude/commands/opsx/apply.md"
+          node -e 'process.exit(JSON.parse(require("fs").readFileSync(process.argv[1] + "/.openspec-padrao.json", "utf8")).version === "1.0.1" ? 0 : 1)' "$man"
 
       - name: Smoke test do setup de projeto
         run: |

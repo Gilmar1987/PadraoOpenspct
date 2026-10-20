@@ -205,6 +205,51 @@ padrao-openspec/
 
 ---
 
+## Versões e atualização
+
+O padrão tem versão semver em `padrao-openspec/VERSION`, um [CHANGELOG.md](CHANGELOG.md) com
+"O que mudou" e "Ações no projeto" por versão, e uma tag `vX.Y.Z` com GitHub Release para cada
+versão publicada ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
+
+Em cada projeto, o instalador grava:
+
+| Arquivo no repositório de código | Para quê |
+|---|---|
+| `.openspec-padrao.json` | Versão, commit e origem do padrão instalado e a lista de arquivos gerenciados (não edite esses arquivos à mão) |
+| `.github/workflows/openspec-padrao-update.yml` | Toda segunda-feira (ou sob demanda) compara a versão instalada com a última release e, se houver versão nova, abre um PR da branch `chore/padrao-vX.Y.Z` com as "Ações no projeto" e o changelog |
+| `docs/openspec-padrao.md` | Guia do projeto: como a atualização chega, a permissão de Actions necessária e como atualizar à mão |
+
+Para o workflow abrir o PR, ligue no GitHub do repositório de código **Settings → Actions →
+General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
+
+Uma reinstalação que mudaria arquivos já instalados exige um modo explícito:
+
+- `--update`: exige a árvore limpa, cria a branch `chore/padrao-vX.Y.Z`, instala e commita (sem push);
+- `--in-place`: grava na branch atual, sem commit.
+
+Sem um dos dois, o instalador para sem alterar nada. Os comandos `/opsx:propose`, `/opsx:apply`,
+`/opsx:verify` e `/opsx:archive` avisam no início quando a versão instalada está atrás da última tag.
+
+### Como publicar uma release
+
+Publicar é ação do responsável, feita só com pedido explícito:
+
+1. No PR da mudança, atualize `padrao-openspec/VERSION` e acrescente a seção da versão no topo do
+   `CHANGELOG.md`, com "O que mudou" e "Ações no projeto" ("Nenhuma" quando não houver). A CI
+   falha se os dois não baterem.
+2. Depois do merge na `main`, crie a tag e a release com as notas da seção:
+
+   ```powershell
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   node padrao-openspec/scripts/changelog-range.mjs --from <versão-anterior> --to X.Y.Z > notas.md
+   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file notas.md
+   ```
+
+Na semana seguinte, o workflow de cada projeto abre o PR de atualização.
+
+---
+
 ## Manutenção do padrão
 
 1. Edite skills, comandos, agentes e modelos de ADR **somente** em `padrao-openspec/`.
@@ -285,7 +330,7 @@ rodar o setup, como em [Como iniciar um projeto novo](#como-iniciar-um-projeto-n
 Projetos já configurados recebem os comandos e as skills atualizados com:
 
 ```powershell
-node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\install-skills.mjs C:\openspec\<projeto> --force
+node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\install-skills.mjs C:\openspec\<projeto> --update
 ```
 
 ## Migração do `--stack`

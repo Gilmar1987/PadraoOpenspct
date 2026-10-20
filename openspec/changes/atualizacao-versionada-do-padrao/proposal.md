@@ -55,8 +55,8 @@ Faltam quatro coisas: o padrão não tem versão nem registro do que mudou; o pr
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: gilmar campelo
+- Data: 2026-10-20
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Origem: "Eu gilmar campelo aprovo a change atualizacao-versionada-do-padrao para apply"
