@@ -60,3 +60,4 @@ Faltam quatro coisas: o padrão não tem versão nem registro do que mudou; o pr
 - Escopo: apply
 - Condições: —
 - Origem: "Eu gilmar campelo aprovo a change atualizacao-versionada-do-padrao para apply"
+- Archive: 2026-10-20; Origem: "rode o verify e o archive, faça push e abra o PR"
