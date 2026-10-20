@@ -9,8 +9,10 @@ repositório PadraoOpenspct. As cópias na raiz do repositório são geradas por
 ## Usar em um novo projeto
 
 Cada projeto tem o próprio store: clone o repositório PadraoOpenspct com o nome do
-projeto e rode o setup a partir do clone. O setup pergunta a stack e o caminho do
-repositório de código e faz o resto.
+projeto e rode o setup a partir do clone. O setup pergunta o caminho do repositório
+de código e o nome do projeto e faz o resto. A stack é definida depois, pelo
+`/opsx:init`: o padrão não traz presets nem skills de stack
+([ADR-0003](../openspec/adrs/0003-padrao-sem-stack-embutida.md)).
 
 ```powershell
 git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\meu-projeto-openspec
@@ -18,12 +20,6 @@ node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\setup-project.mjs
 ```
 
 ```text
-Qual a stack do projeto?
-  1) .NET
-  2) Next.js
-  3) .NET (back-end) + Next.js (front-end)
-  4) Nenhuma: manter o store neutro
-Escolha [1-4]:
 Caminho do repositório de código do projeto:
 Nome do projeto (Enter para preencher depois):
 Registrar este store nesta máquina como "meu-projeto-openspec"? [S/n]:
@@ -32,31 +28,31 @@ Registrar este store nesta máquina como "meu-projeto-openspec"? [S/n]:
 Depois de um resumo e da sua confirmação, o setup:
 
 1. instala no repositório de código as skills (em `.agents/skills/` e
-   `.claude/skills/`, padrão `--target both`), incluindo a skill da stack, os
+   `.claude/skills/`, padrão `--target both`), os
    comandos `/opsx:*` em `.claude/commands/opsx/` e os agentes em `.github/agents/`,
    e acrescenta ao `.gitignore` dele um bloco que ignora o conteúdo local de
    `openspec/`, mas mantém no git o `openspec/config.yaml` com a declaração do store;
-2. aplica o preset da stack em `openspec/project.md` e `openspec/config.yaml` deste
-   store (veja [presets/](presets/README.md));
+2. grava o nome do projeto em `openspec/project.md` deste store, quando informado,
+   sem alterar o resto do `project.md` nem o `config.yaml`;
 3. registra o store nesta máquina com `openspec store register`, grava
    `store: <id>` em `openspec/config.yaml` do repositório de código e confirma, de
    dentro dele, que o OpenSpec CLI resolve este store. Se a resolução falhar, o
    setup termina com erro e mostra o comando que corrige.
 
 Se o instalador encontrar conflito no repositório de código, o setup para antes de
-alterar o store. Um `project.md` já preenchido não é substituído sem `--force`, e
-arquivos com edições locais ganham um backup `.bak` antes da troca. Se o
-repositório de código já declarar outro store, o setup recusa sem `--force`. Sem
+alterar o store. Se o repositório de código já declarar outro store, o setup
+recusa sem `--force`. A opção `--stack` foi removida: o setup a recusa com uma
+mensagem de erro, sem alterar nada. Sem
 terminal interativo (agentes, CI), passe as respostas como opções:
 
 ```powershell
-node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\setup-project.mjs C:\caminho\do\codigo --stack dotnet --name "Meu Projeto" --register-id meu-projeto --yes
+node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\setup-project.mjs C:\caminho\do\codigo --name "Meu Projeto" --register-id meu-projeto --yes
 ```
 
-`node scripts/setup-project.mjs --help` lista as opções. Em seguida, preencha a
-Stack Summary do `openspec/project.md` com as escolhas reais (ou rode `/opsx:init`)
-e registre as decisões transversais como ADRs. Não copie decisões de stack que o
-projeto ainda não tomou.
+`node scripts/setup-project.mjs --help` lista as opções. Em seguida, rode
+`/opsx:init` no repositório de código: a entrevista registra a stack, os comandos de
+verificação (instalar, executar, testar, lint, typecheck ou build, migrar) e as ADRs
+fundacionais. Não registre decisões de stack que o projeto ainda não tomou.
 
 Abra o repositório de código no editor. Os comandos OpenSpec executados nele usam o
 store declarado em `openspec/config.yaml`; as mudanças e specs ficam no store e a
@@ -70,7 +66,7 @@ mostra ao final.
 1. `/opsx:explore` — esclarecer problema, limites e critérios de sucesso.
 2. `/opsx:propose <nome-ou-descrição>` — criar os artefatos de planejamento exigidos pelo schema: proposta, delta specs, design e tarefas, conforme aplicável.
 3. Revisar os artefatos e resolver ambiguidades antes de implementar.
-4. `/opsx:apply` — implementar as tarefas guiadas pelos artefatos e validar conforme a stack escolhida.
+4. `/opsx:apply` — implementar as tarefas guiadas pelos artefatos e validar com os comandos de verificação do `project.md`.
 5. `/opsx:verify` — conferir conclusão das tarefas, requisitos, cenários e decisões de design.
 6. `/opsx:archive` — após a validação, revisar o delta e arquivar a change. O
     arquivamento aplica as alterações das delta specs à fonte da verdade em
@@ -95,9 +91,7 @@ padrao-openspec/
 │       ├── openspec-update-change/    # Revisão de artefatos existentes
 │       ├── requesting-code-review/    # Revisão de código via subagente isolado
 │       ├── docker/                    # Containerização
-│       ├── versioning-ci-cd/          # Release, CI e CD
-│       ├── dotnet-implementation/     # Ponte OpenSpec → .NET (instalada com --stack dotnet)
-│       └── nextjs-implementation/     # Ponte OpenSpec → Next.js (instalada com --stack nextjs)
+│       └── versioning-ci-cd/          # Release, CI e CD
 ├── .markdownlint-cli2.jsonc  # Regras de lint de Markdown usadas no CI
 ├── .github/
 │   └── agents/            # Subagentes especializados para VS Code/Copilot
@@ -107,18 +101,14 @@ padrao-openspec/
 │       ├── qa-validator.agent.md
 │       ├── consistency-guardian.agent.md
 │       └── business-requirements-ingestor.agent.md
-├── presets/               # project.md + config.yaml prontos por stack
-│   ├── dotnet/
-│   ├── nextjs/
-│   └── dotnet-nextjs/
 ├── scripts/
-│   ├── setup-project.mjs  # Setup interativo: stack, preset, instalação, registro e declaração do store
+│   ├── setup-project.mjs  # Setup interativo: instalação, nome do projeto, registro e declaração do store
 │   ├── install-skills.mjs # Instala skills, comandos e subagentes no projeto consumidor
 │   ├── sync-root.mjs      # Espelha esta pasta na raiz do repositório (--check na CI)
 │   └── test-setup.ps1     # Teste manual de ponta a ponta: clone, setup e verificação
 └── openspec/
     ├── config.yaml       # Regras e contexto neutros
-    ├── project.md        # Modelo preenchido por cada projeto
+    ├── project.md        # Modelo preenchido por cada projeto, com stack e comandos de verificação
     ├── adrs/             # Decisões de arquitetura duradouras (README e template)
     ├── specs/            # Fonte da verdade das capacidades
     └── changes/
@@ -133,7 +123,7 @@ ativas são criados pelo OpenSpec CLI.
 
 O store empacota sete skills de workflow OpenSpec (geradas pelo OpenSpec CLI
 1.14.2), três skills de engenharia (`versioning-ci-cd`, `docker` e
-`requesting-code-review`) e duas skills de stack opcionais, instalando-as junto
+`requesting-code-review`), todas neutras quanto à stack, instalando-as junto
 dos comandos `/opsx:*` e dos agentes. Isso não ativa nem altera o perfil global da
 CLI. Os nomes correspondem aos arquivos `SKILL.md` incluídos:
 
@@ -143,27 +133,16 @@ CLI. Os nomes correspondem aos arquivos `SKILL.md` incluídos:
 | Planejamento complementar | `openspec-update-change` | Revisar artefatos de uma change existente |
 | Specs | `openspec-sync-specs` | Aplicar deltas às specs principais sem arquivar |
 | Engenharia | `versioning-ci-cd`, `docker`, `requesting-code-review` | Versionamento e CI/CD, containerização e revisão de código |
-| Stack (via `--stack`) | `dotnet-implementation`, `nextjs-implementation` | Traduzir specs e cenários em código, testes, migrations e comandos de validação da stack |
 
-As skills de stack não ensinam a linguagem nem o framework: elas ligam o fluxo
-OpenSpec à stack (cenário → tipo de teste, comando de validação por tarefa,
-migrations, fronteiras de segurança) e delegam o conhecimento de framework às
-skills oficiais, instaladas à parte:
-
-| Stack | Skills oficiais | Instalação |
-| --- | --- | --- |
-| .NET | [dotnet/skills](https://github.com/dotnet/skills) (time .NET, MIT) | `/plugin marketplace add dotnet/skills` e `/plugin install <plugin>@dotnet-agent-skills` |
-| Next.js | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (Vercel, MIT) | `npx skills add vercel-labs/agent-skills` |
-| Next.js (design visual de interface) | [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) (Anthropic, Apache 2.0) | `npx skills add https://github.com/anthropics/skills --skill frontend-design` |
-
-O instalador não instala as skills oficiais: elas têm instalador e ciclo de
-atualização próprios.
+O padrão não tem skills de stack. O que liga o fluxo OpenSpec à stack de cada
+projeto são os comandos de verificação que o `/opsx:init` grava no `project.md`.
+Skills oficiais de um framework podem ser instaladas à parte, pelo instalador do
+próprio fornecedor; o instalador deste store não as instala nem as recomenda.
 
 O pacote usa os identificadores presentes nas skills reais deste workspace; não
 cria nomes presumidos como `openspec-context-loading` ou
 `openspec-continue-change`. O instalador distribui todas as pastas com
-`SKILL.md` existentes em `.claude/skills/` para o destino escolhido, exceto as
-skills de stack, que só são copiadas quando pedidas com `--stack`.
+`SKILL.md` existentes em `.claude/skills/` para o destino escolhido.
 
 O store também fornece seis subagentes VS Code/Copilot em `.github/agents/`:
 
@@ -206,10 +185,9 @@ node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\install-skills.mjs
 O destino padrão das skills é `--target both`: `.agents/skills/` (GitHub
 Copilot e agentes universais) e `.claude/skills/` (Claude Code). Use
 `--target agents` ou `--target claude` para um único destino. Os comandos
-`/opsx:*` são sempre instalados em `.claude/commands/opsx/`. Acrescente `--stack dotnet`,
-`--stack nextjs` ou `--stack dotnet,nextjs` para instalar também as skills de
-stack; sem `--stack`, só as skills neutras são instaladas, e uma skill de stack
-já instalada é preservada. Os agentes VS Code são instalados em
+`/opsx:*` são sempre instalados em `.claude/commands/opsx/`. A opção `--stack`
+foi removida e é recusada; uma skill de stack instalada por uma versão anterior é
+preservada. Os agentes VS Code são instalados em
 `.github/agents/`. O instalador acrescenta ao final do `.gitignore` do projeto
 consumidor um bloco canônico com `/openspec/*` e `!/openspec/config.yaml`,
 prevalecendo sobre regras anteriores; se o bloco, ou a versão antiga que ignorava
@@ -218,9 +196,10 @@ em vez de duplicado. Assim, os artefatos locais não são enviados junto com o c
 da aplicação, e a declaração do store (`openspec/config.yaml`) vai para o git, para
 que um clone novo saiba qual store usar.
 
-Em projeto Next.js novo, rode o `create-next-app` no repositório de código antes do
-setup: ele recusa pastas que já têm `.agents/`, `.github/` ou `openspec/`. Se o setup
-já rodou, gere o app numa pasta temporária e copie os arquivos. O store/template `padrao-openspec` continua sendo um
+Se o gerador de projeto da stack exigir pasta vazia (por exemplo, `create-next-app`),
+rode-o no repositório de código antes do setup: ele recusa pastas que já têm
+`.agents/`, `.github/` ou `openspec/`. Se o setup já rodou, gere o app numa pasta
+temporária e copie os arquivos. O store/template `padrao-openspec` continua sendo um
 repositório separado e versionado; compartilhe mudanças/specs pelo remoto desse
 store quando desejado.
 
@@ -308,8 +287,8 @@ pull request do store, não em confirmação pelo chat.
 O workflow fica na raiz do repositório, em `.github/workflows/validate.yml`, e
 roda em pull requests e na `main`. O job `store` executa nesta pasta:
 `openspec validate --all --strict` (estrutura e SHALL/MUST dos requisitos), carga
-do config base e dos presets, lint de Markdown, sintaxe dos scripts e smoke tests
-do instalador, do setup e da declaração do store. O job `root` confere que a raiz
+do config base, lint de Markdown, sintaxe dos scripts e smoke tests do instalador,
+do setup (inclusive a recusa de `--stack`) e da declaração do store. O job `root` confere que a raiz
 está em dia com esta pasta (`sync-root.mjs --check`). Para rodar localmente, nesta
 pasta:
 

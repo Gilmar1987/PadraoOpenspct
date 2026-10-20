@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
@@ -11,37 +11,34 @@ const storeRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..
 const installScript = path.join(storeRoot, 'scripts', 'install-skills.mjs');
 const namePlaceholder = '{{Nome do Projeto}}';
 
-const presets = {
-  dotnet: { label: '.NET', stacks: ['dotnet'] },
-  nextjs: { label: 'Next.js', stacks: ['nextjs'] },
-  'dotnet-nextjs': { label: '.NET (back-end) + Next.js (front-end)', stacks: ['dotnet', 'nextjs'] },
-  none: { label: 'Nenhuma: manter o store neutro', stacks: [] },
-};
+// The standard has no stack presets (ADR-0003); old automations that still pass --stack must fail loudly.
+const stackRemovedMessage =
+  '--stack was removed: the standard has no stack presets. Define the stack and the validation ' +
+  'commands with /opsx:init.';
 
 function usage() {
   console.log(`Usage: node scripts/setup-project.mjs [code-repo] [options]
 
 Bootstrap this store for one project: install skills and agents into the code repository,
-apply the stack preset to this store's openspec/project.md and openspec/config.yaml, and
-optionally register this store on the machine. Missing answers are asked interactively;
-without a terminal, pass them as options.
+write the project name into this store's openspec/project.md, and optionally register this
+store on the machine. The stack is defined later by /opsx:init. Missing answers are asked
+interactively; without a terminal, pass them as options.
 
 Arguments:
   [code-repo]                   Path to the project's code repository
 
 Options:
-  --stack <${Object.keys(presets).join('|')}>
   --name <project name>         Replaces ${namePlaceholder} in openspec/project.md
   --target <agents|claude|both> Skill destination in the code repository (default: both)
   --register-id <id>            Register this store with this id (default when asked: folder name)
   --no-register                 Do not register this store
-  --force                       Apply the preset even if openspec/project.md was already filled
+  --force                       Replace a different store declaration in the code repository
   --yes                         Do not ask for the final confirmation
   -h, --help                    Show this help`);
 }
 
 function parseArgs(args) {
-  const options = { code: null, stack: null, name: null, target: 'both', registerId: null, register: null, force: false, yes: false };
+  const options = { code: null, name: null, target: 'both', registerId: null, register: null, force: false, yes: false };
   const valueOf = (index, flag) => {
     const value = args[index + 1];
     if (value === undefined || value.startsWith('--')) throw new Error(`${flag} requires a value.`);
@@ -51,7 +48,7 @@ function parseArgs(args) {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--help' || arg === '-h') options.help = true;
-    else if (arg === '--stack') options.stack = valueOf(index++, arg);
+    else if (arg === '--stack') throw new Error(stackRemovedMessage);
     else if (arg === '--name') options.name = valueOf(index++, arg);
     else if (arg === '--target') options.target = valueOf(index++, arg);
     else if (arg === '--register-id') { options.registerId = valueOf(index++, arg); options.register = true; }
@@ -63,9 +60,6 @@ function parseArgs(args) {
     else throw new Error(`Unexpected argument: ${arg}`);
   }
 
-  if (options.stack !== null && !Object.hasOwn(presets, options.stack)) {
-    throw new Error(`Invalid stack "${options.stack}". Use ${Object.keys(presets).join(', ')}.`);
-  }
   if (!['agents', 'claude', 'both'].includes(options.target)) {
     throw new Error(`Invalid target "${options.target}". Use agents, claude, or both.`);
   }
@@ -103,21 +97,11 @@ function validateRegisterId(id) {
 
 async function askMissing(rl, options) {
   if (!rl) {
-    const missing = [!options.stack && '--stack', !options.code && '<code-repo>'].filter(Boolean);
-    if (missing.length > 0) throw new Error(`No terminal to ask questions; pass ${missing.join(' and ')}.`);
+    if (!options.code) throw new Error('No terminal to ask questions; pass <code-repo>.');
     options.register ??= false;
     return;
   }
 
-  if (!options.stack) {
-      const keys = Object.keys(presets);
-      console.log('\nQual a stack do projeto?');
-      keys.forEach((key, index) => console.log(`  ${index + 1}) ${presets[key].label}`));
-    while (!options.stack) {
-      const answer = (await rl.question('Escolha [1-4]: ')).trim();
-      options.stack = keys[Number(answer) - 1] ?? (Object.hasOwn(presets, answer) ? answer : null);
-    }
-  }
   while (!options.code) {
     options.code = (await rl.question('Caminho do repositório de código do projeto: ')).trim() || null;
   }
@@ -135,9 +119,6 @@ async function askMissing(rl, options) {
 async function confirm(rl, plan, options) {
   console.log('\nResumo:');
   for (const line of plan) console.log(`  - ${line}`);
-  if (path.basename(storeRoot) === 'padrao-openspec' && options.stack !== 'none') {
-    console.log('\n  Atenção: esta pasta se chama padrao-openspec. Aplique presets no store do projeto, não no template.');
-  }
   if (options.yes) return true;
   if (!rl) throw new Error('No terminal to confirm; pass --yes.');
   const answer = (await rl.question('\nConfirmar? [s/N]: ')).trim().toLowerCase();
@@ -152,40 +133,6 @@ function writeAtomic(target, content) {
   } finally {
     if (existsSync(staged)) rmSync(staged, { force: true });
   }
-}
-
-// "HEAD:./<path>" resolves from cwd (the store), so it also works when the store is a subfolder
-// of the git repository; "HEAD:<path>" would resolve from the repository root instead.
-function committedVersion(relativePath) {
-  try {
-    return execFileSync('git', ['show', `HEAD:./${relativePath}`], {
-      cwd: storeRoot,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    });
-  } catch {
-    return null;
-  }
-}
-
-// A file is pristine when it matches a preset or the committed version; anything else may hold
-// local edits, so it is copied to a timestamped backup before being replaced.
-function backupIfEdited(relativePath, presetFileName) {
-  const target = path.join(storeRoot, relativePath);
-  const current = readFileSync(target, 'utf8').replace(/\r\n/g, '\n');
-  const candidates = readdirSync(path.join(storeRoot, 'presets'), { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => path.join(storeRoot, 'presets', entry.name, presetFileName))
-    .filter((file) => existsSync(file))
-    .map((file) => readFileSync(file, 'utf8'));
-  const committed = committedVersion(relativePath.split(path.sep).join('/'));
-  if (committed !== null) candidates.push(committed);
-  if (candidates.some((candidate) => candidate.replace(/\r\n/g, '\n') === current)) return null;
-
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
-  const backup = `${target}.${stamp}.bak`;
-  copyFileSync(target, backup);
-  return backup;
 }
 
 function quoteForShell(value) {
@@ -297,36 +244,16 @@ async function setup(rl, options) {
     throw new Error(`Code repository directory does not exist: ${codeRoot}`);
   }
 
-  const preset = presets[options.stack];
   const projectPath = path.join(storeRoot, 'openspec', 'project.md');
-  const configPath = path.join(storeRoot, 'openspec', 'config.yaml');
-  const presetDir = path.join(storeRoot, 'presets', options.stack);
   const currentProject = readFileSync(projectPath, 'utf8');
-  const applyPreset = options.stack !== 'none';
-
-  if (applyPreset) {
-    for (const file of ['project.md', 'config.yaml']) {
-      if (!existsSync(path.join(presetDir, file))) throw new Error(`Preset file not found: ${path.join(presetDir, file)}`);
-    }
-    if (!currentProject.includes(namePlaceholder) && !options.force) {
-      throw new Error(
-        'openspec/project.md was already filled for a project; applying a preset would overwrite it. ' +
-        'Review it, then rerun with --force if you really want to replace it.',
-      );
-    }
-  }
 
   if (options.register) checkStoreDeclaration(codeRoot, options.registerId, options.force);
 
   const installArgs = [installScript, codeRoot, '--target', options.target];
-  if (preset.stacks.length > 0) installArgs.push('--stack', preset.stacks.join(','));
 
   const plan = [
-    `Stack: ${preset.label}`,
-    `Repositório de código: ${codeRoot} (skills e agentes em --target ${options.target}${preset.stacks.length ? `, --stack ${preset.stacks.join(',')}` : ''})`,
-    applyPreset
-      ? `Store: ${storeRoot} (substitui openspec/project.md e openspec/config.yaml pelo preset ${options.stack})`
-      : `Store: ${storeRoot} (mantém project.md e config.yaml neutros)`,
+    `Repositório de código: ${codeRoot} (skills e agentes em --target ${options.target})`,
+    `Store: ${storeRoot} (project.md e config.yaml continuam neutros até o /opsx:init)`,
     options.name ? `Nome do projeto: ${options.name}` : 'Nome do projeto: preencher depois em openspec/project.md',
     options.register
       ? `Registrar o store nesta máquina como "${options.registerId}" e declará-lo em ${codeConfigPath(codeRoot)}`
@@ -345,16 +272,7 @@ async function setup(rl, options) {
   }
 
   console.log('\n[2/3] Configurando o store...');
-  if (applyPreset) {
-    for (const [relativePath, presetFile] of [[path.join('openspec', 'project.md'), 'project.md'], [path.join('openspec', 'config.yaml'), 'config.yaml']]) {
-      const backup = backupIfEdited(relativePath, presetFile);
-      if (backup) console.log(`Backup of edited ${relativePath}: ${path.relative(storeRoot, backup)}`);
-    }
-    const name = options.name ?? namePlaceholder;
-    writeAtomic(projectPath, readFileSync(path.join(presetDir, 'project.md'), 'utf8').replaceAll(namePlaceholder, name));
-    writeAtomic(configPath, readFileSync(path.join(presetDir, 'config.yaml'), 'utf8'));
-    console.log(`Applied preset: ${options.stack}`);
-  } else if (options.name && currentProject.includes(namePlaceholder)) {
+  if (options.name && currentProject.includes(namePlaceholder)) {
     writeAtomic(projectPath, currentProject.replaceAll(namePlaceholder, options.name));
     console.log('Updated project name in openspec/project.md');
   } else {
@@ -385,9 +303,9 @@ or rerun this setup with --register-id ${id}.`);
 
   console.log(`
 Pronto. Próximos passos:
-  1. Preencha a Stack Summary em openspec/project.md com as escolhas reais.
-  2. Registre as decisões transversais como ADRs em openspec/adrs/.
-  3. Faça commit das mudanças deste store e do repositório de código.`);
+  1. No repositório de código, rode /opsx:init: ele registra a stack, os comandos de
+     verificação e as ADRs fundacionais no project.md deste store.
+  2. Faça commit das mudanças deste store e do repositório de código.`);
 }
 
 try {

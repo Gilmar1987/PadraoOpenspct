@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  # padrao-openspec/ é a fonte única de skills, comandos, agentes e presets (ADR-0001).
+  # padrao-openspec/ é a fonte única de skills, comandos e agentes, sem stack embutida (ADR-0003).
   store:
     runs-on: ubuntu-latest
     defaults:
@@ -29,13 +29,13 @@ jobs:
         run: openspec validate --all --strict
 
       # validate --strict não falha quando config.yaml tem regras malformadas; o CLI só avisa
-      # e descarta as regras do artefato. Gera as instruções de cada artefato com o config base
-      # e com cada preset, falha em qualquer aviso e exige que os presets mantenham as regras base.
-      - name: Configs base e presets carregam sem avisos
+      # e descarta as regras do artefato. Gera as instruções de cada artefato com o config base,
+      # falha em qualquer aviso e exige que todas as regras base apareçam nas instruções.
+      - name: Config base carrega sem avisos
         run: |
           grep -E '^    - ' openspec/config.yaml | sed -E 's/^    - //; s/^"(.*)"$/\1/' > "$RUNNER_TEMP/base-rules.txt"
           status=0
-          for config in openspec/config.yaml presets/*/config.yaml; do
+          for config in openspec/config.yaml; do
             probe="$(mktemp -d)"
             cp -r openspec "$probe/"
             cp "$config" "$probe/openspec/config.yaml"
@@ -103,6 +103,7 @@ jobs:
           git -C "$consumer" check-ignore -q openspec/changes/demo/proposal.md
           if git -C "$consumer" check-ignore -q openspec/config.yaml; then exit 1; fi
           test ! -e "$consumer/.agents/skills/dotnet-implementation"
+          test ! -e "$consumer/.agents/skills/nextjs-implementation"
           node scripts/install-skills.mjs "$consumer" --target both | grep -q '^Done\. 0 installed'
           test "$(grep -cx '/openspec/\*' "$consumer/.gitignore")" -eq 1
           test "$(grep -cx '!/openspec/config.yaml' "$consumer/.gitignore")" -eq 1
@@ -115,12 +116,14 @@ jobs:
           test "$(grep -cx '/openspec/\*' "$legacy/.gitignore")" -eq 1
           grep -qx 'node_modules/' "$legacy/.gitignore"
           if git -C "$legacy" check-ignore -q openspec/config.yaml; then exit 1; fi
-          node scripts/install-skills.mjs "$consumer" --target both --stack dotnet,nextjs
-          for dir in .agents .claude; do
-            test -f "$consumer/$dir/skills/dotnet-implementation/SKILL.md"
-            test -f "$consumer/$dir/skills/nextjs-implementation/SKILL.md"
-          done
-          if node scripts/install-skills.mjs "$consumer" --stack java; then exit 1; fi
+          # --stack foi removido (ADR-0003): recusado antes de qualquer cópia.
+          stackless="$(mktemp -d)"
+          git -C "$stackless" init -q
+          if node scripts/install-skills.mjs "$stackless" --stack dotnet 2> "$RUNNER_TEMP/stack-err.txt"; then exit 1; fi
+          grep -qF -- '--stack was removed' "$RUNNER_TEMP/stack-err.txt"
+          test ! -e "$stackless/.agents"
+          test ! -e "$stackless/.claude"
+          test ! -e "$stackless/.gitignore"
           # Comandos OPSX instalados idênticos à fonte, incluindo init e ingest.
           diff -r .claude/commands/opsx "$consumer/.claude/commands/opsx"
           test -f "$consumer/.claude/commands/opsx/init.md"
@@ -146,19 +149,7 @@ jobs:
           node scripts/install-skills.mjs "$agents_only" --target agents
           test ! -e "$agents_only/.claude/skills"
           test -f "$agents_only/.claude/commands/opsx/init.md"
-          # Skills oficiais externas são recomendadas por stack, nunca instaladas.
-          rec="$(mktemp -d)"
-          git -C "$rec" init -q
-          node scripts/install-skills.mjs "$rec" --stack nextjs > "$RUNNER_TEMP/rec-nextjs.txt"
-          grep -qF 'npx skills add vercel-labs/agent-skills' "$RUNNER_TEMP/rec-nextjs.txt"
-          grep -qF 'npx skills add https://github.com/anthropics/skills --skill frontend-design' "$RUNNER_TEMP/rec-nextjs.txt"
-          test ! -e "$rec/.agents/skills/frontend-design"
-          test ! -e "$rec/.claude/skills/frontend-design"
-          rec_dotnet="$(mktemp -d)"
-          git -C "$rec_dotnet" init -q
-          node scripts/install-skills.mjs "$rec_dotnet" --stack dotnet > "$RUNNER_TEMP/rec-dotnet.txt"
-          grep -qF 'dotnet/skills' "$RUNNER_TEMP/rec-dotnet.txt"
-          if grep -q 'frontend-design' "$RUNNER_TEMP/rec-dotnet.txt"; then exit 1; fi
+          # Nenhuma skill externa é recomendada nem instalada.
           rec_none="$(mktemp -d)"
           git -C "$rec_none" init -q
           node scripts/install-skills.mjs "$rec_none" > "$RUNNER_TEMP/rec-none.txt"
@@ -175,18 +166,25 @@ jobs:
           git -C "$work/store" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
           mkdir "$work/code"
           git -C "$work/code" init -q
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet-nextjs --name "CI Project" --yes
-          cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+          # Sem preset (ADR-0003): o setup só grava o nome do projeto; o config.yaml continua neutro.
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Project" --yes
+          cmp "$work/store/openspec/config.yaml" openspec/config.yaml
           head -n 1 "$work/store/openspec/project.md" | grep -q '^# CI Project '
-          test -f "$work/code/.agents/skills/dotnet-implementation/SKILL.md"
-          test -f "$work/code/.agents/skills/nextjs-implementation/SKILL.md"
+          test "$(sed 1d "$work/store/openspec/project.md")" = "$(sed 1d openspec/project.md)"
+          test ! -e "$work/code/.agents/skills/dotnet-implementation"
+          test ! -e "$work/code/.agents/skills/nextjs-implementation"
           test -z "$(find "$work/store/openspec" -maxdepth 1 -name '*.bak')"
-          # project.md já preenchido: sem --force o setup recusa e não altera nada.
-          if node "$work/store/scripts/setup-project.mjs" "$work/code" --stack dotnet --yes; then exit 1; fi
-          cmp "$work/store/openspec/config.yaml" presets/dotnet-nextjs/config.yaml
+          # --stack foi removido: o setup recusa antes de alterar o store ou o código.
+          before="$(cat "$work/store/openspec/project.md")"
+          fresh="$(mktemp -d)"
+          git -C "$fresh" init -q
+          if node "$work/store/scripts/setup-project.mjs" "$fresh" --stack nextjs --yes 2> "$RUNNER_TEMP/setup-stack-err.txt"; then exit 1; fi
+          grep -qF -- '--stack was removed' "$RUNNER_TEMP/setup-stack-err.txt"
+          test "$(cat "$work/store/openspec/project.md")" = "$before"
+          test ! -e "$fresh/.agents"
 
       # Fluxo recomendado: o store é uma subpasta (padrao-openspec/) de um repositório git.
-      # Arquivos iguais aos commitados não geram .bak; uma edição local gera.
+      # Sem --name, o setup não altera project.md nem config.yaml.
       - name: Smoke test do setup em subpasta
         run: |
           work="$(mktemp -d)"
@@ -196,11 +194,9 @@ jobs:
           git -C "$work/repo" add -A
           git -C "$work/repo" -c user.name=ci -c user.email=ci@example.invalid commit -qm base
           git -C "$work/code" init -q
-          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --stack nextjs --no-register --yes
-          test -z "$(find "$work/repo/padrao-openspec/openspec" -maxdepth 1 -name '*.bak')"
-          printf '\n# edição local\n' >> "$work/repo/padrao-openspec/openspec/config.yaml"
-          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --stack nextjs --no-register --force --yes
-          test -n "$(find "$work/repo/padrao-openspec/openspec" -maxdepth 1 -name 'config.yaml.*.bak')"
+          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --no-register --yes
+          test -z "$(git -C "$work/repo" status --porcelain -- padrao-openspec/openspec)"
+          test -f "$work/code/.claude/commands/opsx/init.md"
 
       - name: Smoke test da declaração do store
         run: |
@@ -208,7 +204,7 @@ jobs:
           cp -r . "$work/store"
           mkdir "$work/code"
           git -C "$work/code" init -q
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --stack nextjs --name "CI Store" --register-id ci-store --yes
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Store" --register-id ci-store --yes
           grep -qx 'store: ci-store' "$work/code/openspec/config.yaml"
           # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
           resolved="$(cd "$work/code" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
@@ -218,10 +214,10 @@ jobs:
           mkdir -p "$work/other/openspec"
           git -C "$work/other" init -q
           printf 'store: outro\n' > "$work/other/openspec/config.yaml"
-          if node "$work/store/scripts/setup-project.mjs" "$work/other" --stack none --register-id ci-store --yes; then exit 1; fi
+          if node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store --yes; then exit 1; fi
           grep -qx 'store: outro' "$work/other/openspec/config.yaml"
           # Com --force, a declaração existente é substituída e o store volta a ser resolvido.
-          node "$work/store/scripts/setup-project.mjs" "$work/other" --stack none --register-id ci-store --force --yes
+          node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store --force --yes
           grep -qx 'store: ci-store' "$work/other/openspec/config.yaml"
           test "$(grep -c '^store:' "$work/other/openspec/config.yaml")" -eq 1
 

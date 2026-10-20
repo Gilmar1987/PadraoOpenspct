@@ -11,23 +11,10 @@ const sourceSkills = path.join(sourceRoot, '.claude', 'skills');
 const sourceAgents = path.join(sourceRoot, '.github', 'agents');
 const sourceCommands = path.join(sourceRoot, '.claude', 'commands', 'opsx');
 
-// Stack-specific skills are installed only when requested with --stack; every other skill is always installed.
-const stacks = {
-  dotnet: {
-    skill: 'dotnet-implementation',
-    officialSkills: [
-      'Official .NET skills: /plugin marketplace add dotnet/skills, then /plugin install <plugin>@dotnet-agent-skills (https://github.com/dotnet/skills)',
-    ],
-  },
-  nextjs: {
-    skill: 'nextjs-implementation',
-    officialSkills: [
-      'Vercel React/Next.js skills: npx skills add vercel-labs/agent-skills (https://github.com/vercel-labs/agent-skills)',
-      'Visual design for new or redesigned UI: npx skills add https://github.com/anthropics/skills --skill frontend-design',
-    ],
-  },
-};
-const stackSkillNames = new Set(Object.values(stacks).map(({ skill }) => skill));
+// The standard has no stack skills (ADR-0003); old automations that still pass --stack must fail loudly.
+const stackRemovedMessage =
+  "--stack was removed: the standard has no stack skills. Record the project's validation commands " +
+  'in openspec/project.md (see /opsx:init).';
 
 function usage() {
   console.log(`Usage: node scripts/install-skills.mjs <consumer-project> [options]
@@ -41,14 +28,12 @@ Arguments:
 Options:
   --target <agents|claude|both>  Skill destination (default: both); OPSX commands always go to
                                  .claude/commands/opsx and VS Code agents to .github/agents
-  --stack <dotnet|nextjs>        Also install the stack implementation skill; repeat or use a comma list
-                                 (e.g. --stack dotnet,nextjs). Without it, only stack-neutral skills are installed
   --force                        Overwrite colliding files; unrelated files are preserved
   -h, --help                      Show this help`);
 }
 
 function parseArgs(args) {
-  const options = { project: null, target: 'both', stacks: [], force: false };
+  const options = { project: null, target: 'both', force: false };
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -62,21 +47,7 @@ function parseArgs(args) {
       options.target = value;
       index += 1;
     } else if (arg === '--stack') {
-      const value = args[index + 1];
-      if (value === undefined || value.startsWith('-')) {
-        throw new Error(`--stack requires a value: ${Object.keys(stacks).join(', ')}.`);
-      }
-      const requested = value.split(',').map((item) => item.trim()).filter(Boolean);
-      if (requested.length === 0) {
-        throw new Error(`--stack requires a value: ${Object.keys(stacks).join(', ')}.`);
-      }
-      for (const stack of requested) {
-        if (!Object.hasOwn(stacks, stack)) {
-          throw new Error(`Invalid stack "${stack}". Use ${Object.keys(stacks).join(', ')}.`);
-        }
-        if (!options.stacks.includes(stack)) options.stacks.push(stack);
-      }
-      index += 1;
+      throw new Error(stackRemovedMessage);
     } else if (arg === '--force') {
       options.force = true;
     } else if (arg.startsWith('-')) {
@@ -494,15 +465,7 @@ function main() {
     throw new Error('The consumer project must be separate from the padrao-openspec store directory.');
   }
 
-  const availableSkills = listSkills();
-  const selectedStackSkills = new Set(options.stacks.map((stack) => stacks[stack].skill));
-  for (const name of selectedStackSkills) {
-    if (!availableSkills.some((skill) => skill.name === name)) {
-      throw new Error(`Stack skill "${name}" was not found under ${sourceSkills}`);
-    }
-  }
-  const skills = availableSkills.filter(({ name }) =>
-    !stackSkillNames.has(name) || selectedStackSkills.has(name));
+  const skills = listSkills();
   if (skills.length === 0) {
     throw new Error(`No skills containing SKILL.md were found under ${sourceSkills}`);
   }
@@ -573,15 +536,6 @@ function main() {
   }
 
   console.log(`\nDone. ${installed} installed, ${unchanged} already current.`);
-
-  if (options.stacks.length > 0) {
-    console.log('\nThe stack skills defer framework guidance to the official skills, which are installed separately:');
-    for (const stack of options.stacks) {
-      for (const recommendation of stacks[stack].officialSkills) {
-        console.log(`  ${stack}: ${recommendation}`);
-      }
-    }
-  }
 }
 
 try {

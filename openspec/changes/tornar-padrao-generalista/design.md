@@ -121,6 +121,7 @@ Ajustes mínimos para não privilegiar uma stack, mantendo 5 opções numeradas 
 | `README.md`, `padrao-openspec/README.md`, `padrao-openspec/presets/README.md` (removido) | D9 | nenhum |
 | `openspec/adrs/0001-padrao-openspec-fonte-unica.md`, `0003-padrao-sem-stack-embutida.md` | Superseded; nova | `README.md` (cita a ADR-0001) |
 | `.claude/**`, `openspec/adrs/{README,template}.md` da raiz | regenerados pelo sync | nenhum |
+| `padrao-openspec/scripts/sync-root.mjs` | descoberto no apply: `pruneEmptyDirs` usava `rmSync` sem `recursive` numa pasta vazia e falhava com `EISDIR` ao remover uma skill inteira; passa a usar `rmdirSync` | job `root` da CI (`--check`) |
 
 ## Risks / Trade-offs
 

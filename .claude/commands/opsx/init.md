@@ -45,7 +45,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 O comando aceita, opcionalmente, o caminho de um arquivo de respostas: `/opsx:init <caminho>`. Use-o para automação e testes do padrão.
 
-- O arquivo é Markdown, com uma tabela `| Pergunta | Resposta |`. A pergunta é o número (1.1, 3.2…) ou, no bloco 7, o nome do campo. Ele também pode trazer as linhas `Responsável: <nome>` e `Confirmação final: sim`.
+- O arquivo é Markdown, com uma tabela `| Pergunta | Resposta |`. A pergunta é o número (1.1, 3.2…) ou, no bloco 7, o nome da finalidade (por exemplo, "Testes") ou do campo da Stack Summary. Ele também pode trazer as linhas `Responsável: <nome>` e `Confirmação final: sim`.
 - Aplique as respostas do arquivo e pergunte no chat só o que faltar, inclusive campos do bloco 7.
 - Mostre o resumo completo uma vez, em vez de confirmar bloco a bloco.
 - A confirmação final vale se vier do responsável no chat, ou se o arquivo trouxer `Confirmação final: sim` e o nome do responsável.
@@ -232,7 +232,7 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 ```
 1) TypeScript + Node.js (no próprio app Next.js com Route Handlers/Server Actions, ou servidor separado com Express, Fastify, Hono)
 2) C# + .NET (Minimal API, Web API, Blazor)
-3) Python (FastAPI, Django, Flask)
+3) Python (Django, FastAPI, Flask)
 4) Java / Kotlin (Spring Boot)
 5) Go (Gin, Echo, Fiber)
 6) Outro (digitar livremente)
@@ -310,11 +310,11 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 **3.7 — Como a validação de entrada será feita?**
 
 ```
-1) Zod (TypeScript)
-2) Valibot (TypeScript)
-3) FluentValidation (.NET)
-4) Pydantic (Python)
-5) Validação manual / Data Annotations
+1) Zod / Valibot (TypeScript)
+2) FluentValidation / Data Annotations (.NET)
+3) Pydantic / Django Forms e Serializers (Python)
+4) Bean Validation (Java/Kotlin)
+5) Validação manual
 6) Outro (digitar livremente)
 ```
 
@@ -324,11 +324,11 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 
 ```
 0) Não aplicável
-1) pg-boss (PostgreSQL como fila)
-2) BullMQ (Redis)
-3) Inngest (cloud-native, serverless-friendly)
-4) Trigger.dev
-5) Hangfire (.NET)
+1) pg-boss / BullMQ (Node.js)
+2) Celery / RQ (Python)
+3) Hangfire (.NET)
+4) Sidekiq (Ruby)
+5) Serviço gerenciado (Inngest, Trigger.dev, filas da cloud)
 6) Outro (digitar livremente)
 ```
 
@@ -373,7 +373,7 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 **4.1 — Qual será o ambiente de deploy em produção?**
 
 ```
-1) Vercel (ideal para Next.js)
+1) Vercel / Netlify (front-end e funções)
 2) AWS (EC2, ECS, Lambda, App Runner)
 3) Azure (App Service, AKS, Container Apps)
 4) Google Cloud (Cloud Run, GKE)
@@ -474,8 +474,8 @@ _(Múltipla escolha — separe os números por vírgula)_
 _(Múltipla escolha — separe os números por vírgula. Se a 5.2 for "Não", registre estas escolhas como verificações locais obrigatórias antes de concluir uma change.)_
 
 ```
-1) Lint (ESLint, dotnet format, Ruff, etc.)
-2) Typecheck (tsc --noEmit, compilação .NET)
+1) Lint (ESLint, Ruff, dotnet format, golangci-lint etc.)
+2) Typecheck/build (tsc, mypy, compilação .NET/Java/Go)
 3) Testes unitários
 4) Testes de integração
 5) Testes E2E
@@ -487,11 +487,11 @@ _(Múltipla escolha — separe os números por vírgula. Se a 5.2 for "Não", re
 **5.4 — Qual framework de testes unitários será usado?**
 
 ```
-1) Vitest (TypeScript/JavaScript)
-2) Jest (TypeScript/JavaScript)
-3) xUnit (.NET)
-4) NUnit (.NET)
-5) Pytest (Python)
+1) Vitest / Jest (TypeScript/JavaScript)
+2) Pytest (Python)
+3) xUnit / NUnit (.NET)
+4) JUnit (Java/Kotlin)
+5) go test (Go)
 6) Outro (digitar livremente)
 ```
 
@@ -631,17 +631,21 @@ _(Múltipla escolha — separe os números por vírgula)_
 
 ---
 
-## Bloco 7 — Complemento da stack
+## Bloco 7 — Comandos de verificação e complemento da stack
 
-> Campos do preset ativo que as respostas anteriores não cobriram.
+> O padrão não embute nenhuma stack: os comandos que validam o código vêm desta entrevista.
 
-1. Leia a Stack Summary de `<root>/openspec/project.md`, que traz o preset aplicado pelo setup.
-2. Para cada linha cuja escolha ainda é "A definir" e que nenhuma resposta dos blocos 1 a 6 cobriu, pergunte o campo, uma pergunta por vez, com as opções da coluna "Opções" do próprio preset, mais duas:
-   - **Adiar**: grava "Adiado: decidir na primeira change que precisar";
-   - **Outro (digitar livremente)**.
-3. Se nenhum campo continuar "A definir", diga isso e siga para a confirmação final.
+**7.1 — Comandos de verificação.** Para cada finalidade da seção "Comandos de verificação" de `<root>/openspec/project.md` (instalar dependências, executar localmente, testes, lint, typecheck/build, migrações), pergunte o comando que o projeto usa, uma pergunta por vez. Ofereça até 3 sugestões coerentes com as respostas 3.1, 3.2, 3.5 e 5.4 (por exemplo, `pytest` quando a 5.4 for Pytest), mais:
 
-O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo adiado não deixa o projeto "não inicializado".
+- **Não aplicável**: o projeto não tem essa etapa;
+- **Adiar**: grava "Adiado: definir na primeira change que precisar";
+- **Outro (digitar livremente)**.
+
+Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comandos rodam dentro do contêiner (por exemplo, `docker compose run --rm app pytest`) e registre a forma escolhida.
+
+**7.2 — Campos sem decisão.** Para cada campo da Stack Summary que ainda é "A definir" e que nenhuma resposta dos blocos 1 a 6 cobriu, pergunte o campo, uma pergunta por vez, com opções coerentes com a stack escolhida no bloco 3, mais **Adiar** (grava "Adiado: decidir na primeira change que precisar") e **Outro (digitar livremente)**. Se nenhum campo continuar "A definir", diga isso e siga para a confirmação final.
+
+O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo ou comando adiado não deixa o projeto "não inicializado".
 
 > **Resumo do Bloco 7** — exiba as respostas e pergunte: **"Confirma este bloco? [s/n]"**
 
@@ -753,13 +757,13 @@ Após todos os blocos confirmados:
 
 ### Arquivo 2: `<root>/openspec/project.md`
 
-Preencha o template do preset ativo com todas as escolhas confirmadas. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
+Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
 
 ### Arquivo 3: `<root>/openspec/config.yaml`
 
-Atualize o campo `context:` com as decisões reais de stack, arquitetura e convenções. Remova o bloco `Inicialização do projeto` após a conclusão — ele não é mais necessário.
+Atualize o campo `context:` com as decisões reais de stack, arquitetura e convenções, citando os comandos de verificação registrados. Remova o bloco `Inicialização do projeto` após a conclusão — ele não é mais necessário.
 
-A decisão de testes do projeto prevalece sobre o padrão do preset. Se a 5.5 for "0) Não aplicável", troque no `operations.apply.guidance` a exigência de teste E2E por: "Cobrir cenários de interface com verificação em navegador versionada no repositório, já que o projeto decidiu não ter E2E".
+A decisão de testes do projeto prevalece sobre a orientação padrão do config base. Se a 5.5 for "0) Não aplicável", troque no `operations.apply.guidance` a exigência de teste E2E por: "Cobrir cenários de interface com verificação em navegador versionada no repositório, já que o projeto decidiu não ter E2E".
 
 ### Arquivo 4: ADRs fundacionais em `<root>/openspec/adrs/`
 

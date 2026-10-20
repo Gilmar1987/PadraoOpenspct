@@ -3,7 +3,7 @@
 // padrao-openspec/ is the single source of skills, OPSX commands, agents and ADR templates
 // (ADR-0001). This script regenerates the copies at the repository root; never edit those copies.
 
-import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -105,7 +105,8 @@ function compare() {
 function pruneEmptyDirs(start, stop) {
   let dir = path.dirname(start);
   while (dir.startsWith(stop) && dir !== stop && existsSync(dir) && readdirSync(dir).length === 0) {
-    rmSync(dir, { recursive: false, force: false });
+    // rmSync refuses directories unless recursive; rmdirSync removes only an empty one.
+    rmdirSync(dir);
     dir = path.dirname(dir);
   }
 }

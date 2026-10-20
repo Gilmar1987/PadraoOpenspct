@@ -56,7 +56,7 @@ operations:
   apply:
     guidance:
       - Consultar todos os artefatos de planejamento antes de implementar
-      - Usar ferramentas de teste, lint e build existentes no projeto consumidor
+      - Usar os comandos da seção Comandos de verificação do openspec/project.md; se um comando necessário faltar, perguntar antes de inventar um
       - Não marcar uma tarefa concluída enquanto o critério de validação não tiver sido atendido
       - "Antes de alterar código, conferir a seção ## Aprovação do proposal: sem ela, ou com Responsável Pendente, parar e pedir a aprovação ao usuário"
       - "Depois de 3 tentativas seguidas falhando no mesmo erro ou teste, parar, mostrar as tentativas e pedir orientação; se for preciso alterar mais de 5 arquivos fora do raio de impacto, parar e pedir confirmação"

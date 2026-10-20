@@ -1,9 +1,9 @@
 ---
 id: ADR-0001
-status: Accepted
+status: Superseded
 date: 2026-10-17
 supersedes:
-superseded_by:
+superseded_by: ADR-0003
 related_changes: [2026-10-17-consolidate-padrao-openspec-source]
 ---
 
