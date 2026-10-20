@@ -79,7 +79,7 @@
 
 - Antes de copiar, o instalador calcula quais destinos mudariam. Se algum destino já existe e mudaria, e não há `--update` nem `--in-place`, ele termina com: `The project already has standard files that would change. Rerun with --update (new branch and commit, recommended) or --in-place (write to the current branch).` Nenhum arquivo muda.
 - Sem destinos existentes (primeira instalação) ou sem mudanças, segue como hoje.
-- `--in-place`: o comportamento atual (grava no working tree, sem commit). `--force` continua sendo o que libera a sobrescrita de arquivos customizados, em qualquer modo.
+- `--in-place`: o comportamento atual (grava no working tree, sem commit). O `--force` deixa de ter efeito: é aceito por compatibilidade, com um aviso, e não substitui o modo. Arquivos gerenciados são sobrescritos pelos dois modos; uma customização neles aparece no diff do PR ou do working tree (ajuste da revisão, D10).
 - `--update`:
   1. exige repositório git e `git status --porcelain` vazio; senão erro listando as alterações;
   2. lê a versão de `VERSION`; `git switch -c chore/padrao-vX.Y.Z` (erro se a branch já existir);
@@ -129,6 +129,18 @@ Bloco novo, igual nos comandos e skills de propose, apply, verify e archive, dep
 - Sintaxe: `node --check scripts/changelog-range.mjs`; o YAML do modelo de workflow é validado com `python -c "import yaml; yaml.safe_load(...)"`.
 - Trechos customizados: os quatro pares de comando e skill exigem "Standard version check".
 
+### D10. Ajustes da revisão de código
+
+A revisão do intervalo `82615c0..9a870fa` apontou 7 achados importantes, corrigidos:
+
+- `--update` transacional: qualquer falha depois de criar a branch (hook, identidade do git, nada a commitar) volta à branch original e apaga a branch nova; o "já está na versão" é checado antes de exigir árvore limpa.
+- Comparação por sobreposição: arquivos extras numa pasta gerenciada não contam como mudança.
+- Mudança só de versão também exige modo, porque regrava o manifesto.
+- `source` normalizado para HTTPS; o workflow clona sempre `https://github.com/<repo>.git`.
+- Workflow: `PADRAO_UPDATE_TOKEN` opcional (escopo `workflow`) e erro explicativo quando o push de `.github/workflows/` é recusado; branch remota de uma execução que falhou é reaproveitada só para abrir o PR; versão cujo PR foi fechado não é reproposta; checkout explícito da branch padrão; `GH_TOKEN` só nos passos que chamam `gh`; tag conferida contra o `VERSION` do clone; falha de consulta da release distinta de "sem release"; o corpo do PR cita os PRs de atualização anteriores ainda abertos.
+- `--force` ignorado com aviso (D4); CHANGELOG 1.0.0 com a ação para quem reinstala com `--force`.
+- CI: YAML do modelo validado; smoke com arquivo extra, hook que falha, mudança só de versão e `--in-place`.
+
 ## Raio de impacto
 
 | Arquivo-alvo | Mudança | Dependentes afetados |
@@ -150,7 +162,7 @@ Bloco novo, igual nos comandos e skills de propose, apply, verify e archive, dep
 - [PR de atualização sem CI automática] → aviso na descrição do PR e no guia (push vazio ou fechar e reabrir).
 - [Quebra para quem reinstala com `--force`] → mensagem que cita `--update` e `--in-place`; README com a migração.
 - [Aviso dos comandos lento ou sem rede] → uma chamada `git ls-remote` curta, ignorada em qualquer falha.
-- [Conflito de arquivo customizado no PR automático] → o instalador falha sem `--force`; o workflow termina com erro visível em vez de sobrescrever customizações.
+- [Customização num arquivo gerenciado] → o guia e o manifesto dizem para não editar esses arquivos; o `--update` sobrescreve e a mudança aparece no diff do PR, onde pode ser recusada.
 
 ## Migration Plan
 

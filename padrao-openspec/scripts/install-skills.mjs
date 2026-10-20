@@ -492,7 +492,13 @@ function sourceInfo() {
   const remote = ['padrao', 'origin']
     .map((name) => tryGit(sourceRoot, ['remote', 'get-url', name]))
     .find((url) => url && standardRepoPattern.test(url));
-  return { commit: commit || null, source: remote ? remote.replace(/\.git$/i, '').replace(/\/$/, '') : defaultSourceUrl };
+  return { commit: commit || null, source: remote ? httpsUrl(remote) : defaultSourceUrl };
+}
+
+function httpsUrl(url) {
+  const ssh = /^(?:ssh:\/\/)?git@github\.com[:/](.+?)(?:\.git)?\/?$/i.exec(url);
+  if (ssh) return `https://github.com/${ssh[1]}`;
+  return url.replace(/\.git$/i, '').replace(/\/$/, '');
 }
 
 function relativeFiles(root, base = root) {
@@ -502,10 +508,17 @@ function relativeFiles(root, base = root) {
     .flatMap((entry) => relativeFiles(path.join(root, entry.name), base));
 }
 
+function sameFile(source, destination) {
+  return existsSync(destination) && statSync(destination).isFile() && readFileSync(source).equals(readFileSync(destination));
+}
+
+// Overlay semantics: every source file must match; extra files in the destination are preserved
+// by the installer and do not count as a change.
 function sameContent(source, destination) {
   if (!existsSync(destination)) return false;
-  if (statSync(source).isDirectory()) return filesAreIdentical(source, destination);
-  return statSync(destination).isFile() && readFileSync(source).equals(readFileSync(destination));
+  if (!statSync(source).isDirectory()) return sameFile(source, destination);
+  if (!statSync(destination).isDirectory()) return false;
+  return relativeFiles(source).every((relative) => sameFile(path.join(source, relative), path.join(destination, relative)));
 }
 
 function installFile(source, destination) {
@@ -528,11 +541,15 @@ function readManifest(projectRoot) {
   }
 }
 
+// The install date alone is not a change.
+function comparableManifest({ installedAt, ...rest } = {}) {
+  return JSON.stringify(rest);
+}
+
 // Rewrites the manifest only when something besides the date changed, so a no-op reinstall stays clean.
 function writeManifest(projectRoot, manifest) {
   const previous = readManifest(projectRoot);
-  const comparable = ({ installedAt, ...rest } = {}) => JSON.stringify(rest);
-  if (previous && comparable(previous) === comparable(manifest)) return false;
+  if (previous && comparableManifest(previous) === comparableManifest(manifest)) return false;
   writeFileSync(path.join(projectRoot, manifestName), `${JSON.stringify(manifest, null, 2)}\n`);
   return true;
 }
@@ -616,25 +633,17 @@ function main() {
     assertSafeDestination(projectRoot, destination, source);
   }
 
-  // Installed files that would change: rewriting them needs an explicit mode (ADR-0004).
-  const changing = operations.filter(({ source, destination }) =>
-    existsSync(destination) && !sameContent(source, destination));
-  if (changing.length > 0 && !options.update && !options.inPlace) {
-    const details = changing.map(({ name, destination }) => `  ${name}: ${destination}`).join('\n');
-    throw new Error(
-      'The project already has standard files that would change; nothing was copied. Rerun with ' +
-      '--update (new branch chore/padrao-vX.Y.Z and a commit, recommended) or --in-place (write to the ' +
-      `current branch without committing):\n${details}`,
-    );
+  if (options.force) {
+    console.warn('Warning: --force is ignored; reinstalling over changed files needs --update or --in-place.');
   }
 
-  const manifestPaths = [
+  const manifestPaths = [...new Set([
     ...operations.flatMap(({ source, destination, file }) => (file
       ? [destination]
       : relativeFiles(source).map((relative) => path.join(destination, relative))))
       .map((absolute) => path.relative(projectRoot, absolute).split(path.sep).join('/')),
     manifestName,
-  ].sort();
+  ])].sort();
   const { commit, source } = sourceInfo();
   const manifest = {
     version,
@@ -644,55 +653,94 @@ function main() {
     installedAt: new Date().toISOString().slice(0, 10),
     managedFiles: manifestPaths,
   };
+  const previous = readManifest(projectRoot);
+  const manifestChanged = previous !== null && comparableManifest(previous) !== comparableManifest(manifest);
 
-  let branch = null;
-  if (options.update) {
-    requireCleanRepository(projectRoot);
-    const previous = readManifest(projectRoot);
-    const missing = operations.some(({ destination }) => !existsSync(destination));
-    if (changing.length === 0 && !missing && previous?.version === version) {
-      console.log(`Already at v${version}; nothing to update.`);
+  // Installed files that would change, or a different recorded version: rewriting them needs an
+  // explicit mode (ADR-0004).
+  const changing = operations.filter(({ source: from, destination }) =>
+    existsSync(destination) && !sameContent(from, destination));
+  if ((changing.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
+    const details = [
+      ...changing.map(({ name, destination }) => `  ${name}: ${destination}`),
+      ...(manifestChanged ? [`  ${manifestName}: v${previous.version ?? '?'} -> v${version}`] : []),
+    ].join('\n');
+    throw new Error(
+      'The project already has standard files that would change; nothing was copied. Rerun with ' +
+      '--update (new branch chore/padrao-vX.Y.Z and a commit, recommended) or --in-place (write to the ' +
+      `current branch without committing):\n${details}`,
+    );
+  }
+
+  const install = () => {
+    cleanStaleInstallerFiles(projectRoot, [...new Set(operations.map(({ destination }) => path.dirname(destination)))]);
+    ensureConsumerGitignore(projectRoot);
+
+    let installed = 0;
+    let unchanged = 0;
+    for (const { source: from, destination, label, file } of operations) {
+      if (sameContent(from, destination)) {
+        console.log(`Unchanged: ${label}`);
+        unchanged += 1;
+        continue;
+      }
+
+      assertSafeDestination(projectRoot, destination, from);
+      mkdirSync(path.dirname(destination), { recursive: true });
+      assertSafeDestination(projectRoot, destination, from);
+      if (file) installFile(from, destination);
+      else installTree(from, destination, projectRoot);
+      console.log(`Installed: ${label}`);
+      installed += 1;
+    }
+    if (writeManifest(projectRoot, manifest)) console.log(`Recorded: ${manifestName} (v${version})`);
+    console.log(`\nDone. ${installed} installed, ${unchanged} already current.`);
+  };
+
+  if (!options.update) {
+    install();
+    return;
+  }
+
+  const missing = operations.some(({ destination }) => !existsSync(destination));
+  if (previous !== null && changing.length === 0 && !missing && !manifestChanged) {
+    console.log(`Already at v${version}; nothing to update.`);
+    return;
+  }
+  requireCleanRepository(projectRoot);
+  const branch = `chore/padrao-v${version}`;
+  if (tryGit(projectRoot, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`])) {
+    throw new Error(`Branch ${branch} already exists; delete it or merge it before updating again.`);
+  }
+  const original = gitIn(projectRoot, ['rev-parse', '--abbrev-ref', 'HEAD']);
+  gitIn(projectRoot, ['checkout', '-q', '-b', branch]);
+
+  // The tree was clean before the branch was created, so any failure from here on is undone by
+  // discarding the working tree and returning to the original branch.
+  const rollback = () => {
+    tryGit(projectRoot, ['reset', '-q', '--hard']);
+    tryGit(projectRoot, ['clean', '-fdq']);
+    tryGit(projectRoot, ['checkout', '-q', original]);
+    tryGit(projectRoot, ['branch', '-q', '-D', branch]);
+  };
+  try {
+    install();
+    const paths = [...new Set(['.gitignore', manifestName, ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/'))])];
+    gitIn(projectRoot, ['add', '-A', '--', ...paths]);
+    if (tryGit(projectRoot, ['diff', '--cached', '--quiet']) !== null) {
+      rollback();
+      console.log(`Nothing to update: the files already match v${version}. Stayed on ${original}.`);
       return;
     }
-    branch = `chore/padrao-v${version}`;
-    if (tryGit(projectRoot, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`])) {
-      throw new Error(`Branch ${branch} already exists; delete it or merge it before updating again.`);
-    }
-    gitIn(projectRoot, ['checkout', '-q', '-b', branch]);
-  }
-
-  cleanStaleInstallerFiles(projectRoot, [...new Set(operations.map(({ destination }) => path.dirname(destination)))]);
-  ensureConsumerGitignore(projectRoot);
-
-  let installed = 0;
-  let unchanged = 0;
-  for (const { source, destination, label, file } of operations) {
-    if (sameContent(source, destination)) {
-      console.log(`Unchanged: ${label}`);
-      unchanged += 1;
-      continue;
-    }
-
-    assertSafeDestination(projectRoot, destination, source);
-    mkdirSync(path.dirname(destination), { recursive: true });
-    assertSafeDestination(projectRoot, destination, source);
-    if (file) installFile(source, destination);
-    else installTree(source, destination, projectRoot);
-    console.log(`Installed: ${label}`);
-    installed += 1;
-  }
-  if (writeManifest(projectRoot, manifest)) console.log(`Recorded: ${manifestName} (v${version})`);
-
-  console.log(`\nDone. ${installed} installed, ${unchanged} already current.`);
-
-  if (branch) {
-    const paths = ['.gitignore', manifestName, ...new Set(manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')))];
-    gitIn(projectRoot, ['add', '-A', '--', ...paths]);
     gitIn(projectRoot, [
       'commit', '-q', '-m', `chore: atualiza padrão OpenSpec para v${version}`, '-m', `Padrao-OpenSpec: v${version}`, '--', ...paths,
     ]);
-    console.log(`Committed the update on branch ${branch}. Push it and open a pull request to review it.`);
+  } catch (error) {
+    rollback();
+    const details = `${error.stderr ?? ''}`.trim();
+    throw new Error(`--update failed and was rolled back to ${original}: ${error.message}${details ? `\n${details}` : ''}`);
   }
+  console.log(`Committed the update on branch ${branch}. Push it and open a pull request to review it.`);
 }
 
 try {

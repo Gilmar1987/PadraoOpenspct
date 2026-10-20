@@ -37,6 +37,9 @@ Django e das correções que vieram dele.
   projeto, inclusive "Auditoria de dependências" e "Varredura de secrets". Sem ela, o apply e o
   verify registram testes, lint e segurança como "não verificado".
 - Automações que chamam o setup ou o instalador com `--stack` precisam tirar a opção.
+- Automações que reinstalam o padrão com `install-skills.mjs --force` sobre arquivos já instalados
+  precisam trocar por `--update` (branch e commit próprios, árvore limpa) ou `--in-place` (grava
+  na branch atual). O `--force` passou a ser ignorado, com um aviso.
 - Para receber os PRs de atualização, ligue no GitHub do repositório de código "Settings →
   Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull
   requests" (veja `docs/openspec-padrao.md`).
