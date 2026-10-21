@@ -82,12 +82,20 @@ Confirmar? [S/n]: (Enter)
   ✔ Store clonado da v1.3.0
   ✔ Branch main criada no store
   ✔ Repositório de código criado
+  … Rodando o setup (pode levar alguns segundos)
   ✔ Setup concluído (skills, comandos e agentes no código; store registrado e ligado ao código)
 
 Pronto. Próximo passo:
   1. Abra a pasta C:\openspec\livraria-online no editor
   2. Abra o Claude Code e rode: /opsx:init
+Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").
+No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
+pull requests" para receber as atualizações do padrão por PR.
 ```
+
+Se a pasta informada não existir, o script pergunta antes de criá-la. Se ela estiver numa pasta
+sincronizada (OneDrive, Dropbox, Google Drive, iCloud), ele avisa e pergunta se você quer
+continuar.
 
 Se a stack tem um gerador de projeto que exige pasta vazia (por exemplo, `create-next-app`),
 rode o gerador **antes** do script e informe a pasta gerada na pergunta do gerador.

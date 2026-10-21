@@ -7,14 +7,15 @@
 import { existsSync, mkdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-import readline from 'node:readline/promises';
 
 const defaultSource = 'https://github.com/Gilmar1987/PadraoOpenspct';
 const cliVersion = '1.14.2';
 const cliPackage = `@fission-ai/openspec@${cliVersion}`;
 const idPattern = /^[a-z0-9][a-z0-9-]*$/;
 const storeDeclarationPattern = /^store:[ \t]*["']?([^"'\s#]*)["']?[ \t]*(?:#.*)?$/m;
-const syncedFolderPattern = /^(onedrive\b.*|dropbox|google ?drive|googledrive|icloud\b.*|icloud ?drive)$/i;
+const syncedFolderPattern = /^(onedrive\b.*|dropbox\b.*|google ?drive\b.*|googledrive\b.*|my drive|meu drive|icloud\b.*|mobile documents|cloudstorage)$/i;
+// git init -b needs Git 2.28.
+const minGit = [2, 28];
 
 function usage() {
   console.log(`Uso: node comecar.mjs [opções]
@@ -72,7 +73,9 @@ function invalidIdMessage(id) {
 
 // Reads answers through the line iterator, which buffers lines; rl.question drops lines that
 // arrive before the question is asked (for example, several answers pasted at once).
-function createPrompter() {
+// node:readline/promises only exists from Node 17, so it is loaded after the version check.
+async function createPrompter() {
+  const { default: readline } = await import('node:readline/promises');
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   const lines = rl[Symbol.asyncIterator]();
   return {
@@ -147,13 +150,12 @@ async function checkEnvironment(rl, options) {
   console.log('Conferindo o ambiente...');
   const gitVersion = toolVersion('git', ['--version']);
   if (!gitVersion) throw new Error('Git não encontrado. Instale o Git (https://git-scm.com/downloads) e rode o script de novo.');
-  line('Git ', gitVersion, 'ok');
-
-  const nodeVersion = process.versions.node;
-  if (Number(nodeVersion.split('.')[0]) < 18) {
-    throw new Error(`Node.js ${nodeVersion} é antigo. Atualize para 18 ou mais recente (https://nodejs.org).`);
+  const [major, minor] = gitVersion.split('.').map(Number);
+  if (major < minGit[0] || (major === minGit[0] && minor < minGit[1])) {
+    throw new Error(`Git ${gitVersion} é antigo. Atualize para ${minGit.join('.')} ou mais recente (https://git-scm.com/downloads).`);
   }
-  line('Node.js ', nodeVersion, 'ok');
+  line('Git ', gitVersion, 'ok');
+  line('Node.js ', process.versions.node, 'ok');
 
   let cli = toolVersion('openspec', ['--version']);
   if (!cli) {
@@ -205,7 +207,7 @@ function refuseExisting(dir) {
 }
 
 function latestTag(source) {
-  const refs = git(['ls-remote', '--tags', '--refs', source, 'v*'], { capture: true });
+  const refs = git(['ls-remote', '--tags', '--refs', '--', source, 'v*'], { capture: true });
   const versions = [...refs.matchAll(/refs\/tags\/v(\d+)\.(\d+)\.(\d+)$/gm)].map((match) => match.slice(1).map(Number));
   if (versions.length === 0) throw new Error(`Nenhuma release vX.Y.Z encontrada em ${source}.`);
   versions.sort((a, b) => b[0] - a[0] || b[1] - a[1] || b[2] - a[2]);
@@ -243,7 +245,7 @@ async function newProject(rl, options) {
     generated = (await rl.question(`Pasta do código já criada por um gerador de projeto (Enter para criar ${path.join(base, id)}): `)) || null;
   }
   const storeDir = path.join(base, `${id}-openspec`);
-  const codeDir = generated ? path.resolve(generated) : path.join(base, id);
+  const codeDir = generated ? path.resolve(base, generated) : path.join(base, id);
   refuseExisting(storeDir);
   if (generated) {
     if (!existsSync(codeDir) || !statSync(codeDir).isDirectory()) throw new Error(`A pasta do código ${codeDir} não existe.`);
@@ -251,6 +253,7 @@ async function newProject(rl, options) {
     refuseExisting(codeDir);
   }
 
+  refuseRegisteredId(id);
   const tag = options.tag ?? latestTag(options.origem);
   plan.push(
     `Store: ${storeDir} (clone da release ${tag} de ${options.origem}, branch main)`,
@@ -265,7 +268,7 @@ async function newProject(rl, options) {
     progress.created.push(base);
   }
   step(`Store clonado da ${tag}`, () => {
-    git(['-c', 'advice.detachedHead=false', 'clone', '--branch', tag, options.origem, storeDir]);
+    git(['-c', 'advice.detachedHead=false', 'clone', '--branch', tag, '--', options.origem, storeDir]);
     progress.created.push(storeDir);
   });
   step('Branch main criada no store', () => git(['-C', storeDir, 'switch', '-q', '-c', 'main']));
@@ -278,6 +281,7 @@ async function newProject(rl, options) {
       git(['init', '-q', '-b', 'main', codeDir]);
     });
   }
+  console.log('  … Rodando o setup (pode levar alguns segundos)');
   step('Setup concluído (skills, comandos e agentes no código; store registrado e ligado ao código)', () => {
     const setup = path.join(storeDir, 'padrao-openspec', 'scripts', 'setup-project.mjs');
     // The setup's own summary and next steps would repeat this script's; show them only on failure.
@@ -291,7 +295,9 @@ async function newProject(rl, options) {
 Pronto. Próximo passo:
   1. Abra a pasta ${codeDir} no editor
   2. Abra o Claude Code e rode: /opsx:init
-Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").`);
+Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").
+No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
+pull requests" para receber as atualizações do padrão por PR.`);
 }
 
 function repoName(url) {
@@ -305,7 +311,10 @@ function readStoreId(codeDir) {
     const config = path.join(codeDir, 'openspec', file);
     if (existsSync(config)) {
       const match = readFileSync(config, 'utf8').match(storeDeclarationPattern);
-      if (match?.[1]) return match[1];
+      if (match?.[1]) {
+        if (!idPattern.test(match[1])) throw new Error(`O código declara um id de store inválido: "${match[1]}" (${config}).`);
+        return match[1];
+      }
     }
   }
   throw new Error(
@@ -320,6 +329,16 @@ function registeredStores() {
     return JSON.parse(result.stdout).stores ?? [];
   } catch {
     return [];
+  }
+}
+
+function refuseRegisteredId(id) {
+  const existing = registeredStores().find((store) => store.id === id);
+  if (existing) {
+    throw new Error(
+      `O id "${id}" já está registrado nesta máquina para ${existing.root}. ` +
+      `Se esse registro é antigo, rode "openspec store unregister ${id}" e rode o script de novo.`,
+    );
   }
 }
 
@@ -361,20 +380,14 @@ async function joinProject(rl, options) {
     progress.created.push(base);
   }
   step('Código clonado', () => {
-    git(['clone', urlCodigo, codeDir]);
+    git(['clone', '--', urlCodigo, codeDir]);
     progress.created.push(codeDir);
   });
   const id = readStoreId(codeDir);
   console.log(`  ✔ Id do store lido do código: ${id}`);
-  const existing = registeredStores().find((store) => store.id === id);
-  if (existing) {
-    throw new Error(
-      `O id "${id}" já está registrado nesta máquina para ${existing.root}. ` +
-      `Se esse registro é antigo, rode "openspec store unregister ${id}" e rode o script de novo.`,
-    );
-  }
+  refuseRegisteredId(id);
   step('Store clonado', () => {
-    git(['clone', urlStore, storeDir]);
+    git(['clone', '--', urlStore, storeDir]);
     progress.created.push(storeDir);
   });
   const storeRoot = storeRootOf(storeDir);
@@ -406,7 +419,11 @@ async function main() {
     usage();
     return;
   }
-  const rl = process.stdin.isTTY && process.stdout.isTTY ? createPrompter() : null;
+  // Checked before anything else: older Node cannot load the prompter.
+  if (Number(process.versions.node.split('.')[0]) < 18) {
+    throw new Error(`Node.js ${process.versions.node} é antigo. Atualize para 18 ou mais recente (https://nodejs.org).`);
+  }
+  const rl = process.stdin.isTTY && process.stdout.isTTY ? await createPrompter() : null;
   try {
     console.log('Padrão OpenSpec — comece aqui\n');
     await checkEnvironment(rl, options);

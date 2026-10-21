@@ -69,14 +69,14 @@ Opções técnicas, para testes e para quem testa uma versão: `--origem <url-ou
 - `path.resolve(resposta)`, a partir da pasta atual; o resumo mostra o caminho completo.
 - Não existe → pergunta "Criar `<pasta>`? [S/n]" (`--yes` cria).
 - Pasta sincronizada: algum segmento do caminho casa com `onedrive`, `dropbox`, `google drive`, `googledrive` ou `icloud` (sem diferenciar maiúsculas), ou o caminho fica dentro de `%OneDrive%`. → aviso e "Continuar mesmo assim? [s/N]". Com `--yes`, só avisa.
-- Destino existente (`<base>/<id>-openspec`, `<base>/<id>`, ou as pastas do modo existente) → para antes de criar qualquer coisa, citando a pasta. A pasta de `--codigo` é a exceção: precisa existir.
+- Destino existente (`<base>/<id>-openspec`, `<base>/<id>`, ou as pastas do modo existente) → para antes de criar qualquer coisa, citando a pasta. A pasta de `--codigo` é a exceção: precisa existir. Um id já registrado nesta máquina também para antes do resumo, com o `openspec store unregister <id>` a rodar. Um `--codigo` relativo é resolvido a partir da pasta base.
 
 ### D5. Projeto novo
 
 1. Tag: `--tag`, ou a maior `vX.Y.Z` de `git ls-remote --tags --refs <origem> "v*"`. Sem tag → para.
 2. `git clone --branch <tag> <origem> <base>/<id>-openspec` e `git -C <store> switch -c main`.
 3. Código: com `--codigo`, usa a pasta e roda `git init -b main` se ela não for repositório; sem `--codigo`, cria `<base>/<id>` com `git init -b main`.
-4. `node <store>/padrao-openspec/scripts/setup-project.mjs <código> --name <nome> --register-id <id> --yes`, com a saída do setup visível. O setup faz o registro, a declaração, a conferência pelo CLI e a troca do remote.
+4. `node <store>/padrao-openspec/scripts/setup-project.mjs <código> --name <nome> --register-id <id> --yes`. O setup faz o registro, a declaração, a conferência pelo CLI e a troca do remote. A saída do setup é guardada e mostrada só se ele falhar, porque o resumo e os próximos passos dele repetiriam os do script; antes do passo, o script avisa que o setup pode levar alguns segundos, e a mensagem final traz a permissão de Actions que o setup citava.
 5. Mensagem final: as duas pastas, "Abra o Claude Code em <código> e rode /opsx:init", e o lembrete de commitar e criar os repositórios remotos (link para o guia).
 
 ### D6. Projeto em andamento

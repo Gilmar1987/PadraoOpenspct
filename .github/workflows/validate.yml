@@ -403,6 +403,10 @@ jobs:
           if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/c" --id ci-falta --yes < /dev/null 2> "$RUNNER_TEMP/falta.txt"; then exit 1; fi
           grep -qF 'Falta --nome' "$RUNNER_TEMP/falta.txt"
           test ! -e "$work/c/ci-falta-openspec"
+          # Id já registrado nesta máquina: recusa antes do resumo, sem criar pastas.
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/e" --nome "CI Entrada" --id ci-entrada --yes 2> "$RUNNER_TEMP/registrado.txt"; then exit 1; fi
+          grep -qF 'openspec store unregister ci-entrada' "$RUNNER_TEMP/registrado.txt"
+          test ! -e "$work/e"
           # Projeto em andamento: publica os dois repositórios e entra por outra pasta.
           git -C "$code" add -A
           commit "$code" -m setup
