@@ -8,9 +8,9 @@ Este guia é gerenciado pelo padrão e é substituído a cada atualização; nã
 
 1. **Inicialize o projeto**, se ainda não fez: abra o agente neste repositório e rode `/opsx:init`.
    A entrevista registra no store OpenSpec a stack, os comandos de verificação e as ADRs.
-2. **Commite** os arquivos que o padrão instalou (`.claude/`, `.agents/`, `.github/agents/`, o
-   workflow, este guia, `.openspec-padrao.json`, `.gitignore` e `openspec/config.yaml`) e, no
-   store, os artefatos do init.
+2. **Commite** os arquivos que o padrão instalou (os listados em `managedFiles` do
+   `.openspec-padrao.json`, o próprio `.openspec-padrao.json`, o `.gitignore` e o
+   `openspec/config.yaml`) e, no store, os artefatos do init.
 3. **Faça cada mudança pelo ciclo** `/opsx:propose` → aprovação explícita no chat (por exemplo,
    `Aprovo a change <nome> para apply`) → `/opsx:apply` → `/opsx:verify` → `/opsx:archive`. O
    agente só faz push, abre PR ou faz deploy quando você pede.

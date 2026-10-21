@@ -13,7 +13,7 @@ Instale e confira:
 | Git | Clonar o padrão e versionar os dois repositórios | `git --version` |
 | Node.js 18 ou mais recente | Rodar o setup e o instalador | `node --version` |
 | OpenSpec CLI | Registrar o store e criar as changes | `openspec --version` |
-| Um agente com os comandos `/opsx:*` | Conduzir a entrevista e as changes (Claude Code, GitHub Copilot ou outro) | Abra o agente no repositório de código depois do setup |
+| Claude Code | Rodar os comandos `/opsx:*`, que o setup instala em `.claude/commands/opsx/` | Abra o Claude Code no repositório de código depois do setup e digite `/opsx` |
 | `gh` (opcional) | Abrir PRs pelo terminal | `gh --version` |
 
 Para instalar o OpenSpec CLI, use a mesma versão da CI do padrão:
@@ -22,10 +22,19 @@ Para instalar o OpenSpec CLI, use a mesma versão da CI do padrão:
 npm install -g @fission-ai/openspec@1.14.2
 ```
 
+**Outros agentes:** o setup também instala skills em `.agents/skills/` e subagentes do GitHub
+Copilot em `.github/agents/`, mas os comandos `/opsx:*` são do Claude Code. Num agente sem esses
+comandos, peça para ele seguir o arquivo do comando, por exemplo: "siga as instruções de
+`.claude/commands/opsx/init.md`".
+
 ## 2. Criar o projeto
 
 Cada projeto tem dois repositórios: o **store**, um clone do padrão onde ficam specs, changes e
-ADRs, e o **repositório de código**, onde fica a aplicação.
+ADRs, e o **repositório de código**, onde fica a aplicação. Nos comandos abaixo, troque
+`<projeto>` e `<Nome do Projeto>` pelos valores reais antes de colar.
+
+Se a stack tem um gerador de projeto que exige pasta vazia (por exemplo, `create-next-app`),
+rode o gerador no repositório de código **antes** do setup.
 
 ```powershell
 # Store do projeto: clone do padrão com o sufixo -openspec
@@ -34,7 +43,7 @@ git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-ope
 # Repositório de código
 mkdir C:\openspec\<projeto>
 cd C:\openspec\<projeto>
-git init
+git init -b main
 
 # Setup: instala skills, comandos e agentes no código e liga o código ao store
 node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
@@ -48,12 +57,9 @@ O setup não pergunta a stack: ela é definida na entrevista do próximo passo. 
 para `padrao` o remote `origin` do store, para que um push no store não vá para o repositório do
 padrão. O que mais ele faz está em [Como iniciar um projeto novo](README.md#como-iniciar-um-projeto-novo).
 
-Se a stack tem um gerador de projeto que exige pasta vazia (por exemplo, `create-next-app`),
-rode o gerador no repositório de código **antes** do setup.
-
 ## 3. Inicializar
 
-Abra o repositório de código no editor, abra o agente e rode:
+Abra o repositório de código no editor, abra o Claude Code e rode:
 
 ```text
 /opsx:init
@@ -78,14 +84,15 @@ Para publicar:
 
 - **Código:** crie o repositório remoto e rode `git remote add origin <url>` e `git push -u origin main`.
 - **Store:** o setup tirou o `origin` do padrão. Crie um repositório próprio para o store e rode
-  `git -C C:\openspec\<projeto>-openspec remote add origin <url>`.
+  `git -C C:\openspec\<projeto>-openspec remote add origin <url>` e
+  `git -C C:\openspec\<projeto>-openspec push -u origin main`.
 - **Atualizações do padrão:** no GitHub do repositório de código, ligue **Settings → Actions →
   General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
   O workflow instalado abre um PR a cada versão nova (veja `docs/openspec-padrao.md` no projeto).
 
 ## 5. Primeira change
 
-Toda mudança de comportamento passa pelo ciclo abaixo, no agente, dentro do repositório de código:
+Toda mudança de comportamento passa pelo ciclo abaixo, no Claude Code, dentro do repositório de código:
 
 1. `/opsx:explore` (opcional): para pensar o problema antes de planejar.
 2. `/opsx:propose <nome-da-change>`: cria proposta, specs, design e tarefas. Revise os artefatos.
@@ -108,7 +115,7 @@ O agente só faz push, abre PR ou faz deploy quando você pede explicitamente.
 | O CLI não encontra o store a partir do código | Rode o `openspec store register ...` que o setup mostrou e confira a linha `store:` em `openspec/config.yaml` do código |
 | Gerador de projeto recusa a pasta | Rode o gerador numa pasta temporária e copie os arquivos para o repositório de código |
 | O CLI está muito lento (Windows) | Veja [Desempenho e ambiente](README.md#desempenho-e-ambiente) |
-| O instalador pede `--update` ou `--in-place` | Os arquivos do padrão mudariam; use `--update` para receber a atualização numa branch própria |
+| O instalador pede `--update` ou `--in-place` | Os arquivos do padrão mudariam. Com a árvore limpa, rode `node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\install-skills.mjs C:\openspec\<projeto> --update` para receber a atualização numa branch própria (o setup não aceita essa opção) |
 
 ## 7. Para saber mais
 

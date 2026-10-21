@@ -75,6 +75,10 @@ O lint de Markdown da raiz já cobre o `COMECE-AQUI.md`.
 
 Entrada nova no topo do `CHANGELOG.md` e o mesmo número no `VERSION`, com "Ações no projeto: Nenhuma" (o guia chega pelo PR de atualização). O número é a próxima minor livre na hora da implementação: hoje a `1.1.0` está reservada pela change `coerencia-de-seguranca-e-triagem`, então esta usa a `1.2.0`; se a ordem dos merges mudar, o rebase ajusta o número e a CI ("Versão e changelog") confere.
 
+### D7. Ajustes da revisão de código
+
+A revisão do intervalo `23d3750..3147cef` apontou dois achados importantes, corrigidos: o guia e o README passam a usar `git init -b main` (num Git para Windows sem `init.defaultBranch`, a branch seria `master` e o `git push -u origin main` do guia falharia); e o pré-requisito de agente passa a ser o Claude Code, que é quem recebe os comandos `/opsx:*` (`.claude/commands/opsx/`), com uma nota para quem usa outro agente seguir o arquivo do comando. Também entram ajustes menores: o aviso do gerador de projeto vem antes do setup, o comando completo do `--update`, o push do store, o exemplo do README sem `&&` (inválido no PowerShell 5.1) e o guia do projeto citando `managedFiles` em vez de pastas fixas.
+
 ## Raio de impacto
 
 | Arquivo-alvo | Mudança | Dependentes afetados |

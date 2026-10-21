@@ -43,7 +43,7 @@ git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-ope
 # 2. Crie e inicialize o repositório de código
 mkdir C:\openspec\<projeto>
 cd C:\openspec\<projeto>
-git init
+git init -b main
 
 # 3. Rode o setup
 node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
@@ -60,7 +60,9 @@ Exemplo real (projeto Livraria):
 
 ```powershell
 git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\livraria-openspec
-mkdir C:\openspec\livraria && cd C:\openspec\livraria && git init
+mkdir C:\openspec\livraria
+cd C:\openspec\livraria
+git init -b main
 node C:\openspec\livraria-openspec\padrao-openspec\scripts\setup-project.mjs `
   C:\openspec\livraria `
   --name "Livraria" `
