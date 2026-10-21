@@ -499,5 +499,7 @@ jobs:
           grep -qF 'setup-project.mjs' COMECE-AQUI.md
           grep -qF '/opsx:init' COMECE-AQUI.md
           grep -qF 'git clone --branch v' COMECE-AQUI.md
-          grep -qF 'switch -c main' COMECE-AQUI.md
+          grep -qF -- '-openspec switch -c main' COMECE-AQUI.md
+          # O início de projeto clona a última release, não a main.
+          if grep -nE 'git clone https://github\.com/Gilmar1987/PadraoOpenspct' COMECE-AQUI.md README.md padrao-openspec/README.md; then exit 1; fi
           grep -qF '## Primeiros passos' padrao-openspec/templates/openspec-padrao.md
