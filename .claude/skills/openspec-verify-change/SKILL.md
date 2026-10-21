@@ -25,6 +25,8 @@ Otherwise, with no root, what happens next depends on how this workflow was reac
 
 In both branches, never create the root as a side effect: do not run `openspec init` until the user asks for it, do not hand-create `openspec/` files, and do not let a command create it.
 
+**Standard version check**: if the code repository has `.openspec-padrao.json`, read its `version` and `source`, and run `git ls-remote --tags --refs "<source>" "v*"`. If the highest `vX.Y.Z` tag is newer than the installed version, show one line: `há atualização do padrão: v<installed> → v<latest> (veja docs/openspec-padrao.md)`. If the file is missing, the command fails, or there is no network, continue silently. Never update anything from this check.
+
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**

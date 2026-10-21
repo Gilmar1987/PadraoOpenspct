@@ -331,7 +331,7 @@ async function setup(rl, options) {
       git(['remote', 'rename', 'origin', 'padrao']);
       console.log('Renamed the store remote "origin" (the standard repository) to "padrao".');
       remoteNote = `
-  3. O store não tem mais remote "origin". Para publicar o planejamento do projeto, crie um
+  4. O store não tem mais remote "origin". Para publicar o planejamento do projeto, crie um
      repositório para o store e rode: git -C "${storeRoot}" remote add origin <url-do-store>
      Para desfazer a troca: git -C "${storeRoot}" remote rename padrao origin`;
     }
@@ -363,7 +363,12 @@ or rerun this setup with --register-id ${id}.`);
 Pronto. Próximos passos:
   1. No repositório de código, rode /opsx:init: ele registra a stack, os comandos de
      verificação e as ADRs fundacionais no project.md deste store.
-  2. Faça commit das mudanças deste store e do repositório de código.${remoteNote}`);
+  2. Faça commit das mudanças deste store e do repositório de código, inclusive
+     .openspec-padrao.json (versão instalada do padrão), docs/openspec-padrao.md e
+     .github/workflows/openspec-padrao-update.yml.
+  3. Quando o repositório de código estiver no GitHub, ligue em Settings → Actions → General
+     "Allow GitHub Actions to create and approve pull requests": o workflow abre um PR a cada
+     versão nova do padrão (veja docs/openspec-padrao.md).${remoteNote}`);
 }
 
 try {

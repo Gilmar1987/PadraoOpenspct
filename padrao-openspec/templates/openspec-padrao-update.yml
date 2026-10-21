@@ -1,0 +1,172 @@
+# Gerenciado pelo padrão OpenSpec (PadraoOpenspct): não edite à mão; ele é substituído a cada
+# atualização. Veja docs/openspec-padrao.md.
+#
+# Toda segunda-feira (ou sob demanda), compara a versão do padrão instalada neste repositório
+# (.openspec-padrao.json) com a última release do padrão e, se houver versão nova, abre um PR
+# com a atualização na branch chore/padrao-vX.Y.Z.
+name: Atualização do padrão OpenSpec
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: openspec-padrao-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      # Sempre a partir da branch padrão. Um token com o escopo "workflow" (segredo opcional
+      # PADRAO_UPDATE_TOKEN) é necessário quando a versão nova muda arquivos em .github/workflows/;
+      # o GITHUB_TOKEN não pode fazer esse push.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.PADRAO_UPDATE_TOKEN || github.token }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ler a versão instalada
+        id: installed
+        run: |
+          if [ ! -f .openspec-padrao.json ]; then
+            echo "::warning::.openspec-padrao.json não encontrado; nada a comparar."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          read_field() { node -e 'const m = JSON.parse(require("fs").readFileSync(".openspec-padrao.json", "utf8")); console.log(m[process.argv[1]] ?? "")' "$1"; }
+          source="$(read_field source)"
+          repo="$(printf '%s\n' "$source" | sed -E 's#^(https://github\.com/|ssh://git@github\.com/|git@github\.com:)##; s#\.git$##; s#/$##')"
+          if ! printf '%s\n' "$repo" | grep -Eqx '[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+'; then
+            echo "::error::Origem do padrão inválida em .openspec-padrao.json: $source"
+            exit 1
+          fi
+          {
+            echo "version=$(read_field version)"
+            echo "repo=$repo"
+            echo "target=$(read_field target)"
+            echo "skip=false"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comparar com a última release
+        id: latest
+        if: steps.installed.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ steps.installed.outputs.repo }}
+          INSTALLED: ${{ steps.installed.outputs.version }}
+        run: |
+          if ! tag="$(gh release view --repo "$REPO" --json tagName -q .tagName 2> "$RUNNER_TEMP/release.err")"; then
+            if grep -qi 'release not found' "$RUNNER_TEMP/release.err"; then
+              echo "Nenhuma release publicada em $REPO."
+              echo "newer=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::Não foi possível consultar a última release de $REPO: $(cat "$RUNNER_TEMP/release.err")"
+            exit 1
+          fi
+          latest="${tag#v}"
+          newest="$(printf '%s\n%s\n' "$INSTALLED" "$latest" | sort -V | tail -n 1)"
+          if [ "$latest" = "$INSTALLED" ] || [ "$newest" != "$latest" ]; then
+            echo "O padrão está em dia (v$INSTALLED)."
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          branch="chore/padrao-v$latest"
+          prs="$(gh pr list --head "$branch" --state all --json state -q '.[].state')"
+          if printf '%s\n' "$prs" | grep -qx 'OPEN'; then
+            echo "Já existe um PR aberto de $branch."
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "$prs" ]; then
+            echo "O PR de $branch foi fechado; a versão v$latest não será proposta de novo. Para propô-la, apague a branch remota $branch."
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # A branch sobrou de uma execução que falhou antes de abrir o PR: só abre o PR.
+          reuse=false
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then reuse=true; fi
+          {
+            echo "newer=true"
+            echo "tag=$tag"
+            echo "latest=$latest"
+            echo "branch=$branch"
+            echo "reuse=$reuse"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Instalar a versão nova numa branch
+        if: steps.latest.outputs.newer == 'true' && steps.latest.outputs.reuse != 'true'
+        env:
+          TAG: ${{ steps.latest.outputs.tag }}
+          LATEST: ${{ steps.latest.outputs.latest }}
+          REPO: ${{ steps.installed.outputs.repo }}
+          TARGET: ${{ steps.installed.outputs.target }}
+          BRANCH: ${{ steps.latest.outputs.branch }}
+        run: |
+          git clone --quiet --depth 1 --branch "$TAG" "https://github.com/$REPO.git" "$RUNNER_TEMP/padrao"
+          version="$(tr -d '\r\n' < "$RUNNER_TEMP/padrao/padrao-openspec/VERSION")"
+          if [ "$version" != "$LATEST" ]; then
+            echo "::error::A tag $TAG do padrão tem VERSION $version; a release está inconsistente."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          node "$RUNNER_TEMP/padrao/padrao-openspec/scripts/install-skills.mjs" . --update --target "$TARGET"
+          if ! git push origin "$BRANCH" 2> "$RUNNER_TEMP/push.err"; then
+            cat "$RUNNER_TEMP/push.err"
+            if grep -qi 'workflow' "$RUNNER_TEMP/push.err"; then
+              echo "::error::A versão nova muda arquivos em .github/workflows/, e o GITHUB_TOKEN não pode publicá-los. Crie o segredo PADRAO_UPDATE_TOKEN (token com o escopo workflow) ou atualize à mão com install-skills.mjs --update (veja docs/openspec-padrao.md)."
+            fi
+            exit 1
+          fi
+
+      - name: Abrir o PR
+        if: steps.latest.outputs.newer == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.latest.outputs.tag }}
+          REPO: ${{ steps.installed.outputs.repo }}
+          FROM: ${{ steps.installed.outputs.version }}
+          TO: ${{ steps.latest.outputs.latest }}
+          BRANCH: ${{ steps.latest.outputs.branch }}
+        run: |
+          if [ ! -d "$RUNNER_TEMP/padrao" ]; then
+            git clone --quiet --depth 1 --branch "$TAG" "https://github.com/$REPO.git" "$RUNNER_TEMP/padrao"
+          fi
+          range="$RUNNER_TEMP/padrao/padrao-openspec/scripts/changelog-range.mjs"
+          older="$(gh pr list --state open --json number,headRefName -q '.[] | select(.headRefName | startswith("chore/padrao-v")) | "#\(.number)"' | tr '\n' ' ')"
+          body="$RUNNER_TEMP/pr-body.md"
+          {
+            echo "Atualiza o padrão OpenSpec de v$FROM para v$TO."
+            if [ -n "$older" ]; then
+              echo
+              echo "Substitui os PRs de atualização ainda abertos: $older. Feche-os depois de mergear este."
+            fi
+            echo
+            echo "## Ações no projeto"
+            echo
+            actions="$(node "$range" --from "$FROM" --to "$TO" --actions)"
+            if [ -n "$actions" ]; then printf '%s\n' "$actions"; else echo "Nenhuma."; fi
+            echo
+            echo "## Changelog"
+            echo
+            node "$range" --from "$FROM" --to "$TO" | sed 's/^## /### /'
+            echo
+            echo "---"
+            echo
+            echo "Aberto pelo workflow \`openspec-padrao-update.yml\`. Um PR aberto com o \`GITHUB_TOKEN\` não dispara os outros workflows do repositório: para rodar a CI, faça um push na branch ou feche e reabra o PR. Veja \`docs/openspec-padrao.md\`."
+          } > "$body"
+          base="$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
+          gh pr create --base "$base" --head "$BRANCH" \
+            --title "chore: atualiza padrão OpenSpec para v$TO" --body-file "$body"

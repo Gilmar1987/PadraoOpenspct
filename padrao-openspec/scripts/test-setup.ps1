@@ -203,6 +203,14 @@ Check 'project.md contém o nome "Projeto Teste"'             {
 Check 'config.yaml continua neutro (sem preset)'             {
     -not $configChanged
 }
+Check 'Manifesto da versão do padrão no código'               {
+    $manifest = Join-Path $codeDir '.openspec-padrao.json'
+    (Test-Path $manifest) -and ((Get-Content $manifest -Raw | ConvertFrom-Json).version -match '^\d+\.\d+\.\d+$')
+}
+Check 'Workflow e guia de atualização no código'              {
+    (Test-Path (Join-Path $codeDir '.github\workflows\openspec-padrao-update.yml')) -and
+    (Test-Path (Join-Path $codeDir 'docs\openspec-padrao.md'))
+}
 Check 'Skills de stack ausentes no código'                    {
     -not (Test-Path (Join-Path $codeDir '.agents\skills\dotnet-implementation')) -and
     -not (Test-Path (Join-Path $codeDir '.agents\skills\nextjs-implementation'))
