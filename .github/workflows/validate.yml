@@ -498,4 +498,6 @@ jobs:
           grep -qF '](COMECE-AQUI.md)' README.md
           grep -qF 'setup-project.mjs' COMECE-AQUI.md
           grep -qF '/opsx:init' COMECE-AQUI.md
+          grep -qF 'git clone --branch v' COMECE-AQUI.md
+          grep -qF 'switch -c main' COMECE-AQUI.md
           grep -qF '## Primeiros passos' padrao-openspec/templates/openspec-padrao.md

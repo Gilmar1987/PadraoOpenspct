@@ -44,8 +44,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-21
+- Escopo: archive
+- Condições: validate --strict, sync-root --check, lint e smoke tests passando, verify sem críticos (as mesmas da change guia-de-primeiros-passos)
+- Origem: "Aprovo a change clone-pela-release para archive, com as mesmas condições da anterio", em resposta à sugestão "Aprovo a change clone-pela-release para archive, com as mesmas condições da anterior"; a anterior é a aprovação de guia-de-primeiros-passos: "validate --strict, sync-root --check, lint e smoke tests passando, verify sem críticos"

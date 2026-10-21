@@ -15,7 +15,9 @@ de código e o nome do projeto e faz o resto. A stack é definida depois, pelo
 ([ADR-0003](../openspec/adrs/0003-padrao-sem-stack-embutida.md)).
 
 ```powershell
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\meu-projeto-openspec
+# Última release do padrão: gh release view --repo Gilmar1987/PadraoOpenspct --json tagName -q .tagName
+git clone --branch vX.Y.Z https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\meu-projeto-openspec
+git -C C:\openspec\meu-projeto-openspec switch -c main
 node C:\openspec\meu-projeto-openspec\padrao-openspec\scripts\setup-project.mjs
 ```
 

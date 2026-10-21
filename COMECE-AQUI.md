@@ -36,9 +36,17 @@ ADRs, e o **repositório de código**, onde fica a aplicação. Nos comandos aba
 Se a stack tem um gerador de projeto que exige pasta vazia (por exemplo, `create-next-app`),
 rode o gerador no repositório de código **antes** do setup.
 
+O store começa da **última release** do padrão, que é uma versão revisada e com changelog. Troque
+`vX.Y.Z` pela tag que o primeiro comando mostrar; sem o `gh`, veja a página
+[Releases](https://github.com/Gilmar1987/PadraoOpenspct/releases).
+
 ```powershell
-# Store do projeto: clone do padrão com o sufixo -openspec
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
+# Última release do padrão
+gh release view --repo Gilmar1987/PadraoOpenspct --json tagName -q .tagName
+
+# Store do projeto: clone da release, com a branch main criada a partir dela
+git clone --branch vX.Y.Z https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
+git -C C:\openspec\<projeto>-openspec switch -c main
 
 # Repositório de código
 mkdir C:\openspec\<projeto>
@@ -53,7 +61,9 @@ node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
   --yes
 ```
 
-O setup não pergunta a stack: ela é definida na entrevista do próximo passo. Ele também renomeia
+O clone por tag deixa o store sem branch; o `switch -c main` cria a branch `main` na release, para
+que os commits do projeto fiquem nela. O setup não pergunta a stack: ela é definida na
+entrevista do próximo passo. Ele também renomeia
 para `padrao` o remote `origin` do store, para que um push no store não vá para o repositório do
 padrão. O que mais ele faz está em [Como iniciar um projeto novo](README.md#como-iniciar-um-projeto-novo).
 
@@ -111,6 +121,7 @@ O agente só faz push, abre PR ou faz deploy quando você pede explicitamente.
 | Sintoma | O que fazer |
 |---|---|
 | `openspec: command not found` | Instale o CLI (passo 1) e abra um terminal novo |
+| `git status` no store diz `HEAD detached at vX.Y.Z` | Rode `git -C C:\openspec\<projeto>-openspec switch -c main` (passo 2) antes de commitar |
 | O setup recusa `--stack` | A opção foi removida; a stack vem do `/opsx:init` |
 | O CLI não encontra o store a partir do código | Rode o `openspec store register ...` que o setup mostrou e confira a linha `store:` em `openspec/config.yaml` do código |
 | Gerador de projeto recusa a pasta | Rode o gerador numa pasta temporária e copie os arquivos para o repositório de código |

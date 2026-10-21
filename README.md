@@ -37,8 +37,11 @@ ciclo de uma change estão no [COMECE-AQUI.md](COMECE-AQUI.md).
 ### Fluxo validado (recomendado)
 
 ```powershell
-# 1. Clone o repositório com o nome do projeto (sufixo -openspec por convenção)
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
+# 1. Clone a última release do padrão com o nome do projeto (sufixo -openspec por convenção)
+#    e crie a branch main a partir dela. A última tag aparece com:
+#    gh release view --repo Gilmar1987/PadraoOpenspct --json tagName -q .tagName
+git clone --branch vX.Y.Z https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
+git -C C:\openspec\<projeto>-openspec switch -c main
 
 # 2. Crie e inicialize o repositório de código
 mkdir C:\openspec\<projeto>
@@ -59,7 +62,8 @@ node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
 Exemplo real (projeto Livraria):
 
 ```powershell
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\livraria-openspec
+git clone --branch v1.2.0 https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\livraria-openspec
+git -C C:\openspec\livraria-openspec switch -c main
 mkdir C:\openspec\livraria
 cd C:\openspec\livraria
 git init -b main

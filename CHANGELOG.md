@@ -4,6 +4,19 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.2.1 — 2026-10-21
+
+### O que mudou
+
+- **Clone pela release:** o `COMECE-AQUI.md` e os READMEs passam a orientar a clonar a última
+  release do padrão (`git clone --branch vX.Y.Z`) e a criar a branch `main` a partir dela
+  (`git switch -c main`), em vez de clonar a `main`. Um projeto novo começa de uma versão
+  publicada, com changelog, e o manifesto registra uma versão que existe como release.
+
+### Ações no projeto
+
+- Nenhuma.
+
 ## 1.2.0 — 2026-10-21
 
 ### O que mudou
