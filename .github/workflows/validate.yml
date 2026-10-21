@@ -490,3 +490,12 @@ jobs:
 
       - name: Lint de Markdown da raiz
         run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"
+
+      # Guia de quem vai iniciar um projeto: existe, é linkado pelo README e cobre setup e init.
+      - name: Guia de primeiros passos
+        run: |
+          test -f COMECE-AQUI.md
+          grep -qF '](COMECE-AQUI.md)' README.md
+          grep -qF 'setup-project.mjs' COMECE-AQUI.md
+          grep -qF '/opsx:init' COMECE-AQUI.md
+          grep -qF '## Primeiros passos' padrao-openspec/templates/openspec-padrao.md

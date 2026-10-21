@@ -4,6 +4,22 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.2.0 — 2026-10-21
+
+### O que mudou
+
+- **Guia de primeiros passos:** `COMECE-AQUI.md` na raiz do padrão, com pré-requisitos (Git,
+  Node.js 18 ou mais recente e o OpenSpec CLI, com o comando de instalação), os passos até o
+  `/opsx:init`, o que commitar em cada repositório, como criar o remoto do store, o primeiro
+  ciclo de uma change e problemas comuns. O README aponta para ele no topo, e o exemplo de início
+  de projeto passa a incluir o `/opsx:init`.
+- **Guia do projeto:** o `docs/openspec-padrao.md` entregue ao repositório de código ganha a
+  seção "Primeiros passos", e a mensagem final do setup passa a citá-lo.
+
+### Ações no projeto
+
+- Nenhuma. O guia novo chega pelo PR de atualização.
+
 ## 1.0.0 — 2026-10-20
 
 Primeira versão numerada. Registra o estado do padrão depois do teste de ponta a ponta com
