@@ -4,10 +4,16 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
-## 1.2.1 — 2026-10-21
+## 1.3.0 — 2026-10-21
 
 ### O que mudou
 
+- **Script de entrada:** o `comecar.mjs`, anexado a cada release, é baixado sozinho
+  (`curl -LO https://github.com/Gilmar1987/PadraoOpenspct/releases/latest/download/comecar.mjs`)
+  e conduz o dev em dois casos. No projeto novo, pergunta a pasta, o nome e o id, clona a
+  última release uma única vez, já com o nome do projeto, e roda o setup. No projeto em
+  andamento, clona o código e o store, lê o id na linha `store:` e registra o store. O
+  `COMECE-AQUI.md` e os READMEs começam por ele e mantêm os passos à mão numa seção própria.
 - **Clone pela release:** o `COMECE-AQUI.md` e os READMEs passam a orientar a clonar a última
   release do padrão (`git clone --branch vX.Y.Z`) e a criar a branch `main` a partir dela
   (`git switch -c main`), em vez de clonar a `main`. Um projeto novo começa de uma versão
@@ -15,7 +21,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 
 ### Ações no projeto
 
-- Nenhuma.
+- Nenhuma obrigatória. O `docs/openspec-padrao.md` ganha a seção "Entrar neste projeto"
+  pelo PR de atualização.
 
 ## 1.2.0 — 2026-10-21
 

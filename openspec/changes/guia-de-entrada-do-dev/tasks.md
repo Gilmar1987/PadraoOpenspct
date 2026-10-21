@@ -25,8 +25,10 @@
 
 ## 4. Versão e integração
 
-- [ ] 4.1 Aplicar o D11 em `padrao-openspec/VERSION` e `CHANGELOG.md`. Verificar com o passo "Versão e changelog" e o smoke test do script (que usa a tag `v<VERSION>`) passando.
-- [ ] 4.2 Rodar `sync-root.mjs --check`, `openspec validate --all --strict` na raiz, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Verificar que todos saem com código 0.
+- [x] 4.1 Aplicar o D11 em `padrao-openspec/VERSION` e `CHANGELOG.md`. Verificar com o passo "Versão e changelog" e o smoke test do script (que usa a tag `v<VERSION>`) passando.
+  - Evidência: `VERSION` → 1.3.0 e seção `## 1.3.0` no topo do CHANGELOG (a 1.2.1 não publicada foi incorporada); `[PASS] Versão e changelog`, `[PASS] Smoke test do changelog-range` e `[PASS] Smoke test do script de entrada` com a tag `v1.3.0` (exit 0).
+- [x] 4.2 Rodar `sync-root.mjs --check`, `openspec validate --all --strict` na raiz, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Verificar que todos saem com código 0.
+  - Evidência: `sync-root.mjs --check` → "Root is in sync with padrao-openspec/."; passos do `validate.yml` no Git Bash → `[PASS]` nos 15 do job `store` (inclui `openspec validate --all --strict`, lint e "Smoke test do script de entrada") e nos 4 do job `root` (inclui validate da raiz, lint da raiz e "Guia de primeiros passos"), exit 0 nos dois. Registro `ci-store` removido.
 
 ## Workflow follow-up
 
