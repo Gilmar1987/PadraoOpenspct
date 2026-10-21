@@ -85,6 +85,7 @@ Entrada nova no topo do `CHANGELOG.md` e o mesmo número no `VERSION`, com "Aç�
 | `padrao-openspec/scripts/setup-project.mjs` | D4 | smokes de setup |
 | `.github/workflows/validate.yml` | D5 | nenhum |
 | `padrao-openspec/VERSION`, `CHANGELOG.md` | D6 | passo "Versão e changelog" |
+| `.markdownlint-cli2.jsonc` (raiz e `padrao-openspec/`) | descoberto no apply: com duas versões, o CHANGELOG repete "O que mudou" e "Ações no projeto" e a MD024 falhava; passa a valer `siblings_only` | lint dos jobs `root` e `store` |
 
 ## Risks / Trade-offs
 

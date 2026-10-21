@@ -4,6 +4,8 @@
     "default": true,
     // Prosa em pt-BR quebra linhas livremente; comprimento não indica erro.
     "MD013": false,
+    // O CHANGELOG repete "O que mudou" e "Ações no projeto" em cada versão: só barra títulos iguais na mesma seção.
+    "MD024": { "siblings_only": true },
     // Arquivos de agente/skill começam com frontmatter seguido de instruções, sem título H1.
     "MD041": false,
     // Tabelas com placeholders vazios não seguem um estilo de coluna único.

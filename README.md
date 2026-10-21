@@ -2,6 +2,9 @@
 
 Repositório central de padrões OpenSpec para desenvolvimento orientado a especificação (spec-driven development). Serve como ponto de partida para qualquer projeto novo, garantindo que o agente de IA tenha contexto preciso, regras claras e fluxo de trabalho padronizado antes de tocar no código.
 
+> **Vai começar um projeto?** Siga o [COMECE-AQUI.md](COMECE-AQUI.md): pré-requisitos, passos até
+> a primeira change e problemas comuns. Este README é a referência completa.
+
 ## O que está aqui
 
 ```text
@@ -27,6 +30,9 @@ pelo `/opsx:init` no `project.md` do projeto, e o apply e o verify usam esses co
 ---
 
 ## Como iniciar um projeto novo
+
+Pré-requisitos (Git, Node.js 18 ou mais recente e o OpenSpec CLI), o que commitar e o primeiro
+ciclo de uma change estão no [COMECE-AQUI.md](COMECE-AQUI.md).
 
 ### Fluxo validado (recomendado)
 
@@ -60,6 +66,9 @@ node C:\openspec\livraria-openspec\padrao-openspec\scripts\setup-project.mjs `
   --name "Livraria" `
   --register-id livraria `
   --yes
+
+# No repositório de código C:\openspec\livraria, abra o agente e rode a entrevista
+/opsx:init
 ```
 
 O setup:

@@ -54,8 +54,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-21
+- Escopo: archive
+- Condições: validate --strict, sync-root --check, lint e smoke tests passando, verify sem críticos
+- Origem: "Aprovo a change guia-de-primeiros-passos para archive, com as condições: validate --strict, sync-root --check, lint e smoke tests passando, verify sem críticos"
