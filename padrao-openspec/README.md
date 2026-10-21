@@ -8,7 +8,19 @@ repositório PadraoOpenspct. As cópias na raiz do repositório são geradas por
 
 ## Usar em um novo projeto
 
-Cada projeto tem o próprio store: clone o repositório PadraoOpenspct com o nome do
+O caminho recomendado é o script de entrada, que cria um projeto novo ou entra num projeto
+em andamento sem que você clone este repositório antes:
+
+```powershell
+curl.exe -LO https://github.com/Gilmar1987/PadraoOpenspct/releases/latest/download/comecar.mjs
+node comecar.mjs
+```
+
+O script fica em [`scripts/comecar.mjs`](scripts/comecar.mjs) e é anexado a cada release; veja
+o [COMECE-AQUI.md](../COMECE-AQUI.md). Para trabalhar num projeto que já usa o padrão, não
+clone este repositório: use o script no modo projeto em andamento.
+
+À mão, cada projeto tem o próprio store: clone o repositório PadraoOpenspct com o nome do
 projeto e rode o setup a partir do clone. O setup pergunta o caminho do repositório
 de código e o nome do projeto e faz o resto. A stack é definida depois, pelo
 `/opsx:init`: o padrão não traz presets nem skills de stack

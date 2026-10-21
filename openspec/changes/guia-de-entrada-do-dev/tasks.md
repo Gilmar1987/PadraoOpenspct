@@ -16,9 +16,12 @@
 
 ## 3. Guias
 
-- [ ] 3.1 Reescrever o `COMECE-AQUI.md` conforme o D9, com os exemplos de conversa copiados da saída real das execuções da 2.1 e da 2.2. Verificar com o lint da raiz sem issues e com as checagens do guia da 1.1 sobre o `COMECE-AQUI.md` passando.
-- [ ] 3.2 Aplicar o D9 em `README.md` (topo, parágrafo do repositório já configurado e "Como publicar uma release") e em `padrao-openspec/README.md`. Verificar com o lint nos dois lugares sem issues e com `grep` mostrando que o README não tem mais `<caminho-do-store>`.
-- [ ] 3.3 Aplicar o D9 em `padrao-openspec/templates/openspec-padrao.md`. Verificar com o passo "Guia de primeiros passos" passando inteiro e com os smoke tests do instalador e do setup passando.
+- [x] 3.1 Reescrever o `COMECE-AQUI.md` conforme o D9, com os exemplos de conversa copiados da saída real das execuções da 2.1 e da 2.2. Verificar com o lint da raiz sem issues e com as checagens do guia da 1.1 sobre o `COMECE-AQUI.md` passando.
+  - Evidência: `markdownlint-cli2@0.23.2 COMECE-AQUI.md` → 0 issues; checagens do guia sobre o `COMECE-AQUI.md` (`setup-project.mjs`, `/opsx:init`, `git clone --branch v`, `-openspec switch -c main`, `releases/latest/download/comecar.mjs` e a ausência de clone da `main`) → todas ok. Os exemplos de conversa vêm da saída real das execuções da 2.1 e da 2.2, com as pastas trocadas por `C:\openspec` e as URLs locais por URLs de exemplo.
+- [x] 3.2 Aplicar o D9 em `README.md` (topo, parágrafo do repositório já configurado e "Como publicar uma release") e em `padrao-openspec/README.md`. Verificar com o lint nos dois lugares sem issues e com `grep` mostrando que o README não tem mais `<caminho-do-store>`.
+  - Evidência: `markdownlint-cli2@0.23.2` → 0 issues em `README.md` e `COMECE-AQUI.md` (raiz) e em `padrao-openspec/README.md`; `grep -c '<caminho-do-store>' README.md` → 0. O topo do README mostra os comandos do script, o parágrafo do repositório já configurado indica `--modo existente` e o registro de `<pasta-do-store>\padrao-openspec`, e o `gh release create` anexa `padrao-openspec/scripts/comecar.mjs`.
+- [x] 3.3 Aplicar o D9 em `padrao-openspec/templates/openspec-padrao.md`. Verificar com o passo "Guia de primeiros passos" passando inteiro e com os smoke tests do instalador e do setup passando.
+  - Evidência: lint do template → 0 issues; `[PASS] Guia de primeiros passos` (todas as checagens, inclusive as novas); `[PASS]` nos smoke tests do instalador, do setup, do setup em subpasta, do remote do padrão e da declaração do store (exit 0). Registro `ci-store` deixado pelo smoke da declaração removido.
 
 ## 4. Versão e integração
 
