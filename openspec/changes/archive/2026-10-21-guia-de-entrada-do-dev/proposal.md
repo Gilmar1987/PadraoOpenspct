@@ -74,6 +74,7 @@ Nenhuma.
 
 - Responsável: gilmar campelo
 - Data: 2026-10-21
-- Escopo: apply
-- Condições: —
+- Escopo: archive
+- Condições: arquivar com os itens não verificados do verify em aberto (download pela release, console real, comandos do projeto); em seguida, push no PR #19, merge e publicação da v1.3.0 com o `comecar.mjs` anexado
+- Origem (archive): resposta "Archive, merge e release (Recomendado)" à pergunta "Como você quer seguir para publicar a v1.3.0?", cuja opção dizia "Arquivo a guia-de-entrada-do-dev (registra a aprovação de archive com esta resposta), faço push do commit no PR, faço o merge do PR #19 e publico a v1.3.0 com o comecar.mjs anexado, conferindo o download", depois do pedido "Publique a release v1.3.0."
 - Origem: "tudo aprovado vamos começar", em resposta à apresentação do fluxo com o script `comecar.mjs` ("Se esse fluxo estiver como você quer, eu levo para a change guia-de-entrada-do-dev pelo /opsx:update [...] Quer que eu siga?") e à pergunta "Quer que a sugestão padrão seja a pasta atual ou que fique C:\openspec?"; a pasta atual, que era a sugestão, foi tomada como aprovada.
