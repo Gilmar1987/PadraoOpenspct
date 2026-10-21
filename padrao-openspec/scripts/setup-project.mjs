@@ -362,7 +362,8 @@ or rerun this setup with --register-id ${id}.`);
   console.log(`
 Pronto. Próximos passos:
   1. No repositório de código, rode /opsx:init: ele registra a stack, os comandos de
-     verificação e as ADRs fundacionais no project.md deste store.
+     verificação e as ADRs fundacionais no project.md deste store. Os próximos passos
+     estão em docs/openspec-padrao.md, no repositório de código.
   2. Faça commit das mudanças deste store e do repositório de código, inclusive
      .openspec-padrao.json (versão instalada do padrão), docs/openspec-padrao.md e
      .github/workflows/openspec-padrao-update.yml.

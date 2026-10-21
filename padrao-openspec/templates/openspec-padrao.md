@@ -4,6 +4,20 @@ Este repositório usa o padrão OpenSpec do [PadraoOpenspct](https://github.com/
 skills, comandos `/opsx:*` e agentes que guiam o fluxo propose → apply → verify → archive.
 Este guia é gerenciado pelo padrão e é substituído a cada atualização; não o edite à mão.
 
+## Primeiros passos
+
+1. **Inicialize o projeto**, se ainda não fez: abra o agente neste repositório e rode `/opsx:init`.
+   A entrevista registra no store OpenSpec a stack, os comandos de verificação e as ADRs.
+2. **Commite** os arquivos que o padrão instalou (os listados em `managedFiles` do
+   `.openspec-padrao.json`, o próprio `.openspec-padrao.json`, o `.gitignore` e o
+   `openspec/config.yaml`) e, no store, os artefatos do init.
+3. **Faça cada mudança pelo ciclo** `/opsx:propose` → aprovação explícita no chat (por exemplo,
+   `Aprovo a change <nome> para apply`) → `/opsx:apply` → `/opsx:verify` → `/opsx:archive`. O
+   agente só faz push, abre PR ou faz deploy quando você pede.
+
+O passo a passo completo, com pré-requisitos e problemas comuns, está no
+[COMECE-AQUI.md](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/COMECE-AQUI.md) do padrão.
+
 ## Versão instalada
 
 A versão do padrão, o commit e o repositório de origem ficam em `.openspec-padrao.json`, na raiz
