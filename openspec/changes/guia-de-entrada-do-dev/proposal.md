@@ -2,33 +2,49 @@
 
 ## Why
 
-O `COMECE-AQUI.md` cobre só quem vai criar um projeto do zero. Um dev que recebe apenas o link do padrão, ou roda só `git clone https://github.com/Gilmar1987/PadraoOpenspct`, esbarra em três problemas:
+Hoje um dev que recebe só o link do padrão precisa ler o `COMECE-AQUI.md`, montar os comandos com o nome do projeto e acertar pasta, tag e registro do store. Três problemas aparecem:
 
-- Nada no clone diz para abrir o guia antes de agir, e o clone sem parâmetros cria uma pasta `PadraoOpenspct` que parece pronta para virar store, com o nome errado e fora de uma release.
-- Quem vai entrar num projeto já em andamento não tem instrução nenhuma. Ele não deve clonar o padrão nem rodar o setup. Precisa clonar o código e o store do projeto e registrar o store com o id certo. Hoje isso aparece em uma frase do README, com um caminho ambíguo (`<caminho-do-store>`, quando o registro é da pasta `padrao-openspec` dentro do clone).
-- O guia não diz o que o dev precisa receber de quem lidera o projeto: nome do projeto, URLs dos repositórios, quem responde a entrevista do `/opsx:init` e as permissões no GitHub. Os comandos também são só de Windows/PowerShell.
+- O caminho natural, `git clone https://github.com/Gilmar1987/PadraoOpenspct`, cria uma pasta `PadraoOpenspct` que não serve de store: tem o nome errado e não está numa release. O guia manda clonar de novo.
+- Quem vai entrar num projeto já em andamento não tem instrução. O README tem uma frase com um caminho ambíguo (`<caminho-do-store>`, quando o registro é da pasta `padrao-openspec` do clone).
+- Os comandos são só de Windows e dependem de o dev copiar e trocar os marcadores sem errar.
+
+Um script interativo, baixado sozinho de cada release, resolve os três: o dev roda dois comandos, responde a poucas perguntas e o script faz o único clone necessário, já na pasta certa.
 
 ## What Changes
 
-- **`COMECE-AQUI.md`** é reorganizado em dois caminhos:
-  - um aviso no topo: este clone serve para ler o guia; não o use como store;
-  - "Qual é o seu caso?": caminho A (projeto novo) ou caminho B (projeto em andamento), com o que pedir ao tech lead em cada um;
-  - **caminho A:** o fluxo atual (clone pela release, setup, `/opsx:init`, commit e publicação) com dois avisos novos: não mover nem renomear a pasta do store depois do setup, e um store por projeto;
-  - **caminho B (novo):** clonar o código e o store do projeto, ler o id na linha `store:` do `openspec/config.yaml` do código, registrar `<store>\padrao-openspec` com esse id, conferir o vínculo pelo CLI e começar pela primeira change, sem setup e sem `/opsx:init`;
-  - nota para macOS/Linux com os comandos equivalentes;
-  - a tabela de problemas comuns ganha as linhas do caminho B.
-- **README da raiz:** o aviso do topo diz para abrir o `COMECE-AQUI.md` também depois de um clone e cita os dois caminhos. A frase sobre "quem clona um repositório já configurado" passa a apontar para o caminho B, com o caminho de registro correto.
-- **`padrao-openspec/README.md`:** "Usar em um novo projeto" ganha uma linha que manda quem vai entrar num projeto existente para o caminho B.
-- **Guia entregue ao projeto (`templates/openspec-padrao.md`):** ganha a seção "Entrar neste projeto", antes de "Primeiros passos", para o dev que chega pelo repositório de código: clonar o store, registrar e conferir, com link para o caminho B.
-- **CI:** o passo "Guia de primeiros passos" passa a conferir que o guia tem os dois caminhos, o comando de registro do caminho B e a seção nova do template.
-- **Versão:** entra na `1.2.1`, que ainda não foi publicada. A seção `## 1.2.1` do CHANGELOG ganha o item, e "Ações no projeto" passa a citar a seção nova do guia do projeto, que chega pelo PR de atualização.
+- **Script `padrao-openspec/scripts/comecar.mjs` (novo)**, em Node, sem dependências:
+  - confere Git, Node.js 18+ e o OpenSpec CLI, e oferece instalar o CLI `1.14.2` quando falta;
+  - pergunta se o projeto é novo ou já existe e a pasta base (sugestão: a pasta atual; aceita qualquer caminho, cria a pasta se não existir, avisa quando a pasta é sincronizada por OneDrive, Dropbox ou Google Drive);
+  - **projeto novo:** pergunta o nome e o id, descobre a última release, clona o padrão direto em `<base>/<id>-openspec` pela tag, cria a branch `main`, cria o repositório de código (ou usa a pasta que um gerador como o `create-next-app` já criou) e roda o `setup-project.mjs`;
+  - **projeto em andamento:** pergunta as URLs do código e do store, clona os dois, lê o id na linha `store:` do código, registra a pasta `padrao-openspec` do store e confere que o CLI resolve o store a partir do código;
+  - mostra um resumo e pede confirmação antes de criar qualquer coisa; recusa uma pasta de projeto que já existe;
+  - aceita todas as respostas por opção (`--modo`, `--pasta`, `--nome`, `--id`, `--codigo`, `--url-codigo`, `--url-store`, `--yes`) para uso sem terminal interativo e para os testes;
+  - termina dizendo o próximo passo: `/opsx:init` no projeto novo e `/opsx:propose` no projeto em andamento.
+- **Release:** cada GitHub Release passa a ter o `comecar.mjs` anexado, para que `https://github.com/Gilmar1987/PadraoOpenspct/releases/latest/download/comecar.mjs` sempre baixe o da última release. "Como publicar uma release" no README ganha esse anexo.
+- **`COMECE-AQUI.md`** encolhe:
+  - aviso no topo: não clone o padrão para começar; baixe e rode o script;
+  - os dois comandos (Windows e macOS/Linux);
+  - o que pedir ao tech lead em cada caso;
+  - um exemplo de cada conversa com o script;
+  - a primeira change;
+  - "Sem o script": os passos manuais dos dois casos;
+  - problemas comuns.
+- **READMEs:** o topo do README da raiz mostra os dois comandos e aponta para o guia. A frase sobre quem clona um repositório de código já configurado passa a indicar o script no modo "projeto em andamento", com o caminho de registro correto. O `padrao-openspec/README.md` aponta para o script.
+- **Guia entregue ao projeto (`templates/openspec-padrao.md`):** ganha a seção "Entrar neste projeto", antes de "Primeiros passos", com o comando do script no modo "projeto em andamento".
+- **CI:**
+  - a sintaxe do script passa a ser conferida;
+  - smoke tests do script nos dois modos, contra um repositório local com tag;
+  - o passo "Guia de primeiros passos" passa a conferir o link de download e a seção nova do template.
+- **Versão:** `1.3.0`. A `1.2.1` não foi publicada; a seção dela no CHANGELOG vira a `1.3.0`, com o clone pela release e o script.
 
 ### Fora do escopo
 
-- Um script ou opção do setup para entrar num projeto existente (por exemplo, `setup-project.mjs --join`). O caminho B usa só `git` e o OpenSpec CLI.
-- Mudar o setup, o instalador ou o workflow de atualização.
-- Traduzir o guia ou criar versões separadas por sistema operacional. Windows continua o caminho principal; macOS/Linux ganha uma nota com os equivalentes.
-- Automatizar no GitHub as permissões citadas no guia.
+- Instalar Git, Node.js ou Claude Code pelo script: ele só confere e diz onde baixar.
+- Criar os repositórios remotos no GitHub, fazer push ou mudar as configurações de Actions pelo script.
+- Rodar o `/opsx:init` pelo script: a entrevista continua no Claude Code.
+- Um instalador `irm | iex` ou `curl | bash` que execute o script sem salvá-lo.
+- Mudar o comportamento do `setup-project.mjs`, do instalador ou do workflow de atualização.
+- Automatizar a publicação da release (o anexo é um argumento a mais no `gh release create`).
 
 ## Capabilities
 
@@ -38,22 +54,26 @@ Nenhuma.
 
 ### Modified Capabilities
 
-- `project-onboarding`: o guia passa a ter os caminhos "projeto novo" e "projeto em andamento", o aviso sobre o clone do padrão e o que pedir ao tech lead; o README e o guia do projeto apontam para o caminho certo; a CI protege as partes novas.
+- `project-onboarding`: entrada pelo script `comecar.mjs` nos casos de projeto novo e projeto em andamento; o guia, os READMEs e o guia do projeto apontam para ele; a CI testa o script.
+- `standard-versioning`: a publicação da release passa a anexar o `comecar.mjs`.
 
 ## Impact
 
-- **Documentação:** `COMECE-AQUI.md`, `README.md`, `padrao-openspec/README.md` e `padrao-openspec/templates/openspec-padrao.md`. O template é gerenciado pelo instalador, então os projetos recebem a seção nova pelo PR de atualização.
-- **CI:** `.github/workflows/validate.yml` (passo "Guia de primeiros passos").
-- **Versão:** `CHANGELOG.md` (seção `1.2.1`); `padrao-openspec/VERSION` continua `1.2.1`.
+- **Código:** `padrao-openspec/scripts/comecar.mjs` (novo).
+- **Documentação:** `COMECE-AQUI.md`, `README.md`, `padrao-openspec/README.md` e `padrao-openspec/templates/openspec-padrao.md`. O template é gerenciado pelo instalador; os projetos recebem a seção nova pelo PR de atualização.
+- **CI:** `.github/workflows/validate.yml`.
+- **Versão:** `padrao-openspec/VERSION` e `CHANGELOG.md` (`1.3.0`).
 - **Riscos:**
-  - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam.
-  - **Compatibilidade:** nenhuma quebra. Os comandos do caminho A continuam os mesmos.
-  - **Comando errado no guia:** o caminho B é conferido com um teste real numa pasta temporária antes do archive.
+  - **Execução de código baixado:** o dev baixa e roda um script. Mitigação: o arquivo vem só da GitHub Release do padrão, por HTTPS, é salvo antes de rodar (o guia diz que ele pode abri-lo antes) e não baixa outro código além do clone pela tag.
+  - **Comandos externos:** o script chama `git` com argumentos em lista, sem shell. `npm` e `openspec` são `.cmd` no Windows e só iniciam por um shell; ali cada argumento é citado, como o `setup-project.mjs` já faz, para que nomes de pasta e URLs não sejam interpretados.
+  - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam. O script não guarda credenciais; o acesso a repositórios privados fica com o Git da máquina.
+  - **Compatibilidade:** nenhuma quebra. O fluxo manual continua documentado e funcionando.
+  - **Release sem o anexo:** até a `v1.3.0` sair, o link `latest/download` não existe. O guia novo só chega aos devs junto com essa release.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: gilmar campelo
+- Data: 2026-10-21
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Origem: "tudo aprovado vamos começar", em resposta à apresentação do fluxo com o script `comecar.mjs` ("Se esse fluxo estiver como você quer, eu levo para a change guia-de-entrada-do-dev pelo /opsx:update [...] Quer que eu siga?") e à pergunta "Quer que a sugestão padrão seja a pasta atual ou que fique C:\openspec?"; a pasta atual, que era a sugestão, foi tomada como aprovada.
