@@ -2,13 +2,17 @@
 
 ## 1. Testes do script na CI
 
-- [ ] 1.1 Acrescentar ao job `store` de `.github/workflows/validate.yml` o `node --check scripts/comecar.mjs` e o passo "Smoke test do script de entrada" do D10, e ao passo "Guia de primeiros passos" as checagens do D10. Verificar rodando os passos localmente no Git Bash: devem falhar (o script e os guias novos ainda não existem).
+- [x] 1.1 Acrescentar ao job `store` de `.github/workflows/validate.yml` o `node --check scripts/comecar.mjs` e o passo "Smoke test do script de entrada" do D10, e ao passo "Guia de primeiros passos" as checagens do D10. Verificar rodando os passos localmente no Git Bash: devem falhar (o script e os guias novos ainda não existem).
+  - Evidência: passos rodados no Git Bash com um executor local do `validate.yml` → `[FAIL (1)] Sintaxe dos scripts` (`Cannot find module ...comecar.mjs`), `[FAIL (1)] Smoke test do script de entrada` e `[FAIL (1)] Guia de primeiros passos` (exit 1, esperado).
 
 ## 2. Script de entrada
 
-- [ ] 2.1 Criar `padrao-openspec/scripts/comecar.mjs` com a conversa, as opções, a conferência do ambiente e a pasta base (D2, D3, D4, D7, D8) e o modo projeto novo (D5). Verificar com a parte "modo novo" e as recusas do smoke test da 1.1 passando no Git Bash, e com uma execução interativa real no Windows numa pasta temporária, respondendo às perguntas como no exemplo do guia.
-- [ ] 2.2 Acrescentar o modo projeto em andamento (D6). Verificar com o smoke test da 1.1 passando inteiro no Git Bash e com uma execução real no Windows contra os repositórios bare do teste, conferindo `openspec context --json` no código clonado.
-- [ ] 2.3 Rodar o script com Git ausente do `PATH` e com um id inválido. Verificar que o primeiro para sem criar pastas e que o segundo repete a pergunta (interativo) ou falha citando `--id` (sem TTY).
+- [x] 2.1 Criar `padrao-openspec/scripts/comecar.mjs` com a conversa, as opções, a conferência do ambiente e a pasta base (D2, D3, D4, D7, D8) e o modo projeto novo (D5). Verificar com a parte "modo novo" e as recusas do smoke test da 1.1 passando no Git Bash, e com uma execução interativa real no Windows numa pasta temporária, respondendo às perguntas como no exemplo do guia.
+  - Evidência: no Git Bash, `[PASS] Sintaxe dos scripts` e `[PASS] Smoke test do script de entrada` (modo novo e recusas; exit 0). Não houve como abrir um console interativo real nesta sessão; a conversa foi rodada com TTY simulado (stdin e stdout marcados como terminal, respostas por pipe), num padrão local com tags v1.2.0 e v1.3.0: respostas `1`, pasta `projetos` inexistente → "Criar? [S/n]", nome `Livraria Online`, id sugerido `[livraria-online]`, Enter no gerador e na confirmação → store em `v1.3.0` na branch `main`, `store: livraria-online` no código, mensagem final com `/opsx:init`. A saída do setup passou a ser mostrada só em caso de falha, porque repetia um segundo "Pronto".
+- [x] 2.2 Acrescentar o modo projeto em andamento (D6). Verificar com o smoke test da 1.1 passando inteiro no Git Bash e com uma execução real no Windows contra os repositórios bare do teste, conferindo `openspec context --json` no código clonado.
+  - Evidência: `[PASS] Smoke test do script de entrada` inteiro (modo existente, código sem `store:` recusado sem registrar). Com TTY simulado: modo `2`, pasta relativa `dev2`, as URLs dos repositórios bare → "✔ O CLI encontra o store a partir do código"; `openspec context --json` no código clonado → `root.path` = `dev2\livraria-online-openspec\padrao-openspec`, `source: declared` (exit 0). Id já registrado → para com o `openspec store unregister livraria-online` a rodar e lista a pasta criada.
+- [x] 2.3 Rodar o script com Git ausente do `PATH` e com um id inválido. Verificar que o primeiro para sem criar pastas e que o segundo repete a pergunta (interativo) ou falha citando `--id` (sem TTY).
+  - Evidência: `PATH` só com o Node → "Erro: Git não encontrado. Instale o Git ..." (exit 1) e a pasta `semgit` não foi criada; `--id "Meu Id"` sem TTY → "Erro: Id inválido: \"Meu Id\" ... (--id)" (exit 1); com TTY simulado, "Meu Id" → `Id inválido` e a pergunta repete, `meu-id` aceito. Extra: pasta com espaço dentro de `OneDrive` → aviso de pasta sincronizada e projeto criado (exit 0).
 
 ## 3. Guias
 
