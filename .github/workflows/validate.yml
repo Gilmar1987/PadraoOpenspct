@@ -169,6 +169,12 @@ jobs:
           check "$f" "**7.3 — Em que idioma o código será escrito"
           check "$f" "Fila no próprio banco"
           check "$f" 'acrescente ao `operations.apply.guidance`'
+          # Coerência de segurança (1.6.0): opção sem autenticação, combinações novas e a restrição no project.md.
+          check "$f" "0) Sem autenticação no MVP"
+          check "$f" '7.1 "Auditoria de dependências" é "Não aplicável"'
+          check "$f" '7.1 "Varredura de secrets" é "Não aplicável"'
+          check "$f" '3.6 é "0) Sem autenticação no MVP" (ou um "Outro" equivalente)'
+          check "$f" "leve a restrição de uso"
           exit $missing
 
       - name: Smoke test do instalador

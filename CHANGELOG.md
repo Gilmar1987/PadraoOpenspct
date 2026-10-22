@@ -23,8 +23,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 ### Ações no projeto
 
 - No `project.md` do store, reveja as respostas "Não aplicável" para auditoria de dependências e
-  varredura de secrets em "Comandos de verificação": registre a ferramenta do ecossistema ou
-  "Adiado" com justificativa.
+  varredura de secrets em "Comandos de verificação": registre a ferramenta do ecossistema, ou
+  mantenha "Não aplicável" ou "Adiado" com a justificativa na coluna "Observações".
 - Se o projeto trata dados pessoais sem autenticação, registre em "Key Constraints" a restrição
   de uso (por exemplo, "uso só em ambiente local, com dados de teste, até existir autenticação").
 
