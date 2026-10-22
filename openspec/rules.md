@@ -39,7 +39,8 @@ Se o usuário pedir implementação sem uma change ativa, você MUST:
 3. Aguardar confirmação antes de qualquer escrita
 
 Toda correção, inclusive urgente, passa por uma change; uma change pequena, com uma tarefa,
-basta. Um "ajuste rápido" direto no código deixa a fonte da verdade (`openspec/specs/`)
+basta. Uma revisão pelo `/opsx:update` que muda o escopo de uma change aprovada zera a
+aprovação: a change volta a `Pendente` até ser aprovada de novo. Um "ajuste rápido" direto no código deixa a fonte da verdade (`openspec/specs/`)
 desatualizada, e a próxima change decide com base nela.
 
 A aprovação vale quando está registrada na seção `## Aprovação` do `proposal.md`:

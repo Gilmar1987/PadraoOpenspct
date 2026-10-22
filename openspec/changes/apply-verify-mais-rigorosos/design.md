@@ -26,7 +26,7 @@ Não há ADR nova: são salvaguardas do fluxo, no mesmo nível das que já exist
 
 ### D1. Trechos novos no apply
 
-Um parágrafo por trecho, em inglês como os demais, inserido na lista do passo 6 ("Implement tasks"), depois do "**Record task evidence**":
+Um parágrafo por trecho, em inglês como os demais, inserido na lista do passo 6 ("Implement tasks"), depois do "**Security checks**":
 
 - **Unrequested fixes are scope**: a behavior change that no task or requirement asks for is new scope, even when it fixes a defect (for example, making an error page follow the route's language). Stop, describe it and ask whether it goes into this change through `/opsx:update` or into another change.
 - **Check the library API**: before writing an adapter, parser or wrapper around a library, read its public API (types, signatures, installed docs) and record in the task evidence what was checked and why the library does not already handle the case.
@@ -37,7 +37,7 @@ Um parágrafo por trecho, em inglês como os demais, inserido na lista do passo 
 
 ### D2. Trechos novos no verify
 
-- **Review before verify** (novo passo 1a, antes do passo 2): if the change altered code (same definition as apply step 6a) and `review.md` is missing, stop before any other check, write no `verification.md`, say that the code review is a prerequisite and offer to run it. The existing "Code review record" check stays for a review that exists but is unresolved or stale.
+- **Review before verify** (novo passo 2a, logo depois do status do passo 2, que dá o `changeRoot` também quando há store): if the change altered code (same definition as apply step 6a) and `review.md` is missing, stop before any other check, write no `verification.md`, say that the code review is a prerequisite and offer to run it. The existing "Code review record" check stays for a review that exists but is unresolved or stale.
 - **Dependencies in Impact** (em Completeness): list the dependencies named in the proposal's Impact and check each against the tasks and the project's dependency manifest; add a WARNING `Dependency in Impact without task or manifest entry: <name>` for each miss.
 - **Agent-run browser scripts** (em Scenario Coverage): when the evidence of a browser verification script says an agent ran it without real interaction (HTTP requests, no clicks), report the scenario as partially covered under "Não verificado" and ask for a human run before archive.
 
