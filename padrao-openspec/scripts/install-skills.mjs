@@ -338,7 +338,7 @@ function escapeRegExp(text) {
 function cleanStaleInstallerFiles(projectRoot, parents) {
   const stale = [
     { dir: projectRoot, pattern: new RegExp(`^\\.gitignore-${uuidPattern}\\.tmp$`, 'i') },
-    ...parents.map((dir) => ({ dir, pattern: new RegExp(`^\\.skill-tree-${uuidPattern}\\.tmp$`, 'i') })),
+    ...parents.map((dir) => ({ dir, pattern: new RegExp(`^\\.(?:skill-tree|skill-file|openspec-block)-${uuidPattern}\\.tmp$`, 'i') })),
   ];
   const backupPattern = new RegExp(`^\\.skill-tree-${uuidPattern}\\.bak$`, 'i');
 
@@ -558,7 +558,7 @@ function withManagedBlock(original, body, file) {
   const begins = original.split(blockBegin).length - 1;
   const ends = original.split(blockEnd).length - 1;
   if (begins === 0 && ends === 0) {
-    if (original.length === 0) return `${block}${eol}`;
+    if (original.replace(/^\uFEFF/, '').length === 0) return `${original}${block}${eol}`;
     const separator = original.endsWith('\n') ? eol : `${eol}${eol}`;
     return `${original}${separator}${block}${eol}`;
   }
@@ -573,13 +573,25 @@ function withManagedBlock(original, body, file) {
   return `${original.slice(0, start)}${block}${original.slice(end + blockEnd.length)}`;
 }
 
+// A file the project ignores (for example, a personal CLAUDE.md) is left alone: writing it would
+// leave an untracked file behind, and --update could not commit it.
+function isIgnoredByProject(projectRoot, relativePath) {
+  if (tryGit(projectRoot, ['rev-parse', '--is-inside-work-tree']) !== 'true') return false;
+  if (tryGit(projectRoot, ['ls-files', '--error-unmatch', '--', relativePath]) !== null) return false;
+  return tryGit(projectRoot, ['check-ignore', '-q', '--', relativePath]) !== null;
+}
+
 function planInstructionBlocks(projectRoot) {
   const templatePath = path.join(sourceTemplates, blockTemplate);
   const rules = readFileSync(templatePath, 'utf8').replace(/\r\n/g, '\n').trim();
+  const normalize = (text) => text.replace(/\r\n/g, '\n');
   return instructionFiles.map((file) => {
     const destination = path.join(projectRoot, ...file.path.split('/'));
-    assertSafeDestination(projectRoot, destination, templatePath);
     const info = lstatIfPresent(destination);
+    // A symlinked instruction file (for example, CLAUDE.md -> AGENTS.md) gets the block through its target.
+    if (info?.isSymbolicLink()) return { ...file, destination, skip: 'is a symbolic link; its target carries the block' };
+    if (isIgnoredByProject(projectRoot, file.path)) return { ...file, destination, skip: 'is ignored by the project (.gitignore)' };
+    assertSafeDestination(projectRoot, destination, templatePath);
     if (info && !info.isFile()) throw new Error(`Refusing to modify a non-regular file: ${destination}`);
     const original = info ? readFileSync(destination, 'utf8') : '';
     const desired = withManagedBlock(original, file.body === 'import' ? '@AGENTS.md' : rules, file.path);
@@ -587,9 +599,11 @@ function planInstructionBlocks(projectRoot) {
       ...file,
       destination,
       desired,
+      mode: info?.mode,
       exists: Boolean(info),
       hadBlock: original.includes(blockBegin),
-      changed: desired !== original,
+      // Line endings alone are not a change, so a file that mixes LF and CRLF stays current.
+      changed: normalize(desired) !== normalize(original),
     };
   });
 }
@@ -598,7 +612,7 @@ function writeInstructionBlock(plan) {
   mkdirSync(path.dirname(plan.destination), { recursive: true });
   const tempPath = path.join(path.dirname(plan.destination), `.openspec-block-${randomUUID()}.tmp`);
   try {
-    writeFileSync(tempPath, plan.desired);
+    writeFileSync(tempPath, plan.desired, plan.mode === undefined ? undefined : { mode: plan.mode });
     renameWithRetry(tempPath, plan.destination);
   } finally {
     if (existsSync(tempPath)) rmSync(tempPath, { force: true });
@@ -736,11 +750,13 @@ function main() {
   const changing = operations.filter(({ source: from, destination }) =>
     existsSync(destination) && !sameContent(from, destination));
   // A block the standard already wrote counts like a managed file; adding a missing block does not.
-  const changingBlocks = blocks.filter((block) => block.hadBlock && block.changed);
+  const changingBlocks = blocks.filter((block) => !block.skip && block.hadBlock && block.changed);
   if ((changing.length > 0 || changingBlocks.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
     const details = [
       ...changing.map(({ name, destination }) => `  ${name}: ${destination}`),
-      ...changingBlocks.map(({ destination }) => `  openspec-padrao block: ${destination}`),
+      ...changingBlocks.map(({ destination }) => (previous === null
+        ? `  existing openspec-padrao block, not written by this installer (it would be replaced): ${destination}`
+        : `  openspec-padrao block: ${destination}`)),
       ...(manifestChanged ? [`  ${manifestName}: v${previous.version ?? '?'} -> v${version}`] : []),
     ].join('\n');
     throw new Error(
@@ -751,7 +767,10 @@ function main() {
   }
 
   const install = () => {
-    cleanStaleInstallerFiles(projectRoot, [...new Set(operations.map(({ destination }) => path.dirname(destination)))]);
+    cleanStaleInstallerFiles(projectRoot, [...new Set([
+      ...operations.map(({ destination }) => path.dirname(destination)),
+      ...blocks.map(({ destination }) => path.dirname(destination)),
+    ])]);
     ensureConsumerGitignore(projectRoot);
 
     let installed = 0;
@@ -772,6 +791,10 @@ function main() {
       installed += 1;
     }
     for (const block of blocks) {
+      if (block.skip) {
+        console.log(`Skipped: ${block.path} ${block.skip}`);
+        continue;
+      }
       if (!block.changed) {
         console.log(`Unchanged: ${block.path} (openspec-padrao block)`);
         unchanged += 1;
@@ -790,7 +813,7 @@ function main() {
     return;
   }
 
-  const missing = operations.some(({ destination }) => !existsSync(destination)) || blocks.some((block) => block.changed);
+  const missing = operations.some(({ destination }) => !existsSync(destination)) || blocks.some((block) => !block.skip && block.changed);
   if (previous !== null && changing.length === 0 && !missing && !manifestChanged) {
     console.log(`Already at v${version}; nothing to update.`);
     return;
@@ -816,7 +839,7 @@ function main() {
     const paths = [...new Set([
       '.gitignore', manifestName,
       ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')),
-      ...instructionFiles.map((file) => file.path),
+      ...blocks.filter((block) => !block.skip).map((block) => block.path),
     ])];
     gitIn(projectRoot, ['add', '-A', '--', ...paths]);
     if (tryGit(projectRoot, ['diff', '--cached', '--quiet']) !== null) {

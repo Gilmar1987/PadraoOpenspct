@@ -25,7 +25,8 @@ qual store deve ser referenciado antes de prosseguir.
 ## 2. Nenhuma implementação sem change ativa aprovada
 
 Você MUST NOT escrever, modificar ou deletar código de aplicação sem que exista
-uma change ativa em `openspec/changes/` com os seguintes artefatos presentes:
+uma change ativa em `openspec/changes/` da raiz OpenSpec (o store, num projeto com store
+separado) com os seguintes artefatos presentes:
 
 - `proposal.md` — escopo e justificativa aprovados
 - `tasks.md` — checklist de tarefas com critérios de conclusão
@@ -121,7 +122,7 @@ Você MUST NOT:
 Economize contexto nas saídas, nunca nos artefatos.
 
 - Você MUST ler por inteiro, sem resumir nem ler parcialmente: este arquivo,
-  `openspec/config.yaml`, `openspec/project.md`, as ADRs `Accepted` relevantes,
+  `openspec/config.yaml` e `openspec/project.md` da raiz OpenSpec, as ADRs `Accepted` relevantes,
   todos os artefatos da change ativa e as specs principais que ela afeta.
 - Você SHOULD filtrar saídas volumosas antes de lê-las (logs, saídas de build e de
   testes, JSON e CSV grandes): busque o erro, leia o início ou o fim, extraia campos.

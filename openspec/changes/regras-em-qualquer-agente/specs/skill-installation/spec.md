@@ -34,3 +34,13 @@ O instalador SHALL manter, em `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/co
 
 - **WHEN** o instalador roda duas vezes seguidas da mesma versão
 - **THEN** os arquivos de instrução não mudam na segunda execução
+
+#### Scenario: Bloco alterado sem modo
+
+- **WHEN** o texto entre os marcadores de um arquivo de instrução difere do da versão instalada e o instalador roda sem `--update` nem `--in-place`
+- **THEN** o instalador termina com erro citando o arquivo e os dois modos, sem alterar nada
+
+#### Scenario: Arquivo ignorado pelo projeto
+
+- **WHEN** o projeto ignora o `CLAUDE.md` no `.gitignore` e o instalador roda com `--update`
+- **THEN** o instalador não cria o `CLAUDE.md`, informa que o pulou e faz o commit dos demais arquivos

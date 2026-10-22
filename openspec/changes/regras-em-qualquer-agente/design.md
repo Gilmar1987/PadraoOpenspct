@@ -39,7 +39,7 @@
   - na seção 1, os arquivos `openspec/config.yaml` e `openspec/project.md` ficam "no store do projeto (o `openspec context --json` mostra a raiz)".
 
   O resto fica igual.
-- `sync-root.mjs` ganha o mapeamento de arquivo `openspec/rules.md`, e a raiz volta a ter a cópia gerada. A guarda do script ("does not look like the PadraoOpenspct repository") passa a procurar `padrao-openspec/openspec/rules.md`.
+- `sync-root.mjs` ganha o mapeamento de arquivo `openspec/rules.md`, e a raiz volta a ter a cópia gerada. A guarda do script ("does not look like the PadraoOpenspct repository") passa a procurar o `COMECE-AQUI.md` na raiz, porque o `openspec/rules.md` da raiz agora é gerado pelo próprio sync.
 - `templateFiles` do instalador ganha `{ source: '../openspec/rules.md', destination: 'docs/openspec-regras.md' }`, ou o equivalente com `sourceRoot`. O arquivo é gerenciado como os outros.
 
 ### D2. Bloco gerenciado
@@ -69,7 +69,7 @@ Alternativa rejeitada: só `AGENTS.md`. O Claude Code, o Gemini CLI e o Copilot 
 
 Função `ensureManagedBlock(projectRoot, relativePath, block)`, no modelo do `ensureConsumerGitignore`:
 
-1. Recusa symlink ou caminho que não é arquivo comum.
+1. Pula, com aviso, um arquivo que é symlink (por exemplo, `CLAUDE.md -> AGENTS.md`: o alvo recebe o bloco) ou que o projeto ignora no `.gitignore` e não rastreia (um `CLAUDE.md` pessoal, por exemplo); recusa um caminho que não é arquivo comum.
 2. Arquivo ausente: cria com o bloco (e as pastas `.github/` e `.amazonq/rules/` se faltarem).
 3. Arquivo sem os marcadores: acrescenta uma linha em branco e o bloco no fim, mantendo o EOL do arquivo.
 4. Arquivo com os marcadores: substitui o trecho entre o primeiro `BEGIN` e o `END` seguinte. Com mais de um par de marcadores, ou com um `BEGIN` sem `END`, para com erro sem alterar nada.

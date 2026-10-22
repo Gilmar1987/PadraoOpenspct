@@ -484,6 +484,17 @@ jobs:
           if grep -qF 'texto antigo' "$code/AGENTS.md"; then exit 1; fi
           head -n 3 "$code/AGENTS.md" | cmp - "$work/next-block.txt"
           git -C "$code" show --stat --format= HEAD | grep -qF 'AGENTS.md'
+          # Arquivo de instrução ignorado pelo projeto: não é criado, e o --update funciona.
+          ignored="$work/ignored"
+          mkdir -p "$ignored"
+          git -C "$ignored" init -q
+          printf 'CLAUDE.md\n' > "$ignored/.gitignore"
+          git -C "$ignored" add -A
+          commit "$ignored" -m base
+          node scripts/install-skills.mjs "$ignored" --update > "$RUNNER_TEMP/blocos-ignored.txt"
+          grep -qF 'Skipped: CLAUDE.md' "$RUNNER_TEMP/blocos-ignored.txt"
+          test ! -e "$ignored/CLAUDE.md"
+          git -C "$ignored" show --stat --format= HEAD | grep -qF 'AGENTS.md'
           # BEGIN sem END: o instalador para antes de alterar qualquer arquivo.
           broken="$work/broken"
           mkdir -p "$broken"
