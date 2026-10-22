@@ -4,6 +4,33 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.4.0 — 2026-10-22
+
+### O que mudou
+
+- **Documento de arquitetura:** o `/opsx:init` passa a gerar `openspec/arquitetura.md` com visão
+  geral, estilo, componentes, comunicação, um diagrama Mermaid, dados, deploy, observabilidade,
+  as decisões com links para as ADRs e os pontos adiados. A seção "Architecture" do `project.md`
+  fica com um resumo e o link.
+- **Idioma do código:** nova pergunta 7.3; a 7.2 passa a cobrir também os campos de Development
+  Conventions que nenhuma resposta preencheu.
+- **Fila e banco:** a 3.8 oferece tipos de fila (no próprio banco, Redis, broker, agendamento,
+  serviço gerenciado) com exemplos por banco e linguagem, e a checagem de coerência aponta uma
+  biblioteca de fila presa a outro banco.
+- **E2E no config:** o init acrescenta a orientação de E2E ao `operations.apply.guidance` (com o
+  framework da 5.5, ou o roteiro em navegador quando não há E2E), em vez de procurar uma linha que
+  o config neutro não tem.
+
+### Ações no projeto
+
+- Nenhuma obrigatória.
+- Projetos já inicializados podem pedir ao agente que gere `openspec/arquitetura.md` a partir do
+  `project-setup.md`, seguindo o "Arquivo 5" do `.claude/commands/opsx/init.md`.
+- Arquivos de respostas pré-preenchidas com a 3.8 numérica: confira a resposta, porque a
+  numeração mudou. Antiga → nova: 1 (pg-boss / BullMQ) → 1 (pg-boss) ou 2 (BullMQ); 2 (Celery /
+  RQ) → 2; 3 (Hangfire) → 1; 4 (Sidekiq) → 2; 5 → 5; 6 → 6. Respostas em texto livre continuam
+  valendo.
+
 ## 1.3.1 — 2026-10-21
 
 ### O que mudou

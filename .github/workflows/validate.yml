@@ -142,6 +142,15 @@ jobs:
             check "$f" "Check the archive authorization"
             check "$f" "Commit the archive"
           done
+          # Entrevista do init: documento de arquitetura, idioma do código, fila por banco e E2E acrescentado.
+          f=.claude/commands/opsx/init.md
+          check "$f" '### Arquivo 5: `<root>/openspec/arquitetura.md`'
+          check "$f" "flowchart LR"
+          check "$f" "ou de Development Conventions"
+          check "$f" "3.8 cita uma biblioteca presa"
+          check "$f" "**7.3 — Em que idioma o código será escrito"
+          check "$f" "Fila no próprio banco"
+          check "$f" 'acrescente ao `operations.apply.guidance`'
           exit $missing
 
       - name: Smoke test do instalador

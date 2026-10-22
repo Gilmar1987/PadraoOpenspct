@@ -45,7 +45,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 O comando aceita, opcionalmente, o caminho de um arquivo de respostas: `/opsx:init <caminho>`. Use-o para automação e testes do padrão.
 
-- O arquivo é Markdown, com uma tabela `| Pergunta | Resposta |`. A pergunta é o número (1.1, 3.2…) ou, no bloco 7, o nome da finalidade (por exemplo, "Testes") ou do campo da Stack Summary. Ele também pode trazer as linhas `Responsável: <nome>` e `Confirmação final: sim`.
+- O arquivo é Markdown, com uma tabela `| Pergunta | Resposta |`. A pergunta é o número (1.1, 3.2…) ou, no bloco 7, o nome da finalidade (por exemplo, "Testes"), do campo da Stack Summary ou do campo de Development Conventions; a 7.3 vai pelo número. Ele também pode trazer as linhas `Responsável: <nome>` e `Confirmação final: sim`.
 - Aplique as respostas do arquivo e pergunte no chat só o que faltar, inclusive campos do bloco 7.
 - Mostre o resumo completo uma vez, em vez de confirmar bloco a bloco.
 - A confirmação final vale se vier do responsável no chat, ou se o arquivo trouxer `Confirmação final: sim` e o nome do responsável.
@@ -320,14 +320,16 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 
 ---
 
-**3.8 — Se houver jobs/filas (respondido no 2.5), qual biblioteca será usada?** `[OPCIONAL]`
+**3.8 — Se houver jobs/filas (respondido no 2.5), qual tipo de fila será usado?** `[OPCIONAL]`
+
+_(Para o agente, não mostre esta nota: mantenha os seis tipos e ajuste os exemplos entre parênteses à linguagem da 3.1 e ao banco da 3.3.)_
 
 ```
 0) Não aplicável
-1) pg-boss / BullMQ (Node.js)
-2) Celery / RQ (Python)
-3) Hangfire (.NET)
-4) Sidekiq (Ruby)
+1) Fila no próprio banco (pg-boss no PostgreSQL, Hangfire com SQL Server, tabela de jobs em qualquer banco)
+2) Fila em Redis (BullMQ no Node.js, RQ ou Celery no Python, Sidekiq no Ruby)
+3) Broker dedicado (RabbitMQ, Kafka, Azure Service Bus)
+4) Agendamento simples (cron do sistema ou do provedor de deploy)
 5) Serviço gerenciado (Inngest, Trigger.dev, filas da cloud)
 6) Outro (digitar livremente)
 ```
@@ -673,7 +675,18 @@ Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido 
 
 Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comandos rodam dentro do contêiner (por exemplo, `docker compose run --rm app pytest`) e registre a forma escolhida.
 
-**7.2 — Campos sem decisão.** Para cada campo da Stack Summary que ainda é "A definir" e que nenhuma resposta dos blocos 1 a 6 cobriu, pergunte o campo, uma pergunta por vez, com opções coerentes com a stack escolhida no bloco 3, mais **Adiar** (grava "Adiado: decidir na primeira change que precisar") e **Outro (digitar livremente)**. Se nenhum campo continuar "A definir", diga isso e siga para a confirmação final.
+**7.2 — Campos sem decisão.** Para cada campo da Stack Summary ou de Development Conventions que ainda é "A definir" e que nenhuma resposta dos blocos 1 a 6, nem a 7.3, cobre, pergunte o campo, uma pergunta por vez, com opções coerentes com a stack escolhida no bloco 3, mais **Adiar** (grava "Adiado: decidir na primeira change que precisar") e **Outro (digitar livremente)**. Se nenhum campo continuar "A definir", diga isso e siga para a 7.3. Em Development Conventions, "Idioma dos textos visíveis ao usuário" vem da 1.7, "Organização e estilo" de 2.2 e 2.3 (e do comando de lint da 7.1), "Git e revisão" do bloco 5, "Testes e critérios de qualidade" de 5.3 a 5.6, "Segurança e tratamento de dados" do bloco 6 e da 1.5, e "Idioma do código" da 7.3.
+
+**7.3 — Em que idioma o código será escrito (identificadores, comentários e mensagens de commit)?**
+
+```
+1) Inglês em tudo
+2) Português em tudo
+3) Inglês no código e português nos comentários e commits
+4) Inglês no código e nos commits, português nos comentários
+5) Seguir o idioma da stack ou do time existente (descreva no complemento)
+6) Outro (digitar livremente)
+```
 
 O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo ou comando adiado não deixa o projeto "não inicializado".
 
@@ -691,11 +704,13 @@ Avalie ao menos estas combinações:
 |---|---|---|
 | 5.7 exige aprovação de PR e 5.9 é "Uma pessoa" | A plataforma não deixa o autor aprovar o próprio PR; a regra vira letra morta | Revisão por subagente (`requesting-code-review`) com o resultado anexado ao PR, ou "merge sem revisão formal" registrado |
 | 5.2 tem CI, ou 5.1/5.7 dependem de PR, e 5.8 é "Sem remoto" | CI remoto e PR não existem sem remoto; tarefas que os exigem não fecham | Verificações locais obrigatórias até o remoto existir |
-| 3.8 tem biblioteca de filas e 2.5 é "Não" | Serviços e dependências sem uso | Adiar a biblioteca para a primeira change que precisar de fila |
+| 3.8 tem um tipo de fila e 2.5 é "Não" | Serviços e dependências sem uso | Adiar a fila para a primeira change que precisar |
 | 2.4 é REST/HTTP, gRPC ou mensageria e 2.1 é um monólito | Chamadas de rede onde uma chamada direta bastaria | Confirmar o motivo, ou trocar por chamada direta entre módulos |
 | 4.4 usa variáveis ou cofre da plataforma e 4.1/4.3 não têm produção | Configuração para uma plataforma que não existe | Registrar só o `.env` local por enquanto |
 | 5.5 tem framework de E2E e 5.3 não inclui E2E, ou o contrário | Testes que ninguém roda, ou exigência sem ferramenta | Alinhar as duas respostas |
 | 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis) e 6.5 é 0 | Dados pessoais sem nenhum controle de LGPD/GDPR | Registrar ao menos o consentimento com registro de aceite e o direito de exclusão (1,2), ou justificar |
+| 3.8 cita uma biblioteca presa a um banco (por exemplo, pg-boss) e 3.3 é outro banco | A fila exige um banco que o projeto não tem | Fila no banco da 3.3 (tabela de jobs, Hangfire etc.), ou registrar o banco extra na 3.3 e no deploy |
+| 3.8 é Redis ou broker dedicado e o bloco 4 não prevê esse serviço | Infraestrutura que o deploy não tem | Registrar o serviço no bloco 4 (desenvolvimento e produção), ou trocar por fila no próprio banco |
 
 Para cada combinação encontrada:
 
@@ -818,18 +833,22 @@ Após todos os blocos confirmados:
 ---
 
 > Documento gerado automaticamente pelo comando `/opsx:init`.
-> Para revisar as decisões, edite este arquivo e atualize `openspec/project.md` e `openspec/config.yaml`.
+> Para revisar as decisões, edite este arquivo e atualize `openspec/project.md`, `openspec/config.yaml` e `openspec/arquitetura.md`.
 ```
 
 ### Arquivo 2: `<root>/openspec/project.md`
 
-Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
+Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Registre a 7.3 em "Idioma do código". Na seção "Architecture", escreva um resumo de 3 a 5 linhas e o link `[Arquitetura detalhada](arquitetura.md)`, sem repetir o conteúdo do Arquivo 5. Nas subseções "Componentes e limites" e "Fluxo de dados e integrações", registre só os componentes e fluxos em uma linha cada, apontando para o `arquitetura.md` para o detalhe. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
 
 ### Arquivo 3: `<root>/openspec/config.yaml`
 
 Atualize o campo `context:` com as decisões reais de stack, arquitetura e convenções, citando os comandos de verificação registrados. Remova o bloco `Inicialização do projeto` após a conclusão — ele não é mais necessário.
 
-A decisão de testes do projeto prevalece sobre a orientação padrão do config base. Se a 5.5 for "0) Não aplicável", troque no `operations.apply.guidance` a exigência de teste E2E por: "Cobrir cenários de interface com um roteiro de verificação em navegador versionado no repositório, já que o projeto decidiu não ter E2E. Se a execução for automatizada, versionar o script junto do roteiro. Registrar no roteiro quem executou (pessoa ou agente), quando e o resultado de cada passo. Dados criados pelo roteiro levam um marcador, e o roteiro termina removendo-os".
+A decisão de testes do projeto prevalece sobre a orientação padrão do config base. O config base não tem linha de E2E: acrescente ao `operations.apply.guidance`, depois das linhas do config base, uma linha conforme a 5.5. Se já houver uma linha sobre E2E (por exemplo, num store antigo), substitua-a em vez de duplicar.
+
+- Com um framework de interface na 5.5 (1 a 4, ou um "Outro" equivalente): "Cobrir os cenários de interface com testes E2E em <framework da 5.5>, rodados pelo comando de E2E registrado no bloco 7 (ou pelo de testes, se for o mesmo)."
+- Com "5) Testcontainers": "Cobrir as integrações com banco e serviços com testes em Testcontainers." Como Testcontainers não cobre a interface, acrescente também a linha do roteiro em navegador abaixo quando o projeto tiver front-end (3.2).
+- Com "0) Não aplicável": "Cobrir cenários de interface com um roteiro de verificação em navegador versionado no repositório, já que o projeto decidiu não ter E2E. Se a execução for automatizada, versionar o script junto do roteiro. Registrar no roteiro quem executou (pessoa ou agente), quando e o resultado de cada passo. Dados criados pelo roteiro levam um marcador, e o roteiro termina removendo-os."
 
 ### Arquivo 4: ADRs fundacionais em `<root>/openspec/adrs/`
 
@@ -872,19 +891,82 @@ Após gerar todas as ADRs, exiba a lista com nome e título de cada uma.
 
 ---
 
+### Arquivo 5: `<root>/openspec/arquitetura.md`
+
+Gere este arquivo depois das ADRs, para poder linká-las. Use só as respostas confirmadas: um componente "Não aplicável" não entra na tabela nem no diagrama, e nada é inventado. O diagrama mostra só os componentes da tabela e, como ator, o público da 1.3; as setas são as dependências reais entre eles (por exemplo, front-end → back-end → acesso a dados → banco), no estilo de comunicação da 2.4.
+
+````markdown
+# Arquitetura — {{Nome do Projeto}}
+
+> Gerado pelo /opsx:init em {{data atual}}. Mantenha em dia: toda mudança de arquitetura vira ADR
+> (openspec/adrs/) e é refletida aqui na mesma change.
+
+## Visão geral
+
+{{1.2, em 2 ou 3 frases, e o público da 1.3}}
+
+## Estilo e organização
+
+- Estilo: {{resposta 2.1}}
+- Repositórios: {{resposta 2.2}}
+- Regras de negócio: {{resposta 2.3}}
+
+## Componentes
+
+| Componente | Tecnologia | Responsabilidade |
+|---|---|---|
+| {{uma linha por componente escolhido: front-end (3.2), back-end (3.1), banco (3.3 e 3.4), acesso a dados (3.5), autenticação (3.6), jobs (2.5 e 3.8), e-mail (3.9), arquivos (3.10)}} | | |
+
+## Comunicação
+
+{{2.4: como os componentes se falam; integrações externas citadas nas respostas}}
+
+## Diagrama
+
+```mermaid
+flowchart LR
+  {{ator da 1.3, componentes da tabela acima e as dependências entre eles}}
+```
+
+## Dados
+
+- Banco: {{resposta 3.3}} ({{resposta 3.4}}); acesso: {{resposta 3.5}}
+- Dados pessoais: {{resposta 1.5}}; controles: {{resposta 6.5}}; em repouso: {{resposta 6.6}}
+
+## Infraestrutura e deploy
+
+{{bloco 4: ambientes, onde roda, configuração e segredos}}
+
+## Observabilidade e segurança
+
+{{respostas 6.1 a 6.4}}
+
+## Decisões
+
+| ADR | Decisão |
+|---|---|
+| {{uma linha por ADR gerada, com link relativo, por exemplo [0001](adrs/0001-estilo-de-arquitetura.md)}} | |
+
+## Pontos adiados
+
+{{respostas "Adiado" e combinações mantidas na checagem de coerência; "Nenhum" se não houver}}
+````
+
+---
+
 ## Próximos passos (exibir ao final)
 
 ```
 Inicialização concluída. Próximos passos:
 
   1. Revise <root>/openspec/project.md e complete os campos de domínio e capabilities.
-  2. Revise as ADRs geradas em <root>/openspec/adrs/ — ajuste contexto e consequências
-     com detalhes que só você conhece do projeto.
+  2. Revise as ADRs geradas em <root>/openspec/adrs/ e o <root>/openspec/arquitetura.md —
+     ajuste contexto, consequências e o diagrama com detalhes que só você conhece do projeto.
   3. Faça commit dos artefatos gerados. <root> pode ser uma subpasta do repositório git
      (por exemplo, padrao-openspec/); o git -C <root> funciona a partir dela:
        git -C <root> add openspec/
        git -C <root> commit -m "chore: initialize project setup and foundational ADRs"
   4. Quando tiver uma funcionalidade para especificar, rode /opsx:explore.
   5. Qualquer mudança de arquitetura futura MUST ser registrada como nova ADR
-     antes de ser implementada.
+     antes de ser implementada e refletida no <root>/openspec/arquitetura.md.
 ```

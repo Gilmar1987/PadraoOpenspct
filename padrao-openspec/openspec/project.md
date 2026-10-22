@@ -24,7 +24,8 @@
 
 ## Architecture
 
-<!-- Descreva a arquitetura existente ou planejada sem assumir uma stack específica. -->
+<!-- Resumo de 3 a 5 linhas, sem assumir uma stack específica. O detalhe (componentes, comunicação,
+     diagrama, dados e deploy) fica em [Arquitetura detalhada](arquitetura.md), gerado pelo /opsx:init. -->
 
 ### Componentes e limites
 

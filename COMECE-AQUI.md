@@ -166,7 +166,7 @@ só os carrega quando é aberto nessa pasta. Nessa janela, abra o Claude Code e 
 
 A entrevista registra no store a visão do produto, a arquitetura, a stack, os **comandos de
 verificação** (instalar, executar, testar, lint, build, migrar, auditar dependências, procurar
-secrets) e as ADRs fundacionais. Antes de confirmar, ela aponta combinações de respostas
+secrets), as ADRs fundacionais e o `arquitetura.md`, com o diagrama dos componentes. Antes de confirmar, ela aponta combinações de respostas
 incoerentes; ajuste ou justifique cada uma. A entrevista termina com a sua confirmação e o seu
 nome como responsável.
 

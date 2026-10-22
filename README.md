@@ -130,7 +130,7 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 
 | Comando | O que faz |
 |---|---|
-| `/opsx:init` | Inicializa o projeto: entrevista estruturada, registra a stack e os comandos de verificação do projeto, gera `project.md`, `config.yaml` e ADRs fundacionais. Com `/opsx:init <arquivo>`, usa um arquivo de respostas pré-preenchidas (tabela `\| Pergunta \| Resposta \|`, mais `Responsável:` e `Confirmação final: sim`) e pergunta só o que faltar |
+| `/opsx:init` | Inicializa o projeto: entrevista estruturada, registra a stack e os comandos de verificação do projeto, gera `project.md`, `config.yaml`, `arquitetura.md` (com diagrama) e ADRs fundacionais. Com `/opsx:init <arquivo>`, usa um arquivo de respostas pré-preenchidas (tabela `\| Pergunta \| Resposta \|`, mais `Responsável:` e `Confirmação final: sim`) e pergunta só o que faltar |
 | `/opsx:ingest` | Ingere documentos externos (atas, requisitos, e-mails) e gera brief estruturado |
 | `/opsx:explore` | Opcional: explora o problema, limites e critérios de sucesso sem implementar nada, quando algo ainda não está claro |
 | `/opsx:propose <nome>` | Cria os artefatos de planejamento: proposal, delta specs, design e tasks |
@@ -220,6 +220,7 @@ padrao-openspec/
 ├── openspec/
 │   ├── config.yaml       # Stack, convenções e regras injetadas no agente
 │   ├── project.md        # Visão do produto, arquitetura, stack e comandos de verificação
+│   ├── arquitetura.md    # Componentes, comunicação, diagrama e deploy (gerado pelo /opsx:init)
 │   ├── specs/            # Fonte da verdade (preenchida após /opsx:archive)
 │   ├── changes/          # Changes ativas e arquivadas
 │   └── adrs/             # Decisões de arquitetura duradouras
