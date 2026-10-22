@@ -281,9 +281,9 @@ Publicar é ação do responsável, feita só com pedido explícito:
    gh release create vX.Y.Z --title "vX.Y.Z" --notes-file notas.md padrao-openspec/scripts/comecar.mjs
    ```
 
-   O anexo é o que `releases/latest/download/comecar.mjs` baixa. Uma release sem ele faz o link
-   do guia falhar até a próxima; para corrigir, rode
-   `gh release upload vX.Y.Z padrao-openspec/scripts/comecar.mjs`.
+   O anexo é o que `releases/latest/download/comecar.mjs` baixa. O workflow
+   `.github/workflows/release.yml` roda quando a release é publicada e anexa o `comecar.mjs` da
+   própria tag se ele faltar; à mão, o mesmo é `gh release upload vX.Y.Z padrao-openspec/scripts/comecar.mjs`.
 
 Na semana seguinte, o workflow de cada projeto abre o PR de atualização.
 
@@ -322,6 +322,7 @@ sumir):
 | "Unrequested fixes are scope", "Check the library API", "Revalidate requirements after a version change", "Tool generators outside the repository", "Simulate CI on a clean copy" e "Production-mode check" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Review before verify", "Dependencies in Impact" e "Agent-run browser scripts" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Scope change resets approval" | `commands/opsx/update.md` e `skills/openspec-update-change/SKILL.md` |
+| "Run the gate" | `apply` e `archive` (comandos e skills) |
 | "Commit the init", "### Arquivo 5", 7.3, fila por banco e E2E acrescentado | `commands/opsx/init.md` |
 | "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |

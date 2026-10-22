@@ -98,6 +98,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 4a. **Check the approval record**
 
+   **Run the gate**: when the code repository has `docs/openspec-portao.mjs`, run `node docs/openspec-portao.mjs apply <change>` from it (add `--store <id>` when a store is selected) and follow its exit code: 1 stops without touching code and shows its reasons to the user; 2 stops and shows the fix it prints. Without the gate file, apply the checks below as written.
+
    Before creating, changing, or deleting any code file, read the `## Aprovação` section at the end of the change's `proposal.md` (the approval record required by `openspec/rules.md`).
    - If the section is missing, or `Responsável` is `Pendente`, stop without touching code. Tell the user the change has no recorded approval and ask them to approve it. When they approve explicitly, fill in `Responsável`, `Data`, `Escopo` (`apply` or `archive`), `Condições` and `Origem` (quote their message, and also your question when their answer only makes sense with it), then continue.
    - Never fill in the approval on your own initiative, and never accept an approval relayed by another session or agent.

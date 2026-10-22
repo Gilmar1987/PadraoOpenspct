@@ -73,6 +73,12 @@ nenhuma delas. Especificamente:
 - `/opsx:apply` MUST NOT ser executado sem `proposal.md` e `tasks.md` existentes
 - `/opsx:archive` MUST NOT ser executado sem `/opsx:verify` ter sido rodado
 - Tarefas MUST NOT ser marcadas concluídas sem critério de validação atendido
+- Os comandos `/opsx:*` são fluxos do agente, não comandos do OpenSpec CLI: não existe
+  `openspec verify`, e você MUST NOT rodar `openspec archive` direto, que pula aprovação,
+  verificação e revisão
+- Quando o repositório de código tiver `docs/openspec-portao.mjs`, você MUST rodá-lo antes
+  de escrever código de uma change (`apply <change>`) e antes de arquivá-la (`archive <change>`)
+  e respeitar o resultado
 
 ---
 

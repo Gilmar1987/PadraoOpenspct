@@ -110,6 +110,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    **If `totalTasks` is zero:** Proceed without a task-related warning.
 
+3a. **Run the gate**: when the code repository has `docs/openspec-portao.mjs`, run `node docs/openspec-portao.mjs archive <change>` from it (add `--store <id>` when a store is selected) before syncing specs or moving anything, and follow its exit code: 1 stops and shows its reasons to the user; 2 stops and shows the fix it prints. When the only reason is that the approved scope is not archive, do step 4a's confirmation now (ask the user, record the `- Archive:` item) and run the gate again before step 4. A user confirmation in step 3 does not override the gate: incomplete tasks keep it blocked. Never use the CLI's `openspec archive` command to skip this workflow. Without the gate file, apply the checks below as written.
+
 4. **Assess delta spec sync state**
 
    Use `artifactPaths.specs.existingOutputPaths` from status JSON as the only
