@@ -44,8 +44,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: CI passar nos três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`); em seguida, PR e merge (sem release)
+- Origem: "Aprovo a change qualidade-em-windows para archive, com PR e merge, se a CI passar nos três jobs"
