@@ -77,27 +77,32 @@ e `.openspec-padrao.json`).
 
 **Hooks de sessão** em `.claude/hooks/openspec-padrao/`, ligados pelo `.claude/settings.json`:
 
-- **Fim do turno:** se uma change ativa tem tarefa marcada sem a linha `Evidência:` logo abaixo, o
-  turno não encerra uma vez, e o agente recebe a lista das tarefas. Uma falha de ambiente (CLI ausente,
-  store não resolvido) nunca bloqueia.
+- **Fim do turno:** se um `tasks.md` alterado nesta conversa tem tarefa marcada sem a linha
+  `Evidência:` logo abaixo, o turno não encerra uma vez, e o agente recebe a lista das tarefas. Tarefas
+  de changes que a conversa não tocou não bloqueiam. Uma falha de ambiente (CLI ausente, store não
+  resolvido) nunca bloqueia, e o hook desiste depois de alguns segundos.
 - **`openspec archive <change>`:** roda o portão (`docs/openspec-portao.mjs archive <change>`) e nega o
   comando com os motivos quando ele bloqueia. Sem o portão, pede a sua confirmação.
 
 **Permissões:** `git push`, `gh pr create`, `gh release` e `openspec archive` pedem a sua confirmação;
-`git push --force`, `git push -f` e `git reset --hard` são negados. O padrão não acrescenta nada em
-`allow`.
+`git push --force ...`, `git push -f ...` e `git reset --hard ...` são negados (outras formas de push
+forçado, como `--force-with-lease`, caem na confirmação do `git push`). O padrão não acrescenta nada em
+`allow`. As regras valem para a ferramenta Bash; no Windows sem Git Bash, em que o Claude Code usa a
+ferramenta PowerShell, elas não se aplicam, e valem só os hooks e as regras de `docs/openspec-regras.md`.
 
 No `.claude/settings.json`, o instalador só mexe nas entradas dele: os hooks que apontam para
 `.claude/hooks/openspec-padrao/` e as permissões listadas em `managedSettings` no
-`.openspec-padrao.json`. Para desligar uma entrada, apague-a do arquivo; a próxima atualização do
-padrão a põe de volta, e o PR de atualização mostra isso no diff.
+`.openspec-padrao.json`. Para desligar uma entrada, apague-a do arquivo. A próxima reinstalação ou
+atualização do padrão pede `--update` ou `--in-place` e a põe de volta, e o PR de atualização mostra
+isso no diff. O instalador mantém a indentação, o fim de linha e o BOM do arquivo.
 
 Três avisos:
 
 - **Confiança na pasta:** os hooks dos subagentes de projeto e as regras `allow` só valem depois que a
   pasta é marcada como confiável no Claude Code; `ask` e `deny` valem logo.
 - **Limite:** os hooks e as permissões são heurísticas sobre o texto do comando, não uma sandbox. Um
-  comando por outro caminho (`sh -c`, caminho absoluto de outro interpretador) pode escapar. As regras
+  comando por outro caminho (o caminho absoluto de outro interpretador, uma expansão de variável,
+  `$( )`) pode escapar. As regras
   de `docs/openspec-regras.md` continuam valendo.
 - **Outros agentes** não recebem esta camada; para eles valem os blocos de instrução e o portão.
 

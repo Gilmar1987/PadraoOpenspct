@@ -644,6 +644,15 @@ function assertNoForeignClaudeAgents(projectRoot, previous) {
   }
 }
 
+// Subagents and hook scripts a previous version installed and the current one no longer ships. They are
+// the standard's, so they go away with the update instead of being taken for project files.
+function retiredClaudeFiles(projectRoot, previous, manifestPaths) {
+  const current = new Set(manifestPaths);
+  return (previous?.managedFiles ?? [])
+    .filter((file) => /^\.claude\/agents\/openspec-[^/]+\.md$/i.test(file) || file.startsWith(hookPathMarker))
+    .filter((file) => !current.has(file) && existsSync(path.join(projectRoot, ...file.split('/'))));
+}
+
 function isStandardHook(entry) {
   const parts = [entry?.command, ...(Array.isArray(entry?.args) ? entry.args : [])];
   return parts.some((part) => typeof part === 'string' && part.replace(/\\/g, '/').includes(hookPathMarker));
@@ -652,9 +661,9 @@ function isStandardHook(entry) {
 // Removes the standard's hook entries from settings.hooks and puts the template's back at the position
 // of the first one removed, so a reinstall of the same version leaves the file byte for byte as it was.
 function mergeHooks(settings, template) {
-  const hooks = settings.hooks && typeof settings.hooks === 'object' ? settings.hooks : {};
+  const hooks = settings.hooks ?? {};
   for (const event of new Set([...Object.keys(hooks), ...Object.keys(template.hooks ?? {})])) {
-    const groups = Array.isArray(hooks[event]) ? hooks[event] : [];
+    const groups = hooks[event] ?? [];
     let insertAt = -1;
     const kept = [];
     for (const group of groups) {
@@ -680,11 +689,11 @@ function mergeHooks(settings, template) {
 // Same for the permission rules the standard added before (manifest managedSettings); a rule the
 // project already has is the project's and is never recorded as the standard's.
 function mergePermissions(settings, template, previousManaged) {
-  const permissions = settings.permissions && typeof settings.permissions === 'object' ? settings.permissions : {};
+  const permissions = settings.permissions ?? {};
   const managed = {};
   for (const list of permissionLists) {
     const wanted = template.permissions?.[list] ?? [];
-    const before = Array.isArray(permissions[list]) ? permissions[list] : [];
+    const before = permissions[list] ?? [];
     const ownBefore = new Set(previousManaged?.[list] ?? []);
     let insertAt = -1;
     const kept = [];
@@ -725,20 +734,32 @@ function planClaudeSettings(projectRoot, previous) {
     } catch (error) {
       throw new Error(`${settingsPath} is not valid JSON (${error.message}); fix it by hand. Nothing was changed.`);
     }
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new Error(`${settingsPath} must hold a JSON object; fix it by hand. Nothing was changed.`);
+    const isObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+    let shapeError = null;
+    if (!isObject(parsed)) shapeError = 'the file must hold a JSON object';
+    else if (parsed.hooks !== undefined
+      && (!isObject(parsed.hooks) || Object.values(parsed.hooks).some((groups) => !Array.isArray(groups)))) {
+      shapeError = '"hooks" must map each event to a list';
+    } else if (parsed.permissions !== undefined && (!isObject(parsed.permissions)
+      || permissionLists.some((list) => parsed.permissions[list] !== undefined && !Array.isArray(parsed.permissions[list])))) {
+      shapeError = '"permissions.allow", "ask" and "deny" must be lists';
     }
+    if (shapeError) throw new Error(`${settingsPath}: ${shapeError}; fix it by hand. Nothing was changed.`);
   }
   const before = JSON.stringify(parsed);
-  const hadEntries = JSON.stringify(parsed.hooks ?? {}).includes(hookPathMarker)
-    || permissionLists.some((list) => (previous?.managedSettings?.[list] ?? []).some((rule) => (parsed.permissions?.[list] ?? []).includes(rule)));
+  // An install that already recorded managedSettings counts as having the entries, even if someone
+  // deleted them by hand: putting them back is then a change that needs --update or --in-place.
+  const hadEntries = previous?.managedSettings !== undefined
+    || JSON.stringify(parsed.hooks ?? {}).includes(hookPathMarker);
   const desired = structuredClone(parsed);
   mergeHooks(desired, template);
   const managedSettings = mergePermissions(desired, template, previous?.managedSettings);
   const eol = original.includes('\r\n') ? '\r\n' : '\n';
+  const indent = original.replace(/^﻿/, '').match(/^[{[][^\n]*\n([ \t]+)\S/)?.[1] ?? '  ';
+  const bom = original.startsWith('﻿') ? '﻿' : '';
   return {
     destination,
-    desired: `${JSON.stringify(desired, null, 2)}\n`.replace(/\n/g, eol),
+    desired: `${bom}${JSON.stringify(desired, null, indent)}\n`.replace(/\n/g, eol),
     mode: info?.mode,
     exists: Boolean(info),
     hadEntries,
@@ -895,6 +916,7 @@ function main() {
     managedSettings: settings.skip ? (previous?.managedSettings ?? {}) : settings.managedSettings,
   };
   const manifestChanged = previous !== null && comparableManifest(previous) !== comparableManifest(manifest);
+  const retired = retiredClaudeFiles(projectRoot, previous, manifestPaths);
 
   // Installed files that would change, or a different recorded version: rewriting them needs an
   // explicit mode (ADR-0004).
@@ -903,13 +925,14 @@ function main() {
   // A block the standard already wrote counts like a managed file; adding a missing block does not.
   const changingBlocks = blocks.filter((block) => !block.skip && block.hadBlock && block.changed);
   const changingSettings = !settings.skip && settings.hadEntries && settings.changed;
-  if ((changing.length > 0 || changingBlocks.length > 0 || changingSettings || manifestChanged) && !options.update && !options.inPlace) {
+  if ((changing.length > 0 || changingBlocks.length > 0 || changingSettings || retired.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
     const details = [
       ...changing.map(({ name, destination }) => `  ${name}: ${destination}`),
       ...changingBlocks.map(({ destination }) => (previous === null
         ? `  existing openspec-padrao block, not written by this installer (it would be replaced): ${destination}`
         : `  openspec-padrao block: ${destination}`)),
       ...(changingSettings ? [`  openspec-padrao entries: ${settings.destination}`] : []),
+      ...retired.map((file) => `  retired by the standard (will be removed): ${file}`),
       ...(manifestChanged ? [`  ${manifestName}: v${previous.version ?? '?'} -> v${version}`] : []),
     ].join('\n');
     throw new Error(
@@ -957,6 +980,11 @@ function main() {
       console.log(`${block.exists ? 'Updated' : 'Created'}: ${block.path} (openspec-padrao block)`);
       installed += 1;
     }
+    for (const file of retired) {
+      rmSync(path.join(projectRoot, ...file.split('/')), { force: true });
+      console.log(`Removed: ${file} (no longer part of the standard)`);
+      installed += 1;
+    }
     if (settings.skip) {
       console.log(`Skipped: ${settingsPath} ${settings.skip}`);
     } else if (!settings.changed) {
@@ -978,7 +1006,8 @@ function main() {
 
   const missing = operations.some(({ destination }) => !existsSync(destination))
     || blocks.some((block) => !block.skip && block.changed)
-    || (!settings.skip && settings.changed);
+    || (!settings.skip && settings.changed)
+    || retired.length > 0;
   if (previous !== null && changing.length === 0 && !missing && !manifestChanged) {
     console.log(`Already at v${version}; nothing to update.`);
     return;

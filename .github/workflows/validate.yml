@@ -251,11 +251,15 @@ jobs:
           }
           # somente-leitura.mjs
           for cmd in 'echo x > a.txt' 'git push origin main' 'python -c "print(1)"' 'Set-Content a.txt x' \
-                     'npm test && rm -rf dist' 'sed -i s/a/b/ f.txt' 'git -C . commit -m x' 'cat a | tee b'; do
+                     'npm test && rm -rf dist' 'sed -i s/a/b/ f.txt' 'git -C . commit -m x' 'cat a | tee b' \
+                     'cp a b' 'mkdir -p out' 'git pull' 'git branch -D feat' 'sed --in-place s/a/b/ f' \
+                     '(rm -rf x)' 'del x' 'env rm x' 'find . -delete' 'git config user.name x'; do
             expect deny somente-leitura.mjs "$(payload Bash command "$cmd")"
           done
           for cmd in 'git status' 'npm test' 'grep -rn "a > b" src' 'npm test 2>&1 | tail -5' \
-                     'ls > /dev/null' 'git diff HEAD~1' 'openspec validate --all --strict' 'Get-Content a.txt'; do
+                     'ls > /dev/null' 'git diff HEAD~1' 'openspec validate --all --strict' 'Get-Content a.txt' \
+                     'python -m pytest -p no:cacheprovider' 'node -r ts-node/register x.ts' 'git stash list' \
+                     'git tag -l' 'echo x > /dev/stderr' 'git config --get user.name' 'npx playwright test'; do
             expect allow somente-leitura.mjs "$(payload Bash command "$cmd")"
           done
           expect allow somente-leitura.mjs 'isto não é JSON'
@@ -286,6 +290,17 @@ jobs:
           expect allow cobra-evidencia.mjs "$(stop 1)"
           printf '## 1. A\n\n- [x] 1.1 primeira\n  - Evidência: `x` → ok (exit 0)\n- [ ] 1.2 segunda\n' > "$w/openspec/changes/demo/tasks.md"
           expect allow cobra-evidencia.mjs "$(stop 0)"
+          # Todas as tarefas marcadas (status "complete" no CLI) continuam sendo cobradas.
+          printf '## 1. A\n\n- [x] 1.1 primeira\n- [x] 1.2 segunda\n' > "$w/openspec/changes/demo/tasks.md"
+          expect block cobra-evidencia.mjs "$(stop 0)"
+          # Com o transcript da conversa, um tasks.md anterior a ela não bloqueia; um alterado depois, sim.
+          transcript="$w_native/transcript.jsonl"
+          node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({ timestamp: new Date().toISOString() }) + "\n")' "$transcript"
+          node -e 'const t = new Date(Date.now() - 3600e3); require("fs").utimesSync(process.argv[1], t, t)' "$w_native/openspec/changes/demo/tasks.md"
+          stop_t() { node -e 'const [cwd, transcript_path] = process.argv.slice(1); process.stdout.write(JSON.stringify({ hook_event_name: "Stop", cwd, transcript_path, stop_hook_active: false }));' "$w_native" "$transcript"; }
+          expect allow cobra-evidencia.mjs "$(stop_t)"
+          printf '## 1. A\n\n- [x] 1.1 primeira\n- [x] 1.2 segunda\n' > "$w/openspec/changes/demo/tasks.md"
+          expect block cobra-evidencia.mjs "$(stop_t)"
           # portao-do-archive.mjs: sem portão pede confirmação; com portão, segue o código de saída dele.
           bash_in() { node -e 'const [command, cwd] = process.argv.slice(1); process.stdout.write(JSON.stringify({ tool_name: "Bash", cwd, tool_input: { command } }));' "$1" "$w_native"; }
           expect ask portao-do-archive.mjs "$(bash_in 'openspec archive demo --yes')"
@@ -298,6 +313,9 @@ jobs:
           printf 'console.log(JSON.stringify({ ok: true, acao: "archive", change: process.argv[3], motivos: [] }));\n' > "$w/docs/openspec-portao.mjs"
           expect allow portao-do-archive.mjs "$(bash_in 'openspec archive demo --yes')"
           expect deny portao-do-archive.mjs "$(bash_in 'openspec archive nome%invalido')"
+          printf 'console.log(JSON.stringify({ ok: false, motivos: [process.argv.slice(2).join(" ")] })); process.exit(1);\n' > "$w/docs/openspec-portao.mjs"
+          out=$(printf '%s' "$(bash_in 'openspec --no-color archive "demo" --store=meu-store -y')" | node "$h/portao-do-archive.mjs")
+          case "$out" in *'archive demo --json --store meu-store'*) ;; *) echo "::error::portao-do-archive deveria repassar change e --store=: $out"; fail=1 ;; esac
           rm -rf "$w"
           exit $fail
 
@@ -481,6 +499,32 @@ jobs:
           grep -qF 'Bash(npm test)' "$s"
           grep -qF 'echo projeto' "$s"
           grep -qF 'Bash(git push *)' "$s"
+          # CRLF, BOM e indentação de 4 espaços do projeto são mantidos.
+          c="$(mktemp -d)"
+          git -C "$c" init -q
+          mkdir -p "$c/.claude"
+          printf '\357\273\277{\r\n    "permissions": {\r\n        "allow": ["Bash(npm test)"]\r\n    }\r\n}\r\n' > "$c/.claude/settings.json"
+          node scripts/install-skills.mjs "$c" > /dev/null
+          head -c 3 "$c/.claude/settings.json" | od -An -tx1 | grep -q 'ef bb bf'
+          node -e 'process.exit(require("fs").readFileSync(process.argv[1], "utf8").includes("\r\n") ? 0 : 1)' "$c/.claude/settings.json"
+          grep -q '^        "allow"' "$c/.claude/settings.json"
+          # Formato inválido (permissions.allow que não é lista): erro e nada escrito.
+          v="$(mktemp -d)"
+          git -C "$v" init -q
+          mkdir -p "$v/.claude"
+          printf '{ "permissions": { "allow": "Bash(npm test)" } }\n' > "$v/.claude/settings.json"
+          if node scripts/install-skills.mjs "$v" > "$RUNNER_TEMP/forma.txt" 2>&1; then exit 1; fi
+          grep -qF 'must be lists' "$RUNNER_TEMP/forma.txt"
+          test ! -e "$v/.openspec-padrao.json"
+          # Um subagente que sai do padrão é removido na atualização, e a reinstalação seguinte não trava.
+          rt="$(mktemp -d)"
+          cp -r . "$rt/padrao-openspec"
+          rm "$rt/padrao-openspec/.claude/agents/openspec-task-planner.md"
+          node "$rt/padrao-openspec/scripts/install-skills.mjs" "$c" --in-place > "$RUNNER_TEMP/retirado.txt"
+          grep -qF 'Removed: .claude/agents/openspec-task-planner.md' "$RUNNER_TEMP/retirado.txt"
+          test ! -e "$c/.claude/agents/openspec-task-planner.md"
+          node "$rt/padrao-openspec/scripts/install-skills.mjs" "$c" > /dev/null
+          rm -rf "$c" "$v" "$rt"
           # JSON inválido: erro e nada escrito.
           q="$(mktemp -d)"
           git -C "$q" init -q

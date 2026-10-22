@@ -1,7 +1,7 @@
 ---
 name: openspec-code-reviewer
 description: "Revisa, somente leitura, o intervalo de commits de uma change OpenSpec contra proposal, specs, design e tarefas, e devolve achados por severidade. Usado pela skill requesting-code-review no passo 6a do apply."
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, PowerShell
 model: sonnet
 hooks:
   PreToolUse:

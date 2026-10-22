@@ -79,7 +79,7 @@ Os scripts ficam em `.claude/hooks/openspec-padrao/`. Cada um lê o JSON da entr
 
   O cabeçalho do script declara o limite: é heurística sobre o texto do comando, não um parser de shell.
 - **`escopo-de-escrita.mjs`** (matcher `Edit|Write`): nega a escrita quando o caminho resolvido:
-  - fica fora de `CLAUDE_PROJECT_DIR`;
+  - fica fora do repositório: o topo git do `cwd` do payload, com `CLAUDE_PROJECT_DIR` como reserva (em worktree, o `CLAUDE_PROJECT_DIR` aponta para o checkout principal);
   - fica dentro de `.claude/` ou `.github/agents/`;
   - é `.openspec-padrao.json` ou um `docs/openspec-*`.
 
@@ -100,7 +100,8 @@ Os scripts ficam em `.claude/hooks/openspec-padrao/`. Cada um lê o JSON da entr
 
 - **`cobra-evidencia.mjs`** (Stop):
   - Se `stop_hook_active` for `true`, termina sem bloquear.
-  - Senão, descobre as changes ativas com `openspec list --json`, que resolve o store declarado como o CLI faz. Para cada uma, lê os `tasks.md` em `openspec status --change <nome> --json`.
+  - Senão, roda uma vez `openspec list --json`, que resolve o store declarado como o CLI faz, com `timeout`. Para cada change com tarefa marcada, lê `openspec/changes/<nome>/tasks.md` na raiz devolvida, mas só se o arquivo mudou depois do início desta conversa (o `timestamp` da primeira entrada do `transcript_path`). Assim, a change de outra pessoa, ou anterior à regra, não bloqueia esta conversa.
+  - A mensagem do bloqueio diz para acrescentar a evidência só nas tarefas marcadas nesta conversa; numa tarefa alheia, o agente apenas avisa o usuário.
   - Se uma tarefa marcada `- [x]` não tiver, nas linhas indentadas logo abaixo, uma linha que comece com `- Evidência:`, bloqueia com a lista `<change>: <tarefa>`.
   - Qualquer erro (CLI ausente, store não resolvido, JSON inválido) libera e escreve um aviso no stderr, porque bloquear por falha de ambiente travaria toda conversa.
 - **`portao-do-archive.mjs`** (PreToolUse, `Bash|PowerShell`): age só quando o comando é `openspec archive <nome>`. Nos outros casos, libera sem saída.
@@ -144,7 +145,7 @@ Cada `padrao-openspec/.github/agents/<papel>.agent.md` SHALL ter um `padrao-open
 - **Smoke tests na CI** (job `store`, no Ubuntu e no Windows), cada hook alimentado com JSON simulado no stdin:
   - `somente-leitura.mjs`: nega `echo x > a.txt`, `git push`, `python -c ...` e `Set-Content a.txt x`; libera `git status`, `npm test` e `grep -rn x src`;
   - `escopo-de-escrita.mjs`: nega `.claude/settings.json` e um caminho fora do projeto; libera `src/app.ts`, também com barras invertidas;
-  - `cobra-evidencia.mjs`: com um store de teste com id único, bloqueia uma tarefa marcada sem `Evidência:`, libera com ela e libera com `stop_hook_active: true`;
+  - `cobra-evidencia.mjs`: numa raiz OpenSpec local temporária (sem usar o registro global de stores), bloqueia uma tarefa marcada sem `Evidência:`, inclusive com todas as tarefas marcadas; libera com ela, com `stop_hook_active: true` e com um `tasks.md` anterior ao início da conversa (lido do `transcript_path`);
   - `portao-do-archive.mjs`: responde `ask` sem portão, nega com um portão falso que sai com 1, libera com um que sai com 0, e não faz nada com `git status`.
 - **Smoke test do instalador:**
   - um `settings.json` do projeto com uma permissão `allow` e um hook próprios continua com os dois depois da instalação;
@@ -180,7 +181,7 @@ Cada `padrao-openspec/.github/agents/<papel>.agent.md` SHALL ter um `padrao-open
 - Projetos existentes recebem os subagentes, os hooks e as entradas do `settings.json` pelo PR de atualização. O CHANGELOG pede para revisar o diff do `settings.json` e confiar na pasta no Claude Code.
 - Rollback:
   1. reverter os commits;
-  2. no projeto, rodar o instalador da versão anterior com `--update`, que remove as entradas listadas em `managedSettings`;
+  2. no projeto, remover à mão do `.claude/settings.json` os hooks que apontam para `.claude/hooks/openspec-padrao/` e as permissões listadas em `managedSettings` do manifesto (o instalador da versão anterior não conhece o `settings.json`);
   3. apagar `.claude/agents/openspec-*` e `.claude/hooks/openspec-padrao/`, que deixam de estar em `managedFiles`.
 
 ## Open Questions

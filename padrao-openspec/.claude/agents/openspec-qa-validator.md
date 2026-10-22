@@ -1,7 +1,7 @@
 ---
 name: openspec-qa-validator
 description: "Valida uma change OpenSpec antes do arquivamento: progresso das tarefas, cobertura dos requisitos e cenários, aderência ao design, testes e qualidade. Produz relatório independente; não corrige código nem arquiva por conta própria."
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, PowerShell
 model: sonnet
 hooks:
   PreToolUse:

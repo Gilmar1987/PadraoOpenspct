@@ -1,7 +1,7 @@
 ---
 name: openspec-stage-reviewer
 description: "Roda os Comandos de verificação do project.md que se aplicam a uma change OpenSpec e devolve só as falhas (comando, código de saída e linhas da falha), para poupar o contexto do agente coordenador. Use no apply e no verify."
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, PowerShell
 model: haiku
 hooks:
   PreToolUse:

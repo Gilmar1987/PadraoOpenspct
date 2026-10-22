@@ -3,38 +3,95 @@
 // PreToolUse hook (Bash|PowerShell) declared in the frontmatter of the standard's verdict subagents
 // (qa-validator, stage-reviewer, code-reviewer). It runs only while one of them is active and denies
 // shell commands that write files or change the Git state, so a reviewer cannot alter what it
-// reviews.
+// reviews, while test, lint and build commands from project.md keep working.
 //
 // Declared limit: this is a heuristic over the command text, not a shell parser and not a sandbox.
 // It catches the common, documented cases below; a command written to evade it (an absolute path to
-// another interpreter, variable expansion, `$( )`) can get through.
+// another interpreter, variable expansion, `$( )`, a .NET call from PowerShell) can get through.
 
-import { deny, readPayload, segments, unquoted } from './comum.mjs';
+import path from 'node:path';
+import { deny, readPayload, shellCommands, unquoted } from './comum.mjs';
 
 const hookName = 'somente-leitura';
 
 // Redirection targets that do not write a file.
-const harmlessTarget = /^(&\d|\/dev\/null|\$null|nul)$/i;
+const harmlessTarget = /^(&\d|\/dev\/(null|stdout|stderr)|\$null|nul)$/i;
 
-const rules = [
-  { pattern: /^(sudo\s+)?(rm|rmdir|mv|tee|shred|truncate|dd)(\s|$)/i, reason: 'apaga, move ou grava arquivos' },
-  { pattern: /^(sudo\s+)?sed\s(.*\s)?-[a-z]*i/i, reason: 'edita arquivo no lugar (sed -i)' },
-  { pattern: /^perl\s(.*\s)?-[a-z]*i/i, reason: 'edita arquivo no lugar (perl -i)' },
-  {
-    pattern: /^(out-file|set-content|add-content|clear-content|new-item|remove-item|move-item|copy-item|rename-item|tee-object)(\s|$)/i,
-    reason: 'grava, move ou apaga arquivos (PowerShell)',
-  },
-  {
-    pattern: /^(python3?|py|node|deno|bun|ruby|perl|php)\s(.*\s)?(-c|-e|-p|-r|--eval|--print|eval)(\s|$)/i,
-    reason: 'executa código inline, que não dá para conferir antes',
-  },
-  { pattern: /^(bash|sh|zsh|dash|powershell|pwsh|cmd)(\.exe)?\s(.*\s)?(-c|-command|-encodedcommand|\/c)(\s|$)/i, reason: 'executa código inline, que não dá para conferir antes' },
-  { pattern: /^(eval|iex|invoke-expression)(\s|$)/i, reason: 'executa código montado em tempo de execução' },
-  {
-    pattern: /^git(\s+-[cC]\s+\S+)*\s+(commit|push|reset|checkout|restore|switch|merge|rebase|cherry-pick|revert|clean|add|rm|mv|stash|tag|apply|am)(\s|$)/i,
-    reason: 'altera o repositório Git',
-  },
-];
+// Programs (and PowerShell cmdlets and aliases) that create, change, move or delete files.
+const fileWriters = new Set([
+  'rm', 'rmdir', 'mv', 'cp', 'tee', 'shred', 'truncate', 'dd', 'touch', 'mkdir', 'ln', 'install',
+  'chmod', 'chown', 'unlink',
+  'del', 'erase', 'copy', 'move', 'ren', 'rename', 'ni', 'md', 'rd', 'ri', 'mi', 'cpi', 'rni', 'sc', 'ac',
+  'out-file', 'set-content', 'add-content', 'clear-content', 'new-item', 'remove-item', 'move-item',
+  'copy-item', 'rename-item', 'tee-object',
+]);
+
+// Flags that run code given inline, per interpreter. They count only before the script or module.
+const inlineFlags = {
+  python: ['-c'], python3: ['-c'], py: ['-c'],
+  node: ['-e', '--eval', '-p', '--print'], bun: ['-e', '--eval'],
+  ruby: ['-e'], php: ['-r'], perl: ['-e', '-E'],
+  bash: ['-c'], sh: ['-c'], zsh: ['-c'], dash: ['-c'],
+  powershell: ['-c', '-command', '-encodedcommand', '-ec'], pwsh: ['-c', '-command', '-encodedcommand', '-ec'],
+  cmd: ['/c', '/k'],
+};
+const commandPrefixes = new Set(['sudo', 'env', 'nohup', 'time', 'command', 'nice', 'exec']);
+
+// Git subcommands that only read, or read in the forms allowed here.
+function gitWrites(args) {
+  let index = 0;
+  while (index < args.length && args[index].startsWith('-')) {
+    index += ['-C', '-c', '--git-dir', '--work-tree', '--namespace'].includes(args[index]) ? 2 : 1;
+  }
+  const sub = args[index];
+  const rest = args.slice(index + 1);
+  const has = (...flags) => rest.some((arg) => flags.includes(arg));
+  const positional = rest.filter((arg) => !arg.startsWith('-'));
+  switch (sub) {
+    case 'commit': case 'push': case 'pull': case 'reset': case 'checkout': case 'restore': case 'switch':
+    case 'merge': case 'rebase': case 'cherry-pick': case 'revert': case 'clean': case 'add': case 'rm':
+    case 'mv': case 'apply': case 'am': case 'init': case 'clone': case 'gc': case 'prune': case 'update-ref':
+      return true;
+    case 'worktree': return rest[0] !== 'list';
+    case 'stash': return !['list', 'show'].includes(rest[0]);
+    case 'branch': return has('-d', '-D', '-m', '-M', '-c', '-C', '-f', '--delete', '--move', '--copy', '--force');
+    case 'tag': return has('-d', '--delete', '-a', '-s', '-f', '-m') || (positional.length > 0 && !has('-l', '--list'));
+    case 'config': return !has('--get', '--get-all', '--get-regexp', '--list', '-l');
+    case 'remote': return ['add', 'remove', 'rm', 'rename', 'set-url', 'set-head', 'prune'].includes(rest[0]);
+    default: return false;
+  }
+}
+
+function inlineCode(name, args) {
+  const flags = inlineFlags[name];
+  if (name === 'deno') return args[0] === 'eval';
+  if (!flags) return false;
+  for (const arg of args) {
+    if (name.startsWith('py') && arg === '-m') return false;
+    if (!arg.startsWith('-') && !(name === 'cmd' && arg.startsWith('/'))) return false;
+    if (flags.includes(arg.toLowerCase())) return true;
+  }
+  return false;
+}
+
+function reasonFor(words) {
+  let start = 0;
+  while (start < words.length && (/^\w+=/.test(words[start]) || commandPrefixes.has(words[start]))) start += 1;
+  if (start >= words.length) return null;
+  const name = path.basename(words[start].replace(/\\/g, '/')).toLowerCase().replace(/\.(exe|cmd|bat)$/, '');
+  const args = words.slice(start + 1);
+  if (fileWriters.has(name)) return 'grava, move ou apaga arquivos';
+  if (name === 'sed' && args.some((arg) => /^-[a-zA-Z]*i/.test(arg) || arg.startsWith('--in-place'))) return 'edita arquivo no lugar (sed -i)';
+  if (name === 'perl' && args.some((arg) => /^-[a-zA-Z]*i/.test(arg))) return 'edita arquivo no lugar (perl -i)';
+  if (name === 'find' && args.some((arg, index) => arg === '-delete'
+    || (['-exec', '-execdir', '-ok'].includes(arg) && fileWriters.has(path.basename(args[index + 1] ?? '').toLowerCase())))) {
+    return 'apaga ou altera arquivos (find)';
+  }
+  if (['eval', 'iex', 'invoke-expression'].includes(name)) return 'executa código montado em tempo de execução';
+  if (inlineCode(name, args)) return 'executa código inline, que não dá para conferir antes';
+  if (name === 'git' && gitWrites(args)) return 'altera o repositório Git';
+  return null;
+}
 
 function redirection(text) {
   for (const match of text.matchAll(/(\d|&)?(>>?)(?!=)\s*(&\d|[^\s;|&()<>]+)?/g)) {
@@ -48,15 +105,11 @@ function redirection(text) {
 }
 
 function check(command) {
-  const text = unquoted(command);
-  const redirect = redirection(text);
+  const redirect = redirection(unquoted(command));
   if (redirect) return redirect;
-  for (const segment of segments(text)) {
-    // Leading variable assignments (FOO=bar cmd) are not the command.
-    const commandText = segment.replace(/^(\w+=\S*\s+)+/, '');
-    for (const rule of rules) {
-      if (rule.pattern.test(commandText)) return `${rule.reason}: ${commandText.split(/\s+/).slice(0, 3).join(' ')}`;
-    }
+  for (const words of shellCommands(command)) {
+    const reason = reasonFor(words);
+    if (reason) return `${reason}: ${words.slice(0, 3).join(' ')}`;
   }
   return null;
 }

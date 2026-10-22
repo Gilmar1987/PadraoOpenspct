@@ -1,7 +1,7 @@
 ---
 name: openspec-code-implementer
 description: "Implementa tarefas de uma change OpenSpec estritamente a partir de tasks.md, specs e design aprovados; executa validações locais e para diante de ambiguidades. Use durante /opsx:apply."
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, PowerShell
 model: inherit
 hooks:
   PreToolUse:
