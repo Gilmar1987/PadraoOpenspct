@@ -97,8 +97,7 @@ export function shellCommands(command) {
   };
   const endCommand = () => {
     endWord();
-    const cleaned = words.filter((item) => !/^[(){}]+$/.test(item)).map((item) => item.replace(/^[({]+|[)}]+$/g, ''));
-    if (cleaned.length > 0) commands.push(cleaned);
+    if (words.length > 0) commands.push(words);
     words = [];
   };
   const text = String(command);
@@ -119,7 +118,8 @@ export function shellCommands(command) {
       }
       quoted = true;
       index = index2;
-    } else if (/\s/.test(char) && char !== '\n') {
+    } else if ((/\s/.test(char) && char !== '\n') || '(){}'.includes(char)) {
+      // Unquoted grouping characters only separate words: `(rm -rf x)` is the command `rm -rf x`.
       endWord();
     } else if (char === ';' || char === '\n' || char === '|' || char === '&') {
       endCommand();
