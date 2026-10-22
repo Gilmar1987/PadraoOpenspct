@@ -63,8 +63,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Origem: "As duas aprovadas : qualidade-de-interface , validacao-e-paralelismo", em resposta a "Para eu implementar, aprove indicando onde ela entra na fila [...]" e à ordem sugerida "1. subagentes-e-ganchos; 2. validacao-e-paralelismo; 3. qualidade-de-interface; 4. as três changes de SDD". A resposta não cita archive, PR nem release, então o escopo registrado é apply.
