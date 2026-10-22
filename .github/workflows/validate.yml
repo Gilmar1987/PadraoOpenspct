@@ -379,7 +379,7 @@ jobs:
           test -f "$consumer/.claude/commands/opsx/init.md"
           test -f "$consumer/.claude/commands/opsx/ingest.md"
           grep -q 'Architectural Decision Check' "$consumer/.claude/commands/opsx/propose.md"
-          for skill in docker requesting-code-review versioning-ci-cd; do
+          for skill in docker requesting-code-review versioning-ci-cd interface-quality; do
             test -f "$consumer/.agents/skills/$skill/SKILL.md"
           done
           # Comando customizado no consumidor: sem --force nada é copiado.

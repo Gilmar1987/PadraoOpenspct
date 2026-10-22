@@ -16,7 +16,9 @@ import { deny, readPayload, shellCommands, unquoted } from './comum.mjs';
 const hookName = 'somente-leitura';
 
 // The subagents this hook restricts. A new verdict subagent of the standard joins this list.
-const verdictAgents = new Set(['openspec-qa-validator', 'openspec-stage-reviewer', 'openspec-code-reviewer']);
+const verdictAgents = new Set([
+  'openspec-qa-validator', 'openspec-stage-reviewer', 'openspec-code-reviewer', 'openspec-validador-de-interface',
+]);
 
 // Redirection targets that do not write a file.
 const harmlessTarget = /^(&\d|\/dev\/(null|stdout|stderr)|\$null|nul)$/i;
