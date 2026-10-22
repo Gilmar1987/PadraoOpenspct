@@ -4,6 +4,26 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.9.0 — 2026-10-22
+
+### O que mudou
+
+- **Portão:** o novo `docs/openspec-portao.mjs` responde do mesmo jeito para qualquer agente se a
+  change pode receber código (`apply <change>`: aprovação completa) ou ser arquivada
+  (`archive <change>`: escopo archive, tarefas marcadas, `verification.md` e, com commits de código,
+  `review.md`). Saída 0, 1 ou 2; `--json` e `--store <id>`. Os fluxos `/opsx:apply` e
+  `/opsx:archive` o rodam, e `instalar-hook` instala um hook `commit-msg` opcional.
+- **Bloco e regras:** os `/opsx:*` são fluxos do agente, não comandos do CLI; não existe
+  `openspec verify`, e o `openspec archive` direto não deve ser usado. O bloco do `AGENTS.md` cita o
+  portão e o `--store <id>`.
+- **Release:** um workflow anexa o `comecar.mjs` da própria tag a toda release publicada sem ele.
+
+### Ações no projeto
+
+- Nenhuma obrigatória. O PR de atualização traz `docs/openspec-portao.mjs` e o bloco novo.
+- Para recusar commits de change não aprovada, rode uma vez
+  `node docs/openspec-portao.mjs instalar-hook`.
+
 ## 1.8.0 — 2026-10-22
 
 ### O que mudou

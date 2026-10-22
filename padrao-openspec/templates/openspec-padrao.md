@@ -36,6 +36,21 @@ O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira c
 O passo a passo completo, com pré-requisitos e problemas comuns, está no
 [COMECE-AQUI.md](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/COMECE-AQUI.md) do padrão.
 
+## Portão
+
+O `docs/openspec-portao.mjs` dá a mesma resposta, para qualquer agente ou pessoa, sobre escrever código
+e arquivar uma change:
+
+```sh
+node docs/openspec-portao.mjs apply <change>     # aprovação completa?
+node docs/openspec-portao.mjs archive <change>   # escopo archive, tarefas, verification.md e review.md?
+```
+
+Saída 0 libera, 1 bloqueia com os motivos e 2 indica erro de ambiente (por exemplo, store não
+resolvido: rode na pasta deste repositório ou passe `--store <id>`). Os fluxos `/opsx:apply` e
+`/opsx:archive` rodam o portão sozinhos. Para recusar também commits `OpenSpec-Change: <change>` de
+changes não aprovadas, rode uma vez `node docs/openspec-portao.mjs instalar-hook`.
+
 ## Usar com outros agentes
 
 As regras do padrão chegam a este repositório como `docs/openspec-regras.md`. Cada agente as recebe por

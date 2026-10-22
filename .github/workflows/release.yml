@@ -1,0 +1,31 @@
+name: Release
+
+# Toda release precisa do comecar.mjs anexado: o link releases/latest/download/comecar.mjs do
+# COMECE-AQUI baixa esse anexo. A v1.7.0 saiu sem ele, apesar do passo no README.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  anexo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Anexar o comecar.mjs da própria tag, se faltar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          assets="$(gh release view "$TAG" --json assets -q '.assets[].name')"
+          if ! grep -qx 'comecar.mjs' <<< "$assets"; then
+            gh release upload "$TAG" padrao-openspec/scripts/comecar.mjs
+            echo "Anexado: comecar.mjs da tag $TAG"
+          fi
+          assets="$(gh release view "$TAG" --json assets -q '.assets[].name')"
+          grep -qx 'comecar.mjs' <<< "$assets"
