@@ -319,6 +319,9 @@ sumir):
 | "Write the verification record", "Evidence reuse", "Cobertura fora da suíte", "Project validation commands" e "Code review record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Update the project overview", "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
 | "Standard version check" e "offer to update now" | `propose`, `apply`, `verify` e `archive` (comandos e skills) |
+| "Unrequested fixes are scope", "Check the library API", "Revalidate requirements after a version change", "Tool generators outside the repository", "Simulate CI on a clean copy" e "Production-mode check" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
+| "Review before verify", "Dependencies in Impact" e "Agent-run browser scripts" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
+| "Scope change resets approval" | `commands/opsx/update.md` e `skills/openspec-update-change/SKILL.md` |
 | "Commit the init", "### Arquivo 5", 7.3, fila por banco e E2E acrescentado | `commands/opsx/init.md` |
 | "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |

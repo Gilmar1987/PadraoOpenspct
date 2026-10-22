@@ -60,3 +60,12 @@ A escolha do modelo de IA MUST permanecer com o usuário; as regras do projeto M
 
 - **WHEN** uma tarefa consome muito contexto
 - **THEN** o agente pode sugerir ao usuário uma troca de modelo, mas não condiciona o trabalho a ela
+
+### Requirement: Contagens vindas do CLI ou de lista
+
+Toda contagem que o agente anunciar ao usuário (tarefas, achados, arquivos, itens) SHALL vir do OpenSpec CLI (por exemplo, `progress.total`) ou de uma lista montada na mesma resposta, e MUST NOT ser estimada de memória.
+
+#### Scenario: Total de tarefas
+
+- **WHEN** o agente informa quantas tarefas a change tem
+- **THEN** o número é o `progress.total` das instruções de apply, e não uma estimativa

@@ -82,6 +82,7 @@ This workflow revises artifacts that already exist; it never creates missing one
    - This step performs every artifact write in this workflow; no earlier step edits an artifact.
    - Show each proposed revision and why - including the requested edit drafted in step 4. Write only after the user confirms.
    - If the user rejects a revision, do not write it - leave that artifact unchanged.
+   - **Scope change resets approval**: a confirmed revision that changes the scope of an approved change (the proposal's "What Changes", requirements or scenarios of the delta specs, or tasks added or removed) resets the approval. In `proposal.md`, move the current record into one line `- Aprovação anterior: <Responsável>, <Data>, <Escopo>; Condições: <...>; Origem: "<...>"` placed after the `## Aprovação` items (an existing `- Archive: ...` item moves into that line too), set `Responsável: Pendente` and the other items to `—`, and tell the user the change needs a new approval before `/opsx:apply`. A wording fix that does not change what is required keeps the approval as it is.
    - When a substantial rewrite is needed, get that artifact's rules and template first:
      ```bash
      openspec instructions "<artifact-id>" --change "<name>" --json

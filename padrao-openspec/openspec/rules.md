@@ -38,6 +38,11 @@ Se o usuário pedir implementação sem uma change ativa, você MUST:
 2. Oferecer iniciar o fluxo com `/opsx:explore` ou `/opsx:propose`
 3. Aguardar confirmação antes de qualquer escrita
 
+Toda correção, inclusive urgente, passa por uma change; uma change pequena, com uma tarefa,
+basta. Uma revisão pelo `/opsx:update` que muda o escopo de uma change aprovada zera a
+aprovação: a change volta a `Pendente` até ser aprovada de novo. Um "ajuste rápido" direto no código deixa a fonte da verdade (`openspec/specs/`)
+desatualizada, e a próxima change decide com base nela.
+
 A aprovação vale quando está registrada na seção `## Aprovação` do `proposal.md`:
 
 - Itens de lista sem checkbox: Responsável, Data, Escopo (`apply` ou `archive`),
@@ -132,6 +137,8 @@ Economize contexto nas saídas, nunca nos artefatos.
   Sem saída, o resultado é "não verificado", nunca "passou".
 - Economia de tokens MUST NOT justificar pular a leitura de um artefato, marcar uma
   tarefa sem verificação ou declarar sucesso sem evidência.
+- Contagens que você anunciar (tarefas, achados, arquivos, itens) MUST vir do CLI (por
+  exemplo, `progress.total`) ou de uma lista montada na mesma resposta, nunca de memória.
 - A escolha do modelo de IA é do usuário. Você pode sugerir uma troca; não a exija.
 - Depois de 3 tentativas seguidas falhando no mesmo erro ou no mesmo teste, você
   MUST parar, mostrar o erro, resumir as tentativas com a hipótese da falha e pedir

@@ -4,6 +4,32 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.8.0 — 2026-10-22
+
+### O que mudou
+
+- **Apply mais rigoroso:**
+  - uma correção que a spec não pede é escopo novo, e o agente para e pergunta;
+  - a API real de uma biblioteca é conferida antes de escrever um adaptador;
+  - requisitos de runtime e compatibilidade são revistos depois de trocar uma versão;
+  - geradores (`init`, `create`) rodam fora do repositório de código;
+  - uma change que mexe na CI simula os passos numa cópia limpa;
+  - mudanças de servidor ou de rotas são verificadas também no modo de produção.
+- **Verify:**
+  - sem `review.md` numa change de código, o verify para no início e oferece rodar a revisão;
+  - as dependências do Impact são cruzadas com as tarefas e o manifesto;
+  - um roteiro de navegador rodado por agente sem interação conta como cobertura parcial.
+- **Update:** uma revisão que muda o escopo de uma change aprovada volta a aprovação para
+  `Pendente`, guardando a anterior.
+- **Regras e config base:**
+  - toda correção, inclusive urgente, passa por uma change;
+  - as contagens anunciadas vêm do CLI;
+  - toda dependência do Impact aparece numa tarefa.
+
+### Ações no projeto
+
+- Nenhuma obrigatória. As regras novas chegam pelo PR de atualização.
+
 ## 1.7.0 — 2026-10-22
 
 ### O que mudou
