@@ -12,7 +12,8 @@
 
 ## 3. Fluxos, bloco e regras
 
-- [ ] 3.1 Aplicar o D2 nos 4 arquivos do apply e do archive e o D3 no `agents-block.md` e no `rules.md`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills", "Smoke test dos blocos de agentes" e `sync-root --check` passando.
+- [x] 3.1 Aplicar o D2 nos 4 arquivos do apply e do archive e o D3 no `agents-block.md` e no `rules.md`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills", "Smoke test dos blocos de agentes" e `sync-root --check` passando.
+  - Evidência: "Run the gate" no passo 4a do apply (antes da checagem em texto) e num passo 3a do archive, antes da sincronização das specs (a primeira inserção caiu no fim do passo 4, depois do sync, e foi movida); bloco `openspec-padrao` e `rules.md` (seção 3) com os `/opsx:*` como fluxos do agente, a proibição do `openspec archive` direto, o portão e o `--store`; `sync-root.mjs` → "Synced 5 paths.", `--check` → em dia; `[PASS]` em "Trechos customizados das skills", "Smoke test dos blocos de agentes" e "Lint de Markdown".
 
 ## 4. Release, guias e versão
 
