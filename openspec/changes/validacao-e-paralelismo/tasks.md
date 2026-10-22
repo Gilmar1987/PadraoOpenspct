@@ -2,8 +2,10 @@
 
 ## 1. CI
 
-- [ ] 1.1 Aplicar o D5 (passo "Ids de teste com sufixo" no job `root`). Verificar rodando-o no Git Bash: deve falhar, listando os ids fixos atuais.
-- [ ] 1.2 Aplicar o D3 nos passos que registram store e o D4 nos dois jobs. Verificar com o passo da 1.1 passando e com todos os passos do job `store` passando no Git Bash, sem nenhum id `ci-` registrado no fim (`openspec store list --json`).
+- [x] 1.1 Aplicar o D5 (passo "Ids de teste com sufixo" no job `root`). Verificar rodando-o no Git Bash: deve falhar, listando os ids fixos atuais.
+  - Evidência: passo "Ids de teste com sufixo" no job `root`; no Git Bash, antes da troca dos ids → falha listando as 12 linhas com ids fixos (`--register-id ci-store`, `--id ci-entrada`, `store unregister ci-semcommit`…), exit 1, esperado.
+- [x] 1.2 Aplicar o D3 nos passos que registram store e o D4 nos dois jobs. Verificar com o passo da 1.1 passando e com todos os passos do job `store` passando no Git Bash, sem nenhum id `ci-` registrado no fim (`openspec store list --json`).
+  - Evidência: sufixo `sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"` nos passos da declaração do store (que ganhou `trap`), do script de entrada, do drive minúsculo e do portão, com os ids, caminhos, URLs e conferências usando `$sfx`; instalação do CLI nos dois jobs pulada quando `openspec --version` = 1.14.2. No Git Bash, `[PASS]` em "Ids de teste com sufixo" e nos quatro passos alterados; `openspec store list --json` → nenhum id `ci-` no fim; com o CLI 1.14.2 instalado, a condição do passo de instalação o pula.
 
 ## 2. Propose e regras
 
