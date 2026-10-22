@@ -47,6 +47,22 @@
 | Testes | A definir |
 | Deploy | A definir |
 
+## Comandos de verificação
+
+Comandos deste repositório (o padrão), os mesmos que a CI roda em `.github/workflows/validate.yml`.
+Rode-os na raiz, no Git Bash ou num shell POSIX.
+
+| Finalidade | Comando | Observações |
+|---|---|---|
+| Instalar dependências | `npm install -g @fission-ai/openspec@1.14.2` | Node.js 18+; o repositório não tem `package.json` |
+| Executar localmente | Não aplicável | Os scripts de `padrao-openspec/scripts/` rodam sob demanda, contra um projeto |
+| Testes | Passos `run:` dos jobs `store` (em `padrao-openspec/`) e `root` do `validate.yml` | Smoke tests do instalador, do setup, do script de entrada, das métricas e do guia |
+| Lint | `npx markdownlint-cli2@0.23.2 "**/*.md"` | Na raiz e em `padrao-openspec/` |
+| Typecheck/build | `node --check` em cada `padrao-openspec/scripts/*.mjs`; `node padrao-openspec/scripts/sync-root.mjs --check`; `openspec validate --all --strict` | O validate roda na raiz e em `padrao-openspec/` |
+| Migrações | Não aplicável | Sem banco de dados |
+| Auditoria de dependências | Não aplicável | Sem dependências npm; o CLI e o markdownlint têm versão fixa |
+| Varredura de secrets | Adiado: definir na primeira change que precisar | Candidato: gitleaks, numa change própria que também o ponha na CI |
+
 ## Git & Process
 
 - Conventional Commits

@@ -26,3 +26,22 @@ Comandos:
 - `review.md` → 19fa0d7..ffaa8d2, subagente requesting-code-review; correções em 8b16e98, sem commits de código depois
 - `git log ffaa8d2..HEAD` → só 8b16e98 (correções da revisão) e ba21e2f (review.md)
 - `openspec store list --json` → só `biblioteca` e `tarefas` registrados depois das execuções (exit 0)
+
+## 2026-10-21 (depois da publicação da v1.3.0)
+
+- Críticos: 0
+- Warnings: 0
+- Sugestões: 0
+- Não verificado: execução num console interativo real (feita depois, no teste do Lava Jato, que achou os defeitos corrigidos na `corrige-caminho-e-prompt-no-windows`); comandos de verificação do projeto (registrados depois, na `comandos-de-verificacao-do-padrao`)
+- Cobertura fora da suíte: "Dev baixa o script" e "Script anexado à release" (download real pelo agente, logo depois da publicação)
+- Avaliação: Os cenários de download e anexo, que estavam não verificados, passaram com a release `v1.3.0` publicada.
+
+Itens: nenhum
+
+Comandos:
+
+- `gh release view v1.3.0 --json tagName,isDraft,isPrerelease,assets` → `v1.3.0`, não é rascunho nem pre-release, anexo `comecar.mjs` (exit 0)
+- `gh api repos/Gilmar1987/PadraoOpenspct/releases/latest -q .tag_name` → `v1.3.0` (exit 0)
+- `curl.exe -sSLO https://github.com/Gilmar1987/PadraoOpenspct/releases/latest/download/comecar.mjs` → baixado (exit 0)
+- `sha256sum` do arquivo baixado e de `padrao-openspec/scripts/comecar.mjs` → iguais, `d6287dcb…cf034` (exit 0)
+- `node comecar.mjs --help` no arquivo baixado → mostra o uso (exit 0)
