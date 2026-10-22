@@ -32,7 +32,7 @@ No PadraoOpenspct também apareceu uma trava só de texto que falhou: a release 
   - smoke test do portão (aprovação pendente e completa; archive com tarefas pendentes, sem `verification.md`, sem `review.md` e completo; hook);
   - checagem de sintaxe;
   - trechos customizados novos.
-- **Versão:** `1.9.0`, a combinar com a outra sessão antes do apply.
+- **Versão:** `1.9.0`, aprovada pelo responsável e combinada com a outra sessão.
 
 ### Fora do escopo
 
@@ -70,8 +70,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.9.0; CI passar nos três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`); em seguida, PR, merge e release `v1.9.0` com o `comecar.mjs` anexado
+- Origem: "Aprovo a change guardas-mecanicas para archive, versão 1.9.0, com PR, merge e release, se a CI passar nos três jobs"
