@@ -151,6 +151,7 @@ O passo segue o mesmo padrão de `grep -qF` dos trechos atuais.
 ### D6. Versão
 
 `1.3.2`, como pedido. Nota: pelo semver da ADR-0004, um artefato novo gerado é uma funcionalidade, o que pediria `1.4.0`. A escolha final é do responsável, na aprovação. "Ações no projeto":
+
 - "Nenhuma obrigatória.";
 - "Projetos já inicializados podem pedir ao agente que gere `openspec/arquitetura.md` a partir do `project-setup.md`, seguindo o 'Arquivo 5' do `.claude/commands/opsx/init.md`.";
 - "Arquivos de respostas com a 3.8: a numeração das opções mudou."
