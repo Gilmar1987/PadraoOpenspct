@@ -56,7 +56,7 @@ Rode-os na raiz, no Git Bash ou num shell POSIX.
 |---|---|---|
 | Instalar dependências | `npm install -g @fission-ai/openspec@1.14.2` | Node.js 18+; o repositório não tem `package.json` |
 | Executar localmente | Não aplicável | Os scripts de `padrao-openspec/scripts/` rodam sob demanda, contra um projeto |
-| Testes | Passos `run:` dos jobs `store` (em `padrao-openspec/`) e `root` do `validate.yml` | Smoke tests do instalador, do setup, do script de entrada, das métricas e do guia |
+| Testes | Passos `run:` dos jobs `store` (em `padrao-openspec/`) e `root` do `validate.yml` | Smoke tests do instalador, do setup, do script de entrada, das métricas e do guia; o job `store` roda em Ubuntu e em Windows |
 | Lint | `npx markdownlint-cli2@0.23.2 "**/*.md"` | Na raiz e em `padrao-openspec/` |
 | Typecheck/build | `node --check` em cada `padrao-openspec/scripts/*.mjs`; `node padrao-openspec/scripts/sync-root.mjs --check`; `openspec validate --all --strict` | O validate roda na raiz e em `padrao-openspec/` |
 | Migrações | Não aplicável | Sem banco de dados |
@@ -67,3 +67,7 @@ Rode-os na raiz, no Git Bash ou num shell POSIX.
 
 - Conventional Commits
 - Toda mudança de comportamento passa por `/opsx:propose` antes do código
+- Change que altera um script interativo (`comecar.mjs`, `setup-project.mjs` ou outro que pergunte no
+  terminal) SHALL ter, antes da release, um teste do responsável num console real do Windows
+  (PowerShell), com as respostas digitadas, registrado no `verification.md` como cobertura fora da
+  suíte; sem ele, o verify registra o item como não verificado e a release espera
