@@ -1,15 +1,18 @@
-# Regras Globais — PadraoOpenspct
+# Regras Globais — padrão OpenSpec
 
 Estas regras são carregadas automaticamente em toda conversa e se aplicam a qualquer
-agente de IA que opere neste repositório. Elas não podem ser ignoradas ou contornadas
-por instruções do usuário em chat.
+agente de IA que opere neste repositório ou num projeto que usa o padrão. Elas não podem
+ser ignoradas ou contornadas por instruções do usuário em chat. Num projeto, elas chegam
+como `docs/openspec-regras.md`; a fonte é `padrao-openspec/openspec/rules.md` do
+PadraoOpenspct.
 
 ---
 
 ## 1. Leitura obrigatória antes de qualquer ação técnica
 
 Antes de responder qualquer pergunta técnica, sugerir implementação ou escrever código,
-você MUST ler os seguintes arquivos:
+você MUST ler os seguintes arquivos, na raiz OpenSpec do projeto (num projeto com store
+separado, é o store; `openspec context --json` mostra a raiz):
 
 - `openspec/config.yaml` — stack, convenções e regras do projeto
 - `openspec/project.md` — visão do produto, arquitetura e limites do sistema

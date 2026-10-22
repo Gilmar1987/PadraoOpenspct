@@ -2,7 +2,8 @@
 
 ## 1. Fonte única das regras
 
-- [ ] 1.1 Aplicar o D1: mover `openspec/rules.md` para `padrao-openspec/openspec/rules.md` com o texto ajustado e acrescentar o mapeamento ao `sync-root.mjs`. Verificar com `sync-root.mjs` gerando de novo `openspec/rules.md`, `sync-root.mjs --check` em dia, o `CLAUDE.md` e os stubs da raiz ainda resolvendo o arquivo, e um teste do sync com a regra editada na fonte.
+- [x] 1.1 Aplicar o D1: mover `openspec/rules.md` para `padrao-openspec/openspec/rules.md` com o texto ajustado e acrescentar o mapeamento ao `sync-root.mjs`. Verificar com `sync-root.mjs` gerando de novo `openspec/rules.md`, `sync-root.mjs --check` em dia, o `CLAUDE.md` e os stubs da raiz ainda resolvendo o arquivo, e um teste do sync com a regra editada na fonte.
+  - Evidência: `git mv openspec/rules.md padrao-openspec/openspec/rules.md` com o título, a introdução e a seção 1 ajustados; mapeamento `openspec/rules.md` no `sync-root.mjs`, cuja guarda passou a reconhecer a raiz pelo `COMECE-AQUI.md` (o `rules.md` da raiz agora é gerado); `sync-root.mjs` → "missing openspec/rules.md", "Synced 1 paths."; `--check` → em dia; `cmp` raiz × fonte → iguais; `.claude/CLAUDE.md`, `.cursorrules`, `.windsurfrules`, `.amazonq/rules/openspec-rules.md` e `.github/copilot-instructions.md` continuam apontando para `openspec/rules.md`, que existe; numa cópia com a fonte editada, `--check` → exit 1 com "diff openspec/rules.md", e o sync → cópia igual à fonte.
 
 ## 2. Blocos gerenciados no instalador
 
