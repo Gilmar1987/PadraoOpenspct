@@ -68,3 +68,4 @@ Nenhuma.
 - Escopo: apply
 - Condições: —
 - Origem: "As duas aprovadas : qualidade-de-interface , validacao-e-paralelismo", em resposta a "Para eu implementar, aprove indicando onde ela entra na fila [...]" e à ordem sugerida "1. subagentes-e-ganchos; 2. validacao-e-paralelismo; 3. qualidade-de-interface; 4. as três changes de SDD". A resposta não cita archive, PR nem release, então o escopo registrado é apply.
+- Archive: 2026-10-22; Condições: push, PR, archive, merge e release v1.11.0, se a CI passar nos três jobs; Origem: "autorizo o push e o PR? E também o archive, o merge e a release v1.11.0, se a CI passar nos três jobs.", em resposta a "Autoriza o push e o PR agora? Se quiser, pode autorizar de uma vez o archive, o merge e a release (depois da v1.10.0), desde que a CI passe nos três jobs."
