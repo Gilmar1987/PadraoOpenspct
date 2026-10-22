@@ -19,7 +19,8 @@
 
 ## 4. Guias, versão e integração
 
-- [ ] 4.1 Aplicar o D4 e o D6. Verificar com o lint nos dois lugares sem issues e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+- [x] 4.1 Aplicar o D4 e o D6. Verificar com o lint nos dois lugares sem issues e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+  - Evidência: COMECE-AQUI com a pergunta e a linha do commit inicial no exemplo e a "Commitar e publicar" focada em publicar; `templates/openspec-padrao.md` com os commits automáticos nos "Primeiros passos" e a oferta de atualização no "Atualizar à mão"; `VERSION` → 1.6.0 e seção `## 1.6.0` no CHANGELOG. `[PASS]` em "Lint de Markdown" (nos dois lugares), "Versão e changelog" e "Guia de primeiros passos" (exit 0).
 - [ ] 4.2 Rodar os comandos de verificação do `openspec/project.md` (passos dos jobs `store` e `root`) localmente e, no PR, conferir os três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`). Verificar que todos passam.
 
 ## Workflow follow-up

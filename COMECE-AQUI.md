@@ -85,13 +85,17 @@ Confirmar? [S/n]: (Enter)
   … Rodando o setup (pode levar alguns segundos)
   ✔ Setup concluído (skills, comandos e agentes no código; store registrado e ligado ao código)
 
+Fazer o commit inicial do código e do store? [S/n]: (Enter)
+  ✔ Commit inicial do código e do store
+
 Pronto. Próximo passo:
   1. Abra a pasta do projeto como pasta do workspace (não a pasta acima dela):
        code "C:\openspec\livraria-online"
      ou, no VS Code: File → Open Folder → C:\openspec\livraria-online
   2. Nessa janela, abra o Claude Code e rode: /opsx:init
      Se /opsx não aparecer, o Claude Code foi aberto em outra pasta.
-Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").
+Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.
+Para publicar, crie os remotos e faça o push (veja o COMECE-AQUI.md, "Commitar e publicar").
 No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
 pull requests" para receber as atualizações do padrão por PR.
 ```
@@ -172,13 +176,17 @@ nome como responsável.
 
 ### Commitar e publicar
 
-No repositório de código, commite o que o setup instalou: `.claude/`, `.agents/`,
-`.github/agents/`, `.github/workflows/openspec-padrao-update.yml`, `.github/copilot-instructions.md`,
-`.amazonq/`, `docs/openspec-padrao.md`, `docs/openspec-regras.md`, `AGENTS.md`, `CLAUDE.md`,
-`GEMINI.md`, `.openspec-padrao.json`, `.gitignore` e `openspec/config.yaml` (a declaração do store).
+Com o script, os commits já estão feitos: o `comecar.mjs` commita o código e o store depois do
+setup, e o `/opsx:init` commita no store o que gerou. Falta só publicar. Se você usou o
+`--sem-commit`, se o commit falhou (o script avisa e mostra os comandos) ou se seguiu os passos à
+mão, commite antes:
 
-No store, commite o que o init gerou em `padrao-openspec/openspec/`: `project.md`, `config.yaml`,
-`project-setup.md` e as ADRs.
+- **No código:** o que o setup instalou: `.claude/`, `.agents/`, `.github/agents/`,
+  `.github/workflows/openspec-padrao-update.yml`, `.github/copilot-instructions.md`, `.amazonq/`,
+  `docs/openspec-padrao.md`, `docs/openspec-regras.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
+  `.openspec-padrao.json`, `.gitignore` e `openspec/config.yaml` (a declaração do store).
+- **No store:** o que o init gerou em `padrao-openspec/openspec/`: `project.md`, `config.yaml`,
+  `project-setup.md`, `arquitetura.md` e as ADRs.
 
 Para publicar:
 

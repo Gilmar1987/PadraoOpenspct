@@ -4,6 +4,24 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.6.0 — 2026-10-22
+
+### O que mudou
+
+- **Commits do que é gerado:** o `comecar.mjs` passa a oferecer o commit inicial do código e do store
+  depois do setup (`--sem-commit` recusa; sem identidade Git, avisa e mostra os comandos), e o
+  `/opsx:init` commita no store a pasta `openspec/` que gerou. O projeto já nasce com histórico, que
+  o `--update` do instalador exige.
+- **Atualização em projeto sem remoto:** os comandos `/opsx:propose`, `/opsx:apply`, `/opsx:verify`
+  e `/opsx:archive` continuam avisando de uma versão nova e, quando o repositório de código não tem
+  remoto (ou quando você pede), oferecem rodar a atualização à mão; ela só roda com a sua
+  confirmação e com a árvore limpa, numa branch `chore/padrao-vX.Y.Z`.
+
+### Ações no projeto
+
+- Nenhuma obrigatória.
+- Projetos sem remoto passam a receber, nos comandos do ciclo, a oferta de atualizar à mão.
+
 ## 1.5.0 — 2026-10-22
 
 ### O que mudou
