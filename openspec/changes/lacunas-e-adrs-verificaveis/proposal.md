@@ -39,6 +39,7 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 
 ## Impact
 
+- **ADR:** [ADR-0008](../../adrs/0008-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Proposed`), criada por decisão do responsável.
 - **Comandos e skills:** `padrao-openspec/.claude/commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` (heurísticas "Declared gaps" e "ADR verification"); `padrao-openspec/.claude/commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` (campo `verificacao` ao criar ADR). Espelhados na raiz pelo `sync-root.mjs`.
 - **Modelos do store:** `padrao-openspec/openspec/lacunas.md` (novo), `padrao-openspec/openspec/adrs/template.md` e `adrs/README.md` (campo `verificacao`), `padrao-openspec/openspec/project.md` (seção "Precedência dos documentos" e linha "Conferência de lacunas" em "Comandos de verificação").
 - **Regras:** `padrao-openspec/openspec/rules.md` (precedência); chega aos projetos como `docs/openspec-regras.md` e aos blocos gerenciados dos agentes.
@@ -52,8 +53,9 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-22
+- Escopo: apply
+- Condições: ordem aprovada: guardas-mecanicas (outra sessão) primeiro, depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao; cada apply começa depois do merge da anterior, com rebase na main e versão combinada com a outra sessão
+- Origem: "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
+- Archive: pendente de aprovação
