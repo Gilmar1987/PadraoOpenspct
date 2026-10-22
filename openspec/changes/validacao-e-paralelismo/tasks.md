@@ -16,7 +16,8 @@
 
 - [x] 3.1 Aplicar o D6 e o D7 com a versão combinada. Verificar com o lint nos dois lugares sem issues e o passo "Versão e changelog" passando.
   - Evidência: `padrao-openspec/VERSION` 1.11.0 e seção "1.11.0" no `CHANGELOG.md`, depois do rebase sobre a main com a v1.10.0 (041a92d); passo "Versão e changelog" rodado no Git Bash → VERSAO-OK (exit 0); `markdownlint-cli2` no `CHANGELOG.md` e na change → 0 issues (exit 0). O D6 já estava aplicado (8f742a4).
-- [ ] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+- [x] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+  - Evidência: outra sessão avisada antes e depois; suíte local completa no Git Bash sobre a main com a v1.10.0 → job `store` 21/21 e `root` 5/5 PASS, sem id `ci-*` sobrando no registro; depois do rebase sobre 2f1df07 e das correções da revisão (d35221b), passos afetados → PASS; PR #32, run 39868122612 (head 27c743b) → store (ubuntu-latest), store (windows-latest) e root = success.
 
 ## Workflow follow-up
 
