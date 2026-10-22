@@ -13,7 +13,7 @@ Itens: nenhum
 
 Comandos:
 
-- `openspec instructions apply --change commits-e-atualizacao-local --json` → 7 de 8 tarefas antes da 4.2 (fechada pela CI do PR)
+- `openspec instructions apply --change commits-e-atualizacao-local --json` → `all_done`, 8/8 depois da 4.2, fechada pela CI do PR #25 nos três jobs
 - Passos do `validate.yml` no Git Bash → 17 `[PASS]` no `store` e 4 no `root` antes das correções; depois delas, `[PASS]` em "Sintaxe dos scripts", "Trechos customizados das skills", "Smoke test do script de entrada" (com o caso sem identidade), "Smoke test do drive minúsculo", "Lint de Markdown" e nos 4 do `root` (exit 0)
 - `sync-root.mjs` → "Synced 9 paths."; `--check` → em dia
 - `comecar.mjs --codigo app` (pasta com histórico, edição e `.env.local`) → "✔ Commit inicial do código (só os arquivos do padrão)", commit sem `app.txt` nem `.env.local`, que continuam " M" e "??" (exit 0)
