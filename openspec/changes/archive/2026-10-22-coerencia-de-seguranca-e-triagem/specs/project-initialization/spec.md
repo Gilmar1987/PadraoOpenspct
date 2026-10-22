@@ -4,7 +4,7 @@
 
 ### Requirement: Checagem de coerência das respostas
 
-Antes da confirmação final, o `/opsx:init` SHALL listar as combinações incoerentes entre as respostas e pedir, para cada uma, que o responsável ajuste a resposta ou a mantenha com uma justificativa. O `project-setup.md` SHALL registrar cada combinação apontada e a decisão tomada. Sem combinações incoerentes, o init SHALL dizer isso e seguir. A combinação "dados pessoais ou sensíveis no 1.5 e nenhum controle de LGPD/GDPR no 6.5" SHALL estar entre as avaliadas. As combinações "auditoria de dependências não aplicável num projeto com dependências de terceiros", "varredura de secrets não aplicável num projeto com credenciais" e "dados pessoais ou sensíveis sem autenticação e sem proteção contra ataques" também SHALL estar entre as avaliadas.
+Antes da confirmação final, o `/opsx:init` SHALL listar as combinações incoerentes entre as respostas e pedir, para cada uma, que o responsável ajuste a resposta ou a mantenha com uma justificativa. O `project-setup.md` SHALL registrar cada combinação apontada e a decisão tomada. Sem combinações incoerentes, o init SHALL dizer isso e seguir. A combinação "dados pessoais ou sensíveis no 1.5 e nenhum controle de LGPD/GDPR no 6.5" SHALL estar entre as avaliadas.
 
 #### Scenario: Aprovação de PR com uma pessoa só
 
@@ -26,6 +26,12 @@ Antes da confirmação final, o `/opsx:init` SHALL listar as combinações incoe
 - **WHEN** o responsável responde no 1.5 que o produto coleta dados pessoais ou sensíveis e responde `0` (não aplicável) no 6.5
 - **THEN** o init aponta que o produto trata dados pessoais sem nenhum controle e propõe ao menos o consentimento com registro de aceite e o direito de exclusão
 
+## ADDED Requirements
+
+### Requirement: Combinações de segurança na checagem de coerência
+
+A checagem de coerência do `/opsx:init` SHALL avaliar também três combinações de segurança: auditoria de dependências "Não aplicável" num projeto com dependências de terceiros, varredura de secrets "Não aplicável" num projeto com credenciais, e dados pessoais ou sensíveis sem autenticação e sem proteção contra ataques.
+
 #### Scenario: Auditoria de dependências desligada num projeto com dependências
 
 - **WHEN** a stack escolhida usa dependências de terceiros e o responsável responde "Não aplicável" para a auditoria de dependências
@@ -40,8 +46,6 @@ Antes da confirmação final, o `/opsx:init` SHALL listar as combinações incoe
 
 - **WHEN** o produto trata dados pessoais ou sensíveis, não tem autenticação e não tem proteção contra ataques
 - **THEN** o init aponta que qualquer pessoa com acesso lê e altera esses dados sem limite e oferece registrar no `project.md` a restrição a ambiente local com dados de teste, ou adotar autenticação e limite de requisições
-
-## ADDED Requirements
 
 ### Requirement: Opção sem autenticação
 
