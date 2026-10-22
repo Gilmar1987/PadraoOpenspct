@@ -25,7 +25,7 @@ O kit-esquadro (projeto Marelli, analisado em 2026-10-22) resolve isso com a apr
   - o portão `apply` bloqueia enquanto um artefato da change tiver `[INFERIDO`, citando arquivo e linha;
   - o init lista as marcas no resumo final e pede a confirmação de cada uma.
 - **Fluxos:** propose, apply, update e archive gravam o selo e respeitam o portão; trecho novo **"Approval content seal"** nos pares desses comandos.
-- **Versão:** a combinar com o responsável. Provisoriamente, depois das changes de SDD da outra sessão (1.13.0–1.15.0), como 1.16.0.
+- **Versão:** 1.16.0, depois das changes de SDD da outra sessão (1.13.0–1.15.0).
 
 ### Fora do escopo
 
