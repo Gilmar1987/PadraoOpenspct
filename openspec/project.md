@@ -70,4 +70,5 @@ Rode-os na raiz, no Git Bash ou num shell POSIX.
 - Change que altera um script interativo (`comecar.mjs`, `setup-project.mjs` ou outro que pergunte no
   terminal) SHALL ter, antes da release, um teste do responsável num console real do Windows
   (PowerShell), com as respostas digitadas, registrado no `verification.md` como cobertura fora da
-  suíte; sem ele, o verify registra o item como não verificado e a release espera
+  suíte; sem release, o teste vem antes do archive. Sem ele, o verify registra o item como não
+  verificado e a release (ou o archive) espera. Na dúvida se um script é interativo, ele é

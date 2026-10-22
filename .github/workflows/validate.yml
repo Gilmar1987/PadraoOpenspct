@@ -74,7 +74,10 @@ jobs:
           node --check scripts/comecar.mjs
           # No Windows o Python se chama python e pode não ter o PyYAML.
           py="$(command -v python3 || command -v python)"
-          "$py" -c 'import yaml' 2>/dev/null || "$py" -m pip install -q pyyaml
+          if ! "$py" -c 'import yaml' 2>/dev/null; then
+            # Ubuntu protege o Python do sistema (PEP 668); o fallback instala só para o usuário.
+            "$py" -m pip install -q 'pyyaml==6.*' || "$py" -m pip install -q --user --break-system-packages 'pyyaml==6.*'
+          fi
           "$py" -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' templates/openspec-padrao-update.yml
 
       # VERSION é a versão do padrão; a primeira seção do CHANGELOG da raiz tem de ser ela,
@@ -393,6 +396,7 @@ jobs:
       # único clone na última release, entrada num projeto em andamento e as recusas.
       - name: Smoke test do script de entrada
         run: |
+          trap 'openspec store unregister ci-entrada >/dev/null 2>&1 || true' EXIT
           work="$(mktemp -d)"
           v="$(tr -d '\r\n' < VERSION)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
@@ -456,14 +460,18 @@ jobs:
 
       # No Windows, a pasta base digitada com o drive em minúscula (c:\...) não pode virar um falso
       # "not this store": o CLI devolve C:\..., e a comparação tem de reconhecer a mesma pasta.
+      # O %TEMP% do runner fica em c:\Users\RUNNER~1, então o passo cobre também o nome curto 8.3.
       - name: Smoke test do drive minúsculo
         if: runner.os == 'Windows'
         run: |
+          trap 'openspec store unregister ci-drive >/dev/null 2>&1 || true' EXIT
           work="$(mktemp -d)"
           v="$(tr -d '\r\n' < VERSION)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
           mkdir -p "$work/padrao"
           cp -r . "$work/padrao/padrao-openspec"
+          # O .gitattributes da raiz mantém LF no repositório temporário, como no checkout.
+          cp ../.gitattributes "$work/padrao/"
           git -C "$work/padrao" init -q
           git -C "$work/padrao" add -A
           commit "$work/padrao" -m base
