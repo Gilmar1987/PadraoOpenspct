@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Página de teste do validador de interface do padrão OpenSpec.">
+  <title>Cadastro de interesse</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <style>
+    :root { --texto: #1b1f24; --fundo: #ffffff; --primaria: #0b5cad; --erro: #a4161a; --sucesso: #1e6b34; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--texto); background: var(--fundo); }
+    header, main, footer { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+    nav a { margin-right: 1rem; color: var(--primaria); }
+    label { display: block; margin-top: 1rem; font-weight: 600; }
+    input { width: 100%; padding: .5rem; font: inherit; border: 1px solid #5b6470; border-radius: 4px; }
+    button { margin-top: 1rem; padding: .5rem 1rem; font: inherit; color: #fff; background: var(--primaria); border: 0; border-radius: 4px; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #f5b400; outline-offset: 2px; }
+    .erro { color: var(--erro); }
+    .sucesso { color: var(--sucesso); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Principal"><a href="/">Início</a><a href="/sobre.html">Sobre</a></nav>
+  </header>
+  <main>
+    <h1>Cadastro de interesse</h1>
+    <p>Deixe seu nome para receber novidades.</p>
+    <form id="cadastro" novalidate>
+      <label for="nome">Nome</label>
+      <input id="nome" name="nome" autocomplete="name" required>
+      <p id="mensagem" role="status" aria-live="polite"></p>
+      <button type="submit">Enviar</button>
+    </form>
+  </main>
+  <footer><p>Exemplo do padrão OpenSpec.</p></footer>
+  <script>
+    document.getElementById('cadastro').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nome = document.getElementById('nome').value.trim();
+      const mensagem = document.getElementById('mensagem');
+      mensagem.className = nome ? 'sucesso' : 'erro';
+      mensagem.textContent = nome ? `Obrigado, ${nome}!` : 'Informe o seu nome.';
+    });
+  </script>
+</body>
+</html>

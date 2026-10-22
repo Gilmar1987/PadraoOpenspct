@@ -2,7 +2,8 @@
 
 ## 1. Testes na CI
 
-- [ ] 1.1 Criar as fixtures `boa/` e `ruim/` e o `jornadas.json` (D6), e acrescentar ao `validate.yml` o "Smoke test da validação de interface", a sintaxe do script e "Interface quality gate" nos trechos customizados. Verificar rodando os passos no Git Bash: devem falhar (o script e o trecho não existem).
+- [x] 1.1 Criar as fixtures `boa/` e `ruim/` e o `jornadas.json` (D6), e acrescentar ao `validate.yml` o "Smoke test da validação de interface", a sintaxe do script e "Interface quality gate" nos trechos customizados. Verificar rodando os passos no Git Bash: devem falhar (o script e o trecho não existem).
+  - Evidência: fixtures em `padrao-openspec/scripts/test-fixtures/interface/` (`boa/` com título, `lang`, favicon, formulário rotulado, `sobre.html` e `404.html`; `ruim/` sem título e sem `lang`, imagem sem `alt`, `console.error` e link para `/promocoes.html` inexistente; `jornadas.json` com três jornadas; `servidor.mjs` estático); passos rodados no Git Bash com `runstep.py` → "Sintaxe dos scripts" FAIL (script ausente), "Trechos customizados das skills" FAIL (Interface quality gate e as duas linhas do init ausentes), "Smoke test dos hooks do Claude Code" FAIL (validador não restrito), "Smoke test da validação de interface" FAIL (script ausente), todos exit 1 como esperado. O formato de jornadas ganhou nome por jornada (`{"jornadas": [{"nome", "passos"}]}`); o script também aceita a lista de passos do D2.
 
 ## 2. Script
 

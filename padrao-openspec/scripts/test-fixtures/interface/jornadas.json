@@ -1,0 +1,29 @@
+{
+  "jornadas": [
+    {
+      "nome": "Cadastro com nome",
+      "passos": [
+        { "visitar": "/" },
+        { "preencher": { "Nome": "Ana" } },
+        { "clicar": "Enviar" },
+        { "conferir": "Obrigado, Ana!" }
+      ]
+    },
+    {
+      "nome": "Cadastro vazio mostra erro",
+      "passos": [
+        { "visitar": "/" },
+        { "clicar": "Enviar" },
+        { "conferir": "Informe o seu nome." }
+      ]
+    },
+    {
+      "nome": "Navegação para Sobre",
+      "passos": [
+        { "visitar": "/" },
+        { "clicar": "Sobre" },
+        { "conferir": "Esta página existe" }
+      ]
+    }
+  ]
+}
