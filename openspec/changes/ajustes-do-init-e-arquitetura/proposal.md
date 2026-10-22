@@ -44,7 +44,7 @@ Nenhuma.
 - **Versão:** `padrao-openspec/VERSION` e `CHANGELOG.md`.
 - **Riscos:**
   - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam.
-  - **Compatibilidade:** sem quebra. Arquivos de respostas pré-preenchidas com a 3.8 antiga continuam válidos como "Outro"; a numeração das opções muda, o que o CHANGELOG registra.
+  - **Compatibilidade:** arquivos de respostas pré-preenchidas com a 3.8 numérica mudam de sentido (por exemplo, a antiga 3, Hangfire, vira "Broker dedicado"); o CHANGELOG traz o mapa completo antiga → nova. Respostas em texto livre continuam valendo.
 
 ## Aprovação
 

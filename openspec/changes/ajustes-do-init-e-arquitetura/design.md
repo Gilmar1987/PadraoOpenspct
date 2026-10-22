@@ -28,7 +28,8 @@ Não há ADR nova: a change ajusta a entrevista e acrescenta um artefato de docu
 
 Em "Arquivo 3", o parágrafo da decisão de testes passa a dizer: "acrescente ao `operations.apply.guidance`, depois das linhas do config base":
 
-- com um framework na 5.5: "Cobrir os cenários de interface com testes E2E em <framework da 5.5>, rodados pelo comando de testes registrado.";
+- com um framework de interface na 5.5 (1 a 4, ou um "Outro" equivalente): "Cobrir os cenários de interface com testes E2E em <framework da 5.5>, rodados pelo comando de E2E registrado no bloco 7 (ou pelo de testes, se for o mesmo).";
+- com "5) Testcontainers": uma linha de testes de integração e, se houver front-end, também a do roteiro em navegador (Testcontainers não cobre a interface);
 - com "0) Não aplicável": o texto atual do roteiro de verificação em navegador.
 
 "Se já houver uma linha sobre E2E (por exemplo, num store antigo), substitua-a em vez de duplicar."
@@ -113,7 +114,7 @@ omita o que for "Não aplicável"}}
 ## Diagrama
 ```mermaid
 flowchart LR
-  {{só os componentes da tabela acima e as setas de comunicação da 2.4}}
+  {{ator da 1.3, componentes da tabela acima e as dependências entre eles}}
 ```
 
 ## Dados
@@ -135,6 +136,7 @@ flowchart LR
 {{respostas "Adiado" e pontos mantidos na checagem de coerência; "Nenhum" se não houver}}
 ````
 
+- O diagrama mostra só os componentes da tabela e, como ator, o público da 1.3; as setas são as dependências reais entre eles, no estilo de comunicação da 2.4.
 - O bloco Mermaid fica aninhado no modelo; no `init.md`, o modelo usa uma cerca de quatro crases para conter a cerca de três.
 - "Arquivo 2" passa a dizer que a seção "Architecture" do `project.md` traz um resumo de 3 a 5 linhas e o link `[Arquitetura detalhada](arquitetura.md)`; o `project.md` neutro troca o comentário da seção por esse lembrete.
 - "Próximos passos" do init: o item 2 passa a citar também o `arquitetura.md`, e o item 5 passa a dizer "registrada como nova ADR e refletida no `arquitetura.md`".

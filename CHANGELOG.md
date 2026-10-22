@@ -26,8 +26,10 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - Nenhuma obrigatória.
 - Projetos já inicializados podem pedir ao agente que gere `openspec/arquitetura.md` a partir do
   `project-setup.md`, seguindo o "Arquivo 5" do `.claude/commands/opsx/init.md`.
-- Arquivos de respostas pré-preenchidas com a 3.8: a numeração das opções mudou (a antiga
-  "1) pg-boss / BullMQ" virou "1) Fila no próprio banco" e "2) Fila em Redis").
+- Arquivos de respostas pré-preenchidas com a 3.8 numérica: confira a resposta, porque a
+  numeração mudou. Antiga → nova: 1 (pg-boss / BullMQ) → 1 (pg-boss) ou 2 (BullMQ); 2 (Celery /
+  RQ) → 2; 3 (Hangfire) → 1; 4 (Sidekiq) → 2; 5 → 5; 6 → 6. Respostas em texto livre continuam
+  valendo.
 
 ## 1.3.1 — 2026-10-21
 

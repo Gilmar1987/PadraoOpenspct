@@ -23,7 +23,8 @@
 
 - [x] 4.1 Regenerar a raiz com `sync-root.mjs` e aplicar o D6 em `VERSION` e `CHANGELOG.md` com a versão aprovada. Verificar com `sync-root.mjs --check` e o passo "Versão e changelog" passando.
   - Evidência: `VERSION` → 1.4.0 e seção `## 1.4.0` no topo do CHANGELOG; `sync-root.mjs --check` → "Root is in sync"; `[PASS] Versão e changelog` (exit 0); lint do CHANGELOG → 0 issues.
-- [ ] 4.2 Rodar os comandos de verificação do `openspec/project.md` da raiz (todos os passos dos jobs `store` e `root`). Verificar que todos saem com código 0.
+- [x] 4.2 Rodar os comandos de verificação do `openspec/project.md` da raiz (todos os passos dos jobs `store` e `root`). Verificar que todos saem com código 0.
+  - Evidência: todos os passos do `validate.yml` no Git Bash → 15 `[PASS]` no `store` e 4 no `root`, exit 0; `openspec validate --all --strict` → 17 passed; `sync-root.mjs --check` → em dia. Depois das correções da revisão, `[PASS]` em "Trechos customizados das skills" (com as checagens reforçadas), "Lint de Markdown", "Versão e changelog", "Smoke test do setup de projeto", "Raiz em dia com padrao-openspec", "Lint de Markdown da raiz" e "Guia de primeiros passos"; validate → 17 passed.
 
 ## Workflow follow-up
 
