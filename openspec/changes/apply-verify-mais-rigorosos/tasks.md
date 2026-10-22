@@ -20,7 +20,8 @@
   - Evidência: `rules.md` com a correção urgente por change (seção 2) e as contagens vindas do CLI (seção 7); `config.yaml` com a regra de tasks das dependências do Impact; `sync-root.mjs` → "Synced 1 paths.", `--check` → em dia; `[PASS]` em "Config base carrega sem avisos" (a regra nova aparece nas instruções), "Lint de Markdown" e "Smoke test dos blocos de agentes" (as regras entregues aos projetos seguem iguais à fonte).
 - [x] 3.2 Aplicar o D5 no README e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint nos dois lugares sem issues e o passo "Versão e changelog" passando.
   - Evidência: tabela de trechos do README com as 3 linhas novas; `VERSION` → 1.8.0 e seção `## 1.8.0` no topo do CHANGELOG (a `1.7.0` da outra change entra no rebase); registro da v1.6.0 (teste no console e download) no `verification.md` da change arquivada `commits-e-atualizacao-local`. `[PASS]` em "Versão e changelog", "Lint de Markdown" (nos dois lugares) e "Validar specs e changes OpenSpec da raiz" (exit 0).
-- [ ] 3.3 Rodar os comandos de verificação do `openspec/project.md` localmente e, no PR, conferir os três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`). Verificar que todos passam.
+- [x] 3.3 Rodar os comandos de verificação do `openspec/project.md` localmente e, no PR, conferir os três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`). Verificar que todos passam.
+  - Evidência: localmente, antes do rebase, 16 `[PASS]` no `store` mais o "Smoke test da declaração do store" ao rodar de novo (a primeira falha foi colisão de id com a suíte da outra sessão, rodando ao mesmo tempo) e 4 no `root`; depois do rebase sobre a 1.7.0, `[PASS]` nos passos afetados e `validate --all --strict` → 17 passed; no PR #27 (run 39820322412), `store (ubuntu-latest)`, `store (windows-latest)` e `root` → pass.
 
 ## Workflow follow-up
 
