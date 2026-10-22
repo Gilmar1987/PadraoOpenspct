@@ -147,6 +147,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    **Agent-run browser scripts**: when the evidence of a browser verification script says an agent ran it without real interaction (HTTP requests, no clicks or typing), report each scenario it covers as partially covered under `Não verificado` (reason: "roteiro executado por agente, sem interação") and ask for a human run before archive. This is a pause, also under `Escopo: archive`: do not continue to archive until a person has run the script, or the user explicitly accepts the partial coverage in this conversation. A run by a person, or by an automated browser that clicks, covers the scenario.
 
+   **Interface quality gate**: when the change's `design.md` has a "Brief visual" section, read `interface-report.md` in `changeRoot` (skill `interface-quality`). A missing report, a report without the "Avaliação do validador" section, or a final grade there of `fraco` is a CRITICAL issue "Interface below client-ready", citing the grade and the listed corrections; the change goes back to apply. A final grade of `médio` or better passes. The report's journeys ran in a real browser with clicks and typing, so they count as interactive coverage for the scenarios they exercise. A change without "Brief visual" needs no report.
+
 7. **Verify Coherence**
 
    **Design Adherence**:
