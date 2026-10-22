@@ -9,8 +9,10 @@
 
 - [x] 2.1 Conferir na documentação de cada agente o arquivo de instrução que ele lê (Cursor, Codex, Claude Code, Gemini CLI, Copilot, Windsurf, Amazon Q) e registrar as fontes no design. Verificar com a tabela do D4 batendo com a documentação; ajustar só os nomes de arquivo, se preciso.
   - Evidência: duas buscas na web (2026-10-22), fontes no design ("Open Questions"). Copilot: `AGENTS.md` e `.github/copilot-instructions.md`; Windsurf: lê `AGENTS.md`, então o `.windsurf/rules/` saiu do plano (spec, proposta e design ajustados); Cursor: `AGENTS.md`; Claude Code: `CLAUDE.md` com `@AGENTS.md`; Gemini CLI: `GEMINI.md`; Amazon Q: `.amazonq/rules/` mantido, sem confirmação nas fontes encontradas. `openspec validate --strict` → valid.
-- [ ] 2.2 Acrescentar o passo "Smoke test dos blocos de agentes" do D5 ao `validate.yml`. Verificar rodando-o no Git Bash: deve falhar.
-- [ ] 2.3 Implementar o D2 e o D3 no instalador (template, `ensureManagedBlock`, `docs/openspec-regras.md`, `managedBlocks` no manifesto e integração com `--update`/`--in-place`). Verificar com o passo da 2.2 passando e os smoke tests do instalador e do setup passando.
+- [x] 2.2 Acrescentar o passo "Smoke test dos blocos de agentes" do D5 ao `validate.yml`. Verificar rodando-o no Git Bash: deve falhar.
+  - Evidência: passo "Smoke test dos blocos de agentes" acrescentado ao job `store`; no Git Bash, antes da implementação → `[FAIL (1)]` (exit 1, esperado).
+- [x] 2.3 Implementar o D2 e o D3 no instalador (template, `ensureManagedBlock`, `docs/openspec-regras.md`, `managedBlocks` no manifesto e integração com `--update`/`--in-place`). Verificar com o passo da 2.2 passando e os smoke tests do instalador e do setup passando.
+  - Evidência: `templates/agents-block.md`, `withManagedBlock`/`planInstructionBlocks`/`writeInstructionBlock` (escrita atômica, marcadores validados antes de qualquer escrita), `docs/openspec-regras.md` em `templateFiles`, `managedBlocks` no manifesto, blocos já escritos contando para o modo de reinstalação e entrando no `git add` do `--update`. `[PASS]` em "Smoke test dos blocos de agentes" (bloco do Next.js intacto, cinco arquivos com um bloco, `@AGENTS.md` no `CLAUDE.md`, reinstalação sem mudanças, bloco antigo recusado sem modo e trocado com `--update` no commit, marcador quebrado sem alterar nada), "Sintaxe dos scripts", "Smoke test do instalador", os três do setup, "Smoke test da declaração do store" e "Smoke test do script de entrada" (exit 0).
 
 ## 3. Guias e versão
 

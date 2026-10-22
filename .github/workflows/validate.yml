@@ -445,6 +445,56 @@ jobs:
           test "$(openspec store list --json)" = "$registered"
           openspec store unregister ci-entrada
 
+      # Regras do padrão entregues ao código por blocos gerenciados (ADR-0005): o conteúdo fora dos
+      # marcadores fica intacto, a reinstalação não duplica e um bloco quebrado faz o instalador parar.
+      - name: Smoke test dos blocos de agentes
+        run: |
+          work="$(mktemp -d)"
+          commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
+          code="$work/code"
+          mkdir -p "$code"
+          git -C "$code" init -q
+          printf '<!-- BEGIN:nextjs-agent-rules -->\nregras do next\n<!-- END:nextjs-agent-rules -->\n' > "$code/AGENTS.md"
+          cp "$code/AGENTS.md" "$work/next-block.txt"
+          node scripts/install-skills.mjs "$code"
+          head -n 3 "$code/AGENTS.md" | cmp - "$work/next-block.txt"
+          for f in AGENTS.md CLAUDE.md GEMINI.md .github/copilot-instructions.md .amazonq/rules/openspec-padrao.md; do
+            test "$(grep -c '<!-- BEGIN:openspec-padrao -->' "$code/$f")" -eq 1
+            test "$(grep -c '<!-- END:openspec-padrao -->' "$code/$f")" -eq 1
+          done
+          grep -qx '@AGENTS.md' "$code/CLAUDE.md"
+          grep -qF 'docs/openspec-regras.md' "$code/AGENTS.md"
+          cmp "$code/docs/openspec-regras.md" openspec/rules.md
+          grep -qF '"docs/openspec-regras.md"' "$code/.openspec-padrao.json"
+          grep -qF '"managedBlocks"' "$code/.openspec-padrao.json"
+          # Segunda instalação da mesma versão: os arquivos de instrução não mudam.
+          before="$(cat "$code/AGENTS.md" "$code/CLAUDE.md" "$code/GEMINI.md")"
+          node scripts/install-skills.mjs "$code"
+          test "$(cat "$code/AGENTS.md" "$code/CLAUDE.md" "$code/GEMINI.md")" = "$before"
+          # Bloco de uma versão anterior: exige um modo; com --update, um só bloco, no commit.
+          git -C "$code" add -A
+          commit "$code" -m base
+          perl -0pi -e 's/(<!-- BEGIN:openspec-padrao -->).*?(<!-- END:openspec-padrao -->)/$1\ntexto antigo\n$2/s' "$code/AGENTS.md"
+          git -C "$code" add -A
+          commit "$code" -m antigo
+          if node scripts/install-skills.mjs "$code"; then exit 1; fi
+          grep -qF 'texto antigo' "$code/AGENTS.md"
+          node scripts/install-skills.mjs "$code" --update
+          test "$(grep -c '<!-- BEGIN:openspec-padrao -->' "$code/AGENTS.md")" -eq 1
+          if grep -qF 'texto antigo' "$code/AGENTS.md"; then exit 1; fi
+          head -n 3 "$code/AGENTS.md" | cmp - "$work/next-block.txt"
+          git -C "$code" show --stat --format= HEAD | grep -qF 'AGENTS.md'
+          # BEGIN sem END: o instalador para antes de alterar qualquer arquivo.
+          broken="$work/broken"
+          mkdir -p "$broken"
+          git -C "$broken" init -q
+          printf 'conteúdo do projeto\n<!-- BEGIN:openspec-padrao -->\nsem fim\n' > "$broken/AGENTS.md"
+          cp "$broken/AGENTS.md" "$work/broken-before.txt"
+          if node scripts/install-skills.mjs "$broken" 2> "$RUNNER_TEMP/blocos-err.txt"; then exit 1; fi
+          grep -qF 'openspec-padrao' "$RUNNER_TEMP/blocos-err.txt"
+          cmp "$broken/AGENTS.md" "$work/broken-before.txt"
+          test ! -e "$broken/.claude"
+
       # Store e repositório de código de exemplo com datas conhecidas e autor fictício:
       # confere o CSV linha a linha, o resumo, a ausência de dados pessoais e que nada muda.
       - name: Smoke test das métricas de fluxo

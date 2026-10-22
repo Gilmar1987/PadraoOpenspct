@@ -20,6 +20,21 @@ const standardRepoPattern = /[/:]PadraoOpenspct(?:\.git)?\/?$/i;
 const templateFiles = [
   { source: 'openspec-padrao-update.yml', destination: '.github/workflows/openspec-padrao-update.yml', label: 'standard update workflow' },
   { source: 'openspec-padrao.md', destination: 'docs/openspec-padrao.md', label: 'standard guide' },
+  { source: '../openspec/rules.md', destination: 'docs/openspec-regras.md', label: 'standard rules' },
+];
+
+// Agent instruction files that carry the standard's managed block (ADR-0005). Only the text between
+// the markers belongs to the standard; the rest of each file belongs to the project.
+const blockBegin = '<!-- BEGIN:openspec-padrao -->';
+const blockEnd = '<!-- END:openspec-padrao -->';
+const blockTemplate = 'agents-block.md';
+const instructionFiles = [
+  { path: 'AGENTS.md', body: 'rules' },
+  // Claude Code reads CLAUDE.md and imports other files with @path.
+  { path: 'CLAUDE.md', body: 'import' },
+  { path: 'GEMINI.md', body: 'rules' },
+  { path: '.github/copilot-instructions.md', body: 'rules' },
+  { path: '.amazonq/rules/openspec-padrao.md', body: 'rules' },
 ];
 
 // The standard has no stack skills (ADR-0003); old automations that still pass --stack must fail loudly.
@@ -30,8 +45,9 @@ const stackRemovedMessage =
 function usage() {
   console.log(`Usage: node scripts/install-skills.mjs <consumer-project> [options]
 
-Install bundled skills, OPSX slash commands, VS Code agents, the standard update workflow and guide into a
-consumer project, record the installed version in ${manifestName}, and ignore its local openspec/ directory in Git.
+Install bundled skills, OPSX slash commands, VS Code agents, the standard update workflow, guide and rules into a
+consumer project, keep the standard's block in the agents' instruction files (${instructionFiles.map((file) => file.path).join(', ')}),
+record the installed version in ${manifestName}, and ignore its local openspec/ directory in Git.
 
 A first install writes to the working tree. Reinstalling over files that would change needs a mode:
 --update (new branch chore/padrao-vX.Y.Z and a commit; requires a clean working tree) or --in-place.
@@ -533,6 +549,62 @@ function installFile(source, destination) {
   }
 }
 
+// Returns the file content with the managed block in place. A file without markers gets the block at
+// the end; a file with one BEGIN followed by one END gets only that span replaced; anything else is
+// refused, so a hand-edited file is never guessed at.
+function withManagedBlock(original, body, file) {
+  const eol = original.includes('\r\n') ? '\r\n' : '\n';
+  const block = [blockBegin, body, blockEnd].join('\n').replace(/\n/g, eol);
+  const begins = original.split(blockBegin).length - 1;
+  const ends = original.split(blockEnd).length - 1;
+  if (begins === 0 && ends === 0) {
+    if (original.length === 0) return `${block}${eol}`;
+    const separator = original.endsWith('\n') ? eol : `${eol}${eol}`;
+    return `${original}${separator}${block}${eol}`;
+  }
+  const start = original.indexOf(blockBegin);
+  const end = original.indexOf(blockEnd);
+  if (begins !== 1 || ends !== 1 || end < start) {
+    throw new Error(
+      `${file}: the openspec-padrao markers are broken (expected one ${blockBegin} followed by one ${blockEnd}); ` +
+      'fix the file by hand. Nothing was changed.',
+    );
+  }
+  return `${original.slice(0, start)}${block}${original.slice(end + blockEnd.length)}`;
+}
+
+function planInstructionBlocks(projectRoot) {
+  const templatePath = path.join(sourceTemplates, blockTemplate);
+  const rules = readFileSync(templatePath, 'utf8').replace(/\r\n/g, '\n').trim();
+  return instructionFiles.map((file) => {
+    const destination = path.join(projectRoot, ...file.path.split('/'));
+    assertSafeDestination(projectRoot, destination, templatePath);
+    const info = lstatIfPresent(destination);
+    if (info && !info.isFile()) throw new Error(`Refusing to modify a non-regular file: ${destination}`);
+    const original = info ? readFileSync(destination, 'utf8') : '';
+    const desired = withManagedBlock(original, file.body === 'import' ? '@AGENTS.md' : rules, file.path);
+    return {
+      ...file,
+      destination,
+      desired,
+      exists: Boolean(info),
+      hadBlock: original.includes(blockBegin),
+      changed: desired !== original,
+    };
+  });
+}
+
+function writeInstructionBlock(plan) {
+  mkdirSync(path.dirname(plan.destination), { recursive: true });
+  const tempPath = path.join(path.dirname(plan.destination), `.openspec-block-${randomUUID()}.tmp`);
+  try {
+    writeFileSync(tempPath, plan.desired);
+    renameWithRetry(tempPath, plan.destination);
+  } finally {
+    if (existsSync(tempPath)) rmSync(tempPath, { force: true });
+  }
+}
+
 function readManifest(projectRoot) {
   try {
     return JSON.parse(readFileSync(path.join(projectRoot, manifestName), 'utf8'));
@@ -591,7 +663,7 @@ function main() {
   }
   listAgents();
   assertCommands();
-  for (const file of templateFiles) {
+  for (const file of [...templateFiles, { source: blockTemplate }]) {
     if (!existsSync(path.join(sourceTemplates, file.source))) {
       throw new Error(`Template not found: ${path.join(sourceTemplates, file.source)}`);
     }
@@ -632,6 +704,8 @@ function main() {
   for (const { source, destination } of operations) {
     assertSafeDestination(projectRoot, destination, source);
   }
+  // Planned before anything is written, so broken markers stop the install with no changes.
+  const blocks = planInstructionBlocks(projectRoot);
 
   if (options.force) {
     console.warn('Warning: --force is ignored; reinstalling over changed files needs --update or --in-place.');
@@ -652,6 +726,7 @@ function main() {
     target: options.target,
     installedAt: new Date().toISOString().slice(0, 10),
     managedFiles: manifestPaths,
+    managedBlocks: instructionFiles.map((file) => file.path),
   };
   const previous = readManifest(projectRoot);
   const manifestChanged = previous !== null && comparableManifest(previous) !== comparableManifest(manifest);
@@ -660,9 +735,12 @@ function main() {
   // explicit mode (ADR-0004).
   const changing = operations.filter(({ source: from, destination }) =>
     existsSync(destination) && !sameContent(from, destination));
-  if ((changing.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
+  // A block the standard already wrote counts like a managed file; adding a missing block does not.
+  const changingBlocks = blocks.filter((block) => block.hadBlock && block.changed);
+  if ((changing.length > 0 || changingBlocks.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
     const details = [
       ...changing.map(({ name, destination }) => `  ${name}: ${destination}`),
+      ...changingBlocks.map(({ destination }) => `  openspec-padrao block: ${destination}`),
       ...(manifestChanged ? [`  ${manifestName}: v${previous.version ?? '?'} -> v${version}`] : []),
     ].join('\n');
     throw new Error(
@@ -693,6 +771,16 @@ function main() {
       console.log(`Installed: ${label}`);
       installed += 1;
     }
+    for (const block of blocks) {
+      if (!block.changed) {
+        console.log(`Unchanged: ${block.path} (openspec-padrao block)`);
+        unchanged += 1;
+        continue;
+      }
+      writeInstructionBlock(block);
+      console.log(`${block.exists ? 'Updated' : 'Created'}: ${block.path} (openspec-padrao block)`);
+      installed += 1;
+    }
     if (writeManifest(projectRoot, manifest)) console.log(`Recorded: ${manifestName} (v${version})`);
     console.log(`\nDone. ${installed} installed, ${unchanged} already current.`);
   };
@@ -702,7 +790,7 @@ function main() {
     return;
   }
 
-  const missing = operations.some(({ destination }) => !existsSync(destination));
+  const missing = operations.some(({ destination }) => !existsSync(destination)) || blocks.some((block) => block.changed);
   if (previous !== null && changing.length === 0 && !missing && !manifestChanged) {
     console.log(`Already at v${version}; nothing to update.`);
     return;
@@ -725,7 +813,11 @@ function main() {
   };
   try {
     install();
-    const paths = [...new Set(['.gitignore', manifestName, ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/'))])];
+    const paths = [...new Set([
+      '.gitignore', manifestName,
+      ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')),
+      ...instructionFiles.map((file) => file.path),
+    ])];
     gitIn(projectRoot, ['add', '-A', '--', ...paths]);
     if (tryGit(projectRoot, ['diff', '--cached', '--quiet']) !== null) {
       rollback();
