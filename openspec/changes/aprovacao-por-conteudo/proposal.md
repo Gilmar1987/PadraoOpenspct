@@ -58,8 +58,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar.campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.16.0; push, PR, merge e release autorizados; o apply começa depois do merge da `subagentes-e-ganchos` (PR #30), e a release segue a ordem de versões aprovada (depois das changes de SDD 1.13.0–1.15.0).
+- Origem: pergunta "1. Aprovação de cada change: só apply ou até archive, e com quais condições. 2. As versões 1.16.0 e 1.17.0: confirma? 3. Push, PR, merge e release: se quer incluí-los nas condições."; resposta "1 - até archive , 2, e 3  aprovados".

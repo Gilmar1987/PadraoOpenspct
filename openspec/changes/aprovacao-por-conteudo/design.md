@@ -92,7 +92,7 @@ Em `openspec/rules.md`, na seção de aprovação, duas frases:
 
 ### D8. Versão
 
-A combinar com o responsável; provisoriamente 1.16.0. "Ações no projeto":
+1.16.0, aprovada pelo responsável. "Ações no projeto":
 
 - "Nenhuma obrigatória. Aprovações registradas antes desta versão seguem valendo, com aviso; as próximas gravam o selo."
 
