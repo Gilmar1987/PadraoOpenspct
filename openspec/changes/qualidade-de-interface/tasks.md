@@ -16,10 +16,10 @@
 
 ## 4. Documentação, versão e integração
 
-- [ ] 4.1 Atualizar README, COMECE-AQUI e guia do projeto com a validação de interface, e aplicar o D7 com a versão combinada. Verificar com o lint nos dois lugares e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+- [ ] 4.1 Atualizar README, COMECE-AQUI e guia do projeto com a validação de interface, e aplicar o D7 (1.12.0). Verificar com o lint nos dois lugares e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
 - [ ] 4.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
 
 ## Workflow follow-up
 
-- O apply só começa depois do merge da `subagentes-e-ganchos` (formato dos subagentes e "Paridade de papéis") e com a versão combinada.
+- O apply só começa depois do merge da `subagentes-e-ganchos` (formato dos subagentes e "Paridade de papéis").
 - O script é interativo? Não: roda sem perguntas, e por isso não exige o teste em console real da regra do `project.md`.

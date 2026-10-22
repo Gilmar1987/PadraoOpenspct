@@ -45,7 +45,7 @@ A verificação de interface também é fraca. O roteiro de navegador costuma se
 - **CI:**
   - um smoke test do script contra uma página estática local (servidor do Node), só no Ubuntu: uma página boa passa e uma página com problemas plantados falha nos pontos certos;
   - checagens dos trechos novos.
-- **Versão:** a combinar com a outra sessão e com o responsável antes do apply. Provisoriamente, a seguinte à `validacao-e-paralelismo`.
+- **Versão:** 1.12.0, depois da `subagentes-e-ganchos` (1.10.0) e da `validacao-e-paralelismo` (1.11.0).
 
 ### Fora do escopo
 
@@ -83,8 +83,8 @@ A verificação de interface também é fraca. O roteiro de navegador costuma se
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar.campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.12.0, depois da `subagentes-e-ganchos` (1.10.0) e da `validacao-e-paralelismo` (1.11.0); o apply começa depois do merge da `subagentes-e-ganchos`; push, PR, merge e release só com pedido explícito do responsável, que não os incluiu nesta aprovação.
+- Origem: pergunta "1. Aprovação para o apply da `qualidade-de-interface`. Diga o escopo (só apply ou até archive) e as condições […] 2. Ordem das versões entre as duas sessões. Minha sugestão: v1.10.0: `subagentes-e-ganchos`; v1.11.0: `validacao-e-paralelismo`; v1.12.0: `qualidade-de-interface`; v1.13.0 a v1.15.0: as changes de SDD da outra sessão"; resposta "1 - Até archive . 2- Sim".

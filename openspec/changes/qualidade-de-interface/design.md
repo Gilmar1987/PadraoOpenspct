@@ -124,7 +124,7 @@ Trecho novo **"Interface quality gate"**, em Correctness:
 
 ### D7. Versão
 
-A combinar com a outra sessão e aprovada pelo responsável antes do apply. "Ações no projeto":
+1.12.0, na ordem aprovada pelo responsável. "Ações no projeto":
 
 - "Nenhuma obrigatória. Projetos com front-end: nas próximas changes com telas, o verify exige o relatório de interface."
 
@@ -151,4 +151,4 @@ Nenhuma migração. Rollback: reverter os commits; a skill e o script saem na pr
 
 ## Open Questions
 
-Nenhuma; versões das dependências do script e a versão do padrão são fixadas no apply.
+Nenhuma; as versões das dependências do script são fixadas na tarefa 2.1.
