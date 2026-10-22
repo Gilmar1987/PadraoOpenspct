@@ -13,7 +13,7 @@ Itens: nenhum
 
 Comandos:
 
-- `openspec instructions apply --change ajustes-do-init-e-arquitetura --json` → `all_done`, 8/8 (exit 0)
+- `openspec instructions apply --change ajustes-do-init-e-arquitetura --json` → `all_done`, 7/7 (exit 0)
 - Passos do `validate.yml` (comandos de verificação do `openspec/project.md`) → 19 `[PASS]` antes das correções da revisão; depois delas, `[PASS]` nos passos afetados (trechos customizados, lint nos dois lugares, versão e changelog, smoke do setup, raiz em dia, guia de primeiros passos) (exit 0)
 - `openspec validate --all --strict` → 17 passed (exit 0)
 - `node padrao-openspec/scripts/sync-root.mjs --check` → em dia (exit 0)
