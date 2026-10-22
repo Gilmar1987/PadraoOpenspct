@@ -80,7 +80,9 @@ async function createPrompter() {
   const lines = rl[Symbol.asyncIterator]();
   return {
     async question(prompt) {
-      process.stdout.write(prompt);
+      // The readline prompt, not a plain write: a real console redraws the line with it.
+      rl.setPrompt(prompt);
+      rl.prompt();
       const { value, done } = await lines.next();
       if (done) throw new Error('A entrada terminou antes de todas as respostas.');
       return value.trim();
@@ -229,6 +231,18 @@ function step(message, action) {
   console.log(`  ✔ ${message}`);
 }
 
+// The /opsx:* commands live in <code>/.claude/commands, so Claude Code only loads them when the
+// code folder itself is the workspace, not a folder above it.
+function openWorkspaceSteps(codeDir, next) {
+  const hasCode = runTool('code', ['--version'], { capture: true }).status === 0;
+  return [
+    '  1. Abra a pasta do projeto como pasta do workspace (não a pasta acima dela):',
+    ...(hasCode ? [`       code "${codeDir}"`, `     ou, no VS Code: File → Open Folder → ${codeDir}`] : [`       no VS Code: File → Open Folder → ${codeDir}`]),
+    `  2. Nessa janela, abra o Claude Code e ${next}`,
+    '     Se /opsx não aparecer, o Claude Code foi aberto em outra pasta.',
+  ].join('\n');
+}
+
 async function newProject(rl, options) {
   const { base, plan } = await askBaseFolder(rl, options);
   const name = options.nome ?? await ask(rl, 'Nome do projeto, como as pessoas o chamam', '--nome');
@@ -293,8 +307,7 @@ async function newProject(rl, options) {
 
   console.log(`
 Pronto. Próximo passo:
-  1. Abra a pasta ${codeDir} no editor
-  2. Abra o Claude Code e rode: /opsx:init
+${openWorkspaceSteps(codeDir, 'rode: /opsx:init')}
 Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").
 No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
 pull requests" para receber as atualizações do padrão por PR.`);
@@ -352,7 +365,7 @@ function storeRootOf(storeDir) {
 function resolvedRoot(codeDir) {
   const result = runTool('openspec', ['context', '--json'], { cwd: codeDir, capture: true });
   try {
-    return realpathSync(JSON.parse(result.stdout).root.path);
+    return realpathSync.native(JSON.parse(result.stdout).root.path);
   } catch {
     return null;
   }
@@ -399,7 +412,8 @@ async function joinProject(rl, options) {
   });
   step('O CLI encontra o store a partir do código', () => {
     const resolved = resolvedRoot(codeDir);
-    if (resolved !== realpathSync(storeRoot)) {
+    // The native realpath normalizes the drive letter, which the CLI reports in upper case.
+    if (resolved !== realpathSync.native(storeRoot)) {
       throw new Error(
         `A partir de ${codeDir} o CLI resolve ${resolved ?? 'nada'}, e não ${storeRoot}.\n` +
         `Confira com: openspec store register "${storeRoot}" --id ${id} --yes`,
@@ -409,8 +423,7 @@ async function joinProject(rl, options) {
 
   console.log(`
 Pronto. O projeto já está inicializado: não rode /opsx:init.
-  1. Abra a pasta ${codeDir} no editor
-  2. Abra o Claude Code e comece pela primeira change: /opsx:propose <nome-da-change>`);
+${openWorkspaceSteps(codeDir, 'comece pela primeira change: /opsx:propose <nome-da-change>')}`);
 }
 
 async function main() {

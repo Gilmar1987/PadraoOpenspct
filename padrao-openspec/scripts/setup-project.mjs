@@ -83,7 +83,9 @@ function createPrompter() {
   const lines = rl[Symbol.asyncIterator]();
   return {
     async question(prompt) {
-      process.stdout.write(prompt);
+      // The readline prompt, not a plain write: a real console redraws the line with it.
+      rl.setPrompt(prompt);
+      rl.prompt();
       const { value, done } = await lines.next();
       if (done) throw new Error('Input ended before all questions were answered.');
       return value;
@@ -254,7 +256,8 @@ function verifyStoreResolution(codeRoot, id) {
     const details = `${result.stderr ?? ''}`.trim();
     throw new Error(`The OpenSpec CLI could not resolve the store from ${codeRoot}.${details ? `\n${details}` : ''}\nFix:\n${fix}`);
   }
-  if (realpathSync(resolved) !== realpathSync(storeRoot)) {
+  // The native realpath normalizes the drive letter, which the CLI reports in upper case.
+  if (realpathSync.native(resolved) !== realpathSync.native(storeRoot)) {
     throw new Error(
       `From ${codeRoot} the OpenSpec CLI resolves ${resolved}, not this store (${storeRoot}). ` +
       `An openspec/ folder with specs/ or changes/ in the code repository makes the CLI ignore the declaration.\nFix:\n${fix}`,

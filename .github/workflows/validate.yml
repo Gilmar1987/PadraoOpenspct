@@ -395,6 +395,7 @@ jobs:
           test -f "$code/.claude/commands/opsx/init.md"
           grep -qx 'store: ci-entrada' "$code/openspec/config.yaml"
           grep -qF '/opsx:init' "$RUNNER_TEMP/novo.txt"
+          grep -qF 'pasta do workspace' "$RUNNER_TEMP/novo.txt"
           # A pasta do projeto já existe: recusa sem alterar nada.
           before="$(git -C "$store" status --porcelain)"
           if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada --yes; then exit 1; fi
@@ -422,6 +423,7 @@ jobs:
           expected="$(cd "$work/b/ci-entrada-openspec/padrao-openspec" && node -p 'require("fs").realpathSync(process.cwd())')"
           test "$resolved" = "$expected"
           grep -qF '/opsx:propose' "$RUNNER_TEMP/existente.txt"
+          grep -qF 'pasta do workspace' "$RUNNER_TEMP/existente.txt"
           grep -qF 'não rode /opsx:init' "$RUNNER_TEMP/existente.txt"
           # Código sem a linha store: recusa sem registrar nada.
           mkdir "$work/sem-store"
