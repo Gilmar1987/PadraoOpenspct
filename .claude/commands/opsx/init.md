@@ -626,7 +626,9 @@ _(Múltipla escolha — separe os números por vírgula)_
 
 ---
 
-**6.5 — Se o produto lida com LGPD/GDPR (respondido no 1.5), quais controles serão implementados?** `[OPCIONAL]`
+**6.5 — Quais controles de LGPD/GDPR serão implementados?** `[OPCIONAL]`
+
+_(Múltipla escolha — separe os números por vírgula. Faça esta pergunta só se o 1.5 não for 4 (Não); se for, registre "Não aplicável" e siga para a 6.6. Se um arquivo de respostas trouxer controles na 6.5 com o 1.5 = 4, aponte a combinação na checagem de coerência.)_
 
 ```
 0) Não aplicável
@@ -634,7 +636,7 @@ _(Múltipla escolha — separe os números por vírgula)_
 2) Direito de exclusão de dados (right to erasure)
 3) Exportação de dados do usuário (portabilidade)
 4) Anonimização de dados em logs e relatórios
-5) Todos os anteriores
+5) Todos os controles de 1 a 4
 6) Outro (digitar livremente)
 ```
 
@@ -693,6 +695,7 @@ Avalie ao menos estas combinações:
 | 2.4 é REST/HTTP, gRPC ou mensageria e 2.1 é um monólito | Chamadas de rede onde uma chamada direta bastaria | Confirmar o motivo, ou trocar por chamada direta entre módulos |
 | 4.4 usa variáveis ou cofre da plataforma e 4.1/4.3 não têm produção | Configuração para uma plataforma que não existe | Registrar só o `.env` local por enquanto |
 | 5.5 tem framework de E2E e 5.3 não inclui E2E, ou o contrário | Testes que ninguém roda, ou exigência sem ferramenta | Alinhar as duas respostas |
+| 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis) e 6.5 é 0 | Dados pessoais sem nenhum controle de LGPD/GDPR | Registrar ao menos o consentimento com registro de aceite e o direito de exclusão (1,2), ou justificar |
 
 Para cada combinação encontrada:
 

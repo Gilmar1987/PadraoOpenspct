@@ -4,6 +4,27 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.3.1 — 2026-10-21
+
+### O que mudou
+
+- **Drive em minúscula no Windows:** o setup e o `comecar.mjs` deixam de acusar "not this store"
+  quando a pasta é digitada como `c:\...` e o OpenSpec CLI devolve `C:\...`; a comparação usa o
+  caminho real normalizado.
+- **Perguntas visíveis:** num console real, a pergunta da pasta base (e as do setup) era apagada
+  pelo redesenho do readline, e o dev via só o sinal `>`. As perguntas passam a ser o prompt do readline.
+- **Abrir o projeto certo:** a mensagem final do `comecar.mjs` manda abrir a pasta do código como
+  pasta do workspace (com `code "<pasta>"` quando o VS Code está instalado), porque o Claude Code
+  só carrega os comandos `/opsx:*` nessa pasta.
+- **Pergunta de LGPD do `/opsx:init`:** a 6.5 aceita mais de um controle (números separados por
+  vírgula), a opção 5 passa a ser "Todos os controles de 1 a 4" (antes "Todos os anteriores", que
+  incluía o "Não aplicável"), a pergunta não é feita quando o 1.5 diz que não há dados pessoais, e a
+  checagem de coerência aponta dados pessoais sem nenhum controle.
+
+### Ações no projeto
+
+- Nenhuma.
+
 ## 1.3.0 — 2026-10-21
 
 ### O que mudou

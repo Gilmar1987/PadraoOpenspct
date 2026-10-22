@@ -86,8 +86,11 @@ Confirmar? [S/n]: (Enter)
   ✔ Setup concluído (skills, comandos e agentes no código; store registrado e ligado ao código)
 
 Pronto. Próximo passo:
-  1. Abra a pasta C:\openspec\livraria-online no editor
-  2. Abra o Claude Code e rode: /opsx:init
+  1. Abra a pasta do projeto como pasta do workspace (não a pasta acima dela):
+       code "C:\openspec\livraria-online"
+     ou, no VS Code: File → Open Folder → C:\openspec\livraria-online
+  2. Nessa janela, abra o Claude Code e rode: /opsx:init
+     Se /opsx não aparecer, o Claude Code foi aberto em outra pasta.
 Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").
 No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
 pull requests" para receber as atualizações do padrão por PR.
@@ -129,8 +132,11 @@ Confirmar? [S/n]: (Enter)
   ✔ O CLI encontra o store a partir do código
 
 Pronto. O projeto já está inicializado: não rode /opsx:init.
-  1. Abra a pasta C:\openspec\livraria-online no editor
-  2. Abra o Claude Code e comece pela primeira change: /opsx:propose <nome-da-change>
+  1. Abra a pasta do projeto como pasta do workspace (não a pasta acima dela):
+       code "C:\openspec\livraria-online"
+     ou, no VS Code: File → Open Folder → C:\openspec\livraria-online
+  2. Nessa janela, abra o Claude Code e comece pela primeira change: /opsx:propose <nome-da-change>
+     Se /opsx não aparecer, o Claude Code foi aberto em outra pasta.
 ```
 
 Siga para a [Primeira change](#4-primeira-change). Se o projeto tiver uma atualização do padrão
@@ -150,7 +156,9 @@ node comecar.mjs --modo existente --url-codigo <url-do-codigo> --url-store <url-
 
 ### Inicializar
 
-Abra o repositório de código no editor, abra o Claude Code e rode:
+Abra a pasta do código como pasta do workspace (no VS Code, File → Open Folder), não a pasta
+acima dela: os comandos `/opsx:*` ficam em `.claude/commands/` dentro do código, e o Claude Code
+só os carrega quando é aberto nessa pasta. Nessa janela, abra o Claude Code e rode:
 
 ```text
 /opsx:init
@@ -282,7 +290,7 @@ O registro vale para esta máquina: cada dev faz o passo 3 uma vez.
 | Movi ou renomeei a pasta do store e o CLI não acha mais o store | `openspec store register <novo-caminho>\padrao-openspec --id <id> --yes` e confira com `openspec context --json` no código |
 | `openspec context --json` no código mostra a pasta do código como raiz, ou o erro cita `Declared in ...openspec/config.yaml` | O store não está registrado com o id da linha `store:`. Registre como no passo 3 da [seção 5](#projeto-em-andamento-à-mão) |
 | Registrei a pasta do store sem o `\padrao-openspec` | `openspec store unregister <id>` e registre de novo com `\padrao-openspec` no fim |
-| `/opsx` não aparece no Claude Code | O código não tem `.claude/` commitado. Peça ao tech lead para commitar o que o setup instalou |
+| `/opsx` não aparece no Claude Code | Quase sempre o Claude Code foi aberto numa pasta acima do código. Abra a pasta do código como pasta do workspace (File → Open Folder) e uma conversa nova. Se a pasta certa já está aberta, o código não tem `.claude/` commitado: peça ao tech lead para commitar o que o setup instalou |
 | O setup recusa `--stack` | A opção foi removida; a stack vem do `/opsx:init` |
 | Gerador de projeto recusa a pasta | Rode o gerador numa pasta temporária e copie os arquivos para o repositório de código |
 | O CLI está muito lento (Windows) | Veja [Desempenho e ambiente](README.md#desempenho-e-ambiente) |
