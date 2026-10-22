@@ -25,7 +25,7 @@ O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira c
 
 1. **Se o projeto é novo, inicialize-o**: abra o agente neste repositório e rode `/opsx:init`.
    A entrevista registra no store OpenSpec a stack, os comandos de verificação e as ADRs.
-2. **Commite** os arquivos que o padrão instalou (os listados em `managedFiles` do
+2. **Commite** os arquivos que o padrão instalou (os listados em `managedFiles` e `managedBlocks` do
    `.openspec-padrao.json`, o próprio `.openspec-padrao.json`, o `.gitignore` e o
    `openspec/config.yaml`) e, no store, os artefatos do init.
 3. **Faça cada mudança pelo ciclo** `/opsx:propose` → aprovação explícita no chat (por exemplo,
@@ -34,6 +34,23 @@ O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira c
 
 O passo a passo completo, com pré-requisitos e problemas comuns, está no
 [COMECE-AQUI.md](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/COMECE-AQUI.md) do padrão.
+
+## Usar com outros agentes
+
+As regras do padrão chegam a este repositório como `docs/openspec-regras.md`. Cada agente as recebe por
+um bloco entre `<!-- BEGIN:openspec-padrao -->` e `<!-- END:openspec-padrao -->` no arquivo de
+instrução que ele lê. O padrão só altera o texto entre os marcadores; escreva instruções próprias fora
+deles.
+
+| Agente | Arquivo que lê | Como rodar o fluxo |
+|---|---|---|
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`) | Comandos `/opsx:*` |
+| Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
+| Gemini CLI | `GEMINI.md` | Idem |
+| Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem |
+
+Apagar um desses arquivos não quebra nada, mas a próxima atualização do padrão o recria.
 
 ## Versão instalada
 

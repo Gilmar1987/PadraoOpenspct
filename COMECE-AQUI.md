@@ -173,8 +173,9 @@ nome como responsável.
 ### Commitar e publicar
 
 No repositório de código, commite o que o setup instalou: `.claude/`, `.agents/`,
-`.github/agents/`, `.github/workflows/openspec-padrao-update.yml`, `docs/openspec-padrao.md`,
-`.openspec-padrao.json`, `.gitignore` e `openspec/config.yaml` (a declaração do store).
+`.github/agents/`, `.github/workflows/openspec-padrao-update.yml`, `.github/copilot-instructions.md`,
+`.amazonq/`, `docs/openspec-padrao.md`, `docs/openspec-regras.md`, `AGENTS.md`, `CLAUDE.md`,
+`GEMINI.md`, `.openspec-padrao.json`, `.gitignore` e `openspec/config.yaml` (a declaração do store).
 
 No store, commite o que o init gerou em `padrao-openspec/openspec/`: `project.md`, `config.yaml`,
 `project-setup.md` e as ADRs.
@@ -210,10 +211,18 @@ Toda mudança de comportamento passa pelo ciclo abaixo, no Claude Code, dentro d
 
 O agente só faz push, abre PR ou faz deploy quando você pede explicitamente.
 
-**Outros agentes:** o setup também instala skills em `.agents/skills/` e subagentes do GitHub
-Copilot em `.github/agents/`, mas os comandos `/opsx:*` são do Claude Code. Num agente sem esses
-comandos, peça para ele seguir o arquivo do comando, por exemplo: "siga as instruções de
-`.claude/commands/opsx/init.md`".
+**Outros agentes:** os comandos `/opsx:*` são do Claude Code, mas as regras e o fluxo valem para
+qualquer agente. O setup põe as regras em `docs/openspec-regras.md` e um bloco
+`openspec-padrao` no arquivo que cada agente lê; num agente sem os comandos, peça para ele seguir o
+arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx/init.md`".
+
+| Agente | Arquivo que lê | Como rodar o fluxo |
+|---|---|---|
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`) | Comandos `/opsx:*` |
+| Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
+| Gemini CLI | `GEMINI.md` | Idem |
+| Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem |
 
 ## 5. Sem o script
 

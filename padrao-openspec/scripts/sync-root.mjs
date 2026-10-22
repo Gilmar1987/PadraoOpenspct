@@ -17,6 +17,7 @@ const mappings = [
   { type: 'dir', source: '.github/agents', destination: '.github/agents' },
   { type: 'file', source: 'openspec/adrs/README.md', destination: 'openspec/adrs/README.md' },
   { type: 'file', source: 'openspec/adrs/template.md', destination: 'openspec/adrs/template.md' },
+  { type: 'file', source: 'openspec/rules.md', destination: 'openspec/rules.md' },
 ];
 
 function usage() {
@@ -121,9 +122,10 @@ function main() {
   if (unknown.length > 0) throw new Error(`Unknown option: ${unknown.join(' ')}`);
   const check = args.includes('--check');
 
-  if (!existsSync(path.join(repoRoot, 'openspec', 'rules.md'))) {
+  // openspec/rules.md is now a generated copy, so the root is recognized by its guide instead.
+  if (!existsSync(path.join(repoRoot, 'COMECE-AQUI.md'))) {
     throw new Error(
-      `${repoRoot} does not look like the PadraoOpenspct repository (openspec/rules.md not found); nothing was changed.`,
+      `${repoRoot} does not look like the PadraoOpenspct repository (COMECE-AQUI.md not found); nothing was changed.`,
     );
   }
 

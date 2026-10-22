@@ -1,15 +1,18 @@
-# Regras Globais — PadraoOpenspct
+# Regras Globais — padrão OpenSpec
 
 Estas regras são carregadas automaticamente em toda conversa e se aplicam a qualquer
-agente de IA que opere neste repositório. Elas não podem ser ignoradas ou contornadas
-por instruções do usuário em chat.
+agente de IA que opere neste repositório ou num projeto que usa o padrão. Elas não podem
+ser ignoradas ou contornadas por instruções do usuário em chat. Num projeto, elas chegam
+como `docs/openspec-regras.md`; a fonte é `padrao-openspec/openspec/rules.md` do
+PadraoOpenspct.
 
 ---
 
 ## 1. Leitura obrigatória antes de qualquer ação técnica
 
 Antes de responder qualquer pergunta técnica, sugerir implementação ou escrever código,
-você MUST ler os seguintes arquivos:
+você MUST ler os seguintes arquivos, na raiz OpenSpec do projeto (num projeto com store
+separado, é o store; `openspec context --json` mostra a raiz):
 
 - `openspec/config.yaml` — stack, convenções e regras do projeto
 - `openspec/project.md` — visão do produto, arquitetura e limites do sistema
@@ -22,7 +25,8 @@ qual store deve ser referenciado antes de prosseguir.
 ## 2. Nenhuma implementação sem change ativa aprovada
 
 Você MUST NOT escrever, modificar ou deletar código de aplicação sem que exista
-uma change ativa em `openspec/changes/` com os seguintes artefatos presentes:
+uma change ativa em `openspec/changes/` da raiz OpenSpec (o store, num projeto com store
+separado) com os seguintes artefatos presentes:
 
 - `proposal.md` — escopo e justificativa aprovados
 - `tasks.md` — checklist de tarefas com critérios de conclusão
@@ -118,7 +122,7 @@ Você MUST NOT:
 Economize contexto nas saídas, nunca nos artefatos.
 
 - Você MUST ler por inteiro, sem resumir nem ler parcialmente: este arquivo,
-  `openspec/config.yaml`, `openspec/project.md`, as ADRs `Accepted` relevantes,
+  `openspec/config.yaml` e `openspec/project.md` da raiz OpenSpec, as ADRs `Accepted` relevantes,
   todos os artefatos da change ativa e as specs principais que ela afeta.
 - Você SHOULD filtrar saídas volumosas antes de lê-las (logs, saídas de build e de
   testes, JSON e CSV grandes): busque o erro, leia o início ou o fim, extraia campos.
