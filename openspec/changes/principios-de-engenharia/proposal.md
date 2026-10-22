@@ -26,7 +26,7 @@ O padrão é generalista ([ADR-0003](../../adrs/0003-padrao-sem-stack-embutida.m
 - **Verify:** nova heurística "Engineering principles", igual no comando e na skill, que confere as fronteiras e os erros da change, com severidade por item.
 - **Init e `project.md`:** a seção "Development Conventions" ganha a linha "Princípios de engenharia", preenchida pelo init com os padrões do guia (log de três estados, validação na fronteira e erro sem detalhe interno). O projeto pode marcar um item como "Não aplicável", com justificativa, e o verify respeita isso.
 - **CI:** marcadores dos trechos novos.
-- **Versão:** a próxima minor livre, combinada com a outra sessão antes do apply, com as ações para projetos existentes.
+- **Versão:** acrescenta os seus itens à seção da versão aberta no `CHANGELOG.md` (1.12.0, aberta pela `qualidade-de-interface`), sem mexer no `VERSION` se ele já estiver nela; a release sai só quando o responsável pedir (modelo decidido em 2026-10-22).
 
 ### Fora do escopo
 
