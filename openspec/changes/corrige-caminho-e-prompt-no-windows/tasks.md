@@ -14,7 +14,8 @@
 
 ## 3. Guia e versão
 
-- [ ] 3.1 Aplicar o D4 no `COMECE-AQUI.md` e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint da raiz sem issues e com os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+- [x] 3.1 Aplicar o D4 no `COMECE-AQUI.md` e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint da raiz sem issues e com os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+  - Evidência: `markdownlint-cli2@0.23.2` no `COMECE-AQUI.md`, no `CHANGELOG.md` e nos artefatos da change → 0 issues (depois de trocar o trecho de código com espaço pelo texto "o sinal `>`"); `[PASS] Guia de primeiros passos` e `[PASS] Versão e changelog` com `VERSION` = 1.3.1 (exit 0).
 - [ ] 3.2 Rodar `sync-root.mjs --check` e todos os passos dos jobs `store` e `root` localmente. Verificar que todos saem com código 0.
 
 ## Workflow follow-up

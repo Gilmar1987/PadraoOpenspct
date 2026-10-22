@@ -4,7 +4,7 @@
 
 - `setup-project.mjs:257` compara `realpathSync(resolved)` com `realpathSync(storeRoot)`; `comecar.mjs:355,402` faz o mesmo no modo projeto em andamento. O `fs.realpathSync` do Node mantém a caixa do drive que recebeu (`realpathSync('c:\\Windows')` → `c:\Windows`), e o `fs.realpathSync.native` a normaliza (`C:\Windows`). O CLI devolve a raiz com `C:`.
 - O `storeRoot` do setup vem do caminho com que o script foi chamado; o `comecar.mjs` o chama com o caminho digitado pelo dev.
-- Os dois scripts têm um `createPrompter` igual: escrevem a pergunta com `process.stdout.write(prompt)` e leem pelo iterador de linhas. Em modo terminal, o readline redesenha a linha com o prompt dele (`> ` por padrão) e apaga o que foi escrito por fora.
+- Os dois scripts têm um `createPrompter` igual: escrevem a pergunta com `process.stdout.write(prompt)` e leem pelo iterador de linhas. Em modo terminal, o readline redesenha a linha com o prompt dele (o sinal `>` por padrão) e apaga o que foi escrito por fora.
 - A mensagem final do `comecar.mjs` diz "Abra a pasta <código> no editor".
 
 ## Architecture Decisions

@@ -5,7 +5,7 @@
 No primeiro teste do `comecar.mjs` da `v1.3.0` num console real do Windows (projeto Lava Jato, 2026-10-21), três problemas apareceram:
 
 - **Falso erro no fim do setup.** O dev digitou a pasta com o drive em minúscula (`c:\TesteOpenSpct`). O setup compara o caminho do store, de `realpathSync`, que mantém o `c:`, com o caminho que o OpenSpec CLI devolve, `C:\...`. São a mesma pasta, mas a comparação de texto falha: o setup termina com erro depois de ter feito tudo certo. O modo "projeto em andamento" do script tem a mesma comparação.
-- **A pergunta da pasta não aparece.** O script escreve a pergunta por conta própria. Num console real, o readline do Node redesenha a linha com o prompt dele (`> `) e apaga a pergunta. O dev viu só `> ` e respondeu sem saber o que estava sendo perguntado. O `setup-project.mjs` pergunta do mesmo jeito.
+- **A pergunta da pasta não aparece.** O script escreve a pergunta por conta própria. Num console real, o readline do Node redesenha a linha com o prompt dele (o sinal `>`) e apaga a pergunta. O dev viu só o sinal `>` e respondeu sem saber o que estava sendo perguntado. O `setup-project.mjs` pergunta do mesmo jeito.
 - **O dev abre a pasta errada.** A mensagem final diz "Abra a pasta ... no editor". O dev abriu a pasta-mãe, onde o Claude Code não carrega os comandos `/opsx:*`, que ficam em `<código>\.claude\commands\`, e o `/opsx:init` não existia na sessão.
 
 ## What Changes
