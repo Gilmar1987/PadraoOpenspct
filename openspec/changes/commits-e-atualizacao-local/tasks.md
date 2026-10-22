@@ -2,11 +2,13 @@
 
 ## 1. Testes na CI
 
-- [ ] 1.1 Aplicar o D5 no `validate.yml`. Verificar rodando no Git Bash os passos "Smoke test do script de entrada" e "Trechos customizados das skills": devem falhar (o script ainda não commita, e os trechos novos não existem).
+- [x] 1.1 Aplicar o D5 no `validate.yml`. Verificar rodando no Git Bash os passos "Smoke test do script de entrada" e "Trechos customizados das skills": devem falhar (o script ainda não commita, e os trechos novos não existem).
+  - Evidência: no Git Bash, `[FAIL (2)] Smoke test do script de entrada` (o script ainda não commita) e `[FAIL (1)] Trechos customizados das skills` ("offer to update now" ausente nos 8 arquivos e "Commit the init" no `init.md`), exit diferente de 0, esperado; o `trap` não deixou nenhum id de teste registrado.
 
 ## 2. Commits
 
-- [ ] 2.1 Aplicar o D2 no `comecar.mjs` e ajustar o "Smoke test do drive minúsculo" (commits manuais condicionais). Verificar com o "Smoke test do script de entrada" e o do drive passando no Git Bash, e com uma execução sem identidade Git (`GIT_CONFIG_GLOBAL` vazio, `GIT_AUTHOR_NAME` e `GIT_COMMITTER_NAME` vazios) terminando com código 0 e o aviso.
+- [x] 2.1 Aplicar o D2 no `comecar.mjs` e ajustar o "Smoke test do drive minúsculo" (commits manuais condicionais). Verificar com o "Smoke test do script de entrada" e o do drive passando no Git Bash, e com uma execução sem identidade Git (`GIT_CONFIG_GLOBAL` vazio, `GIT_AUTHOR_NAME` e `GIT_COMMITTER_NAME` vazios) terminando com código 0 e o aviso.
+  - Evidência: `initialCommit` no `comecar.mjs` (pergunta, `--yes`, `--sem-commit`, commit do código e do store, aviso sem falhar); o teste passou a conferir a tag como a mais próxima (`describe --abbrev=0`), já que o commit de configuração fica por cima dela. No Git Bash, `[PASS] Smoke test do script de entrada` (um commit no código, "configura o store" no store, árvores limpas, `--sem-commit` sem histórico) e `[PASS] Smoke test do drive minúsculo`, sem ids de teste registrados no fim. Com `GIT_CONFIG_GLOBAL` vazio e `GIT_AUTHOR_NAME`/`GIT_COMMITTER_NAME` vazios → exit 0, "Aviso: não consegui fazer o commit inicial: fatal: empty ident name ...", comandos de commit na mensagem final e código sem commit.
 - [ ] 2.2 Aplicar o D1 no `init.md`. Verificar com `grep` mostrando "Commit the init" e os novos "Próximos passos", e com o passo "Trechos customizados das skills" passando nessa parte.
 
 ## 3. Atualização oferecida

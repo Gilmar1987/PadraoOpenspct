@@ -32,6 +32,7 @@ Opções:
   --url-codigo <url>        Projeto em andamento: URL do repositório de código
   --url-store <url>         Projeto em andamento: URL do repositório do store
   --yes                     Não pedir confirmações
+  --sem-commit              Projeto novo: não fazer o commit inicial do código e do store
   --origem <url-ou-pasta>   Repositório do padrão (padrão: ${defaultSource})
   --tag <vX.Y.Z>            Release do padrão (padrão: a mais recente)
   -h, --help                Mostra esta ajuda`);
@@ -40,7 +41,7 @@ Opções:
 function parseArgs(args) {
   const options = {
     modo: null, pasta: null, nome: null, id: null, codigo: null, urlCodigo: null, urlStore: null,
-    yes: false, origem: defaultSource, tag: null,
+    yes: false, semCommit: false, origem: defaultSource, tag: null,
   };
   const valued = {
     '--modo': 'modo', '--pasta': 'pasta', '--nome': 'nome', '--id': 'id', '--codigo': 'codigo',
@@ -50,6 +51,7 @@ function parseArgs(args) {
     const arg = args[index];
     if (arg === '--help' || arg === '-h') options.help = true;
     else if (arg === '--yes') options.yes = true;
+    else if (arg === '--sem-commit') options.semCommit = true;
     else if (valued[arg]) {
       const value = args[index + 1];
       if (value === undefined || value.startsWith('--')) throw new Error(`${arg} precisa de um valor.`);
@@ -245,6 +247,40 @@ function openWorkspaceSteps(codeDir, next) {
   ].join('\n');
 }
 
+// Commits what the setup produced, so the project starts with history: install-skills --update
+// needs a clean repository with commits. A failed commit (for example, no Git identity) is reported,
+// not fatal: the project is already usable.
+async function initialCommit(rl, options, { codeDir, storeDir, id }) {
+  const version = readFileSync(path.join(storeDir, 'padrao-openspec', 'VERSION'), 'utf8').trim();
+  const codeMessage = `chore: instala o padrão OpenSpec v${version}`;
+  const storeMessage = `chore: configura o store do projeto ${id}`;
+  const manual = [
+    `git -C "${codeDir}" add -A`,
+    `git -C "${codeDir}" commit -m "${codeMessage}"`,
+    `git -C "${storeDir}" add -A`,
+    `git -C "${storeDir}" commit -m "${storeMessage}"`,
+  ];
+  if (options.semCommit) return { done: false, manual };
+  // Without a terminal and without --sem-commit, the commit is the accepted default.
+  if (rl && !options.yes && !await askYesNo(rl, '\nFazer o commit inicial do código e do store?', options)) {
+    return { done: false, manual };
+  }
+  try {
+    git(['-C', codeDir, 'add', '-A'], { capture: true });
+    git(['-C', codeDir, 'commit', '-q', '-m', codeMessage], { capture: true });
+    git(['-C', storeDir, 'add', '-A'], { capture: true });
+    const staged = spawnSync('git', ['-C', storeDir, 'diff', '--cached', '--quiet']);
+    if (staged.status !== 0) git(['-C', storeDir, 'commit', '-q', '-m', storeMessage], { capture: true });
+  } catch (error) {
+    console.warn(`\n  Aviso: não consegui fazer o commit inicial: ${error.message.split('\n').slice(-1)[0] || error.message}`);
+    console.warn('  Se faltar a identidade, rode git config --global user.name "Seu Nome" e git config --global user.email voce@exemplo.com.');
+    return { done: false, manual };
+  }
+  progress.done.push('Commit inicial do código e do store');
+  console.log('  ✔ Commit inicial do código e do store');
+  return { done: true, manual };
+}
+
 async function newProject(rl, options) {
   const { base, plan } = await askBaseFolder(rl, options);
   const name = options.nome ?? await ask(rl, 'Nome do projeto, como as pessoas o chamam', '--nome');
@@ -307,10 +343,15 @@ async function newProject(rl, options) {
     if (result.status !== 0) throw new Error(`O setup falhou:\n${`${result.stdout ?? ''}${result.stderr ?? ''}`.trim()}`);
   });
 
+  const commit = await initialCommit(rl, options, { codeDir, storeDir, id });
+  const commitNote = commit.done
+    ? 'Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.'
+    : `Os repositórios ainda não têm o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
   console.log(`
 Pronto. Próximo passo:
 ${openWorkspaceSteps(codeDir, 'rode: /opsx:init')}
-Depois do init, commite os dois repositórios e crie os remotos (veja o COMECE-AQUI.md, "Commitar e publicar").
+${commitNote}
+Para publicar, crie os remotos e faça o push (veja o COMECE-AQUI.md, "Commitar e publicar").
 No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
 pull requests" para receber as atualizações do padrão por PR.`);
 }

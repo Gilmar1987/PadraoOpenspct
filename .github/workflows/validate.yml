@@ -128,6 +128,7 @@ jobs:
             check "$f" "Architectural Decision Check"
             check "$f" "Prior authorization exception"
             check "$f" "Standard version check"
+            check "$f" "offer to update now"
             check "$f" "Commit the planning"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
@@ -135,6 +136,7 @@ jobs:
             check "$f" "OpenSpec-Change:"
             check "$f" "Confirm progress per task group"
             check "$f" "Standard version check"
+            check "$f" "offer to update now"
             check "$f" "Record task evidence"
             check "$f" "Push only on explicit request"
             check "$f" "Security checks"
@@ -144,6 +146,7 @@ jobs:
             check "$f" "Write the verification record"
             check "$f" "Evidence reuse"
             check "$f" "Standard version check"
+            check "$f" "offer to update now"
             check "$f" "Cobertura fora da suíte"
             check "$f" "Project validation commands"
             check "$f" "Code review record"
@@ -151,11 +154,13 @@ jobs:
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
             check "$f" "Standard version check"
+            check "$f" "offer to update now"
             check "$f" "Check the archive authorization"
             check "$f" "Commit the archive"
           done
           # Entrevista do init: documento de arquitetura, idioma do código, fila por banco e E2E acrescentado.
           f=.claude/commands/opsx/init.md
+          check "$f" "Commit the init"
           check "$f" '### Arquivo 5: `<root>/openspec/arquitetura.md`'
           check "$f" "flowchart LR"
           check "$f" "ou de Development Conventions"
@@ -396,7 +401,9 @@ jobs:
       # único clone na última release, entrada num projeto em andamento e as recusas.
       - name: Smoke test do script de entrada
         run: |
-          trap 'openspec store unregister ci-entrada >/dev/null 2>&1 || true' EXIT
+          trap 'openspec store unregister ci-entrada >/dev/null 2>&1 || true; openspec store unregister ci-semcommit >/dev/null 2>&1 || true' EXIT
+          # O script faz o commit inicial; o runner não tem identidade Git configurada.
+          export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
           v="$(tr -d '\r\n' < VERSION)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
@@ -413,11 +420,18 @@ jobs:
           store="$work/a/ci-entrada-openspec"
           code="$work/a/ci-entrada"
           test "$(git -C "$store" branch --show-current)" = main
-          test "$(git -C "$store" describe --tags --exact-match)" = "v$v"
+          # O commit de configuração fica por cima da tag da release clonada.
+          test "$(git -C "$store" describe --tags --abbrev=0)" = "v$v"
           test -f "$code/.claude/commands/opsx/init.md"
           grep -qx 'store: ci-entrada' "$code/openspec/config.yaml"
           grep -qF '/opsx:init' "$RUNNER_TEMP/novo.txt"
           grep -qF 'pasta do workspace' "$RUNNER_TEMP/novo.txt"
+          # Commit inicial: um commit no código, o de configuração no store, as duas árvores limpas.
+          test "$(git -C "$code" rev-list --count HEAD)" -eq 1
+          git -C "$store" log -1 --format=%s | grep -qF 'configura o store'
+          test -z "$(git -C "$code" status --porcelain)"
+          test -z "$(git -C "$store" status --porcelain)"
+          grep -qF 'Commit inicial' "$RUNNER_TEMP/novo.txt"
           # A pasta do projeto já existe: recusa sem alterar nada.
           before="$(git -C "$store" status --porcelain)"
           if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada --yes; then exit 1; fi
@@ -430,11 +444,16 @@ jobs:
           if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/e" --nome "CI Entrada" --id ci-entrada --yes 2> "$RUNNER_TEMP/registrado.txt"; then exit 1; fi
           grep -qF 'openspec store unregister ci-entrada' "$RUNNER_TEMP/registrado.txt"
           test ! -e "$work/e"
+          # Com --sem-commit, o código fica sem histórico e a mensagem mostra como commitar.
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/f" --nome "CI Sem Commit" --id ci-semcommit --yes --sem-commit > "$RUNNER_TEMP/semcommit.txt"
+          if git -C "$work/f/ci-semcommit" rev-parse -q --verify HEAD; then exit 1; fi
+          grep -qF 'git -C' "$RUNNER_TEMP/semcommit.txt"
+          openspec store unregister ci-semcommit
           # Projeto em andamento: publica os dois repositórios e entra por outra pasta.
           git -C "$code" add -A
-          commit "$code" -m setup
+          git -C "$code" diff --cached --quiet || commit "$code" -m setup
           git -C "$store" add -A
-          commit "$store" -m init
+          git -C "$store" diff --cached --quiet || commit "$store" -m init
           mkdir "$work/remotos"
           git clone -q --bare "$code" "$work/remotos/ci-entrada.git"
           git clone -q --bare "$store" "$work/remotos/ci-entrada-openspec.git"
@@ -479,9 +498,9 @@ jobs:
           low="$(cygpath -w "$work" | sed -E 's/^([A-Za-z]):/\L\1:/')"
           node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$low\a" --nome "CI Drive" --id ci-drive --yes
           git -C "$work/a/ci-drive" add -A
-          commit "$work/a/ci-drive" -m setup
+          git -C "$work/a/ci-drive" diff --cached --quiet || commit "$work/a/ci-drive" -m setup
           git -C "$work/a/ci-drive-openspec" add -A
-          commit "$work/a/ci-drive-openspec" -m init
+          git -C "$work/a/ci-drive-openspec" diff --cached --quiet || commit "$work/a/ci-drive-openspec" -m init
           mkdir "$work/remotos"
           git clone -q --bare "$work/a/ci-drive" "$work/remotos/ci-drive.git"
           git clone -q --bare "$work/a/ci-drive-openspec" "$work/remotos/ci-drive-openspec.git"
