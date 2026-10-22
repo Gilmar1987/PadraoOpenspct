@@ -50,7 +50,9 @@
 ## Comandos de verificação
 
 Comandos deste repositório (o padrão), os mesmos que a CI roda em `.github/workflows/validate.yml`.
-Rode-os na raiz, no Git Bash ou num shell POSIX.
+Rode-os na raiz, no Git Bash ou num shell POSIX. Na execução local, pule o passo de instalação do
+CLI quando ele já estiver na versão certa e avise outras sessões antes de rodar a suíte, conforme a
+seção "Trabalho em paralelo" das regras: os testes usam o registro de stores da máquina.
 
 | Finalidade | Comando | Observações |
 |---|---|---|

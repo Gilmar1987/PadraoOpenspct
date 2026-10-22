@@ -154,7 +154,20 @@ Economize contexto nas saídas, nunca nos artefatos.
 
 ---
 
-## 8. Quando em dúvida
+## 8. Trabalho em paralelo
+
+Com mais de uma sessão ou agente no mesmo repositório:
+
+- Cada change fica numa worktree e numa branch próprias (`git worktree add ../<repo>-<change> -b <branch>`),
+  com uma sessão por worktree. Duas sessões na mesma pasta disputam o índice do Git e as mensagens.
+- A versão do padrão (ou do produto) e o número de uma ADR nova são combinados antes do apply, e não
+  no merge.
+- Quem for rodar algo que usa recursos compartilhados da máquina (o registro de stores do OpenSpec,
+  ferramentas instaladas globalmente) avisa antes e espera a resposta.
+
+---
+
+## 9. Quando em dúvida
 
 Se uma solicitação for ambígua quanto ao escopo, comportamento ou impacto:
 

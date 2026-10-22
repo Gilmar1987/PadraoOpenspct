@@ -28,8 +28,14 @@ jobs:
         with:
           node-version: 22
 
+      # Nunca reinstala por cima: numa máquina com outra suíte rodando, a reinstalação tira o CLI do ar.
       - name: Instalar OpenSpec CLI
-        run: npm install --global @fission-ai/openspec@1.14.2
+        run: |
+          if [ "$(openspec --version 2>/dev/null)" = "1.14.2" ]; then
+            echo "OpenSpec CLI 1.14.2 já instalado"
+          else
+            npm install --global @fission-ai/openspec@1.14.2
+          fi
 
       - name: Validar specs e changes OpenSpec
         run: openspec validate --all --strict
@@ -132,6 +138,7 @@ jobs:
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
+            check "$f" "Check concurrent changes"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
@@ -584,7 +591,7 @@ jobs:
           mkdir "$work/code"
           git -C "$work/code" init -q
           # Sem preset (ADR-0003): o setup só grava o nome do projeto; o config.yaml continua neutro.
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Project" --yes
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Project" --yes --no-register
           cmp "$work/store/openspec/config.yaml" openspec/config.yaml
           head -n 1 "$work/store/openspec/project.md" | grep -q '^# CI Project '
           test "$(sed 1d "$work/store/openspec/project.md")" = "$(sed 1d openspec/project.md)"
@@ -644,12 +651,14 @@ jobs:
 
       - name: Smoke test da declaração do store
         run: |
+          sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
+          trap 'openspec store unregister "ci-store-$sfx" >/dev/null 2>&1 || true' EXIT
           work="$(mktemp -d)"
           cp -r . "$work/store"
           mkdir "$work/code"
           git -C "$work/code" init -q
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Store" --register-id ci-store --yes
-          grep -qx 'store: ci-store' "$work/code/openspec/config.yaml"
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Store" --register-id ci-store-$sfx --yes
+          grep -qx "store: ci-store-$sfx" "$work/code/openspec/config.yaml"
           # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
           resolved="$(cd "$work/code" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
           expected="$(cd "$work/store" && node -p 'require("fs").realpathSync(process.cwd())')"
@@ -658,18 +667,19 @@ jobs:
           mkdir -p "$work/other/openspec"
           git -C "$work/other" init -q
           printf 'store: outro\n' > "$work/other/openspec/config.yaml"
-          if node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store --yes; then exit 1; fi
+          if node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store-$sfx --yes; then exit 1; fi
           grep -qx 'store: outro' "$work/other/openspec/config.yaml"
           # Com --force, a declaração existente é substituída e o store volta a ser resolvido.
-          node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store --force --yes
-          grep -qx 'store: ci-store' "$work/other/openspec/config.yaml"
+          node "$work/store/scripts/setup-project.mjs" "$work/other" --register-id ci-store-$sfx --force --yes
+          grep -qx "store: ci-store-$sfx" "$work/other/openspec/config.yaml"
           test "$(grep -c '^store:' "$work/other/openspec/config.yaml")" -eq 1
 
       # Script de entrada (comecar.mjs) contra um padrão local com tags: projeto novo com um
       # único clone na última release, entrada num projeto em andamento e as recusas.
       - name: Smoke test do script de entrada
         run: |
-          trap 'for id in ci-entrada ci-semcommit ci-semident; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
+          sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
+          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
           # O script faz o commit inicial; o runner não tem identidade Git configurada.
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
@@ -684,14 +694,14 @@ jobs:
           commit "$work/padrao" --allow-empty -m next
           git -C "$work/padrao" tag "v$v"
           # Projeto novo: store na última tag, na branch main, e código ligado a ele.
-          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada --yes > "$RUNNER_TEMP/novo.txt"
-          store="$work/a/ci-entrada-openspec"
-          code="$work/a/ci-entrada"
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada-$sfx --yes > "$RUNNER_TEMP/novo.txt"
+          store="$work/a/ci-entrada-$sfx-openspec"
+          code="$work/a/ci-entrada-$sfx"
           test "$(git -C "$store" branch --show-current)" = main
           # O commit de configuração fica por cima da tag da release clonada.
           test "$(git -C "$store" describe --tags --abbrev=0)" = "v$v"
           test -f "$code/.claude/commands/opsx/init.md"
-          grep -qx 'store: ci-entrada' "$code/openspec/config.yaml"
+          grep -qx "store: ci-entrada-$sfx" "$code/openspec/config.yaml"
           grep -qF '/opsx:init' "$RUNNER_TEMP/novo.txt"
           grep -qF 'pasta do workspace' "$RUNNER_TEMP/novo.txt"
           # Commit inicial: um commit no código, o de configuração no store, as duas árvores limpas.
@@ -702,40 +712,40 @@ jobs:
           grep -qF 'Commit inicial' "$RUNNER_TEMP/novo.txt"
           # A pasta do projeto já existe: recusa sem alterar nada.
           before="$(git -C "$store" status --porcelain)"
-          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada --yes; then exit 1; fi
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada-$sfx --yes; then exit 1; fi
           test "$(git -C "$store" status --porcelain)" = "$before"
           # Sem terminal, uma resposta que falta para com a opção que a informa.
-          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/c" --id ci-falta --yes < /dev/null 2> "$RUNNER_TEMP/falta.txt"; then exit 1; fi
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/c" --id ci-falta-$sfx --yes < /dev/null 2> "$RUNNER_TEMP/falta.txt"; then exit 1; fi
           grep -qF 'Falta --nome' "$RUNNER_TEMP/falta.txt"
-          test ! -e "$work/c/ci-falta-openspec"
+          test ! -e "$work/c/ci-falta-$sfx-openspec"
           # Id já registrado nesta máquina: recusa antes do resumo, sem criar pastas.
-          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/e" --nome "CI Entrada" --id ci-entrada --yes 2> "$RUNNER_TEMP/registrado.txt"; then exit 1; fi
-          grep -qF 'openspec store unregister ci-entrada' "$RUNNER_TEMP/registrado.txt"
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/e" --nome "CI Entrada" --id ci-entrada-$sfx --yes 2> "$RUNNER_TEMP/registrado.txt"; then exit 1; fi
+          grep -qF "openspec store unregister ci-entrada-$sfx" "$RUNNER_TEMP/registrado.txt"
           test ! -e "$work/e"
           # Com --sem-commit, o código fica sem histórico e a mensagem mostra como commitar.
-          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/f" --nome "CI Sem Commit" --id ci-semcommit --yes --sem-commit > "$RUNNER_TEMP/semcommit.txt"
-          if git -C "$work/f/ci-semcommit" rev-parse -q --verify HEAD; then exit 1; fi
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/f" --nome "CI Sem Commit" --id ci-semcommit-$sfx --yes --sem-commit > "$RUNNER_TEMP/semcommit.txt"
+          if git -C "$work/f/ci-semcommit-$sfx" rev-parse -q --verify HEAD; then exit 1; fi
           grep -qF 'git -C' "$RUNNER_TEMP/semcommit.txt"
-          openspec store unregister ci-semcommit
+          openspec store unregister ci-semcommit-$sfx
           # Sem identidade Git: o script avisa, mostra os comandos e termina com código zero.
           GIT_CONFIG_GLOBAL=/dev/null GIT_AUTHOR_NAME= GIT_COMMITTER_NAME= GIT_AUTHOR_EMAIL= GIT_COMMITTER_EMAIL= \
-            node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/g" --nome "CI Sem Ident" --id ci-semident --yes > "$RUNNER_TEMP/semident.txt" 2>&1
+            node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/g" --nome "CI Sem Ident" --id ci-semident-$sfx --yes > "$RUNNER_TEMP/semident.txt" 2>&1
           grep -qF 'não consegui fazer o commit inicial' "$RUNNER_TEMP/semident.txt"
-          if git -C "$work/g/ci-semident" rev-parse -q --verify HEAD; then exit 1; fi
-          openspec store unregister ci-semident
+          if git -C "$work/g/ci-semident-$sfx" rev-parse -q --verify HEAD; then exit 1; fi
+          openspec store unregister ci-semident-$sfx
           # Projeto em andamento: publica os dois repositórios e entra por outra pasta.
           git -C "$code" add -A
           git -C "$code" diff --cached --quiet || commit "$code" -m setup
           git -C "$store" add -A
           git -C "$store" diff --cached --quiet || commit "$store" -m init
           mkdir "$work/remotos"
-          git clone -q --bare "$code" "$work/remotos/ci-entrada.git"
-          git clone -q --bare "$store" "$work/remotos/ci-entrada-openspec.git"
-          openspec store unregister ci-entrada
-          node scripts/comecar.mjs --modo existente --pasta "$work/b" --url-codigo "$work/remotos/ci-entrada.git" --url-store "$work/remotos/ci-entrada-openspec.git" --yes > "$RUNNER_TEMP/existente.txt"
+          git clone -q --bare "$code" "$work/remotos/ci-entrada-$sfx.git"
+          git clone -q --bare "$store" "$work/remotos/ci-entrada-$sfx-openspec.git"
+          openspec store unregister ci-entrada-$sfx
+          node scripts/comecar.mjs --modo existente --pasta "$work/b" --url-codigo "$work/remotos/ci-entrada-$sfx.git" --url-store "$work/remotos/ci-entrada-$sfx-openspec.git" --yes > "$RUNNER_TEMP/existente.txt"
           # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
-          resolved="$(cd "$work/b/ci-entrada" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
-          expected="$(cd "$work/b/ci-entrada-openspec/padrao-openspec" && node -p 'require("fs").realpathSync(process.cwd())')"
+          resolved="$(cd "$work/b/ci-entrada-$sfx" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
+          expected="$(cd "$work/b/ci-entrada-$sfx-openspec/padrao-openspec" && node -p 'require("fs").realpathSync(process.cwd())')"
           test "$resolved" = "$expected"
           grep -qF '/opsx:propose' "$RUNNER_TEMP/existente.txt"
           grep -qF 'pasta do workspace' "$RUNNER_TEMP/existente.txt"
@@ -746,10 +756,10 @@ jobs:
           commit "$work/sem-store" --allow-empty -m vazio
           git clone -q --bare "$work/sem-store" "$work/remotos/sem-store.git"
           registered="$(openspec store list --json)"
-          if node scripts/comecar.mjs --modo existente --pasta "$work/d" --url-codigo "$work/remotos/sem-store.git" --url-store "$work/remotos/ci-entrada-openspec.git" --yes 2> "$RUNNER_TEMP/sem-store.txt"; then exit 1; fi
+          if node scripts/comecar.mjs --modo existente --pasta "$work/d" --url-codigo "$work/remotos/sem-store.git" --url-store "$work/remotos/ci-entrada-$sfx-openspec.git" --yes 2> "$RUNNER_TEMP/sem-store.txt"; then exit 1; fi
           grep -qF 'store:' "$RUNNER_TEMP/sem-store.txt"
           test "$(openspec store list --json)" = "$registered"
-          openspec store unregister ci-entrada
+          openspec store unregister ci-entrada-$sfx
 
       # No Windows, a pasta base digitada com o drive em minúscula (c:\...) não pode virar um falso
       # "not this store": o CLI devolve C:\..., e a comparação tem de reconhecer a mesma pasta.
@@ -757,7 +767,8 @@ jobs:
       - name: Smoke test do drive minúsculo
         if: runner.os == 'Windows'
         run: |
-          trap 'openspec store unregister ci-drive >/dev/null 2>&1 || true' EXIT
+          sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
+          trap 'openspec store unregister ci-drive-$sfx >/dev/null 2>&1 || true' EXIT
           work="$(mktemp -d)"
           v="$(tr -d '\r\n' < VERSION)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
@@ -770,33 +781,34 @@ jobs:
           commit "$work/padrao" -m base
           git -C "$work/padrao" tag "v$v"
           low="$(cygpath -w "$work" | sed -E 's/^([A-Za-z]):/\L\1:/')"
-          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$low\a" --nome "CI Drive" --id ci-drive --yes
-          git -C "$work/a/ci-drive" add -A
-          git -C "$work/a/ci-drive" diff --cached --quiet || commit "$work/a/ci-drive" -m setup
-          git -C "$work/a/ci-drive-openspec" add -A
-          git -C "$work/a/ci-drive-openspec" diff --cached --quiet || commit "$work/a/ci-drive-openspec" -m init
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$low\a" --nome "CI Drive" --id ci-drive-$sfx --yes
+          git -C "$work/a/ci-drive-$sfx" add -A
+          git -C "$work/a/ci-drive-$sfx" diff --cached --quiet || commit "$work/a/ci-drive-$sfx" -m setup
+          git -C "$work/a/ci-drive-$sfx-openspec" add -A
+          git -C "$work/a/ci-drive-$sfx-openspec" diff --cached --quiet || commit "$work/a/ci-drive-$sfx-openspec" -m init
           mkdir "$work/remotos"
-          git clone -q --bare "$work/a/ci-drive" "$work/remotos/ci-drive.git"
-          git clone -q --bare "$work/a/ci-drive-openspec" "$work/remotos/ci-drive-openspec.git"
-          openspec store unregister ci-drive
-          node scripts/comecar.mjs --modo existente --pasta "$low\b" --url-codigo "$work/remotos/ci-drive.git" --url-store "$work/remotos/ci-drive-openspec.git" --yes
-          resolved="$(cd "$work/b/ci-drive" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync.native(JSON.parse(d).root.path)))')"
-          expected="$(cd "$work/b/ci-drive-openspec/padrao-openspec" && node -p 'require("fs").realpathSync.native(process.cwd())')"
+          git clone -q --bare "$work/a/ci-drive-$sfx" "$work/remotos/ci-drive-$sfx.git"
+          git clone -q --bare "$work/a/ci-drive-$sfx-openspec" "$work/remotos/ci-drive-$sfx-openspec.git"
+          openspec store unregister ci-drive-$sfx
+          node scripts/comecar.mjs --modo existente --pasta "$low\b" --url-codigo "$work/remotos/ci-drive-$sfx.git" --url-store "$work/remotos/ci-drive-$sfx-openspec.git" --yes
+          resolved="$(cd "$work/b/ci-drive-$sfx" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync.native(JSON.parse(d).root.path)))')"
+          expected="$(cd "$work/b/ci-drive-$sfx-openspec/padrao-openspec" && node -p 'require("fs").realpathSync.native(process.cwd())')"
           test "$resolved" = "$expected"
-          openspec store unregister ci-drive
+          openspec store unregister ci-drive-$sfx
 
       # Portão (docs/openspec-portao.mjs): resposta determinística, para qualquer agente, sobre
       # escrever código (apply) e arquivar (archive); o hook commit-msg é opcional.
       - name: Smoke test do portão
         run: |
-          trap 'openspec store unregister ci-portao >/dev/null 2>&1 || true' EXIT
+          sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
+          trap 'openspec store unregister ci-portao-$sfx >/dev/null 2>&1 || true' EXIT
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
           mkdir -p "$work/repo" "$work/code"
           cp -r . "$work/repo/padrao-openspec"
           git -C "$work/repo" init -q
           git -C "$work/code" init -q
-          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --register-id ci-portao --yes > /dev/null
+          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --register-id ci-portao-$sfx --yes > /dev/null
           cmp "$work/code/docs/openspec-portao.mjs" scripts/portao.mjs
           ch="$work/repo/padrao-openspec/openspec/changes/ci-change"
           mkdir -p "$ch"
@@ -852,7 +864,7 @@ jobs:
           git -C "$work/code" reset -q
           git -C "$work/code" commit -q --allow-empty -m "chore: sem trailer"
           codecommit retrabalho change-arquivada
-          printf 'store: ci-portao\n# nota\n' > "$work/code/openspec/config.yaml"
+          printf "store: ci-portao-$sfx\n# nota\n" > "$work/code/openspec/config.yaml"
           git -C "$work/code" add openspec/config.yaml
           git -C "$work/code" commit -q -m "docs: planejamento" -m "OpenSpec-Change: ci-change"
 
@@ -1031,14 +1043,30 @@ jobs:
       - name: Raiz em dia com padrao-openspec
         run: node padrao-openspec/scripts/sync-root.mjs --check
 
+      # Nunca reinstala por cima: numa máquina com outra suíte rodando, a reinstalação tira o CLI do ar.
       - name: Instalar OpenSpec CLI
-        run: npm install --global @fission-ai/openspec@1.14.2
+        run: |
+          if [ "$(openspec --version 2>/dev/null)" = "1.14.2" ]; then
+            echo "OpenSpec CLI 1.14.2 já instalado"
+          else
+            npm install --global @fission-ai/openspec@1.14.2
+          fi
 
       - name: Validar specs e changes OpenSpec da raiz
         run: openspec validate --all --strict
 
       - name: Lint de Markdown da raiz
         run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"
+
+      # Duas suítes na mesma máquina dividem o registro de stores do OpenSpec: todo id de teste
+      # registrado leva um sufixo por execução, e o trap o desregistra.
+      - name: Ids de teste com sufixo
+        run: |
+          test -f .github/workflows/validate.yml
+          if grep -nE -- "(--register-id|--id|store unregister)[ =][\"']?ci-[a-z0-9-]+[\"']?([^a-z0-9\$-]|\$)" .github/workflows/validate.yml | grep -vF -- '-$sfx'; then
+            echo "::error file=.github/workflows/validate.yml::Id de teste sem o sufixo de execução (\$sfx)"
+            exit 1
+          fi
 
       # Guia de quem vai iniciar um projeto: existe, é linkado pelo README e cobre setup e init.
       - name: Guia de primeiros passos

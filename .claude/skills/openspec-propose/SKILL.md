@@ -159,6 +159,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
       - Ask the user to clarify
       - Then continue with creation
 
+6a. **Check concurrent changes**: run `openspec list --json` (with the selected store flag) and, for every other active change, list the capability folders under its `specs/`. Compare them with the capabilities of the delta specs you just wrote. Add one line to the proposal's Impact, `Changes concorrentes: <change> (<capabilities>); ...` or `Changes concorrentes: nenhuma`, and show each overlap to the user with a suggested order before asking for approval. Changes in other worktrees or unmerged branches are not listed by the CLI: when the user mentions parallel work, or `git worktree list` shows more than one worktree, ask about them.
+
 7. **Show final status**
    ```bash
    openspec status --change "<name>"
