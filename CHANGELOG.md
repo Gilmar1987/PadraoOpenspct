@@ -16,6 +16,10 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - **Abrir o projeto certo:** a mensagem final do `comecar.mjs` manda abrir a pasta do código como
   pasta do workspace (com `code "<pasta>"` quando o VS Code está instalado), porque o Claude Code
   só carrega os comandos `/opsx:*` nessa pasta.
+- **Pergunta de LGPD do `/opsx:init`:** a 6.5 aceita mais de um controle (números separados por
+  vírgula), a opção 5 passa a ser "Todos os controles de 1 a 4" (antes "Todos os anteriores", que
+  incluía o "Não aplicável"), a pergunta não é feita quando o 1.5 diz que não há dados pessoais, e a
+  checagem de coerência aponta dados pessoais sem nenhum controle.
 
 ### Ações no projeto
 

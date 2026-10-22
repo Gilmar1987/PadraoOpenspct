@@ -46,4 +46,3 @@ Antes da confirmação final, o `/opsx:init` SHALL listar as combinações incoe
 
 - **WHEN** o responsável responde no 1.5 que o produto coleta dados pessoais ou sensíveis e responde `0` (não aplicável) no 6.5
 - **THEN** o init aponta que o produto trata dados pessoais sem nenhum controle e propõe ao menos o consentimento com registro de aceite e o direito de exclusão
-
