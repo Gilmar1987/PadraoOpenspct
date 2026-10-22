@@ -135,7 +135,8 @@ function git(args, { capture = false } = {}) {
     : { stdio: 'inherit' });
   if (result.error || result.status !== 0) {
     const details = capture ? `${result.stderr ?? ''}`.trim() : '';
-    throw new Error(`git ${args[0]} falhou.${details ? `\n${details}` : ''}`);
+    const command = args.find((arg, index) => !arg.startsWith('-') && args[index - 1] !== '-C' && args[index - 1] !== '-c');
+    throw new Error(`git ${command ?? args[0]} falhou.${details ? `\n${details}` : ''}`);
   }
   return capture ? result.stdout.trim() : '';
 }
@@ -250,35 +251,61 @@ function openWorkspaceSteps(codeDir, next) {
 // Commits what the setup produced, so the project starts with history: install-skills --update
 // needs a clean repository with commits. A failed commit (for example, no Git identity) is reported,
 // not fatal: the project is already usable.
-async function initialCommit(rl, options, { codeDir, storeDir, id }) {
+// The paths the setup writes in the code repository, read from the manifest it just recorded.
+function standardPaths(codeDir) {
+  const manifest = JSON.parse(readFileSync(path.join(codeDir, '.openspec-padrao.json'), 'utf8'));
+  return [...new Set([
+    ...(manifest.managedFiles ?? []), ...(manifest.managedBlocks ?? []),
+    '.openspec-padrao.json', '.gitignore', 'openspec/config.yaml',
+  ])].filter((file) => existsSync(path.join(codeDir, ...file.split('/'))));
+}
+
+function commitRepository(dir, message, paths) {
+  const scope = paths ? ['--', ...paths] : [];
+  git(['-C', dir, 'add', ...(paths ? scope : ['-A'])], { capture: true });
+  if (spawnSync('git', ['-C', dir, 'diff', '--cached', '--quiet', ...scope]).status === 0) return false;
+  git(['-C', dir, 'commit', '-q', '-m', message, ...scope], { capture: true });
+  return true;
+}
+
+async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork }) {
   const version = readFileSync(path.join(storeDir, 'padrao-openspec', 'VERSION'), 'utf8').trim();
-  const codeMessage = `chore: instala o padrão OpenSpec v${version}`;
-  const storeMessage = `chore: configura o store do projeto ${id}`;
-  const manual = [
-    `git -C "${codeDir}" add -A`,
-    `git -C "${codeDir}" commit -m "${codeMessage}"`,
-    `git -C "${storeDir}" add -A`,
-    `git -C "${storeDir}" commit -m "${storeMessage}"`,
+  // A code folder that already had commits or uncommitted work gets only the standard's files,
+  // so the developer's own changes (and secrets such as .env.local) never land in this commit.
+  const codePaths = codeHadWork ? standardPaths(codeDir) : null;
+  const repos = [
+    { label: 'código', dir: codeDir, message: `chore: instala o padrão OpenSpec v${version}`, paths: codePaths },
+    { label: 'store', dir: storeDir, message: `chore: configura o store do projeto ${id}`, paths: null },
   ];
-  if (options.semCommit) return { done: false, manual };
-  // Without a terminal and without --sem-commit, the commit is the accepted default.
-  if (rl && !options.yes && !await askYesNo(rl, '\nFazer o commit inicial do código e do store?', options)) {
-    return { done: false, manual };
+  const manualFor = (repo) => {
+    const files = repo.paths ? ` -- ${repo.paths.join(' ')}` : '';
+    return [`git -C "${repo.dir}" add${repo.paths ? files : ' -A'}`, `git -C "${repo.dir}" commit -m "${repo.message}"${files}`];
+  };
+  const pending = () => repos.filter((repo) => !repo.done);
+  const result = () => ({ done: pending().length === 0, manual: pending().flatMap(manualFor) });
+
+  if (options.semCommit) return result();
+  if (rl && !options.yes) {
+    let accepted;
+    try {
+      accepted = await askYesNo(rl, '\nFazer o commit inicial do código e do store?', options);
+    } catch {
+      accepted = false; // Input ended (Ctrl+D / Ctrl+Z): the setup is done; treat it as "no".
+    }
+    if (!accepted) return result();
   }
-  try {
-    git(['-C', codeDir, 'add', '-A'], { capture: true });
-    git(['-C', codeDir, 'commit', '-q', '-m', codeMessage], { capture: true });
-    git(['-C', storeDir, 'add', '-A'], { capture: true });
-    const staged = spawnSync('git', ['-C', storeDir, 'diff', '--cached', '--quiet']);
-    if (staged.status !== 0) git(['-C', storeDir, 'commit', '-q', '-m', storeMessage], { capture: true });
-  } catch (error) {
-    console.warn(`\n  Aviso: não consegui fazer o commit inicial: ${error.message.split('\n').slice(-1)[0] || error.message}`);
-    console.warn('  Se faltar a identidade, rode git config --global user.name "Seu Nome" e git config --global user.email voce@exemplo.com.');
-    return { done: false, manual };
+  for (const repo of repos) {
+    try {
+      commitRepository(repo.dir, repo.message, repo.paths);
+      repo.done = true;
+      progress.done.push(`Commit inicial do ${repo.label}`);
+      console.log(`  ✔ Commit inicial do ${repo.label}${repo.paths ? ' (só os arquivos do padrão)' : ''}`);
+    } catch (error) {
+      console.warn(`\n  Aviso: não consegui fazer o commit inicial do ${repo.label}: ${error.message.split('\n').slice(-1)[0] || error.message}`);
+      console.warn('  Se faltar a identidade, rode git config --global user.name "Seu Nome" e git config --global user.email voce@exemplo.com.');
+    }
   }
-  progress.done.push('Commit inicial do código e do store');
-  console.log('  ✔ Commit inicial do código e do store');
-  return { done: true, manual };
+  return result();
 }
 
 async function newProject(rl, options) {
@@ -307,10 +334,16 @@ async function newProject(rl, options) {
 
   refuseRegisteredId(id);
   const tag = options.tag ?? latestTag(options.origem);
+  const codeHadWork = Boolean(generated) && existsSync(path.join(codeDir, '.git')) && (
+    spawnSync('git', ['-C', codeDir, 'rev-parse', '-q', '--verify', 'HEAD']).status === 0 ||
+    spawnSync('git', ['-C', codeDir, 'status', '--porcelain'], { encoding: 'utf8' }).stdout.trim() !== '');
   plan.push(
     `Store: ${storeDir} (clone da release ${tag} de ${options.origem}, branch main)`,
     generated ? `Código: ${codeDir} (pasta existente)` : `Código: ${codeDir} (repositório novo, branch main)`,
     `Setup: comandos /opsx:*, skills e agentes no código; store registrado como "${id}"`,
+    options.semCommit
+      ? 'Commit inicial: não (--sem-commit)'
+      : `Commit inicial: perguntado no fim${codeHadWork ? '; no código, só os arquivos do padrão, porque a pasta já tinha trabalho' : ''}`,
   );
   await confirmPlan(rl, plan, options);
 
@@ -343,10 +376,10 @@ async function newProject(rl, options) {
     if (result.status !== 0) throw new Error(`O setup falhou:\n${`${result.stdout ?? ''}${result.stderr ?? ''}`.trim()}`);
   });
 
-  const commit = await initialCommit(rl, options, { codeDir, storeDir, id });
+  const commit = await initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork });
   const commitNote = commit.done
     ? 'Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.'
-    : `Os repositórios ainda não têm o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
+    : `Falta o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
   console.log(`
 Pronto. Próximo passo:
 ${openWorkspaceSteps(codeDir, 'rode: /opsx:init')}
@@ -415,6 +448,7 @@ function resolvedRoot(codeDir) {
 }
 
 async function joinProject(rl, options) {
+  if (options.semCommit) console.warn('Aviso: --sem-commit não tem efeito no modo existente, que não faz commit.');
   const { base, plan } = await askBaseFolder(rl, options);
   const urlCodigo = options.urlCodigo ?? await ask(rl, 'URL do repositório de código', '--url-codigo');
   const urlStore = options.urlStore ?? await ask(rl, 'URL do repositório do store', '--url-store');

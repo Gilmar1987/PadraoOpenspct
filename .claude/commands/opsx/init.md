@@ -963,7 +963,7 @@ git -C "<root>" add -- openspec/
 git -C "<root>" commit -m "chore: inicializa o projeto <Nome do Projeto>" -- openspec/
 ```
 
-O pathspec mantém fora do commit qualquer outra coisa que o responsável tenha preparado. Se a raiz não estiver num repositório Git, diga que o init não foi commitado. Nunca faça push.
+O pathspec mantém fora do commit qualquer outra coisa que o responsável tenha preparado. Antes do commit, se `git -C "<root>" diff --cached --quiet -- openspec/` disser que não há nada novo (por exemplo, num init refeito sem mudanças), diga que não havia o que commitar. Se a raiz não estiver num repositório Git, diga que o init não foi commitado. Nunca faça push.
 
 ---
 

@@ -318,6 +318,8 @@ sumir):
 | "Check the approval record", trailer "OpenSpec-Change:", "Record task evidence", "Push only on explicit request", "Security checks" e "Request code review" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Write the verification record", "Evidence reuse", "Cobertura fora da suíte", "Project validation commands" e "Code review record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Update the project overview", "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
+| "Standard version check" e "offer to update now" | `propose`, `apply`, `verify` e `archive` (comandos e skills) |
+| "Commit the init", "### Arquivo 5", 7.3, fila por banco e E2E acrescentado | `commands/opsx/init.md` |
 | "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
 

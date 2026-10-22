@@ -401,7 +401,7 @@ jobs:
       # único clone na última release, entrada num projeto em andamento e as recusas.
       - name: Smoke test do script de entrada
         run: |
-          trap 'openspec store unregister ci-entrada >/dev/null 2>&1 || true; openspec store unregister ci-semcommit >/dev/null 2>&1 || true' EXIT
+          trap 'for id in ci-entrada ci-semcommit ci-semident; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
           # O script faz o commit inicial; o runner não tem identidade Git configurada.
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
@@ -449,6 +449,12 @@ jobs:
           if git -C "$work/f/ci-semcommit" rev-parse -q --verify HEAD; then exit 1; fi
           grep -qF 'git -C' "$RUNNER_TEMP/semcommit.txt"
           openspec store unregister ci-semcommit
+          # Sem identidade Git: o script avisa, mostra os comandos e termina com código zero.
+          GIT_CONFIG_GLOBAL=/dev/null GIT_AUTHOR_NAME= GIT_COMMITTER_NAME= GIT_AUTHOR_EMAIL= GIT_COMMITTER_EMAIL= \
+            node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/g" --nome "CI Sem Ident" --id ci-semident --yes > "$RUNNER_TEMP/semident.txt" 2>&1
+          grep -qF 'não consegui fazer o commit inicial' "$RUNNER_TEMP/semident.txt"
+          if git -C "$work/g/ci-semident" rev-parse -q --verify HEAD; then exit 1; fi
+          openspec store unregister ci-semident
           # Projeto em andamento: publica os dois repositórios e entra por outra pasta.
           git -C "$code" add -A
           git -C "$code" diff --cached --quiet || commit "$code" -m setup

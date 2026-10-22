@@ -104,8 +104,9 @@ o PR.
 
 Sem o workflow (por exemplo, num repositório sem remoto), os comandos `/opsx:propose`, `/opsx:apply`,
 `/opsx:verify` e `/opsx:archive` avisam da versão nova e oferecem rodar os comandos abaixo; eles só
-rodam com a sua confirmação e com a árvore limpa. À mão, ou para testar antes, a partir de um clone do
-padrão na tag desejada:
+rodam com a sua confirmação e com a árvore limpa, clonando o padrão numa pasta fora deste repositório,
+e voltam à sua branch depois, deixando a `chore/padrao-vX.Y.Z` para você revisar e mergear. À mão, ou
+para testar antes, a partir de um clone do padrão na tag desejada, fora deste repositório:
 
 ```sh
 git clone --depth 1 --branch vX.Y.Z https://github.com/Gilmar1987/PadraoOpenspct padrao-tmp
