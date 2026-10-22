@@ -19,7 +19,8 @@
 
 - [x] 4.1 Criar o `.github/workflows/release.yml` conforme o D4 e aplicar o D5 e o D7. Verificar com `yaml.safe_load` do workflow, o lint nos dois lugares sem issues e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
   - Evidência: `.github/workflows/release.yml` (dispara em `release: published`, anexa o `comecar.mjs` da tag se faltar e confere); `yaml.safe_load` → ok, e a checagem de sintaxe da CI passou a carregar o arquivo; COMECE-AQUI com as linhas `no_root_with_registered_stores` e "o agente rodou `openspec verify` ou `openspec archive`"; seção "Portão" no guia do projeto; README com o workflow e a linha "Run the gate"; `VERSION` → 1.9.0 e seção `## 1.9.0` no CHANGELOG. `[PASS]` em "Sintaxe dos scripts", "Versão e changelog", "Lint de Markdown" e nos 4 passos do `root` (exit 0).
-- [ ] 4.2 Rodar os comandos de verificação do `openspec/project.md` localmente, depois de combinar com a outra sessão que ela não roda a suíte ao mesmo tempo, e conferir no PR os três jobs. Verificar que todos passam.
+- [x] 4.2 Rodar os comandos de verificação do `openspec/project.md` localmente, depois de combinar com a outra sessão que ela não roda a suíte ao mesmo tempo, e conferir no PR os três jobs. Verificar que todos passam.
+  - Evidência: combinado com a outra sessão antes de rodar; localmente, 18 `[PASS]` no `store` e 4 no `root` (exit 0), sem ids de teste registrados no fim; depois das correções da revisão, `[PASS]` no "Smoke test do portão" com os casos novos e nos demais passos afetados; no PR #28 (run 39836966024), `store (ubuntu-latest)`, `store (windows-latest)` e `root` → pass.
 
 ## Workflow follow-up
 
