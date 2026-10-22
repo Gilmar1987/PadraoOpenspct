@@ -49,6 +49,7 @@ Nova pergunta no bloco 7, depois da 7.2:
 ```
 
 A 7.2 passa a valer também para os campos de Development Conventions que continuarem sem resposta. Mapa dos campos:
+
 - "Idioma dos textos visíveis ao usuário" vem da 1.7;
 - "Git e revisão" vem do bloco 5;
 - "Testes e critérios de qualidade" vem de 5.3 a 5.6;
@@ -141,6 +142,7 @@ flowchart LR
 ### D5. CI
 
 No passo "Trechos customizados das skills", o job `store` confere no `commands/opsx/init.md`:
+
 - `arquitetura.md`;
 - `**7.3 — Em que idioma o código será escrito`;
 - `Fila no próprio banco`;
