@@ -811,9 +811,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/ms-playwright
-            ${{ runner.temp }}/openspec-validar-interface
+          path: ${{ runner.temp }}/openspec-validar-interface
           key: validar-interface-${{ runner.os }}-${{ hashFiles('padrao-openspec/scripts/validar-interface.mjs') }}
 
       - name: Smoke test da validação de interface
@@ -847,6 +845,8 @@ jobs:
           grep -q 'image-alt' "$out/ruim/interface-report.md"
           grep -q 'falha ao carregar o carrinho' "$out/ruim/interface-report.md"
           grep -q '/promocoes.html' "$out/ruim/interface-report.md"
+          # O relatório fica na pasta da change e passa pelo lint de Markdown do projeto.
+          npx --yes markdownlint-cli2@0.23.2 --config .markdownlint-cli2.jsonc "$out/boa/interface-report.md" "$out/ruim/interface-report.md"
           # URL fora do ar: erro de ambiente (saída 2).
           set +e
           node scripts/validar-interface.mjs http://127.0.0.1:4199/ --saida "$out/fora"
@@ -868,6 +868,7 @@ jobs:
           git -C "$work/code" init -q
           node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --register-id ci-portao-$sfx --yes > /dev/null
           cmp "$work/code/docs/openspec-portao.mjs" scripts/portao.mjs
+          cmp "$work/code/docs/openspec-validar-interface.mjs" scripts/validar-interface.mjs
           ch="$work/repo/padrao-openspec/openspec/changes/ci-change"
           mkdir -p "$ch"
           proposal() { printf '# Proposal\n\n## Why\n\nTeste.\n\n## Aprovação\n\n- Responsável: %s\n- Data: %s\n- Escopo: %s\n- Condições: —\n- Origem: %s\n' "$@" > "$ch/proposal.md"; }
