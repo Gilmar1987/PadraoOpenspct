@@ -18,7 +18,7 @@ O `/opsx:init` do projeto Lava Jato (2026-10-21) deixou três atritos e uma lacu
 - **(d)** As opções da 3.8 passam a ser por tipo de fila, com exemplos por banco e linguagem. Uma nota pede exemplos compatíveis com a 3.1 e a 3.3. A checagem de coerência ganha a linha "biblioteca de fila presa a um banco diferente do da 3.3".
 - **Documento de arquitetura:** o init passa a gerar `<root>/openspec/arquitetura.md`, montado a partir dos blocos 1 a 6. A seção "Architecture" do `project.md` gerado resume e aponta para ele. Os próximos passos do init pedem para revisá-lo e mantê-lo em dia quando uma ADR mudar a arquitetura.
 - **Cópia da raiz** regenerada pelo `sync-root.mjs`; **CI** confere a presença do trecho do `arquitetura.md` e da 7.3 no `init.md`.
-- **Versão:** `1.3.2`, como pedido. Veja a nota de versionamento no design.
+- **Versão:** `1.4.0`. Pelo semver da ADR-0004, um artefato novo gerado pelo init é uma funcionalidade.
 
 ### Fora do escopo
 
@@ -48,8 +48,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.4.0; CI passar; em seguida, PR, merge e release `v1.4.0` com o `comecar.mjs` anexado
+- Origem: "Aprovo a change ajustes-do-init-e-arquitetura para archive, versão 1.4.0, com PR, merge e release, se a CI passar"
