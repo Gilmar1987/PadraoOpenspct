@@ -254,7 +254,14 @@ async function runJourneys(browser, journeys, report, capturas) {
       const label = JSON.stringify(step);
       try {
         await runStep(page, step, report.url);
-        result.passos.push({ passo: label, ok: true });
+        const done = { passo: label, ok: true };
+        // A "conferir" step shows a state of the screen (error, success, empty): keep its picture.
+        if (Object.keys(step ?? {})[0] === 'conferir') {
+          const shot = `jornada-${journeyIndex + 1}-passo-${stepIndex + 1}.png`;
+          await page.screenshot({ path: path.join(capturas, shot), fullPage: true });
+          done.captura = `interface/capturas/${shot}`;
+        }
+        result.passos.push(done);
       } catch (error) {
         const shot = `jornada-${journeyIndex + 1}-passo-${stepIndex + 1}.png`;
         await page.screenshot({ path: path.join(capturas, shot), fullPage: true }).catch(() => {});
@@ -346,7 +353,8 @@ function markdown(report) {
   for (const journey of report.jornadas) {
     lines.push(`### ${journey.nome}: ${journey.ok ? 'aprovada' : 'reprovada'}`, '');
     for (const step of journey.passos) {
-      lines.push(`- ${step.ok ? 'ok' : 'falhou'}: \`${step.passo}\`${step.ok ? '' : ` — ${step.erro} ([captura](${step.captura}))`}`);
+      const shot = step.captura ? ` ([captura](${step.captura}))` : '';
+      lines.push(`- ${step.ok ? 'ok' : 'falhou'}: \`${step.passo}\`${step.ok ? shot : ` — ${step.erro}${shot}`}`);
     }
     lines.push('');
   }

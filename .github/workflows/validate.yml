@@ -835,6 +835,8 @@ jobs:
           grep -Eq '"nota": *"(médio|bom)"' "$out/boa.json"
           grep -q 'Cadastro com nome' "$out/boa/interface-report.md"
           for w in 390 768 1280; do ls "$out/boa/interface/capturas/" | grep -q -- "-$w\.png$"; done
+          # Cada passo "conferir" deixa a captura do estado da tela.
+          test -f "$out/boa/interface/capturas/jornada-1-passo-4.png"
           # Página com problemas plantados: saída 1, e o relatório cita texto alternativo, console e link.
           set +e
           node scripts/validar-interface.mjs http://127.0.0.1:4174/ --saida "$out/ruim"
