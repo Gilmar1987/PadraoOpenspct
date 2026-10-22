@@ -118,10 +118,10 @@ function quoteForShell(value) {
 }
 
 // On Windows npm and the OpenSpec CLI are .cmd shims, which spawnSync can only start through a shell.
-function runTool(command, args, { cwd = process.cwd(), capture = false } = {}) {
+function runTool(command, args, { cwd = process.cwd(), capture = false, timeout } = {}) {
   const spawnOptions = capture
-    ? { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
-    : { cwd, stdio: 'inherit' };
+    ? { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout }
+    : { cwd, stdio: 'inherit', timeout };
   return process.platform === 'win32'
     ? spawnSync([command, ...args.map(quoteForShell)].join(' '), { ...spawnOptions, shell: true })
     : spawnSync(command, args, spawnOptions);
@@ -234,10 +234,12 @@ function step(message, action) {
 // The /opsx:* commands live in <code>/.claude/commands, so Claude Code only loads them when the
 // code folder itself is the workspace, not a folder above it.
 function openWorkspaceSteps(codeDir, next) {
-  const hasCode = runTool('code', ['--version'], { capture: true }).status === 0;
+  // A shim that blocks (for example, one waiting for a remote server) counts as no VS Code.
+  const hasCode = runTool('code', ['--version'], { capture: true, timeout: 5000 }).status === 0;
+  const quoted = process.platform === 'win32' ? `"${codeDir}"` : `'${codeDir.replace(/'/g, "'\\''")}'`;
   return [
     '  1. Abra a pasta do projeto como pasta do workspace (não a pasta acima dela):',
-    ...(hasCode ? [`       code "${codeDir}"`, `     ou, no VS Code: File → Open Folder → ${codeDir}`] : [`       no VS Code: File → Open Folder → ${codeDir}`]),
+    ...(hasCode ? [`       code ${quoted}`, `     ou, no VS Code: File → Open Folder → ${codeDir}`] : [`       no VS Code: File → Open Folder → ${codeDir}`]),
     `  2. Nessa janela, abra o Claude Code e ${next}`,
     '     Se /opsx não aparecer, o Claude Code foi aberto em outra pasta.',
   ].join('\n');

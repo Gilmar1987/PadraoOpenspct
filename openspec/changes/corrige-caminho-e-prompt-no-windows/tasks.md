@@ -16,7 +16,8 @@
 
 - [x] 3.1 Aplicar o D4 no `COMECE-AQUI.md` e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint da raiz sem issues e com os passos "Guia de primeiros passos" e "Versão e changelog" passando.
   - Evidência: `markdownlint-cli2@0.23.2` no `COMECE-AQUI.md`, no `CHANGELOG.md` e nos artefatos da change → 0 issues (depois de trocar o trecho de código com espaço pelo texto "o sinal `>`"); `[PASS] Guia de primeiros passos` e `[PASS] Versão e changelog` com `VERSION` = 1.3.1 (exit 0).
-- [ ] 3.2 Rodar `sync-root.mjs --check` e todos os passos dos jobs `store` e `root` localmente. Verificar que todos saem com código 0.
+- [x] 3.2 Rodar `sync-root.mjs --check` e todos os passos dos jobs `store` e `root` localmente. Verificar que todos saem com código 0.
+  - Evidência: `sync-root.mjs --check` → "Root is in sync with padrao-openspec/."; todos os passos do `validate.yml` no Git Bash → 19 `[PASS]` (15 do `store`, 4 do `root`), exit 0 nos dois. Depois dos ajustes menores da revisão (timeout no `code --version`, aspas no macOS/Linux), `[PASS]` em "Sintaxe dos scripts", "Smoke test do script de entrada" e "Lint de Markdown", e o teste do drive em minúscula → exit 0 nos dois modos.
 
 ## Workflow follow-up
 
