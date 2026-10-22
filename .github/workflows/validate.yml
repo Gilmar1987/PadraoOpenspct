@@ -449,6 +449,8 @@ jobs:
       # marcadores fica intacto, a reinstalação não duplica e um bloco quebrado faz o instalador parar.
       - name: Smoke test dos blocos de agentes
         run: |
+          # O --update do instalador faz commit; o runner não tem identidade Git configurada.
+          export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
           code="$work/code"
