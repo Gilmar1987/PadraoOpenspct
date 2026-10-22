@@ -28,7 +28,7 @@ O padrão não trata o contrato de uma interface (a API que o projeto expõe ou 
 - **Hash exposto (opcional):** o serviço pode expor o hash do contrato que implementa (por exemplo, num cabeçalho de resposta), para o consumidor detectar a divergência. O padrão recomenda, mas não exige.
 - **Regras globais (`rules.md`):** uma linha na seção 3 diz que, quando o projeto tem contrato de interface, o contrato vem antes do código e no mesmo commit.
 - **CI e README:** os trechos novos entram na checagem de trechos customizados e na tabela do README.
-- **Versão:** a próxima minor livre, combinada com a outra sessão antes do apply, em `VERSION` e `CHANGELOG.md`.
+- **Versão:** acrescenta os seus itens à seção da versão aberta no `CHANGELOG.md` (1.12.0, aberta pela `qualidade-de-interface`), sem mexer no `VERSION` se ele já estiver nela; a release sai só quando o responsável pedir (modelo decidido em 2026-10-22).
 
 ### Fora do escopo
 
@@ -73,5 +73,6 @@ Nenhuma. Os requisitos novos ficam todos em `interface-contracts`. Os existentes
 - Escopo: apply
 - Condições: versões aprovadas: 1.10.0 subagentes-e-ganchos, 1.11.0 validacao-e-paralelismo, 1.12.0 qualidade-de-interface, 1.13.0 lacunas-e-adrs-verificaveis, 1.14.0 contratos-de-interface e 1.15.0 debitos-e-camadas-de-verificacao (esta change: 1.14.0); cada apply começa depois do merge da anterior, com rebase na main
 - Ordem confirmada: Gilmar Campelo, 2026-10-22, "aprovo também: [...] a confirmação da ordem das versões"
+- Versão (atualizada em 2026-10-22): a versão só sobe quando o responsável decidir publicar; esta change acrescenta itens à seção aberta (1.12.0). Origem: "sim", em resposta a "Confirma esse modelo? [...] tudo entra na 1.12.0 [...] a release sai quando você pedir"
 - Origem: "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
 - Archive: pendente de aprovação
