@@ -10,7 +10,7 @@
 
 ## 3. Skill, subagente e fluxos
 
-- [ ] 3.1 Criar a skill `interface-quality` (D1) e os dois arquivos do subagente (D3), no formato da `subagentes-e-ganchos` já mergeada, e acrescentar `openspec-validador-de-interface` à lista `verdictAgents` do `somente-leitura.mjs`. Verificar com o passo "Paridade de papéis", o lint e o teste do hook (entrada com `agent_type: openspec-validador-de-interface` e um `rm` → negado; `node docs/openspec-validar-interface.mjs` → liberado) passando.
+- [ ] 3.1 Criar a skill `interface-quality` (D1) e os dois arquivos do subagente (D3), no formato da `subagentes-e-ganchos` já mergeada, acrescentar `'openspec-validador-de-interface'` ao `Set` `verdictAgents` de `padrao-openspec/.claude/hooks/openspec-padrao/somente-leitura.mjs`, e acrescentar ao passo "Smoke test dos hooks do Claude Code" os casos `expect deny somente-leitura.mjs "$(payload Bash command 'echo x > a.txt' '' openspec-validador-de-interface)"` e o `allow` equivalente para `node docs/openspec-validar-interface.mjs http://localhost:3000`. Verificar com esse passo, a "Paridade de papéis" e o lint passando.
 - [ ] 3.2 Aplicar o D4 no verify e o D5 no init e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills" e `sync-root --check` passando.
 - [ ] 3.3 Validar uma página real: rodar o subagente sobre um app de exemplo com uma tela (pasta temporária), conferindo que o relatório traz as capturas nas três larguras, a nota automática e a avaliação do subagente. Verificar com o `interface-report.md` gerado e citado na evidência.
 

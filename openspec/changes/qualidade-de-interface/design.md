@@ -88,7 +88,7 @@ node docs/openspec-validar-interface.mjs <url> [--jornadas <arquivo>] [--saida <
 - **Frontmatter:**
   - `tools: Read, Grep, Glob, Bash, PowerShell`, sem Edit nem Write (PowerShell para funcionar no Windows sem Git Bash);
   - `model: sonnet`;
-  - sem `hooks:`; a restrição vem do `somente-leitura.mjs` no `settings.json`, com `openspec-validador-de-interface` acrescentado à lista `verdictAgents` do script (nome exato da constante confirmado com a outra sessão no apply).
+  - sem `hooks:`; a restrição vem do `somente-leitura.mjs` no `settings.json`, com `openspec-validador-de-interface` acrescentado à lista `verdictAgents` do script (`const verdictAgents = new Set([...])`), com casos novos no passo "Smoke test dos hooks do Claude Code" da CI.
 - **Corpo:**
   1. roda o script, que o hook libera como `node arquivo.mjs`;
   2. lê o relatório e as capturas de tela (o Read do Claude Code lê imagens);
