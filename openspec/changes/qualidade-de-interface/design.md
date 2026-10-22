@@ -85,7 +85,7 @@ node docs/openspec-validar-interface.mjs <url> [--jornadas <arquivo>] [--saida <
 
 - **Arquivo:** `padrao-openspec/.claude/agents/openspec-validador-de-interface.md`, no formato da ADR-0006.
 - **Frontmatter:**
-  - `tools: Read, Grep, Glob, Bash`, sem Edit nem Write;
+  - `tools: Read, Grep, Glob, Bash, PowerShell`, sem Edit nem Write (PowerShell para funcionar no Windows sem Git Bash);
   - `model: sonnet`;
   - o hook `somente-leitura.mjs`.
 - **Corpo:**
