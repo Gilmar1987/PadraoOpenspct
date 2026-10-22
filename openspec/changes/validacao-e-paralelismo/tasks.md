@@ -14,7 +14,8 @@
 
 ## 3. Documentação, versão e integração
 
-- [ ] 3.1 Aplicar o D6 e o D7 com a versão combinada. Verificar com o lint nos dois lugares sem issues e o passo "Versão e changelog" passando.
+- [x] 3.1 Aplicar o D6 e o D7 com a versão combinada. Verificar com o lint nos dois lugares sem issues e o passo "Versão e changelog" passando.
+  - Evidência: `padrao-openspec/VERSION` 1.11.0 e seção "1.11.0" no `CHANGELOG.md`, depois do rebase sobre a main com a v1.10.0 (041a92d); passo "Versão e changelog" rodado no Git Bash → VERSAO-OK (exit 0); `markdownlint-cli2` no `CHANGELOG.md` e na change → 0 issues (exit 0). O D6 já estava aplicado (8f742a4).
 - [ ] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
 
 ## Workflow follow-up

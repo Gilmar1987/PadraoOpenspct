@@ -95,7 +95,7 @@ if grep -nE -- '(--register-id|--id|store unregister) "?ci-[a-z-]+"?( |$)' .gith
 
 ### D7. Versão
 
-A próxima livre depois da `subagentes-e-ganchos` (v1.10.0), combinada com a outra sessão e aprovada pelo responsável antes do apply.
+1.11.0, depois da `subagentes-e-ganchos` (v1.10.0), na ordem aprovada pelo responsável em 2026-10-22.
 
 ## Raio de impacto
 
