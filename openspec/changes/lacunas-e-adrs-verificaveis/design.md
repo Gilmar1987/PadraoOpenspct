@@ -77,7 +77,7 @@ Texto igual no comando e na skill, depois de "External report triage":
 - `rules.md`, seção 1, parágrafo novo "Precedência entre documentos" com a ordem e as regras do requisito (código converge, salvo lacuna declarada; contrato × specs vai ao responsável; outras divergências são reportadas e o trabalho segue o de maior precedência; o `project.md` pode ajustar a ordem).
 - Modelo de `project.md`: seção "Precedência dos documentos", depois de "Key Constraints", com a lista padrão para o projeto ajustar ("contrato de interface: não aplicável" quando não houver).
 - Modelo de `project.md`, "Comandos de verificação": linha "Conferência de lacunas", com "Não aplicável" como orientação inicial.
-- **Ordem escolhida:** contrato → specs → arquitetura → ADRs → código. Os projetos de referência usam contrato → arquitetura → ADRs → código; o padrão acrescenta as specs principais logo depois do contrato, porque elas são o contrato de comportamento do OpenSpec.
+- **Ordem escolhida:** contrato → specs → arquitetura → ADRs → código. Confirmada pelo responsável em 2026-10-22 ("Precedência dos documentos (lacunas): a proposta pôs as specs principais logo depois do contrato: contrato → specs → arquitetura → ADRs → código"). Os projetos de referência usam contrato → arquitetura → ADRs → código; o padrão acrescenta as specs principais logo depois do contrato, porque elas são o contrato de comportamento do OpenSpec.
 
 ### D6. CI e README
 
