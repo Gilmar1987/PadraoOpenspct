@@ -53,8 +53,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.5.0; ADR-0005 aprovada (promover a `Accepted`); CI passar; em seguida, PR, merge e release `v1.5.0` com o `comecar.mjs` anexado
+- Origem: "Aprovo a change regras-em-qualquer-agente e a ADR-0005 para archive, versão 1.5.0, com PR, merge e release, se a CI passar"
