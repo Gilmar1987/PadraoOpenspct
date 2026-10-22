@@ -16,7 +16,7 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 - **ADR verificável**: o modelo de ADR ganha o campo opcional `verificacao`, com o teste ou comando que sustenta a decisão. O propose, ao criar uma ADR cuja regra pode ser conferida por código, preenche o campo e cria a tarefa do teste. O verify, heurística "ADR verification", roda a verificação das ADRs `Accepted` ligadas à change e aponta como crítica a verificação ausente ou falhando.
 - **Precedência entre documentos** em `rules.md` e numa seção nova do modelo de `project.md`: contrato de interface → specs principais → arquitetura (`arquitetura.md` e `project.md`) → ADRs `Accepted` → código. Código que diverge de um documento converge para ele, salvo lacuna declarada. Divergência entre o contrato e as specs é reportada à revisão humana, e o agente não escolhe sozinho.
 - **CI**: marcadores dos trechos novos no passo "Trechos customizados das skills", `node --check` do script novo e um smoke test do `lacunas.mjs`. README com os trechos novos.
-- **Versão**: próxima minor livre, combinada com a outra sessão antes do apply, no `VERSION` e no `CHANGELOG.md`, com as ações para projetos existentes.
+- **Versão:** acrescenta os seus itens à seção da versão aberta no `CHANGELOG.md` (1.12.0, aberta pela `qualidade-de-interface`), sem mexer no `VERSION` se ele já estiver nela; a release sai só quando o responsável pedir (modelo decidido em 2026-10-22).
 
 ### Fora do escopo
 
@@ -58,5 +58,6 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 - Escopo: apply
 - Condições: versões aprovadas: 1.10.0 subagentes-e-ganchos, 1.11.0 validacao-e-paralelismo, 1.12.0 qualidade-de-interface, 1.13.0 lacunas-e-adrs-verificaveis, 1.14.0 contratos-de-interface e 1.15.0 debitos-e-camadas-de-verificacao (esta change: 1.13.0); cada apply começa depois do merge da anterior, com rebase na main
 - Ordem confirmada: Gilmar Campelo, 2026-10-22, "aprovo também: [...] a confirmação da ordem das versões"
+- Versão (atualizada em 2026-10-22): a versão só sobe quando o responsável decidir publicar; esta change acrescenta itens à seção aberta (1.12.0). Origem: "sim", em resposta a "Confirma esse modelo? [...] tudo entra na 1.12.0 [...] a release sai quando você pedir"
 - Origem: "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
 - Archive: pendente de aprovação
