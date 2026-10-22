@@ -591,7 +591,7 @@ jobs:
           mkdir "$work/code"
           git -C "$work/code" init -q
           # Sem preset (ADR-0003): o setup só grava o nome do projeto; o config.yaml continua neutro.
-          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Project" --yes
+          node "$work/store/scripts/setup-project.mjs" "$work/code" --name "CI Project" --yes --no-register
           cmp "$work/store/openspec/config.yaml" openspec/config.yaml
           head -n 1 "$work/store/openspec/project.md" | grep -q '^# CI Project '
           test "$(sed 1d "$work/store/openspec/project.md")" = "$(sed 1d openspec/project.md)"
@@ -679,7 +679,7 @@ jobs:
       - name: Smoke test do script de entrada
         run: |
           sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
-          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
+          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
           # O script faz o commit inicial; o runner não tem identidade Git configurada.
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
@@ -1062,7 +1062,8 @@ jobs:
       # registrado leva um sufixo por execução, e o trap o desregistra.
       - name: Ids de teste com sufixo
         run: |
-          if grep -nE -- '(--register-id|--id|store unregister) "?ci-[a-z-]+"?( |$)' .github/workflows/validate.yml | grep -v 'sfx'; then
+          test -f .github/workflows/validate.yml
+          if grep -nE -- "(--register-id|--id|store unregister)[ =][\"']?ci-[a-z0-9-]+[\"']?([^a-z0-9\$-]|\$)" .github/workflows/validate.yml | grep -vF -- '-$sfx'; then
             echo "::error file=.github/workflows/validate.yml::Id de teste sem o sufixo de execução (\$sfx)"
             exit 1
           fi

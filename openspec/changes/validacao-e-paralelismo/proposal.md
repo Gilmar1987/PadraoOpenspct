@@ -54,7 +54,7 @@ Nenhuma.
 
 - **Comandos e skills:** `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md`, com as cópias da raiz pelo `sync-root`.
 - **Regras:** `padrao-openspec/openspec/rules.md` (e `docs/openspec-regras.md` dos projetos).
-- **CI:** `.github/workflows/validate.yml` (ids e `trap` em seis passos, instalação do CLI nos dois jobs).
+- **CI:** `.github/workflows/validate.yml` (ids e `trap` em quatro passos, instalação do CLI nos dois jobs).
 - **Documentação:** `openspec/project.md` deste repositório, `README.md` (tabela de trechos), `CHANGELOG.md`, `VERSION`.
 - **Changes concorrentes:** a `subagentes-e-ganchos` (outra sessão, em apply) também toca `validate.yml`, `VERSION` e `CHANGELOG`; esta change entra depois dela e é rebaseada.
 - **Riscos:**

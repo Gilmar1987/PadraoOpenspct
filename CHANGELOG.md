@@ -11,7 +11,7 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - **Changes concorrentes no propose:** antes de pedir a aprovação, o propose compara as capabilities
   da change nova com as das outras changes ativas e registra no Impact a linha "Changes
   concorrentes", mostrando cada sobreposição com uma ordem sugerida.
-- **Trabalho em paralelo:** a seção 8 do `openspec/rules.md` pede uma worktree e uma branch por change,
+- **Trabalho em paralelo:** a seção 8 das regras (`openspec/rules.md` no store, `docs/openspec-regras.md` no código) pede uma worktree e uma branch por change,
   versão e número de ADR combinados antes do apply, e aviso antes de rodar algo que usa recursos
   compartilhados da máquina (registro de stores do OpenSpec, ferramentas globais). "Quando em dúvida"
   passa a ser a seção 9.
@@ -22,7 +22,7 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 ### Ações no projeto
 
 - Nenhuma obrigatória. Com mais de uma sessão ou agente no mesmo repositório, siga a seção 8 do
-  `openspec/rules.md`.
+  `docs/openspec-regras.md`.
 
 ## 1.10.0 — 2026-10-22
 
