@@ -74,7 +74,7 @@ A verificação de interface também é fraca. O roteiro de navegador costuma se
 - **Comandos:** verify (trecho novo) e init (comandos de verificação e `config.yaml`), com as cópias da raiz.
 - **CI, documentação e versão:** `validate.yml`, `README.md`, `COMECE-AQUI.md`, guia do projeto, `CHANGELOG.md`, `VERSION`.
 - **Changes concorrentes:**
-  - a `subagentes-e-ganchos` (outra sessão, em apply) define o formato dos subagentes, o hook `somente-leitura.mjs` e o passo "Paridade de papéis" da CI. Esta change entra depois dela;
+  - a `subagentes-e-ganchos` (outra sessão, em apply) define o formato dos subagentes, os hooks de papel no `settings.json` (o `somente-leitura.mjs`, com a lista `verdictAgents`) e o passo "Paridade de papéis" da CI. Esta change entra depois dela;
   - a `validacao-e-paralelismo` (esta sessão) também mexe no `validate.yml`, no `VERSION` e no `CHANGELOG`.
 - **Riscos:**
   - **Download do navegador na primeira execução:** cerca de 150 MB. Mitigação: só na pasta temporária, com aviso antes, e reaproveitado entre execuções pelo cache do Playwright.

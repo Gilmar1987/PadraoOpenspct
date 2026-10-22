@@ -6,7 +6,8 @@
 - O verify (v1.8.0) já trata roteiros de navegador: um roteiro sem interação é cobertura parcial. Um navegador que clica e digita cobre o cenário.
 - A change `subagentes-e-ganchos` (outra sessão, v1.10.0, em apply) define:
   - o local `padrao-openspec/.claude/agents/openspec-<papel>.md`;
-  - o frontmatter (`name`, `description`, `tools`, `model`, `hooks.PreToolUse` com `somente-leitura.mjs`, que libera `node arquivo.mjs` e `npx playwright test`);
+  - o frontmatter (`name`, `description`, `tools`, `model`), sem `hooks:`: o roteiro manual da outra sessão mostrou que hook no frontmatter do subagente não dispara;
+  - os hooks de papel no template `claude-settings.json` (PreToolUse `Bash|PowerShell` → `somente-leitura.mjs`, `Edit|Write` → `escopo-de-escrita.mjs`), filtrando pelo campo `agent_type` da entrada. O `somente-leitura.mjs` só age para os nomes da lista fixa no script (`verdictAgents`) e libera `node arquivo.mjs` e `npx playwright test`;
   - a nota "Subagente só do Claude Code…";
   - o passo "Paridade de papéis" da CI, que exige `.github/agents/<papel>.agent.md` salvo na lista `only_claude`.
 - O instalador entrega scripts ao código por `templateFiles` (como o `docs/openspec-portao.mjs`).
@@ -87,7 +88,7 @@ node docs/openspec-validar-interface.mjs <url> [--jornadas <arquivo>] [--saida <
 - **Frontmatter:**
   - `tools: Read, Grep, Glob, Bash, PowerShell`, sem Edit nem Write (PowerShell para funcionar no Windows sem Git Bash);
   - `model: sonnet`;
-  - o hook `somente-leitura.mjs`.
+  - sem `hooks:`; a restrição vem do `somente-leitura.mjs` no `settings.json`, com `openspec-validador-de-interface` acrescentado à lista `verdictAgents` do script (nome exato da constante confirmado com a outra sessão no apply).
 - **Corpo:**
   1. roda o script, que o hook libera como `node arquivo.mjs`;
   2. lê o relatório e as capturas de tela (o Read do Claude Code lê imagens);
@@ -134,7 +135,7 @@ Trecho novo **"Interface quality gate"**, em Correctness:
 |---|---|---|
 | `padrao-openspec/.claude/skills/interface-quality/SKILL.md` (nova) | D1 | instalador (skills), cópias da raiz |
 | `padrao-openspec/scripts/validar-interface.mjs` (novo), `scripts/test-fixtures/interface/` | D2, D6 | instalador (`templateFiles`), CI |
-| `padrao-openspec/.claude/agents/openspec-validador-de-interface.md`, `.github/agents/validador-de-interface.agent.md` (novos) | D3 | instalador, "Paridade de papéis" |
+| `padrao-openspec/.claude/agents/openspec-validador-de-interface.md`, `.github/agents/validador-de-interface.agent.md` (novos), lista `verdictAgents` do `somente-leitura.mjs` | D3 | instalador, "Paridade de papéis", hooks de papel |
 | `commands/opsx/verify.md`, skill do verify | D4 | trechos customizados |
 | `commands/opsx/init.md` | D5 | cópia da raiz |
 | `.github/workflows/validate.yml`, `README.md`, `COMECE-AQUI.md`, `templates/openspec-padrao.md`, `CHANGELOG.md`, `VERSION` | D6, D7 | lint, guia, versão |
