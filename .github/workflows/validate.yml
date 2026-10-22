@@ -141,6 +141,12 @@ jobs:
             check "$f" "Push only on explicit request"
             check "$f" "Security checks"
             check "$f" "Request code review"
+            check "$f" "Unrequested fixes are scope"
+            check "$f" "Check the library API"
+            check "$f" "Revalidate requirements after a version change"
+            check "$f" "Tool generators outside the repository"
+            check "$f" "Simulate CI on a clean copy"
+            check "$f" "Production-mode check"
           done
           for f in .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md; do
             check "$f" "Write the verification record"
@@ -151,6 +157,9 @@ jobs:
             check "$f" "Project validation commands"
             check "$f" "Code review record"
             check "$f" "External report triage"
+            check "$f" "Review before verify"
+            check "$f" "Dependencies in Impact"
+            check "$f" "Agent-run browser scripts"
           done
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
@@ -158,6 +167,9 @@ jobs:
             check "$f" "offer to update now"
             check "$f" "Check the archive authorization"
             check "$f" "Commit the archive"
+          done
+          for f in .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
+            check "$f" "Scope change resets approval"
           done
           # Entrevista do init: documento de arquitetura, idioma do código, fila por banco e E2E acrescentado.
           f=.claude/commands/opsx/init.md

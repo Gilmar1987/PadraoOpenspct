@@ -44,6 +44,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:verify <other>`).
 
+1a. **Review before verify**: decide whether the change altered code, with the definition of apply step 6a (anything executed, loaded or interpreted by tools or agents), from its commits (the `OpenSpec-Change:` trailer) or its diff. If it did and `review.md` is missing from the change directory, stop here, before any other check: write no `verification.md`, say that the code review (apply step 6a) is a prerequisite of the verification, and offer to run it. Continue only once `review.md` exists. A change that did not alter code goes on normally.
+
 2. **Check status to understand the schema**
    ```bash
    openspec status --change "<name>" --json
@@ -93,6 +95,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
 
    **Code review record**: decide whether the change altered code from its commits (the `OpenSpec-Change:` trailer) or its diff, with the definition of apply step 6a (anything executed, loaded or interpreted by tools or agents), never from what `review.md` claims. If it did, read `review.md` in the change directory. Missing file, or a Critical or Important finding without a fix or a justification: add a CRITICAL issue "Code review missing or unresolved". A `não aplicável` entry for a change that did alter code is also CRITICAL. If code commits of the change come after the last review's `HEAD_SHA`, other than the fix commits it lists, add a WARNING "Code review is stale". Report the review range and reviewer under `Comandos:` (for example, `review.md → <BASE_SHA>..<HEAD_SHA>, <reviewer>`); only a missing, unresolved or stale review becomes an `Itens:` line.
+
+   **Dependencies in Impact**: list the dependencies (libraries, packages, services) that the proposal's Impact says the change adds. For each one, check that a task installs or configures it and that it appears in the project's dependency manifest. Add a WARNING `Dependency in Impact without task or manifest entry: <name>` for each miss, with the recommendation to add the task or remove it from the Impact.
 
    **Spec Coverage**:
    - If status marks the spec artifact skipped by `skip_specs: true`, or the schema defines no spec artifact (no artifact whose `artifactPaths.<id>.outputPath` is under `specs/`), report the spec-dependent checks as not applicable.
@@ -145,6 +149,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
        - Add WARNING: "Scenario not covered: <scenario name>"
        - Recommendation: "Add test or implementation for scenario: <description>"
    - Skip scenarios under a REMOVED requirement; that behavior is meant to be gone.
+
+   **Agent-run browser scripts**: when the evidence of a browser verification script says an agent ran it without real interaction (HTTP requests, no clicks or typing), report each scenario it covers as partially covered under `Não verificado` (reason: "roteiro executado por agente, sem interação") and ask for a human run before archive. A run by a person, or by an automated browser that clicks, covers the scenario.
 
 7. **Verify Coherence**
 

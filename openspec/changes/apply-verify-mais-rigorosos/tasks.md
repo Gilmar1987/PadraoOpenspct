@@ -2,13 +2,17 @@
 
 ## 1. Proteção na CI
 
-- [ ] 1.1 Aplicar o D5 no passo "Trechos customizados das skills" do `validate.yml`. Verificar rodando o passo no Git Bash: deve falhar, citando os 10 trechos ausentes nos 6 arquivos.
+- [x] 1.1 Aplicar o D5 no passo "Trechos customizados das skills" do `validate.yml`. Verificar rodando o passo no Git Bash: deve falhar, citando os 10 trechos ausentes nos 6 arquivos.
+  - Evidência: 10 checagens novas no passo "Trechos customizados das skills" (6 no par do apply, 3 no do verify, 1 no par novo do update); no Git Bash → 20 linhas "Trecho customizado ausente" (10 trechos × 2 arquivos) e `[FAIL (1)]`, esperado.
 
 ## 2. Skills e comandos
 
-- [ ] 2.1 Aplicar o D1 no `apply.md` e no `SKILL.md` do apply. Verificar com `grep` mostrando os 6 títulos nos dois arquivos.
-- [ ] 2.2 Aplicar o D2 no `verify.md` e no `SKILL.md` do verify. Verificar com `grep` mostrando os 3 títulos nos dois arquivos e o passo "Review before verify" antes do passo 2.
-- [ ] 2.3 Aplicar o D3 no `update.md` e no `SKILL.md` do update. Verificar com `grep` mostrando o título nos dois arquivos, e com o passo da 1.1 passando inteiro.
+- [x] 2.1 Aplicar o D1 no `apply.md` e no `SKILL.md` do apply. Verificar com `grep` mostrando os 6 títulos nos dois arquivos.
+  - Evidência: `grep -cE` com os 6 títulos → 6 em `commands/opsx/apply.md` e 6 em `skills/openspec-apply-change/SKILL.md`, inseridos depois do "Security checks" no passo 6.
+- [x] 2.2 Aplicar o D2 no `verify.md` e no `SKILL.md` do verify. Verificar com `grep` mostrando os 3 títulos nos dois arquivos e o passo "Review before verify" antes do passo 2.
+  - Evidência: `grep -cE` com os 3 títulos → 3 em cada arquivo do verify; o passo "1a. **Review before verify**" fica na linha 43 do comando e 47 da skill, antes do "2. **Check status**" (45 e 49).
+- [x] 2.3 Aplicar o D3 no `update.md` e no `SKILL.md` do update. Verificar com `grep` mostrando o título nos dois arquivos, e com o passo da 1.1 passando inteiro.
+  - Evidência: "Scope change resets approval" → 1 em cada arquivo do update; `sync-root.mjs` → "Synced 6 paths."; `[PASS] Trechos customizados das skills` (exit 0).
 
 ## 3. Regras, config e integração
 
