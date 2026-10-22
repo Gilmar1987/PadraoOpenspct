@@ -42,7 +42,7 @@ Não há ADR nova. A change reforça o registro de aprovação já decidido (rul
 
   > A aprovação venceu: o planejamento mudou depois dela (selo registrado X, atual Y). Mostre ao responsável o que mudou e registre a reconfirmação com o /opsx:update, ou peça uma nova aprovação se o escopo mudou.
 
-- **Sem `Conteúdo:`:** o portão acrescenta ao JSON o campo opcional `avisos`, com "Aprovação sem selo de conteúdo (registrada antes da v1.16.0)", e mostra o aviso no texto. O código de saída não muda.
+- **Sem `Conteúdo:`:** o portão acrescenta ao JSON o campo opcional `avisos`, com "Aprovação sem selo de conteúdo (registrada antes desta versão)", e mostra o aviso no texto. O código de saída não muda.
 - O campo `avisos` é aditivo: o formato `{ok, acao, change, motivos, erro?}` continua valendo para quem só lê `motivos`.
 
 ### D3. Marcas de inferência
@@ -92,7 +92,7 @@ Em `openspec/rules.md`, na seção de aprovação, duas frases:
 
 ### D8. Versão
 
-1.16.0, aprovada pelo responsável. "Ações no projeto":
+Item da versão aberta no CHANGELOG, sem subir o VERSION (decisão do responsável em 2026-10-22). "Ações no projeto":
 
 - "Nenhuma obrigatória. Aprovações registradas antes desta versão seguem valendo, com aviso; as próximas gravam o selo."
 
