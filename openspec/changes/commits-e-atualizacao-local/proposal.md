@@ -51,8 +51,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.6.0; PR e merge se a CI passar nos três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`); release `v1.6.0` só depois do teste do responsável num console real
+- Origem: "Aprovo a change commits-e-atualizacao-local para archive, versão 1.6.0, com PR e merge se a CI passar nos três jobs, e release depois do meu teste no console"
