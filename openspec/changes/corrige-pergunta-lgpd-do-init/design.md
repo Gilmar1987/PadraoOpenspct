@@ -28,7 +28,7 @@ Não há ADR nova.
 ```markdown
 **6.5 — Quais controles de LGPD/GDPR serão implementados?** `[OPCIONAL]`
 
-_(Múltipla escolha — separe os números por vírgula. Faça esta pergunta só se o 1.5 não for "Não"; se for, registre "Não aplicável" e siga para a 6.6.)_
+_(Múltipla escolha — separe os números por vírgula. Faça esta pergunta só se o 1.5 não for 4 (Não); se for, registre "Não aplicável" e siga para a 6.6. Se um arquivo de respostas trouxer controles na 6.5 com o 1.5 = 4, aponte a combinação na checagem de coerência.)_
 
 0) Não aplicável
 1) Consentimento explícito com registro de aceite
