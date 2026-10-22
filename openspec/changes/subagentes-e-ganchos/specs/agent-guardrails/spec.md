@@ -31,7 +31,7 @@ O subagente `openspec-stage-reviewer` SHALL rodar os comandos da seção "Comand
 
 ### Requirement: Hooks de papel durante o subagente
 
-Os subagentes de veredito que têm `Bash` SHALL declarar no frontmatter um hook `PreToolUse` que nega comandos de escrita: redirecionamento para arquivo, `tee`, edição in-place, interpretador inline, `git commit`, `git push`, `git reset`, `rm` e `mv`. O implementador SHALL declarar um hook que nega a escrita fora do repositório e nos arquivos gerenciados pelo padrão. A documentação MUST dizer que esses hooks são heurísticas, e não uma fronteira de segurança.
+Para as chamadas feitas pelos subagentes de veredito que têm shell, um hook `PreToolUse` SHALL negar comandos de escrita: redirecionamento para arquivo, `tee`, edição in-place, interpretador inline, `git commit`, `git push`, `git reset`, `rm` e `mv`. Para as chamadas do implementador, um hook SHALL negar a escrita fora do repositório e nos arquivos gerenciados pelo padrão. A documentação MUST dizer que esses hooks são heurísticas, e não uma fronteira de segurança.
 
 #### Scenario: Validador tenta gravar arquivo
 
@@ -47,6 +47,15 @@ Os subagentes de veredito que têm `Bash` SHALL declarar no frontmatter um hook 
 
 - **WHEN** um subagente de veredito roda `git diff` ou o comando de testes do `project.md`
 - **THEN** o hook não interfere
+
+### Requirement: Hooks de papel restritos ao papel
+
+Os hooks de papel SHALL agir só nas chamadas dos subagentes do seu papel, identificados pelo campo `agent_type` da entrada do hook, e MUST NOT interferir nas chamadas do agente principal nem dos outros subagentes.
+
+#### Scenario: Agente principal não é afetado
+
+- **WHEN** o agente principal roda `echo ok > notas.txt` ou edita `src/app.ts`
+- **THEN** os hooks de papel não interferem
 
 ### Requirement: Tarefa marcada exige evidência antes do fim do turno
 

@@ -47,16 +47,16 @@
 
 ### D1. Papéis e ferramentas
 
-| Subagente | `tools` | `model` | Hook de frontmatter |
+| Subagente | `tools` | `model` | Hook de papel |
 |---|---|---|---|
 | `openspec-spec-architect` | Read, Grep, Glob | sonnet | — |
 | `openspec-task-planner` | Read, Grep, Glob | sonnet | — |
 | `openspec-consistency-guardian` | Read, Grep, Glob | sonnet | — |
 | `openspec-requirements-ingestor` | Read, Grep, Glob | sonnet | — |
-| `openspec-qa-validator` | Read, Grep, Glob, Bash | sonnet | `somente-leitura.mjs` |
-| `openspec-stage-reviewer` | Read, Grep, Glob, Bash | haiku | `somente-leitura.mjs` |
-| `openspec-code-reviewer` | Read, Grep, Glob, Bash | sonnet | `somente-leitura.mjs` |
-| `openspec-code-implementer` | Read, Edit, Write, Grep, Glob, Bash | inherit | `escopo-de-escrita.mjs` |
+| `openspec-qa-validator` | Read, Grep, Glob, Bash, PowerShell | sonnet | `somente-leitura.mjs` |
+| `openspec-stage-reviewer` | Read, Grep, Glob, Bash, PowerShell | haiku | `somente-leitura.mjs` |
+| `openspec-code-reviewer` | Read, Grep, Glob, Bash, PowerShell | sonnet | `somente-leitura.mjs` |
+| `openspec-code-implementer` | Read, Edit, Write, Grep, Glob, Bash, PowerShell | inherit | `escopo-de-escrita.mjs` |
 
 - O corpo de cada um dos seis papéis já existentes é o texto do agente do Copilot correspondente, adaptado aos nomes das ferramentas do Claude Code.
 - O `openspec-stage-reviewer`:
@@ -67,18 +67,20 @@
   Ele não opina sobre o código. Usa `haiku` porque o trabalho é mecânico.
 - O `openspec-code-reviewer` recebe o template de revisão da skill `requesting-code-review`. A skill passa a despachá-lo quando `.claude/agents/openspec-code-reviewer.md` existir, e mantém o `general-purpose` como alternativa.
 
-### D2. Hooks de frontmatter
+### D2. Hooks de papel
 
-Os scripts ficam em `.claude/hooks/openspec-padrao/`. Cada um lê o JSON da entrada pelo stdin e responde no formato de `PreToolUse`: `permissionDecision: "deny"` com o motivo, ou nenhuma saída para liberar.
+Os scripts ficam em `.claude/hooks/openspec-padrao/` e são ligados pelo `.claude/settings.json`, como os hooks de sessão do D3. Cada um lê o JSON da entrada pelo stdin e só age quando o campo `agent_type` é um dos subagentes do seu papel; nas chamadas do agente principal e dos outros subagentes, termina sem saída. Quando age, responde no formato de `PreToolUse`: `permissionDecision: "deny"` com o motivo, ou nenhuma saída para liberar.
 
-- **`somente-leitura.mjs`** (matcher `Bash|PowerShell`): nega o comando quando ele contém, fora de aspas:
+- **Por que no `settings.json` e não no frontmatter do subagente:** no roteiro manual de 2026-10-22, o hook declarado no frontmatter (forma `command` + `args`) não disparou no Claude Code real, enquanto o `Stop` do `settings.json`, na mesma forma, disparou. A documentação mostra a forma `args` só para o `settings.json` e documenta que `PreToolUse` de uma chamada de subagente recebe `agent_type`. O filtro pelo `agent_type` usa só o que está documentado.
+
+- **`somente-leitura.mjs`** (matcher `Bash|PowerShell`; `agent_type` `openspec-qa-validator`, `openspec-stage-reviewer` ou `openspec-code-reviewer`): nega o comando quando ele contém, fora de aspas:
   - redirecionamento para arquivo (`>`, `>>`, `Out-File`, `Set-Content`);
   - `tee`, `sed -i` ou `perl -i`;
   - interpretador inline (`python -c`, `node -e`, `powershell -Command`, `bash -c`, `sh -c`, `eval`);
   - `git commit`, `git push`, `git reset`, `git checkout --`, `git restore`, `rm` ou `mv`.
 
   O cabeçalho do script declara o limite: é heurística sobre o texto do comando, não um parser de shell.
-- **`escopo-de-escrita.mjs`** (matcher `Edit|Write`): nega a escrita quando o caminho resolvido:
+- **`escopo-de-escrita.mjs`** (matcher `Edit|Write`; `agent_type` `openspec-code-implementer`): nega a escrita quando o caminho resolvido:
   - fica fora do repositório: o topo git do `cwd` do payload, com `CLAUDE_PROJECT_DIR` como reserva (em worktree, o `CLAUDE_PROJECT_DIR` aponta para o checkout principal);
   - fica dentro de `.claude/` ou `.github/agents/`;
   - é `.openspec-padrao.json` ou um `docs/openspec-*`.
@@ -152,7 +154,7 @@ Cada `padrao-openspec/.github/agents/<papel>.agent.md` SHALL ter um `padrao-open
   - uma reinstalação sem mudanças não altera o arquivo;
   - um JSON inválido faz o instalador parar sem alterar nada.
 - **Paridade:** um passo confere D6.
-- **Não verificável na CI:** o comportamento dentro do Claude Code real (o hook de frontmatter disparar só no subagente, o `Stop` bloquear o turno). Fica um roteiro manual em `docs/openspec-padrao.md`, com o resultado registrado no `verification.md`.
+- **Não verificável na CI:** o comportamento dentro do Claude Code real (o hook de papel disparar só no subagente, o `Stop` bloquear o turno). Fica um roteiro manual em `docs/openspec-padrao.md`, com o resultado registrado no `verification.md`.
 
 ## Raio de impacto
 

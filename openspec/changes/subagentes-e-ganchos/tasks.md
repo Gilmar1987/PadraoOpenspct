@@ -36,3 +36,8 @@
   - `openspec archive` pede confirmação, ou passa pelo portão.
 
   Registrar quem executou e o resultado. Verificar com a evidência do roteiro; o que não puder ser executado fica como não verificado, com o motivo.
+
+## 5. Hooks de papel no settings.json
+
+- [ ] 5.1 Mover os hooks de papel do frontmatter dos subagentes para o `templates/claude-settings.json` (`Bash|PowerShell` → `somente-leitura.mjs`; `Edit|Write` → `escopo-de-escrita.mjs`), com o filtro por `agent_type` nos dois scripts (D2); atualizar os smoke tests (payload com e sem `agent_type`) e a documentação. Verificar com os passos "Paridade de papéis", "Smoke test dos hooks do Claude Code" e "Smoke test da camada do Claude Code no instalador" passando, e com uma chamada sem `agent_type` liberada.
+- [ ] 5.2 Repetir o passo 1 do roteiro manual no Claude Code real, numa conversa nova, depois de reinstalar o padrão no repositório de teste. Registrar quem executou e o resultado.

@@ -12,7 +12,7 @@ As regras do padrão chegam ao agente só como texto: as do `rules.md` e as dos 
     - `openspec-stage-reviewer` (revisor de etapa): roda os Comandos de verificação do `project.md` e devolve só as falhas, para poupar o contexto do agente principal;
     - `openspec-code-reviewer`: revisão de código somente leitura, usada pela skill `requesting-code-review` quando existir.
   - Cada um declara `tools` e `model`. Os papéis de análise e de veredito não têm `Edit` nem `Write` e devolvem veredito com evidência, sem corrigir.
-- **Hooks por papel no frontmatter** dos subagentes, que valem só enquanto o subagente roda:
+- **Hooks por papel**, no `.claude/settings.json`, que agem só quando a chamada vem do subagente do papel (campo `agent_type` da entrada do hook):
   - nos papéis de veredito que têm `Bash`, um `PreToolUse` nega comandos que escrevem: redirecionamento para arquivo, `tee`, `sed -i`, interpretador inline, `git commit`, `git push`, `git reset`, `rm` e `mv`;
   - no implementador, um `PreToolUse` de `Edit|Write` nega escrita fora do repositório e nos arquivos gerenciados pelo padrão (`.claude/`, `docs/openspec-*`, `.openspec-padrao.json`).
 - **Hooks de sessão** gerenciados no `.claude/settings.json` do código, em Node.js (`.claude/hooks/openspec-padrao/*.mjs`):
@@ -68,6 +68,7 @@ As regras do padrão chegam ao agente só como texto: as do `rules.md` e as dos 
 - Responsável: Gilmar Campelo
 - Data: 2026-10-22
 - Escopo: apply
-- Condições: ordem aprovada: guardas-mecanicas (outra sessão) primeiro, depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao; cada apply começa depois do merge da anterior, com rebase na main e versão combinada com a outra sessão
-- Origem: "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
+- Condições: versões aprovadas: 1.10.0 subagentes-e-ganchos, 1.11.0 validacao-e-paralelismo, 1.12.0 qualidade-de-interface, 1.13.0 a 1.15.0 lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao; cada apply começa depois do merge da anterior, com rebase na main
+- Origem: "Aprovo o update da subagentes-e-ganchos e o apply da change atualizada, aprovo também: promoção da ADR-0006 e a confirmação da ordem das versões", em resposta a "Você aprova esse caminho? Se aprovar, já pode responder com a nova aprovação de apply" (hooks de papel do frontmatter para o settings.json, com filtro por agent_type)
+- Aprovação anterior: Gilmar Campelo, 2026-10-22, apply, origem "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
 - Archive: pendente de aprovação
