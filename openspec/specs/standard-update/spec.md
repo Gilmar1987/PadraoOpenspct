@@ -36,7 +36,7 @@ A descrição do PR de atualização SHALL trazer a versão de origem e a de des
 
 ### Requirement: Aviso de versão nos comandos do ciclo
 
-Os comandos e skills de propose, apply, verify e archive SHALL, no início, comparar a versão do manifesto do repositório de código com a última tag do padrão e, se a instalada for mais antiga, mostrar uma linha "há atualização do padrão: vA → vB". Quando o repositório de código não tiver remoto, ou quando o usuário pedir, SHALL oferecer a atualização à mão na versão nova e só executá-la com a confirmação explícita do usuário e a árvore limpa. Sem manifesto, sem rede ou com erro na consulta, MUST seguir sem aviso e sem falhar.
+Os comandos e skills de propose, apply, verify e archive SHALL, no início, comparar a versão do manifesto do repositório de código com a última tag do padrão e, se a instalada for mais antiga, mostrar uma linha "há atualização do padrão: vA → vB". Sem manifesto, sem rede ou com erro na consulta, MUST seguir sem aviso e sem falhar.
 
 #### Scenario: Atualização disponível
 
@@ -47,6 +47,10 @@ Os comandos e skills de propose, apply, verify e archive SHALL, no início, comp
 
 - **WHEN** a consulta das tags falha por falta de rede
 - **THEN** o agente segue o comando sem aviso e sem erro
+
+### Requirement: Atualização oferecida em projeto sem remoto
+
+Quando o repositório de código não tiver remoto, ou quando o usuário pedir, os comandos e skills de propose, apply, verify e archive SHALL oferecer a atualização à mão na versão nova e só executá-la com a confirmação explícita do usuário e a árvore limpa, voltando à branch original antes de continuar.
 
 #### Scenario: Projeto sem remoto
 
