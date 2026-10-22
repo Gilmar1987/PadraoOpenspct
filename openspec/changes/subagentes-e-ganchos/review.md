@@ -43,3 +43,18 @@ Achados:
 - [menor] A CI não conferia o par matcher↔script nem a atualização de um grupo misto — corrigido em e478a05
 - [menor] O separador de palavras deixava passar `for … do rm`, `then rm`, `f() { rm x; }`, `! rm`, `xargs rm`, `$(rm x)` e `ForEach-Object { Remove-Item }`, e negava `git tag --contains HEAD@{1}` — corrigido em e478a05: parênteses e chaves abrem comando (`${VAR}` e `ref@{n}` continuam palavras), prefixos novos e filtros de listagem do `git tag`; smoke cobre os casos
 - [menor] Custo de um `node` a mais por chamada de Edit/Write e dois por chamada de shell na sessão principal — informativo, aceito: o hook de papel sai antes de qualquer trabalho quando o `agent_type` não é do papel
+
+## 2026-10-22 (correção do Windows)
+
+- Intervalo: e478a05..2f4515c
+- Revisor: subagente requesting-code-review
+- Críticos: 0 (corrigidos 0, justificados 0)
+- Importantes: 1 (corrigidos 1, justificados 0)
+- Menores: 2 (corrigidos 2)
+- Segurança: auditoria de dependências não aplicável; varredura de secrets não verificada (o `project.md` registra "Adiado"), diff conferido à mão sem secrets
+
+Achados:
+
+- [importante] Ao comparar só pela forma canônica, uma pasta gerenciada que é link para outra pasta do repositório (`.claude -> cfg`) deixava de ser reconhecida, e a escrita era liberada — corrigido em c5dbae9: o destino real decide "fora do repositório", e as áreas gerenciadas são conferidas pelo destino real e pelo caminho escrito; testado com junction e com nome curto 8.3
+- [menor] Link quebrado dentro do repositório apontando para fora não era seguido — corrigido em c5dbae9 com `lstat` e `readlink`
+- [menor] Qualquer erro do `realpath` era tratado como "não existe" — corrigido em c5dbae9: só ENOENT e ENOTDIR sobem para o pai
