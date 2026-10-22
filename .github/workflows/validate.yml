@@ -150,6 +150,7 @@ jobs:
             check "$f" "Cobertura fora da suíte"
             check "$f" "Project validation commands"
             check "$f" "Code review record"
+            check "$f" "External report triage"
           done
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"

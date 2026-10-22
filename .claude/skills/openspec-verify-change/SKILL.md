@@ -234,9 +234,13 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    - `<command>` → <relevant result> (exit <code>)
    - `<command>` → <relevant result> (exit <code>; reused from apply)
+
+   Triagem:
+
+   - <tool>: <finding> → real | não se aplica | risco aceito (<ADR/decisão>) | falso positivo — <evidência>
    ```
 
-   Write one `Itens:` line per issue of the report, or `Itens: nenhum`. Under `Comandos:`, list every command you ran or reused, with a one-line result (for example, `130 passed`), never the full output; write `Comandos: nenhum (<reason>)` when the run was inspection only. `Cobertura fora da suíte` lists every scenario whose only evidence is a manual run, a script outside the repository or an external tool, as the **Evidence reuse** heuristic requires.
+   Write one `Itens:` line per issue of the report, or `Itens: nenhum`. Under `Comandos:`, list every command you ran or reused, with a one-line result (for example, `130 passed`), never the full output; write `Comandos: nenhum (<reason>)` when the run was inspection only. `Cobertura fora da suíte` lists every scenario whose only evidence is a manual run, a script outside the repository or an external tool, as the **Evidence reuse** heuristic requires. Write the `Triagem:` section only when the run triaged a report from an external tool, as the **External report triage** heuristic requires; leave it out otherwise.
 
 **Verification Heuristics**
 
@@ -247,6 +251,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 - **Actionability**: Every issue must have a specific recommendation with file/line references where applicable
 - **Project validation commands**: take test, lint, typecheck and build evidence from the commands in the "Comandos de verificação" section of `openspec/project.md` that apply to the change. A command recorded as missing or postponed there is reported as not verified with that reason; never invent a replacement.
 - **Evidence reuse**: Reuse a result recorded during apply only when it names the command and its exit code and no code file changed after it (check with `git log` and `git status`); otherwise run the command again. A check kept outside the repository (a manual run, a script in a temp folder) is not automated coverage: report the scenario as covered outside the suite.
+- **External report triage**: when the user or the change provides a report from an external analysis tool (static analysis, dependency scanner, automated review), triage every finding before acting on it. Confirm it in the code (file and line), in the configuration and in the recorded decisions (ADRs, `project.md` constraints). Classify it as **real**, **not applicable** (the pattern exists but cannot be exploited here, with the reason), **accepted risk** (cite the ADR or recorded decision) or **false positive** (cite the code that disproves it). Keep the reported severity, or raise it, for every real finding; never lower it to make the report look better. A finding you cannot confirm or disprove stays not verified, with the reason. Real findings become `Itens:` of the verification record with their severity; add one line under `Triagem:` per finding with its class and evidence.
 
 **Output Format**
 

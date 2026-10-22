@@ -51,8 +51,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-22
+- Escopo: apply
+- Condições: nenhuma
+- Origem: "Eu, gilmar campelo, aprovo a change coerencia-de-seguranca-e-triagem para apply"
+- Archive: pendente de aprovação
