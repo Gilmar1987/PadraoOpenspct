@@ -24,7 +24,7 @@ O segundo problema é o verify. Hoje ele roda os comandos do `project.md`, mas n
   - nova seção, depois de "Comandos de verificação", com uma linha por camada (unitário, contrato, arquitetura, E2E, roteiro manual, produção), dizendo o que ela cobre, o comando ou procedimento e onde roda (local, CI);
   - o init a preenche só com respostas que já tem (5.2 a 5.5 e bloco 7), sem pergunta nova; camada sem resposta fica "Adiado" ou "Não aplicável";
   - o verify usa a matriz: registra no `verification.md` quais camadas a change exercitou e põe em "Não verificado" as que se aplicavam à change e não rodaram.
-- **Versão:** próxima minor livre, combinada com a outra sessão antes do apply, no `VERSION` e no `CHANGELOG.md`, com as ações para projetos já inicializados (criar o `estado-atual.md` e a matriz à mão a partir do `project-setup.md`).
+- **Versão:** acrescenta os seus itens à seção da versão aberta no `CHANGELOG.md` (1.12.0, aberta pela `qualidade-de-interface`), sem mexer no `VERSION` se ele já estiver nela; a release sai só quando o responsável pedir (modelo decidido em 2026-10-22).
 - Marcadores novos na CI para os trechos do init, do verify, do archive, do propose e do explore.
 
 ### Fora do escopo
@@ -73,5 +73,6 @@ Nenhuma.
 - Escopo: apply
 - Condições: versões aprovadas: 1.10.0 subagentes-e-ganchos, 1.11.0 validacao-e-paralelismo, 1.12.0 qualidade-de-interface, 1.13.0 lacunas-e-adrs-verificaveis, 1.14.0 contratos-de-interface e 1.15.0 debitos-e-camadas-de-verificacao (esta change: 1.15.0); cada apply começa depois do merge da anterior, com rebase na main
 - Ordem confirmada: Gilmar Campelo, 2026-10-22, "aprovo também: [...] a confirmação da ordem das versões"
+- Versão (atualizada em 2026-10-22): a versão só sobe quando o responsável decidir publicar; esta change acrescenta itens à seção aberta (1.12.0). Origem: "sim", em resposta a "Confirma esse modelo? [...] tudo entra na 1.12.0 [...] a release sai quando você pedir"
 - Origem: "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
 - Archive: pendente de aprovação
