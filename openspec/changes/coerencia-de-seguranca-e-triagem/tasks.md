@@ -2,11 +2,11 @@
 
 ## 1. Proteção na CI
 
-- [ ] 1.1 Acrescentar o marcador "External report triage" (D5) para a skill e o comando de verify no passo "Trechos customizados das skills" de `.github/workflows/validate.yml`. Verificar rodando o passo localmente: deve falhar nos dois arquivos.
+- [ ] 1.1 Se a `main` tiver andado desde o planejamento, rebasear a branch nela e, se outra versão tiver saído, usar a próxima minor livre no D4. Depois, acrescentar o marcador "External report triage" (D5) para a skill e o comando de verify no passo "Trechos customizados das skills" de `.github/workflows/validate.yml`. Verificar rodando o passo localmente: deve falhar nos dois arquivos.
 
 ## 2. Init
 
-- [ ] 2.1 Aplicar o D1 (opção "0) Sem autenticação no MVP" na 3.6) e o D2 (três combinações novas e a regra de levar a restrição para o `project.md` e a ADR) em `padrao-openspec/.claude/commands/opsx/init.md`. Verificar com `grep -n "Sem autenticação no MVP\|Auditoria de dependências\" é \"Não aplicável\|Varredura de secrets\" é \"Não aplicável\|dados pessoais ou sensíveis, 3.6"` no arquivo.
+- [ ] 2.1 Aplicar o D1 (opção "0) Sem autenticação no MVP" na 3.6) e o D2 (três combinações novas e a regra de levar a restrição para o `project.md` e a ADR) em `padrao-openspec/.claude/commands/opsx/init.md`. Verificar com `grep -n "Sem autenticação no MVP\|Auditoria de dependências\" é \"Não aplicável\|Varredura de secrets\" é \"Não aplicável\|dados pessoais ou sensíveis, 3.6"` no arquivo, e com `grep -n "dados pessoais ou sensíveis) e 6.5 é 0"` confirmando que a linha de LGPD da tabela continua lá.
 
 ## 3. Verify
 
