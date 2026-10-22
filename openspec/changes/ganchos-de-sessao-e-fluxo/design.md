@@ -132,7 +132,7 @@ A mensagem de negação:
 
 ### D7. Versão
 
-1.17.0, aprovada pelo responsável. "Ações no projeto":
+Item da versão aberta no CHANGELOG, sem subir o VERSION (decisão do responsável em 2026-10-22). "Ações no projeto":
 
 - "Rodar a atualização do padrão: o `settings.json` ganha os hooks novos. Nenhuma mudança no código."
 

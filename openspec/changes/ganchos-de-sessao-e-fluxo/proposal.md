@@ -24,7 +24,7 @@ A camada do Claude Code da `subagentes-e-ganchos` (v1.10.0, PR #30) protege os p
   - uma resposta positiva do `estado` fica em cache por sessão durante 60 segundos, para não pagar os 2 a 3 segundos do CLI a cada edição.
 - **Template `claude-settings.json`:** grupo novo `SessionStart` e um hook a mais nos grupos `Bash|PowerShell` e `Edit|Write`, todos sob `.claude/hooks/openspec-padrao/`, como o instalador exige.
 - **CI:** casos novos nos smoke tests do portão e dos hooks do Claude Code, e a lista `placed` do smoke da camada do Claude Code no instalador.
-- **Versão:** 1.17.0, depois da `aprovacao-por-conteudo`.
+- **Versão:** item da versão aberta no CHANGELOG (hoje a 1.12.0), depois da `aprovacao-por-conteudo`, sem subir o VERSION; a release sai quando o responsável pedir.
 
 ### Fora do escopo
 
@@ -65,3 +65,4 @@ Nenhuma.
 - Escopo: archive
 - Condições: versão 1.17.0; push, PR, merge e release autorizados; o apply começa depois do merge da `subagentes-e-ganchos` (PR #30) e da `aprovacao-por-conteudo`, e a release segue a ordem de versões aprovada (depois das changes de SDD 1.13.0–1.15.0).
 - Origem: pergunta "1. Aprovação de cada change: só apply ou até archive, e com quais condições. 2. As versões 1.16.0 e 1.17.0: confirma? 3. Push, PR, merge e release: se quer incluí-los nas condições."; resposta "1 - até archive , 2, e 3  aprovados".
+- Versão revista: 2026-10-22; a versão 1.17.0 deixa de valer: a change entra como item da versão aberta no CHANGELOG (a 1.12.0, enquanto o responsável não publicar), sem subir o VERSION, e a release sai só quando o responsável pedir; Origem: "sim", em resposta a "Se isso vale, troco a aprovacao-por-conteudo e a ganchos-de-sessao-e-fluxo (aprovadas como 1.16.0 e 1.17.0) para itens da versão aberta. Confirma?"
