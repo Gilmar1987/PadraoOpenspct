@@ -1,6 +1,7 @@
 # agent-guardrails Specification
 
 ## Purpose
+
 Define os papéis de agente do Claude Code distribuídos pelo padrão, com as ferramentas e o modelo de cada um, os hooks que cobram as regras do fluxo e as permissões gerenciadas.
 
 ## Requirements
