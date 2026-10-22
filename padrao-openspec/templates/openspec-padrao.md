@@ -25,9 +25,10 @@ O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira c
 
 1. **Se o projeto é novo, inicialize-o**: abra o agente neste repositório e rode `/opsx:init`.
    A entrevista registra no store OpenSpec a stack, os comandos de verificação e as ADRs.
-2. **Commite** os arquivos que o padrão instalou (os listados em `managedFiles` e `managedBlocks` do
-   `.openspec-padrao.json`, o próprio `.openspec-padrao.json`, o `.gitignore` e o
-   `openspec/config.yaml`) e, no store, os artefatos do init.
+2. **Confira os commits.** O `comecar.mjs` já faz o commit inicial deste repositório e do store, e o
+   `/opsx:init` commita no store o que gerar. Sem o script, commite os arquivos que o padrão instalou
+   (os listados em `managedFiles` e `managedBlocks` do `.openspec-padrao.json`, o próprio
+   `.openspec-padrao.json`, o `.gitignore` e o `openspec/config.yaml`).
 3. **Faça cada mudança pelo ciclo** `/opsx:propose` → aprovação explícita no chat (por exemplo,
    `Aprovo a change <nome> para apply`) → `/opsx:apply` → `/opsx:verify` → `/opsx:archive`. O
    agente só faz push, abre PR ou faz deploy quando você pede.
@@ -101,7 +102,11 @@ o PR.
 
 ## Atualizar à mão
 
-Sem o workflow, ou para testar antes, a partir de um clone do padrão na tag desejada:
+Sem o workflow (por exemplo, num repositório sem remoto), os comandos `/opsx:propose`, `/opsx:apply`,
+`/opsx:verify` e `/opsx:archive` avisam da versão nova e oferecem rodar os comandos abaixo; eles só
+rodam com a sua confirmação e com a árvore limpa, clonando o padrão numa pasta fora deste repositório,
+e voltam à sua branch depois, deixando a `chore/padrao-vX.Y.Z` para você revisar e mergear. À mão, ou
+para testar antes, a partir de um clone do padrão na tag desejada, fora deste repositório:
 
 ```sh
 git clone --depth 1 --branch vX.Y.Z https://github.com/Gilmar1987/PadraoOpenspct padrao-tmp
