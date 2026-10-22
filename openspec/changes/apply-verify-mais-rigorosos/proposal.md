@@ -38,7 +38,7 @@ Além disso, à luz do princípio "se o requisito mudou, aborte, altere a spec e
   - seção 7: contagens anunciadas vêm do CLI ou de uma lista montada na hora, nunca de memória.
 - **Config base** (`padrao-openspec/openspec/config.yaml`), regra de tasks: toda dependência citada no Impact do proposal aparece numa tarefa.
 - **CI e README:** os trechos novos entram na checagem de trechos customizados e na tabela do README.
-- **Versão:** `1.7.0`.
+- **Versão:** `1.8.0`, depois da `1.7.0` da change `coerencia-de-seguranca-e-triagem`.
 
 ### Fora do escopo
 
@@ -71,8 +71,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar campelo
+- Data: 2026-10-22
+- Escopo: archive
+- Condições: versão 1.8.0; PR, merge e release `v1.8.0` só depois do merge da `coerencia-de-seguranca-e-triagem` (da outra sessão), com rebase na `main` resultante; CI passar nos três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`)
+- Origem: "Aprovo a change apply-verify-mais-rigorosos para archive, versão 1.8.0, com PR, merge e release depois do merge da coerencia-de-seguranca-e-triagem, se a CI passar nos três jobs"

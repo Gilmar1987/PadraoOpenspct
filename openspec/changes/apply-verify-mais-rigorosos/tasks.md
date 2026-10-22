@@ -19,4 +19,4 @@
 ## Workflow follow-up
 
 - O registro do download e do teste no console da `v1.6.0` (change arquivada `commits-e-atualizacao-local`) entra neste PR.
-- Depois do merge, release `v1.7.0` com o `comecar.mjs` anexado. Esta change não altera script interativo, então não exige o teste no console.
+- Depois do merge, release `v1.8.0`, depois do merge da `coerencia-de-seguranca-e-triagem` e do rebase, com o `comecar.mjs` anexado. Esta change não altera script interativo, então não exige o teste no console.

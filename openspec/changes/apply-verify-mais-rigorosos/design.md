@@ -68,7 +68,7 @@ O apply já para com `Responsável: Pendente`, então nenhuma mudança é necess
 
 ### D6. Versão
 
-`1.7.0`. "Ações no projeto": "Nenhuma obrigatória. As regras novas do apply, do verify e do update chegam pelo PR de atualização."
+`1.8.0` (a `1.7.0` é da `coerencia-de-seguranca-e-triagem`, que entra antes). "Ações no projeto": "Nenhuma obrigatória. As regras novas do apply, do verify e do update chegam pelo PR de atualização."
 
 ## Raio de impacto
 
