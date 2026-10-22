@@ -13,7 +13,7 @@ related_changes: [subagentes-e-ganchos]
 
 A [ADR-0005](0005-regras-entregues-por-blocos-gerenciados.md) entrega as regras a qualquer agente como texto, em blocos gerenciados nos arquivos de instrução. Texto não impede o agente de descumprir uma regra. O Claude Code, onde o fluxo `/opsx:*` roda, oferece três mecanismos que impõem limites:
 
-- subagentes em `.claude/agents/` com `tools` e `model` próprios e hooks no frontmatter, que valem só enquanto o subagente roda;
+- subagentes em `.claude/agents/` com `tools` e `model` próprios (a documentação também prevê hooks no frontmatter, que valeriam só enquanto o subagente roda, mas eles não dispararam no Claude Code real; ver a Decisão);
 - hooks de sessão no `.claude/settings.json` (`PreToolUse`, `PostToolUse`, `Stop`), que podem negar uma ferramenta ou recusar o fim do turno;
 - permissões `allow`, `ask` e `deny` no mesmo arquivo, com `deny` avaliado antes de `ask` e de `allow`.
 

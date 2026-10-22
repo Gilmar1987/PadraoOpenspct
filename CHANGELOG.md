@@ -26,8 +26,9 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 
 ### Ações no projeto
 
-- Revise no PR de atualização o diff do `.claude/settings.json`: entram dois hooks e as permissões
-  `ask` e `deny`; as entradas do projeto não mudam.
+- Revise no PR de atualização o diff do `.claude/settings.json`: entram quatro hooks (dois de sessão
+  e dois de papel, que só agem nas chamadas dos subagentes do padrão) e as permissões `ask` e `deny`;
+  as entradas do projeto não mudam.
 - No Claude Code, marque a pasta do código como confiável para os hooks dos subagentes valerem, e
   siga o roteiro "Roteiro de verificação no Claude Code" do `docs/openspec-padrao.md`.
 

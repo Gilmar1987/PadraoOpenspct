@@ -118,9 +118,12 @@ export function shellCommands(command) {
       }
       quoted = true;
       index = index2;
-    } else if ((/\s/.test(char) && char !== '\n') || '(){}'.includes(char)) {
-      // Unquoted grouping characters only separate words: `(rm -rf x)` is the command `rm -rf x`.
+    } else if (/\s/.test(char) && char !== '\n') {
       endWord();
+    } else if ('(){}'.includes(char) && !(char === '{' && /[@$]$/.test(word)) && !(char === '}' && /[@$]\{[^}]*$/.test(word))) {
+      // Unquoted grouping characters start or end a command: `(rm x)`, `f() { rm x; }`, `$(rm x)` and
+      // `ForEach-Object { Remove-Item $_ }` each contain the command `rm`. `${VAR}` and `ref@{1}` stay words.
+      endCommand();
     } else if (char === ';' || char === '\n' || char === '|' || char === '&') {
       endCommand();
       if ((char === '|' || char === '&') && text[index + 1] === char) index += 1;

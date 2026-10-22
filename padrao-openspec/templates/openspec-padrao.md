@@ -75,7 +75,8 @@ chamadas dos que têm shell, um hook nega comandos que gravam arquivos ou altera
 do implementador, um hook nega a escrita fora do repositório e nos arquivos do padrão (`.claude/`,
 `.github/agents/`, `docs/openspec-*` e `.openspec-padrao.json`). Esses hooks ficam no
 `.claude/settings.json` e reconhecem o subagente pelo campo `agent_type` da chamada; o agente
-principal não é afetado.
+principal não é afetado. Uma sessão aberta com `claude --agent openspec-<papel>` assume o papel e
+passa a ter os mesmos limites.
 
 **Hooks de sessão** em `.claude/hooks/openspec-padrao/`, ligados pelo `.claude/settings.json`:
 
@@ -98,7 +99,7 @@ No `.claude/settings.json`, o instalador só mexe nas entradas dele: os hooks qu
 atualização do padrão pede `--update` ou `--in-place` e a põe de volta, e o PR de atualização mostra
 isso no diff. O instalador mantém a indentação, o fim de linha e o BOM do arquivo.
 
-Três avisos:
+Avisos:
 
 - **Confiança na pasta:** os hooks e as regras `allow` do projeto só valem depois que a pasta é marcada
   como confiável no Claude Code; `ask` e `deny` valem logo.
@@ -107,6 +108,9 @@ Três avisos:
   `$( )`) pode escapar. As regras
   de `docs/openspec-regras.md` continuam valendo.
 - **Outros agentes** não recebem esta camada; para eles valem os blocos de instrução e o portão.
+- **Versão:** os hooks de papel dependem do campo `agent_type`, que o Claude Code envia nas chamadas
+  de subagente; o roteiro abaixo foi validado no Claude Code 2.1.243. Sem esse campo, os hooks de papel
+  liberam tudo sem aviso: repita o passo 1 do roteiro no ambiente que o time usa (terminal, VS Code).
 
 ### Roteiro de verificação no Claude Code
 

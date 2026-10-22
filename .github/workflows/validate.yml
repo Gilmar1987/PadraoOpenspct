@@ -253,13 +253,16 @@ jobs:
           for cmd in 'echo x > a.txt' 'git push origin main' 'python -c "print(1)"' 'Set-Content a.txt x' \
                      'npm test && rm -rf dist' 'sed -i s/a/b/ f.txt' 'git -C . commit -m x' 'cat a | tee b' \
                      'cp a b' 'mkdir -p out' 'git pull' 'git branch -D feat' 'sed --in-place s/a/b/ f' \
-                     '(rm -rf x)' 'del x' 'env rm x' 'find . -delete' 'git config user.name x'; do
+                     '(rm -rf x)' 'del x' 'env rm x' 'find . -delete' 'git config user.name x' \
+                     'for f in *.tmp; do rm "$f"; done' 'if true; then rm x; fi' 'f() { rm x; }; f' '! rm x' \
+                     'xargs rm < lista' 'echo $(rm x)' 'Get-ChildItem | ForEach-Object { Remove-Item $_ }'; do
             expect deny somente-leitura.mjs "$(payload Bash command "$cmd" '' openspec-qa-validator)"
           done
           for cmd in 'git status' 'npm test' 'grep -rn "a > b" src' 'npm test 2>&1 | tail -5' \
                      'ls > /dev/null' 'git diff HEAD~1' 'openspec validate --all --strict' 'Get-Content a.txt' \
                      'python -m pytest -p no:cacheprovider' 'node -r ts-node/register x.ts' 'git stash list' \
-                     'git tag -l' 'echo x > /dev/stderr' 'git config --get user.name' 'npx playwright test'; do
+                     'git tag -l' 'echo x > /dev/stderr' 'git config --get user.name' 'npx playwright test' \
+                     'echo ${HOME}' 'git show stash@{0}' 'git tag --contains HEAD@{1}'; do
             expect allow somente-leitura.mjs "$(payload Bash command "$cmd" '' openspec-stage-reviewer)"
           done
           # Agente principal (sem agent_type) e outro subagente: o hook de papel não interfere.
@@ -479,7 +482,12 @@ jobs:
               && has("deny", "Bash(git reset --hard *)") && hooks.includes("echo projeto")
               && hooks.includes("cobra-evidencia.mjs") && hooks.includes("portao-do-archive.mjs")
               && hooks.includes("somente-leitura.mjs") && hooks.includes("escopo-de-escrita.mjs");
-            if (!ok) { console.error(JSON.stringify(s, null, 2)); process.exit(1); }' "$s"
+            // Cada script do padrão no matcher certo: um hook de papel no grupo errado nunca agiria.
+            const where = (script) => (s.hooks.PreToolUse || []).filter((g) => JSON.stringify(g.hooks).includes(script)).map((g) => g.matcher);
+            const placed = JSON.stringify(where("somente-leitura.mjs")) === JSON.stringify(["Bash|PowerShell"])
+              && JSON.stringify(where("portao-do-archive.mjs")) === JSON.stringify(["Bash|PowerShell"])
+              && JSON.stringify(where("escopo-de-escrita.mjs")) === JSON.stringify(["Edit|Write"]);
+            if (!ok || !placed) { console.error(JSON.stringify(s, null, 2)); process.exit(1); }' "$s"
           # A permissão que o projeto já tinha não vira do padrão.
           node -e '
             const m = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
@@ -532,6 +540,19 @@ jobs:
           test ! -e "$c/.claude/agents/openspec-task-planner.md"
           node "$rt/padrao-openspec/scripts/install-skills.mjs" "$c" > /dev/null
           rm -rf "$c" "$v" "$rt"
+          # Atualização a partir do formato anterior, com um hook do projeto no mesmo grupo do padrão:
+          # o hook do projeto fica, os do padrão vão para o lugar certo e a reinstalação não muda nada.
+          u="$(mktemp -d)"
+          git -C "$u" init -q
+          mkdir -p "$u/.claude"
+          printf '{\n  "hooks": {\n    "PreToolUse": [\n      { "matcher": "Bash|PowerShell", "hooks": [ { "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/portao-do-archive.mjs"] }, { "type": "command", "command": "echo meu-bash" } ] }\n    ]\n  }\n}\n' > "$u/.claude/settings.json"
+          node scripts/install-skills.mjs "$u" --in-place > /dev/null
+          grep -qF 'echo meu-bash' "$u/.claude/settings.json"
+          grep -qF 'escopo-de-escrita.mjs' "$u/.claude/settings.json"
+          cp "$u/.claude/settings.json" "$RUNNER_TEMP/misto.json"
+          node scripts/install-skills.mjs "$u" > /dev/null
+          cmp "$RUNNER_TEMP/misto.json" "$u/.claude/settings.json"
+          rm -rf "$u"
           # JSON inválido: erro e nada escrito.
           q="$(mktemp -d)"
           git -C "$q" init -q

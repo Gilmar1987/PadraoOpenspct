@@ -39,7 +39,12 @@ const inlineFlags = {
   powershell: ['-c', '-command', '-encodedcommand', '-ec'], pwsh: ['-c', '-command', '-encodedcommand', '-ec'],
   cmd: ['/c', '/k'],
 };
-const commandPrefixes = new Set(['sudo', 'env', 'nohup', 'time', 'command', 'nice', 'exec']);
+// Words that come before the command they run: privilege and environment wrappers, shell keywords
+// (`then rm x`, `do rm x`, `! rm x`) and runners that take the command as arguments (`xargs rm`).
+const commandPrefixes = new Set([
+  'sudo', 'env', 'nohup', 'time', 'command', 'nice', 'exec', 'xargs',
+  'then', 'do', 'else', 'elif', '!', '%', 'foreach-object',
+]);
 
 // Git subcommands that only read, or read in the forms allowed here.
 function gitWrites(args) {
@@ -59,7 +64,11 @@ function gitWrites(args) {
     case 'worktree': return rest[0] !== 'list';
     case 'stash': return !['list', 'show'].includes(rest[0]);
     case 'branch': return has('-d', '-D', '-m', '-M', '-c', '-C', '-f', '--delete', '--move', '--copy', '--force');
-    case 'tag': return has('-d', '--delete', '-a', '-s', '-f', '-m') || (positional.length > 0 && !has('-l', '--list'));
+    case 'tag': {
+      // Listing filters take a commit as their value: `git tag --contains HEAD@{1}` only reads.
+      const listing = has('-l', '--list', '-n', '--contains', '--no-contains', '--points-at', '--merged', '--no-merged', '--sort', '--format');
+      return has('-d', '--delete', '-a', '-s', '-f', '-m') || (positional.length > 0 && !listing);
+    }
     case 'config': return !has('--get', '--get-all', '--get-regexp', '--list', '-l');
     case 'remote': return ['add', 'remove', 'rm', 'rename', 'set-url', 'set-head', 'prune'].includes(rest[0]);
     default: return false;

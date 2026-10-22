@@ -13,7 +13,7 @@
 - Os seis agentes do Copilot (`spec-architect`, `task-planner`, `code-implementer`, `qa-validator`, `consistency-guardian` e `business-requirements-ingestor`) já descrevem limites ("não edite arquivos", "não corrija"). No Copilot eles têm `tools` restritas. No Claude Code, nada disso existe.
 - O apply manda usar a skill `requesting-code-review`, que despacha um subagente `general-purpose`, com todas as ferramentas.
 - Pela documentação do Claude Code (hooks, sub-agents, settings, permissions):
-  - o frontmatter de `.claude/agents/*.md` aceita `tools`, `disallowedTools`, `model` e `hooks`. Os hooks do frontmatter valem só enquanto o subagente roda, e um `Stop` ali vira `SubagentStop`;
+  - o frontmatter de `.claude/agents/*.md` aceita `tools`, `disallowedTools`, `model` e `hooks`. Pela documentação, os hooks do frontmatter valeriam só enquanto o subagente roda, mas no roteiro manual eles não dispararam (ver D2);
   - o `PreToolUse` recebe `tool_name` e `tool_input`, e pode negar a ferramenta;
   - o `Stop` recebe `stop_hook_active` e bloqueia com `{"decision":"block","reason":...}`;
   - as permissões são avaliadas na ordem `deny`, `ask`, `allow`;
@@ -26,7 +26,7 @@
 
 ## Architecture Decisions
 
-[ADR-0006](../../adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md) (`Proposed`): camada do Claude Code entregue por arquivos gerenciados e por entradas gerenciadas no `.claude/settings.json`. Ela estende a [ADR-0005](../../adrs/0005-regras-entregues-por-blocos-gerenciados.md) sem contradizê-la e segue a [ADR-0003](../../adrs/0003-padrao-sem-stack-embutida.md): nenhum hook depende da stack, e os comandos de verificação vêm do `project.md`. Ela é promovida a `Accepted` na revisão, antes do archive.
+[ADR-0006](../../adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md) (`Accepted` em 2026-10-22): camada do Claude Code entregue por arquivos gerenciados e por entradas gerenciadas no `.claude/settings.json`. Ela estende a [ADR-0005](../../adrs/0005-regras-entregues-por-blocos-gerenciados.md) sem contradizê-la e segue a [ADR-0003](../../adrs/0003-padrao-sem-stack-embutida.md): nenhum hook depende da stack, e os comandos de verificação vêm do `project.md`.
 
 ## Goals / Non-Goals
 
@@ -69,7 +69,7 @@
 
 ### D2. Hooks de papel
 
-Os scripts ficam em `.claude/hooks/openspec-padrao/` e são ligados pelo `.claude/settings.json`, como os hooks de sessão do D3. Cada um lê o JSON da entrada pelo stdin e só age quando o campo `agent_type` é um dos subagentes do seu papel; nas chamadas do agente principal e dos outros subagentes, termina sem saída. Quando age, responde no formato de `PreToolUse`: `permissionDecision: "deny"` com o motivo, ou nenhuma saída para liberar.
+Os scripts ficam em `.claude/hooks/openspec-padrao/` e são ligados pelo `.claude/settings.json`, como os hooks de sessão do D3. Cada um lê o JSON da entrada pelo stdin e só age quando o campo `agent_type` é um dos subagentes do seu papel; nas chamadas do agente principal e dos outros subagentes, termina sem saída. Uma sessão aberta com `--agent openspec-<papel>` recebe o `agent_type` do papel e, por isso, conta como o papel, o que é o comportamento desejado. Quando age, responde no formato de `PreToolUse`: `permissionDecision: "deny"` com o motivo, ou nenhuma saída para liberar.
 
 - **Por que no `settings.json` e não no frontmatter do subagente:** no roteiro manual de 2026-10-22, o hook declarado no frontmatter (forma `command` + `args`) não disparou no Claude Code real, enquanto o `Stop` do `settings.json`, na mesma forma, disparou. A documentação mostra a forma `args` só para o `settings.json` e documenta que `PreToolUse` de uma chamada de subagente recebe `agent_type`. O filtro pelo `agent_type` usa só o que está documentado.
 
@@ -94,8 +94,12 @@ Os scripts ficam em `.claude/hooks/openspec-padrao/` e são ligados pelo `.claud
   "hooks": {
     "Stop": [{ "hooks": [{ "type": "command", "command": "node",
       "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/cobra-evidencia.mjs"] }] }],
-    "PreToolUse": [{ "matcher": "Bash|PowerShell", "hooks": [{ "type": "command", "command": "node",
-      "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/portao-do-archive.mjs"] }] }]
+    "PreToolUse": [
+      { "matcher": "Bash|PowerShell", "hooks": [
+        { "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/portao-do-archive.mjs"] },
+        { "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/somente-leitura.mjs"] }] },
+      { "matcher": "Edit|Write", "hooks": [
+        { "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/escopo-de-escrita.mjs"] }] }]
   }
 }
 ```
