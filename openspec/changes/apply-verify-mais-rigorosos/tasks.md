@@ -16,7 +16,8 @@
 
 ## 3. Regras, config e integração
 
-- [ ] 3.1 Aplicar o D4 no `rules.md` e no `config.yaml` e regenerar a raiz com `sync-root.mjs`. Verificar com `sync-root --check` em dia e o passo "Config base carrega sem avisos" passando (ele confere que as regras de `tasks` aparecem nas instruções).
+- [x] 3.1 Aplicar o D4 no `rules.md` e no `config.yaml` e regenerar a raiz com `sync-root.mjs`. Verificar com `sync-root --check` em dia e o passo "Config base carrega sem avisos" passando (ele confere que as regras de `tasks` aparecem nas instruções).
+  - Evidência: `rules.md` com a correção urgente por change (seção 2) e as contagens vindas do CLI (seção 7); `config.yaml` com a regra de tasks das dependências do Impact; `sync-root.mjs` → "Synced 1 paths.", `--check` → em dia; `[PASS]` em "Config base carrega sem avisos" (a regra nova aparece nas instruções), "Lint de Markdown" e "Smoke test dos blocos de agentes" (as regras entregues aos projetos seguem iguais à fonte).
 - [ ] 3.2 Aplicar o D5 no README e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint nos dois lugares sem issues e o passo "Versão e changelog" passando.
 - [ ] 3.3 Rodar os comandos de verificação do `openspec/project.md` localmente e, no PR, conferir os três jobs (`store (ubuntu-latest)`, `store (windows-latest)` e `root`). Verificar que todos passam.
 

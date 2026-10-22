@@ -50,6 +50,7 @@ rules:
     - Cada tarefa deve informar um critério objetivo de conclusão ou validação
     - Incluir tarefas explícitas para cada mitigação de risco do design e para criar ou atualizar as ADRs indicadas
     - Citar em cada tarefa os arquivos que ela toca
+    - Toda dependência citada no Impact do proposal precisa aparecer numa tarefa
     - Em cada grupo, a tarefa que cria ou atualiza os testes dos cenários vem antes da tarefa que implementa o comportamento
     - Tarefas que dependem de push, PR ou CI remoto só entram quando o project.md registra um remoto; sem ele, a tarefa usa a verificação local equivalente e diz qual é
 
