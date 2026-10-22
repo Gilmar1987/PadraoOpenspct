@@ -8,18 +8,11 @@
 // The repository root is the Git top level of the payload's cwd, so a subagent working in a
 // worktree is scoped to that worktree (CLAUDE_PROJECT_DIR keeps pointing at the main checkout).
 
-import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-import { deny, readPayload } from './comum.mjs';
+import { deny, readPayload, repositoryRoot } from './comum.mjs';
 
 const hookName = 'escopo-de-escrita';
 const caseInsensitive = process.platform === 'win32';
-
-function repositoryRoot(cwd) {
-  const result = spawnSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8' });
-  if (result.status === 0 && result.stdout.trim()) return path.resolve(result.stdout.trim());
-  return path.resolve(process.env.CLAUDE_PROJECT_DIR || cwd);
-}
 
 function normalize(value) {
   const forward = value.split(path.sep).join('/').replace(/\\/g, '/');
@@ -39,7 +32,7 @@ const input = payload?.tool_input ?? {};
 const target = input.file_path ?? input.notebook_path;
 if (typeof target === 'string' && target) {
   const cwd = typeof payload.cwd === 'string' && payload.cwd ? payload.cwd : process.cwd();
-  const root = repositoryRoot(cwd);
+  const root = repositoryRoot(cwd) ?? path.resolve(process.env.CLAUDE_PROJECT_DIR || cwd);
   const absolute = path.resolve(cwd, target.replace(/\\/g, '/'));
   const relative = normalize(path.relative(root, absolute));
   if (relative === '' || relative.startsWith('../') || relative === '..' || path.isAbsolute(relative)) {
