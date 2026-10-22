@@ -72,6 +72,7 @@ jobs:
           node --check scripts/sync-root.mjs
           node --check scripts/changelog-range.mjs
           node --check scripts/comecar.mjs
+          node --check scripts/portao.mjs
           # No Windows o Python se chama python e pode não ter o PyYAML.
           py="$(command -v python3 || command -v python)"
           if ! "$py" -c 'import yaml' 2>/dev/null; then
@@ -79,6 +80,7 @@ jobs:
             "$py" -m pip install -q 'pyyaml==6.*' || "$py" -m pip install -q --user --break-system-packages 'pyyaml==6.*'
           fi
           "$py" -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' templates/openspec-padrao-update.yml
+          "$py" -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' ../.github/workflows/release.yml
 
       # VERSION é a versão do padrão; a primeira seção do CHANGELOG da raiz tem de ser ela,
       # com "O que mudou" e "Ações no projeto" (ADR-0004).
@@ -141,6 +143,7 @@ jobs:
             check "$f" "Push only on explicit request"
             check "$f" "Security checks"
             check "$f" "Request code review"
+            check "$f" "Run the gate"
             check "$f" "Unrequested fixes are scope"
             check "$f" "Check the library API"
             check "$f" "Revalidate requirements after a version change"
@@ -167,6 +170,7 @@ jobs:
             check "$f" "offer to update now"
             check "$f" "Check the archive authorization"
             check "$f" "Commit the archive"
+            check "$f" "Run the gate"
           done
           for f in .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
             check "$f" "Scope change resets approval"
@@ -535,6 +539,56 @@ jobs:
           expected="$(cd "$work/b/ci-drive-openspec/padrao-openspec" && node -p 'require("fs").realpathSync.native(process.cwd())')"
           test "$resolved" = "$expected"
           openspec store unregister ci-drive
+
+      # Portão (docs/openspec-portao.mjs): resposta determinística, para qualquer agente, sobre
+      # escrever código (apply) e arquivar (archive); o hook commit-msg é opcional.
+      - name: Smoke test do portão
+        run: |
+          trap 'openspec store unregister ci-portao >/dev/null 2>&1 || true' EXIT
+          export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
+          work="$(mktemp -d)"
+          mkdir -p "$work/repo" "$work/code"
+          cp -r . "$work/repo/padrao-openspec"
+          git -C "$work/repo" init -q
+          git -C "$work/code" init -q
+          node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --register-id ci-portao --yes > /dev/null
+          cmp "$work/code/docs/openspec-portao.mjs" scripts/portao.mjs
+          ch="$work/repo/padrao-openspec/openspec/changes/ci-change"
+          mkdir -p "$ch"
+          proposal() { printf '# Proposal\n\n## Why\n\nTeste.\n\n## Aprovação\n\n- Responsável: %s\n- Data: %s\n- Escopo: %s\n- Condições: —\n- Origem: %s\n' "$@" > "$ch/proposal.md"; }
+          gate() { (cd "$work/code" && node docs/openspec-portao.mjs "$@"); }
+          printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [ ] 1.2 b\n' > "$ch/tasks.md"
+          # Aprovação pendente: apply bloqueia (1), também em JSON.
+          proposal Pendente — — —
+          if gate apply ci-change > "$RUNNER_TEMP/portao1.txt"; then exit 1; fi
+          grep -qiF 'pendente' "$RUNNER_TEMP/portao1.txt"
+          out="$(gate apply ci-change --json || true)"
+          grep -qF '"ok":false' <<< "$out"
+          # Aprovação completa para apply: libera o apply e bloqueia o archive.
+          proposal ci 2026-10-22 apply '"Aprovo"'
+          gate apply ci-change
+          if gate archive ci-change; then exit 1; fi
+          # Escopo archive, mas tarefa pendente e sem verification.md: bloqueia citando as duas faltas.
+          proposal ci 2026-10-22 archive '"Aprovo para archive"'
+          if gate archive ci-change > "$RUNNER_TEMP/portao2.txt"; then exit 1; fi
+          grep -qF 'tarefa' "$RUNNER_TEMP/portao2.txt"
+          grep -qF 'verification.md' "$RUNNER_TEMP/portao2.txt"
+          # Tudo pronto, mas a change tem commit de código e falta o review.md.
+          printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [x] 1.2 b\n' > "$ch/tasks.md"
+          printf '# Verificações\n' > "$ch/verification.md"
+          git -C "$work/code" commit -q --allow-empty -m "feat: x" -m "OpenSpec-Change: ci-change"
+          if gate archive ci-change > "$RUNNER_TEMP/portao3.txt"; then exit 1; fi
+          grep -qF 'review.md' "$RUNNER_TEMP/portao3.txt"
+          printf '# Revisão\n' > "$ch/review.md"
+          gate archive ci-change
+          # Change inexistente: erro de ambiente (2).
+          set +e; gate apply nao-existe; status=$?; set -e
+          test "$status" -eq 2
+          # Hook opcional: recusa commit de change não aprovada e libera commit sem trailer.
+          proposal Pendente — — —
+          gate instalar-hook
+          if git -C "$work/code" commit -q --allow-empty -m "feat: y" -m "OpenSpec-Change: ci-change"; then exit 1; fi
+          git -C "$work/code" commit -q --allow-empty -m "chore: sem trailer"
 
       # Regras do padrão entregues ao código por blocos gerenciados (ADR-0005): o conteúdo fora dos
       # marcadores fica intacto, a reinstalação não duplica e um bloco quebrado faz o instalador parar.

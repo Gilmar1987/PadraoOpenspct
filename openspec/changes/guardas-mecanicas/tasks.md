@@ -2,11 +2,13 @@
 
 ## 1. Testes na CI
 
-- [ ] 1.1 Aplicar o D6 no `validate.yml` (sintaxe, "Smoke test do portão" e "Run the gate" nos trechos customizados). Verificar rodando os passos no Git Bash: devem falhar.
+- [x] 1.1 Aplicar o D6 no `validate.yml` (sintaxe, "Smoke test do portão" e "Run the gate" nos trechos customizados). Verificar rodando os passos no Git Bash: devem falhar.
+  - Evidência: no Git Bash, `[FAIL (1)] Sintaxe dos scripts` (sem `portao.mjs` e `release.yml`), `[FAIL (1)] Trechos customizados das skills` ("Run the gate" ausente) e `[FAIL (2)] Smoke test do portão` (exit diferente de 0, esperado); nenhum id `ci-portao` ficou registrado.
 
 ## 2. Portão
 
-- [ ] 2.1 Criar `padrao-openspec/scripts/portao.mjs` conforme o D1 e entregá-lo pelo instalador. Verificar com o "Smoke test do portão" e os smoke tests do instalador passando no Git Bash.
+- [x] 2.1 Criar `padrao-openspec/scripts/portao.mjs` conforme o D1 e entregá-lo pelo instalador. Verificar com o "Smoke test do portão" e os smoke tests do instalador passando no Git Bash.
+  - Evidência: `portao.mjs` (apply, archive, `--json`, `--store`, `instalar-hook`, `commit-msg`) entregue como `docs/openspec-portao.mjs` por `templateFiles`. No Git Bash, `[PASS] Smoke test do portão`: pendente → bloqueia (texto e `"ok":false`); aprovação de apply → libera o apply e bloqueia o archive; escopo archive com tarefa pendente e sem `verification.md` → bloqueia citando as duas; commit `OpenSpec-Change:` sem `review.md` → bloqueia; com ele → "✔ liberado"; change inexistente → código 2; hook recusa o commit da change pendente e aceita o sem trailer. `[PASS]` nos smoke tests do instalador, do setup (três), da declaração do store, do script de entrada e dos blocos de agentes. O `ci-store` deixado pelo teste da declaração do store (anterior a esta change, sem `trap`) foi removido à mão.
 
 ## 3. Fluxos, bloco e regras
 
