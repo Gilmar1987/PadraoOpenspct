@@ -4,6 +4,32 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.10.0 — 2026-10-22
+
+### O que mudou
+
+- **Subagentes do Claude Code:** oito papéis em `.claude/agents/openspec-*.md`, com ferramentas e
+  modelo próprios. Os de veredito (arquiteto de spec, planejador, guardião de consistência, ingestor,
+  validador de QA, revisor de etapa e revisor de código) não editam arquivos e devolvem achados com
+  evidência. O `openspec-stage-reviewer` roda os Comandos de verificação e devolve só as falhas, e o
+  `openspec-code-reviewer` passa a ser usado pela skill `requesting-code-review`.
+- **Hooks:** nos subagentes de veredito, um hook nega comandos que gravam arquivos ou alteram o Git;
+  no implementador, um hook nega escrita fora do repositório e nos arquivos do padrão. Na sessão, o
+  fim do turno é recusado uma vez quando há tarefa marcada sem `Evidência:`, e `openspec archive`
+  passa pelo portão ou pede confirmação.
+- **Permissões:** `git push`, `gh pr create`, `gh release` e `openspec archive` pedem confirmação;
+  `git push --force`, `git push -f` e `git reset --hard` são negados.
+- **Instalador:** entrega os subagentes e os hooks e mantém no `.claude/settings.json` só as entradas
+  do padrão, registradas em `managedSettings` no manifesto
+  ([ADR-0006](openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)).
+
+### Ações no projeto
+
+- Revise no PR de atualização o diff do `.claude/settings.json`: entram dois hooks e as permissões
+  `ask` e `deny`; as entradas do projeto não mudam.
+- No Claude Code, marque a pasta do código como confiável para os hooks dos subagentes valerem, e
+  siga o roteiro "Roteiro de verificação no Claude Code" do `docs/openspec-padrao.md`.
+
 ## 1.9.0 — 2026-10-22
 
 ### O que mudou

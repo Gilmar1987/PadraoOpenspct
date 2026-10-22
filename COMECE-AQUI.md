@@ -226,7 +226,7 @@ arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx
 
 | Agente | Arquivo que lê | Como rodar o fluxo |
 |---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`) | Comandos `/opsx:*` |
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` |
 | Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
 | GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
 | Gemini CLI | `GEMINI.md` | Idem |
@@ -311,6 +311,10 @@ O registro vale para esta máquina: cada dev faz o passo 3 uma vez.
 | Registrei a pasta do store sem o `\padrao-openspec` | `openspec store unregister <id>` e registre de novo com `\padrao-openspec` no fim |
 | `/opsx` não aparece no Claude Code | Quase sempre o Claude Code foi aberto numa pasta acima do código. Abra a pasta do código como pasta do workspace (File → Open Folder) e uma conversa nova. Se a pasta certa já está aberta, o código não tem `.claude/` commitado: peça ao tech lead para commitar o que o setup instalou |
 | O setup recusa `--stack` | A opção foi removida; a stack vem do `/opsx:init` |
+| O Claude Code negou um comando com "Papel somente leitura" | Um subagente de revisão tentou gravar algo. É o esperado: ele devolve o achado e quem corrige é o agente principal |
+| O turno não encerra e o agente cita "Tarefas marcadas sem a linha Evidência" | Acrescente a linha `Evidência:` a cada tarefa citada, ou desmarque a que não foi verificada. O hook bloqueia uma vez só |
+| O Claude Code pede confirmação para `git push`, `gh pr create`, `gh release` ou `openspec archive` | São permissões do padrão no `.claude/settings.json`. Confirme só o que você pediu; veja [Camada do Claude Code](padrao-openspec/templates/openspec-padrao.md#camada-do-claude-code) |
+| O instalador recusa `.claude/settings.json` ("is not valid JSON") ou um `.claude/agents/openspec-*.md` | Corrija o JSON à mão, ou renomeie o agente do projeto: o prefixo `openspec-` é do padrão. Nada foi alterado |
 | Gerador de projeto recusa a pasta | Rode o gerador numa pasta temporária e copie os arquivos para o repositório de código |
 | O CLI está muito lento (Windows) | Veja [Desempenho e ambiente](README.md#desempenho-e-ambiente) |
 | O instalador pede `--update` ou `--in-place` | Com a árvore limpa, rode `node <pasta-do-store>\padrao-openspec\scripts\install-skills.mjs <pasta-do-codigo> --update` para receber a atualização numa branch própria (o setup não aceita essa opção) |

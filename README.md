@@ -88,7 +88,7 @@ node C:\openspec\livraria-openspec\padrao-openspec\scripts\setup-project.mjs `
 
 O setup:
 
-- instala no repositório de código as skills em `.agents/skills/` e `.claude/skills/` (padrão `--target both`), os comandos `/opsx:*` em `.claude/commands/opsx/` e os subagentes em `.github/agents/`;
+- instala no repositório de código as skills em `.agents/skills/` e `.claude/skills/` (padrão `--target both`), os comandos `/opsx:*` em `.claude/commands/opsx/`, os subagentes do Copilot em `.github/agents/` e os do Claude Code em `.claude/agents/`, com os hooks em `.claude/hooks/openspec-padrao/` e as entradas do padrão no `.claude/settings.json`;
 - grava o nome do projeto em `<projeto>-openspec\padrao-openspec\openspec\project.md`, sem mexer no resto do `project.md` nem no `config.yaml`, que continuam neutros até o `/opsx:init`;
 - acrescenta ao `.gitignore` do repositório de código um bloco que ignora o conteúdo local de `openspec/`, mas mantém no git o `openspec/config.yaml` com a declaração do store (commite esse arquivo);
 - registra o store nesta máquina, grava `store: <projeto>` em `openspec/config.yaml` do repositório de código e confirma que o OpenSpec CLI encontra o store a partir dele.
@@ -187,6 +187,25 @@ Fonte em `padrao-openspec/.github/agents/`, espelhados em `.github/agents/`:
 | `consistency-guardian` | Detecta contradições, duplicações e ambiguidades entre changes e specs |
 | `business-requirements-ingestor` | Extrai objetivos, atores e regras de materiais de negócio |
 
+## Subagentes e hooks do Claude Code
+
+Fonte em `padrao-openspec/.claude/agents/` e `padrao-openspec/.claude/hooks/openspec-padrao/`, com as entradas do
+`.claude/settings.json` em `padrao-openspec/templates/claude-settings.json`
+([ADR-0006](openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)). Cada papel do Copilot tem um
+subagente `openspec-<papel>` (o `business-requirements-ingestor` vira `openspec-requirements-ingestor`), e a CI
+confere a paridade. Dois papéis existem só no Claude Code:
+
+| Subagente | Responsabilidade |
+|---|---|
+| `openspec-stage-reviewer` | Roda os Comandos de verificação do `project.md` e devolve só as falhas |
+| `openspec-code-reviewer` | Revisa, somente leitura, o intervalo de commits da change; usado pela skill `requesting-code-review` |
+
+Os papéis de veredito não têm `Edit` nem `Write`. Os hooks de papel (`somente-leitura.mjs`,
+`escopo-de-escrita.mjs`) ficam no frontmatter do subagente e valem só enquanto ele roda; os de sessão
+(`cobra-evidencia.mjs` no `Stop`, `portao-do-archive.mjs` no `PreToolUse`) ficam no `settings.json`. Todos são
+heurísticos: o detalhe e o roteiro de verificação manual estão em
+[`templates/openspec-padrao.md`](padrao-openspec/templates/openspec-padrao.md#camada-do-claude-code).
+
 ---
 
 ## Regras globais de agentes
@@ -231,7 +250,9 @@ padrao-openspec/
 │   ├── changes/          # Changes ativas e arquivadas
 │   └── adrs/             # Decisões de arquitetura duradouras
 ├── .claude/
+│   ├── agents/           # Subagentes do Claude Code por papel
 │   ├── commands/opsx/    # Slash commands /opsx:*
+│   ├── hooks/            # Hooks do Claude Code (openspec-padrao/)
 │   └── skills/           # Skills instaladas no repositório de código
 ├── .github/agents/       # Subagentes VS Code/Copilot
 └── scripts/              # setup-project, install-skills, sync-root

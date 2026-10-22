@@ -51,6 +51,70 @@ resolvido: rode na pasta deste repositório ou passe `--store <id>`). Os fluxos 
 `/opsx:archive` rodam o portão sozinhos. Para recusar também commits `OpenSpec-Change: <change>` de
 changes não aprovadas, rode uma vez `node docs/openspec-portao.mjs instalar-hook`.
 
+## Camada do Claude Code
+
+No Claude Code, o padrão também impõe limites por mecanismo, e não só por instrução
+([ADR-0006](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)).
+
+**Subagentes** em `.claude/agents/openspec-*.md`, um por papel, com ferramentas e modelo próprios:
+
+| Subagente | Ferramentas | Papel |
+|---|---|---|
+| `openspec-spec-architect` | leitura | Analisa specs e impactos e prepara drafts de proposal, specs e design |
+| `openspec-task-planner` | leitura | Deriva o checklist de tarefas dos artefatos aprovados |
+| `openspec-consistency-guardian` | leitura | Aponta contradições e duplicações entre changes, specs e ADRs |
+| `openspec-requirements-ingestor` | leitura | Extrai requisitos de atas e documentos de negócio |
+| `openspec-qa-validator` | leitura e shell somente leitura | Valida a change antes do archive |
+| `openspec-stage-reviewer` | leitura e shell somente leitura | Roda os Comandos de verificação e devolve só as falhas |
+| `openspec-code-reviewer` | leitura e shell somente leitura | Revisa o intervalo de commits da change (passo 6a do apply) |
+| `openspec-code-implementer` | leitura, edição e shell | Implementa as tarefas aprovadas |
+
+Os de veredito não têm ferramenta de edição e devolvem achados com evidência, sem corrigir. Nos que
+têm shell, um hook nega comandos que gravam arquivos ou alteram o Git (redirecionamento, `tee`,
+`sed -i`, código inline, `git commit`, `git push`, `rm`, `mv`). No implementador, um hook nega a
+escrita fora do repositório e nos arquivos do padrão (`.claude/`, `.github/agents/`, `docs/openspec-*`
+e `.openspec-padrao.json`).
+
+**Hooks de sessão** em `.claude/hooks/openspec-padrao/`, ligados pelo `.claude/settings.json`:
+
+- **Fim do turno:** se uma change ativa tem tarefa marcada sem a linha `Evidência:` logo abaixo, o
+  turno não encerra uma vez, e o agente recebe a lista das tarefas. Uma falha de ambiente (CLI ausente,
+  store não resolvido) nunca bloqueia.
+- **`openspec archive <change>`:** roda o portão (`docs/openspec-portao.mjs archive <change>`) e nega o
+  comando com os motivos quando ele bloqueia. Sem o portão, pede a sua confirmação.
+
+**Permissões:** `git push`, `gh pr create`, `gh release` e `openspec archive` pedem a sua confirmação;
+`git push --force`, `git push -f` e `git reset --hard` são negados. O padrão não acrescenta nada em
+`allow`.
+
+No `.claude/settings.json`, o instalador só mexe nas entradas dele: os hooks que apontam para
+`.claude/hooks/openspec-padrao/` e as permissões listadas em `managedSettings` no
+`.openspec-padrao.json`. Para desligar uma entrada, apague-a do arquivo; a próxima atualização do
+padrão a põe de volta, e o PR de atualização mostra isso no diff.
+
+Três avisos:
+
+- **Confiança na pasta:** os hooks dos subagentes de projeto e as regras `allow` só valem depois que a
+  pasta é marcada como confiável no Claude Code; `ask` e `deny` valem logo.
+- **Limite:** os hooks e as permissões são heurísticas sobre o texto do comando, não uma sandbox. Um
+  comando por outro caminho (`sh -c`, caminho absoluto de outro interpretador) pode escapar. As regras
+  de `docs/openspec-regras.md` continuam valendo.
+- **Outros agentes** não recebem esta camada; para eles valem os blocos de instrução e o portão.
+
+### Roteiro de verificação no Claude Code
+
+Depois de instalar ou atualizar o padrão, confira num repositório de teste, com uma conversa nova:
+
+1. Peça ao agente que despache o `openspec-qa-validator` e que ele rode `echo ok > teste.txt`. O
+   comando deve ser negado com "Papel somente leitura".
+2. Numa change de teste, marque uma tarefa sem a linha `Evidência:` e deixe o agente encerrar o turno.
+   O turno deve continuar uma vez, citando a tarefa.
+3. Peça `openspec archive <change de teste>`. Com o portão, o comando deve ser negado com os motivos;
+   sem ele, o Claude Code deve pedir confirmação.
+
+Registre quem executou, quando e o resultado de cada passo no `verification.md` da change que mexeu
+nesta camada.
+
 ## Usar com outros agentes
 
 As regras do padrão chegam a este repositório como `docs/openspec-regras.md`. Cada agente as recebe por
@@ -60,7 +124,7 @@ deles.
 
 | Agente | Arquivo que lê | Como rodar o fluxo |
 |---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`) | Comandos `/opsx:*` |
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` |
 | Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
 | GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
 | Gemini CLI | `GEMINI.md` | Idem |
