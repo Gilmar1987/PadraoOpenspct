@@ -31,7 +31,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 **2. Dispatch code reviewer subagent:**
 
-Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md](code-reviewer.md)
+Dispatch the `openspec-code-reviewer` subagent when `.claude/agents/openspec-code-reviewer.md` exists in the repository: it has read-only tools, and a hook denies shell commands that write, so the review cannot change what it reviews. Otherwise dispatch a `general-purpose` subagent. Either way, fill the template at [code-reviewer.md](code-reviewer.md)
 
 **Placeholders:**
 - `{DESCRIPTION}` - Brief summary of what you built

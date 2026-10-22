@@ -164,6 +164,8 @@ jobs:
             check "$f" "Dependencies in Impact"
             check "$f" "Agent-run browser scripts"
           done
+          # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
+          check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
             check "$f" "Standard version check"
@@ -192,6 +194,83 @@ jobs:
           check "$f" '3.6 é "0) Sem autenticação no MVP" (ou um "Outro" equivalente)'
           check "$f" "leve a restrição de uso"
           exit $missing
+
+      - name: Paridade de papéis
+        run: |
+          # Cada agente do Copilot tem um subagente do Claude Code (ADR-0006). Os papéis de veredito
+          # não têm Edit nem Write.
+          missing=0
+          declare -A alias=([business-requirements-ingestor]=requirements-ingestor)
+          only_claude=" stage-reviewer code-reviewer requirements-ingestor "
+          for f in .github/agents/*.agent.md; do
+            role=$(basename "$f" .agent.md)
+            role=${alias[$role]:-$role}
+            if [ ! -f ".claude/agents/openspec-$role.md" ]; then
+              echo "::error file=padrao-openspec/$f::Falta o subagente .claude/agents/openspec-$role.md"
+              missing=1
+            fi
+          done
+          found=0
+          for f in .claude/agents/openspec-*.md; do
+            [ -f "$f" ] || continue
+            found=1
+            role=$(basename "$f" .md)
+            role=${role#openspec-}
+            case "$only_claude" in *" $role "*) ;; *)
+              if [ ! -f ".github/agents/$role.agent.md" ]; then
+                echo "::error file=padrao-openspec/$f::Papel sem agente do Copilot e fora das exceções: $role"
+                missing=1
+              fi ;;
+            esac
+            if [ "$role" != code-implementer ] && grep -E '^tools:' "$f" | grep -qE '(^|[^A-Za-z])(Edit|Write)([^A-Za-z]|$)'; then
+              echo "::error file=padrao-openspec/$f::Papel de veredito com Edit ou Write"
+              missing=1
+            fi
+          done
+          if [ "$found" = 0 ]; then
+            echo "::error::Nenhum subagente em .claude/agents/"
+            missing=1
+          fi
+          exit $missing
+
+      - name: Smoke test dos hooks do Claude Code
+        run: |
+          # Cada hook recebe um payload JSON simulado no stdin (ADR-0006). "deny"/"ask" na saída
+          # nega ou pede confirmação; saída vazia libera.
+          h=.claude/hooks/openspec-padrao
+          for f in "$h"/*.mjs; do node --check "$f"; done
+          fail=0
+          payload() { node -e 'const [tool, key, value, cwd] = process.argv.slice(1); const p = { tool_name: tool, tool_input: { [key]: value } }; if (cwd) p.cwd = cwd; process.stdout.write(JSON.stringify(p));' "$@"; }
+          expect() {
+            local want="$1" hook="$2" json="$3" out
+            out=$(printf '%s' "$json" | node "$h/$hook")
+            case "$want" in
+              allow) [ -z "$out" ] || { echo "::error::$hook deveria liberar: $json -> $out"; fail=1; } ;;
+              *) case "$out" in *"\"$want\""*) ;; *) echo "::error::$hook deveria responder $want: $json -> $out"; fail=1 ;; esac ;;
+            esac
+          }
+          # somente-leitura.mjs
+          for cmd in 'echo x > a.txt' 'git push origin main' 'python -c "print(1)"' 'Set-Content a.txt x' \
+                     'npm test && rm -rf dist' 'sed -i s/a/b/ f.txt' 'git -C . commit -m x' 'cat a | tee b'; do
+            expect deny somente-leitura.mjs "$(payload Bash command "$cmd")"
+          done
+          for cmd in 'git status' 'npm test' 'grep -rn "a > b" src' 'npm test 2>&1 | tail -5' \
+                     'ls > /dev/null' 'git diff HEAD~1' 'openspec validate --all --strict' 'Get-Content a.txt'; do
+            expect allow somente-leitura.mjs "$(payload Bash command "$cmd")"
+          done
+          expect allow somente-leitura.mjs 'isto não é JSON'
+          # escopo-de-escrita.mjs, num repositório temporário
+          repo=$(mktemp -d)
+          git -C "$repo" init -q
+          repo_native=$(cygpath -m "$repo" 2>/dev/null || echo "$repo")
+          for target in .claude/settings.json docs/openspec-regras.md .openspec-padrao.json ../fora.txt .github/agents/x.agent.md; do
+            expect deny escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native")"
+          done
+          for target in src/app.ts 'src\app.ts' "$repo_native/README.md" docs/guia.md; do
+            expect allow escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native")"
+          done
+          rm -rf "$repo"
+          exit $fail
 
       - name: Smoke test do instalador
         run: |
