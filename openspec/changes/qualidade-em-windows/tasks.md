@@ -14,4 +14,4 @@
 
 ## Workflow follow-up
 
-- Depois do merge, conferir se alguma regra de proteção da `main` exige o nome antigo `store` e atualizá-la para os dois nomes novos.
+- Proteção da `main`: conferido em 2026-10-22 que não há regra de proteção nem ruleset; nada a atualizar.
