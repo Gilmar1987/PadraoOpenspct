@@ -18,6 +18,6 @@
 ## 4. Versão, documentação e integração
 
 - [x] 4.1 Aplicar o D4 em `padrao-openspec/VERSION` e `CHANGELOG.md`. Verificar com o passo "Versão e changelog" passando localmente.
-  - Evidência: `VERSION` = 1.6.0 e seção `## 1.6.0` no topo do CHANGELOG; `run-ci-steps.py ... "Versão e changelog" "changelog-range"` → os dois PASS (exit 0)
+  - Evidência: `VERSION` = 1.6.0 e seção `## 1.6.0` no topo do CHANGELOG; `run-ci-steps.py ... "Versão e changelog" "changelog-range"` → os dois PASS (exit 0). Depois do rebase na `main` 1.6.0 (PR #25), a versão passou a 1.7.0, com a seção `## 1.7.0` acima da `1.6.0`
 - [x] 4.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos do job `store` localmente. Verificar que todos saem com código 0.
   - Evidência: main sem commits novos, sem rebase; `sync-root.mjs --check` → em dia (exit 0); `openspec validate --all --strict` na raiz → 17 passed (exit 0) e em `padrao-openspec/` → nada a validar (exit 0); `run-ci-steps.py validate.yml store .` → 18/18 PASS, lint incluído (exit 0); passos da raiz "Raiz em dia", "Lint de Markdown da raiz" e "Guia de primeiros passos" → PASS (exit 0); store `ci-store` do smoke removido depois

@@ -70,8 +70,8 @@ As linhas de contagem não mudam; o `flow-metrics.mjs` continua lendo só elas.
 
 ### D4. Versão e CHANGELOG
 
-- `padrao-openspec/VERSION`: `1.6.0`.
-- `CHANGELOG.md`: seção `## 1.6.0` no topo, acima da `1.5.0`, com "O que mudou" (D1 a D3) e "Ações no projeto": rever no `project.md` do store as respostas "Não aplicável" para auditoria de dependências e varredura de secrets e, se o projeto trata dados pessoais sem autenticação, registrar a restrição de uso em "Key Constraints".
+- `padrao-openspec/VERSION`: `1.7.0`.
+- `CHANGELOG.md`: seção `## 1.7.0` no topo, acima da `1.6.0`, com "O que mudou" (D1 a D3) e "Ações no projeto": rever no `project.md` do store as respostas "Não aplicável" para auditoria de dependências e varredura de secrets e, se o projeto trata dados pessoais sem autenticação, registrar a restrição de uso em "Key Constraints".
 
 ### D5. CI
 
@@ -94,7 +94,7 @@ O passo "Trechos customizados das skills" exige "External report triage" na skil
 
 ## Migration Plan
 
-Projetos existentes recebem as skills novas pelo PR de atualização (`1.6.0`) e fazem as "Ações no projeto" do CHANGELOG. Rollback: reverter os commits e voltar o `VERSION` para `1.5.0`.
+Projetos existentes recebem as skills novas pelo PR de atualização (`1.7.0`) e fazem as "Ações no projeto" do CHANGELOG. Rollback: reverter os commits e voltar o `VERSION` para `1.6.0`.
 
 ## Open Questions
 
