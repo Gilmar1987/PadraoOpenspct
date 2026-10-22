@@ -13,7 +13,7 @@ O instalador SHALL entregar ao repositório de código as regras globais do padr
 
 ### Requirement: Blocos gerenciados nos arquivos de instrução dos agentes
 
-O instalador SHALL manter, em `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md` e nos arquivos de regras de projeto de Windsurf e Amazon Q, um bloco delimitado por `<!-- BEGIN:openspec-padrao -->` e `<!-- END:openspec-padrao -->` que manda ler `docs/openspec-regras.md` e explica como seguir os comandos `/opsx:*`. Fora dos marcadores, o instalador MUST NOT alterar esses arquivos.
+O instalador SHALL manter, em `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md` e `.amazonq/rules/openspec-padrao.md`, um bloco delimitado por `<!-- BEGIN:openspec-padrao -->` e `<!-- END:openspec-padrao -->` que manda ler `docs/openspec-regras.md` e explica como seguir os comandos `/opsx:*`. Fora dos marcadores, o instalador MUST NOT alterar esses arquivos.
 
 #### Scenario: AGENTS.md com conteúdo de outro gerador
 

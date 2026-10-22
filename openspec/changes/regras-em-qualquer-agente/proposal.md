@@ -15,7 +15,7 @@ O padrão funciona com qualquer stack, mas com agentes só em parte. Ao olhar o 
   - o instalador entrega as regras ao código como `docs/openspec-regras.md`, um arquivo gerenciado.
 - **Blocos gerenciados nos arquivos de instrução** ([ADR-0005](../../adrs/0005-regras-entregues-por-blocos-gerenciados.md), `Proposed`):
   - o instalador mantém, entre `<!-- BEGIN:openspec-padrao -->` e `<!-- END:openspec-padrao -->`, um bloco curto que manda ler `docs/openspec-regras.md` e explica como seguir os comandos `/opsx:*` em agentes que não os têm;
-  - os arquivos cobertos são `AGENTS.md` (ponto de entrada comum), `CLAUDE.md` (com `@AGENTS.md`), `GEMINI.md`, `.github/copilot-instructions.md` e as regras de projeto de Windsurf e Amazon Q;
+  - os arquivos cobertos são `AGENTS.md` (ponto de entrada comum), `CLAUDE.md` (com `@AGENTS.md`), `GEMINI.md`, `.github/copilot-instructions.md` e as regras de projeto do Amazon Q (o Windsurf lê o `AGENTS.md`);
   - fora dos marcadores, nada é alterado: o bloco do Next.js no `AGENTS.md` do Lava Jato, por exemplo, fica intacto.
 - **Guias:** o COMECE-AQUI e o `docs/openspec-padrao.md` ganham uma seção "Usar com outros agentes", com o que cada agente lê e como rodar o fluxo sem os comandos `/opsx:*`.
 - **CI:** smoke tests dos blocos (criação, preservação do conteúdo fora dos marcadores, atualização sem duplicar) e o `sync-root --check` cobrindo o `rules.md`.

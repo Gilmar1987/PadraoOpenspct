@@ -10,7 +10,7 @@
   - **Claude Code:** lê `CLAUDE.md` e aceita `@AGENTS.md` como import.
   - **Gemini CLI:** lê `GEMINI.md` por padrão.
   - **GitHub Copilot:** lê `.github/copilot-instructions.md`.
-  - **Windsurf:** regras de projeto em `.windsurf/rules/`.
+  - **Windsurf:** lê o `AGENTS.md` sem configuração (e também `.windsurf/rules/`).
   - **Amazon Q:** regras em `.amazonq/rules/`.
 - O `AGENTS.md` do Lava Jato já tem o bloco `<!-- BEGIN:nextjs-agent-rules -->`, do `create-next-app`.
 
@@ -61,7 +61,7 @@ para qualquer agente e não podem ser contornadas por instruções no chat.
 <!-- END:openspec-padrao -->
 ```
 
-O mesmo texto vai para `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.windsurf/rules/openspec-padrao.md` e `.amazonq/rules/openspec-padrao.md`. No `CLAUDE.md`, o bloco é só `@AGENTS.md` entre os marcadores, porque o Claude Code importa o arquivo.
+O mesmo texto vai para `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md` e `.amazonq/rules/openspec-padrao.md`. O Windsurf não ganha arquivo próprio: ele lê o `AGENTS.md`. No `CLAUDE.md`, o bloco é só `@AGENTS.md` entre os marcadores, porque o Claude Code importa o arquivo.
 
 Alternativa rejeitada: só `AGENTS.md`. O Claude Code, o Gemini CLI e o Copilot não o leem por padrão.
 
@@ -70,7 +70,7 @@ Alternativa rejeitada: só `AGENTS.md`. O Claude Code, o Gemini CLI e o Copilot 
 Função `ensureManagedBlock(projectRoot, relativePath, block)`, no modelo do `ensureConsumerGitignore`:
 
 1. Recusa symlink ou caminho que não é arquivo comum.
-2. Arquivo ausente: cria com o bloco (e as pastas `.github/`, `.windsurf/rules/` e `.amazonq/rules/` se faltarem).
+2. Arquivo ausente: cria com o bloco (e as pastas `.github/` e `.amazonq/rules/` se faltarem).
 3. Arquivo sem os marcadores: acrescenta uma linha em branco e o bloco no fim, mantendo o EOL do arquivo.
 4. Arquivo com os marcadores: substitui o trecho entre o primeiro `BEGIN` e o `END` seguinte. Com mais de um par de marcadores, ou com um `BEGIN` sem `END`, para com erro sem alterar nada.
 5. Escrita atômica (arquivo temporário e `rename`).
@@ -80,7 +80,7 @@ Os blocos entram na lógica de modo da reinstalação. Se algum bloco mudaria, a
 ### D4. Guias
 
 - `docs/openspec-padrao.md` (template) e COMECE-AQUI ganham a seção "Usar com outros agentes". A seção traz uma tabela com o agente, o arquivo que ele lê e a forma de rodar o fluxo (o comando `/opsx:*` no Claude Code; nos outros, "siga `.claude/commands/opsx/<comando>.md`").
-- A lista de arquivos commitados ("Commitar e publicar") passa a incluir `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.windsurf/`, `.amazonq/` e `docs/openspec-regras.md`.
+- A lista de arquivos commitados ("Commitar e publicar") passa a incluir `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.amazonq/` e `docs/openspec-regras.md`.
 - README: o parágrafo "Regras globais de agentes" explica a fonte em `padrao-openspec/openspec/rules.md` e a entrega aos projetos.
 
 ### D5. CI
@@ -88,7 +88,7 @@ Os blocos entram na lógica de modo da reinstalação. Se algum bloco mudaria, a
 Novo "Smoke test dos blocos de agentes" no job `store`:
 
 - Código com `AGENTS.md` contendo o bloco `nextjs-agent-rules`: depois do setup, o bloco do Next.js continua byte a byte igual, e o `openspec-padrao` aparece uma vez.
-- Os seis arquivos existem com o bloco; o `CLAUDE.md` tem `@AGENTS.md`; o `docs/openspec-regras.md` é igual à fonte.
+- Os cinco arquivos existem com o bloco; o `CLAUDE.md` tem `@AGENTS.md`; o `docs/openspec-regras.md` é igual à fonte.
 - Segunda instalação: `Done.` sem mudanças.
 - Bloco antigo (texto diferente entre os marcadores) com `--update`: um só bloco, com o texto novo, e o commit inclui o `AGENTS.md`.
 - `BEGIN` sem `END`: o instalador falha sem alterar o arquivo.
@@ -99,7 +99,7 @@ O "Sintaxe dos scripts" segue cobrindo os scripts. O `sync-root --check` cobre o
 
 `1.5.0` (funcionalidade nova). "Ações no projeto":
 
-- "O PR de atualização cria ou atualiza `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.windsurf/rules/openspec-padrao.md`, `.amazonq/rules/openspec-padrao.md` e `docs/openspec-regras.md`; revise o diff dos arquivos que já existiam, que só ganham o bloco entre marcadores."
+- "O PR de atualização cria ou atualiza `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.amazonq/rules/openspec-padrao.md` e `docs/openspec-regras.md`; revise o diff dos arquivos que já existiam, que só ganham o bloco entre marcadores."
 
 ## Raio de impacto
 
@@ -125,4 +125,4 @@ Projetos existentes recebem os arquivos pelo PR de atualização da `v1.5.0`. Ro
 
 ## Open Questions
 
-Nenhuma que mude o plano. Os nomes exatos dos arquivos de Windsurf e Amazon Q são conferidos na documentação na tarefa 2.1; se mudarem, só a constante e a tabela do guia mudam.
+Nenhuma. Conferência da tarefa 2.1 (2026-10-22): o Copilot coding agent lê `AGENTS.md` e `.github/copilot-instructions.md` ([changelog do GitHub](https://github.blog/changelog/2025-08-28-copilot-coding-agent-now-supports-agents-md-custom-instructions)); o Windsurf lê `AGENTS.md` sem configuração, abaixo de `.windsurf/rules/` ([guia](https://thepromptshelf.dev/blog/agents-md-windsurf-setup-guide-2026/)), por isso não ganha arquivo próprio; Cursor lê `AGENTS.md`, Claude Code importa `@AGENTS.md` no `CLAUDE.md` e Gemini CLI lê `GEMINI.md` ([guia CrewAI](https://docs.crewai.com/edge/en/guides/coding-tools/agents-md)); o `.amazonq/rules/` não foi confirmado nessas fontes e fica pela documentação do Amazon Q Developer.
