@@ -49,12 +49,12 @@ jobs:
             output="$(cd "$probe" && for artifact in proposal specs design tasks; do
               openspec instructions "$artifact" --change ci-config-probe 2>&1
             done)"
-            if printf '%s' "$output" | grep -iE "ignoring|invalid '"; then
+            if grep -iE "ignoring|invalid '" <<< "$output"; then
               echo "::error file=padrao-openspec/$config::OpenSpec ignorou parte da configuração"
               status=1
             fi
             while IFS= read -r rule; do
-              if ! printf '%s' "$output" | grep -qF -- "$rule"; then
+              if ! grep -qF -- "$rule" <<< "$output"; then
                 echo "::error file=padrao-openspec/$config::Regra do config base ausente: $rule"
                 status=1
               fi
@@ -85,7 +85,7 @@ jobs:
       - name: Versão e changelog
         run: |
           v="$(tr -d '\r\n' < VERSION)"
-          if ! printf '%s\n' "$v" | grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+'; then
+          if ! grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+' <<< "$v"; then
             echo "::error file=padrao-openspec/VERSION::VERSION não é semver: $v"; exit 1
           fi
           first="$(grep -m1 -E '^## [0-9]+\.[0-9]+\.[0-9]+' ../CHANGELOG.md | sed -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
@@ -94,7 +94,7 @@ jobs:
           fi
           section="$(awk -v head="## $v" 'index($0, head) == 1 {f = 1; next} f && /^## / {exit} f' ../CHANGELOG.md)"
           for title in '### O que mudou' '### Ações no projeto'; do
-            if ! printf '%s\n' "$section" | grep -qxF "$title"; then
+            if ! grep -qxF "$title" <<< "$section"; then
               echo "::error file=CHANGELOG.md::A seção $v não tem \"$title\""; exit 1
             fi
           done
@@ -104,12 +104,12 @@ jobs:
           f="$RUNNER_TEMP/CHANGELOG.md"
           printf '# Changelog\n\n## 1.2.0 — 2026-11-01\n\n### O que mudou\n\n- c\n\n### Ações no projeto\n\n- Acrescentar X ao project.md\n\n## 1.1.0 — 2026-10-25\n\n### O que mudou\n\n- b\n\n### Ações no projeto\n\n- Nenhuma\n\n## 1.0.0 — 2026-10-20\n\n### O que mudou\n\n- a\n\n### Ações no projeto\n\n- Nenhuma\n' > "$f"
           out="$(node scripts/changelog-range.mjs --file "$f" --from 1.0.0 --to v1.2.0)"
-          printf '%s\n' "$out" | grep -q '^## 1\.2\.0'
-          printf '%s\n' "$out" | grep -q '^## 1\.1\.0'
-          if printf '%s\n' "$out" | grep -q '^## 1\.0\.0'; then exit 1; fi
+          grep -q '^## 1\.2\.0' <<< "$out"
+          grep -q '^## 1\.1\.0' <<< "$out"
+          if grep -q '^## 1\.0\.0' <<< "$out"; then exit 1; fi
           acts="$(node scripts/changelog-range.mjs --file "$f" --from v1.0.0 --to 1.2.0 --actions)"
-          printf '%s\n' "$acts" | grep -qF 'Acrescentar X ao project.md'
-          if printf '%s\n' "$acts" | grep -q 'Nenhuma'; then exit 1; fi
+          grep -qF 'Acrescentar X ao project.md' <<< "$acts"
+          if grep -q 'Nenhuma' <<< "$acts"; then exit 1; fi
           test -z "$(node scripts/changelog-range.mjs --file "$f" --from 1.2.0 --to 1.2.0)"
           if node scripts/changelog-range.mjs --file "$f" --from 1.0.0 --to 9.9.9; then exit 1; fi
 
