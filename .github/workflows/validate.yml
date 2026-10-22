@@ -240,7 +240,7 @@ jobs:
           h=.claude/hooks/openspec-padrao
           for f in "$h"/*.mjs; do node --check "$f"; done
           fail=0
-          payload() { node -e 'const [tool, key, value, cwd] = process.argv.slice(1); const p = { tool_name: tool, tool_input: { [key]: value } }; if (cwd) p.cwd = cwd; process.stdout.write(JSON.stringify(p));' "$@"; }
+          payload() { node -e 'const [tool, key, value, cwd, agent] = process.argv.slice(1); const p = { tool_name: tool, tool_input: { [key]: value } }; if (cwd) p.cwd = cwd; if (agent) p.agent_type = agent; process.stdout.write(JSON.stringify(p));' "$@"; }
           expect() {
             local want="$1" hook="$2" json="$3" out
             out=$(printf '%s' "$json" | node "$h/$hook")
@@ -254,25 +254,31 @@ jobs:
                      'npm test && rm -rf dist' 'sed -i s/a/b/ f.txt' 'git -C . commit -m x' 'cat a | tee b' \
                      'cp a b' 'mkdir -p out' 'git pull' 'git branch -D feat' 'sed --in-place s/a/b/ f' \
                      '(rm -rf x)' 'del x' 'env rm x' 'find . -delete' 'git config user.name x'; do
-            expect deny somente-leitura.mjs "$(payload Bash command "$cmd")"
+            expect deny somente-leitura.mjs "$(payload Bash command "$cmd" '' openspec-qa-validator)"
           done
           for cmd in 'git status' 'npm test' 'grep -rn "a > b" src' 'npm test 2>&1 | tail -5' \
                      'ls > /dev/null' 'git diff HEAD~1' 'openspec validate --all --strict' 'Get-Content a.txt' \
                      'python -m pytest -p no:cacheprovider' 'node -r ts-node/register x.ts' 'git stash list' \
                      'git tag -l' 'echo x > /dev/stderr' 'git config --get user.name' 'npx playwright test'; do
-            expect allow somente-leitura.mjs "$(payload Bash command "$cmd")"
+            expect allow somente-leitura.mjs "$(payload Bash command "$cmd" '' openspec-stage-reviewer)"
           done
+          # Agente principal (sem agent_type) e outro subagente: o hook de papel não interfere.
+          expect allow somente-leitura.mjs "$(payload Bash command 'echo x > a.txt')"
+          expect allow somente-leitura.mjs "$(payload Bash command 'git push origin main' '' openspec-code-implementer)"
+          expect deny somente-leitura.mjs "$(payload PowerShell command 'Set-Content a.txt x' '' openspec-code-reviewer)"
           expect allow somente-leitura.mjs 'isto não é JSON'
           # escopo-de-escrita.mjs, num repositório temporário
           repo=$(mktemp -d)
           git -C "$repo" init -q
           repo_native=$(cygpath -m "$repo" 2>/dev/null || echo "$repo")
           for target in .claude/settings.json docs/openspec-regras.md .openspec-padrao.json ../fora.txt .github/agents/x.agent.md; do
-            expect deny escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native")"
+            expect deny escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native" openspec-code-implementer)"
           done
           for target in src/app.ts 'src\app.ts' "$repo_native/README.md" docs/guia.md; do
-            expect allow escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native")"
+            expect allow escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native" openspec-code-implementer)"
           done
+          # Agente principal (sem agent_type): o hook de papel não interfere.
+          expect allow escopo-de-escrita.mjs "$(payload Write file_path .claude/settings.json "$repo_native")"
           rm -rf "$repo"
           # cobra-evidencia.mjs, numa raiz OpenSpec local temporária (sem registrar store)
           w=$(mktemp -d)
@@ -471,7 +477,8 @@ jobs:
             const hooks = JSON.stringify(s.hooks);
             const ok = has("allow", "Bash(npm test)") && has("ask", "Bash(git push *)") && has("ask", "Bash(openspec archive *)")
               && has("deny", "Bash(git reset --hard *)") && hooks.includes("echo projeto")
-              && hooks.includes("cobra-evidencia.mjs") && hooks.includes("portao-do-archive.mjs");
+              && hooks.includes("cobra-evidencia.mjs") && hooks.includes("portao-do-archive.mjs")
+              && hooks.includes("somente-leitura.mjs") && hooks.includes("escopo-de-escrita.mjs");
             if (!ok) { console.error(JSON.stringify(s, null, 2)); process.exit(1); }' "$s"
           # A permissão que o projeto já tinha não vira do padrão.
           node -e '

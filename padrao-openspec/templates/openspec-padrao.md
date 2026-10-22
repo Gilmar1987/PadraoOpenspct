@@ -69,11 +69,13 @@ No Claude Code, o padrão também impõe limites por mecanismo, e não só por i
 | `openspec-code-reviewer` | leitura e shell somente leitura | Revisa o intervalo de commits da change (passo 6a do apply) |
 | `openspec-code-implementer` | leitura, edição e shell | Implementa as tarefas aprovadas |
 
-Os de veredito não têm ferramenta de edição e devolvem achados com evidência, sem corrigir. Nos que
-têm shell, um hook nega comandos que gravam arquivos ou alteram o Git (redirecionamento, `tee`,
-`sed -i`, código inline, `git commit`, `git push`, `rm`, `mv`). No implementador, um hook nega a
-escrita fora do repositório e nos arquivos do padrão (`.claude/`, `.github/agents/`, `docs/openspec-*`
-e `.openspec-padrao.json`).
+Os de veredito não têm ferramenta de edição e devolvem achados com evidência, sem corrigir. Nas
+chamadas dos que têm shell, um hook nega comandos que gravam arquivos ou alteram o Git
+(redirecionamento, `tee`, `sed -i`, código inline, `git commit`, `git push`, `rm`, `mv`). Nas chamadas
+do implementador, um hook nega a escrita fora do repositório e nos arquivos do padrão (`.claude/`,
+`.github/agents/`, `docs/openspec-*` e `.openspec-padrao.json`). Esses hooks ficam no
+`.claude/settings.json` e reconhecem o subagente pelo campo `agent_type` da chamada; o agente
+principal não é afetado.
 
 **Hooks de sessão** em `.claude/hooks/openspec-padrao/`, ligados pelo `.claude/settings.json`:
 
@@ -98,8 +100,8 @@ isso no diff. O instalador mantém a indentação, o fim de linha e o BOM do arq
 
 Três avisos:
 
-- **Confiança na pasta:** os hooks dos subagentes de projeto e as regras `allow` só valem depois que a
-  pasta é marcada como confiável no Claude Code; `ask` e `deny` valem logo.
+- **Confiança na pasta:** os hooks e as regras `allow` do projeto só valem depois que a pasta é marcada
+  como confiável no Claude Code; `ask` e `deny` valem logo.
 - **Limite:** os hooks e as permissões são heurísticas sobre o texto do comando, não uma sandbox. Um
   comando por outro caminho (o caminho absoluto de outro interpretador, uma expansão de variável,
   `$( )`) pode escapar. As regras
@@ -110,10 +112,11 @@ Três avisos:
 
 Depois de instalar ou atualizar o padrão, confira num repositório de teste, com uma conversa nova:
 
-1. Peça ao agente que despache o `openspec-qa-validator` e que ele rode `echo ok > teste.txt`. O
-   comando deve ser negado com "Papel somente leitura".
-2. Numa change de teste, marque uma tarefa sem a linha `Evidência:` e deixe o agente encerrar o turno.
-   O turno deve continuar uma vez, citando a tarefa.
+1. Peça ao agente que despache o `openspec-qa-validator` e que ele rode `python -c "print(1)"`, um
+   comando que só lê e que o agente não tem motivo para recusar. O comando deve ser negado com "Papel
+   somente leitura"; se aparecer `1`, o hook não disparou.
+2. Com a conversa aberta, marque à mão, no editor, uma tarefa de uma change de teste sem a linha
+   `Evidência:` e peça ao agente uma resposta curta. O turno deve continuar uma vez, citando a tarefa.
 3. Peça `openspec archive <change de teste>`. Com o portão, o comando deve ser negado com os motivos;
    sem ele, o Claude Code deve pedir confirmação.
 

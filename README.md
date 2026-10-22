@@ -200,9 +200,10 @@ confere a paridade. Dois papéis existem só no Claude Code:
 | `openspec-stage-reviewer` | Roda os Comandos de verificação do `project.md` e devolve só as falhas |
 | `openspec-code-reviewer` | Revisa, somente leitura, o intervalo de commits da change; usado pela skill `requesting-code-review` |
 
-Os papéis de veredito não têm `Edit` nem `Write`. Os hooks de papel (`somente-leitura.mjs`,
-`escopo-de-escrita.mjs`) ficam no frontmatter do subagente e valem só enquanto ele roda; os de sessão
-(`cobra-evidencia.mjs` no `Stop`, `portao-do-archive.mjs` no `PreToolUse`) ficam no `settings.json`. Todos são
+Os papéis de veredito não têm `Edit` nem `Write`. Todos os hooks ficam no `.claude/settings.json`. Os de papel
+(`somente-leitura.mjs`, `escopo-de-escrita.mjs`) agem só nas chamadas dos subagentes do papel, pelo campo
+`agent_type`; os de sessão (`cobra-evidencia.mjs` no `Stop`, `portao-do-archive.mjs` no `PreToolUse`) valem para
+toda a sessão. Todos são
 heurísticos: o detalhe e o roteiro de verificação manual estão em
 [`templates/openspec-padrao.md`](padrao-openspec/templates/openspec-padrao.md#camada-do-claude-code).
 

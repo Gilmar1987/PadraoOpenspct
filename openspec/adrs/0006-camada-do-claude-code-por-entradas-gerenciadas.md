@@ -1,6 +1,6 @@
 ---
 id: ADR-0006
-status: Proposed
+status: Accepted
 date: 2026-10-22
 supersedes:
 superseded_by:
@@ -31,6 +31,7 @@ O `.claude/settings.json` pertence ao projeto: ele guarda as permissões e os ho
   - uma permissão é do padrão quando está listada em `managedSettings` no manifesto.
 - O instalador acrescenta as entradas que faltam, atualiza as suas e remove as que deixaram de fazer parte do padrão. Ele MUST NOT alterar nem remover outras entradas, e MUST parar sem nenhuma mudança quando o arquivo não for JSON válido.
 - Os hooks SHALL ser escritos em Node.js, já exigido pelo padrão, e chamados como `node` com `args`.
+- Todos os hooks SHALL ficar no `.claude/settings.json`. Os que valem só para um papel reconhecem o subagente pelo campo `agent_type` da entrada e não interferem nas chamadas do agente principal. O hook declarado no frontmatter do subagente não disparou no Claude Code real (roteiro manual de 2026-10-22), e a forma `args` só está documentada para o `settings.json`.
 - A lógica de aprovação, de apply e de archive SHALL ficar no portão neutro de agente (`docs/openspec-portao.mjs`, da change `guardas-mecanicas`). Os hooks o chamam e não repetem a regra.
 
 ## Alternativas consideradas

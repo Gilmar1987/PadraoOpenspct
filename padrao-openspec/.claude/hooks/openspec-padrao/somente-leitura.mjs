@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-// PreToolUse hook (Bash|PowerShell) declared in the frontmatter of the standard's verdict subagents
-// (qa-validator, stage-reviewer, code-reviewer). It runs only while one of them is active and denies
-// shell commands that write files or change the Git state, so a reviewer cannot alter what it
-// reviews, while test, lint and build commands from project.md keep working.
+// PreToolUse hook (Bash|PowerShell) from the code repository's .claude/settings.json (ADR-0006). It acts
+// only on calls made by the standard's verdict subagents, named in verdictAgents and identified by the
+// payload's agent_type, and denies shell commands that write files or change the Git state, so a
+// reviewer cannot alter what it reviews, while test, lint and build commands from project.md keep
+// working. Calls from the main agent and from other subagents pass untouched.
 //
 // Declared limit: this is a heuristic over the command text, not a shell parser and not a sandbox.
 // It catches the common, documented cases below; a command written to evade it (an absolute path to
@@ -13,6 +14,9 @@ import path from 'node:path';
 import { deny, readPayload, shellCommands, unquoted } from './comum.mjs';
 
 const hookName = 'somente-leitura';
+
+// The subagents this hook restricts. A new verdict subagent of the standard joins this list.
+const verdictAgents = new Set(['openspec-qa-validator', 'openspec-stage-reviewer', 'openspec-code-reviewer']);
 
 // Redirection targets that do not write a file.
 const harmlessTarget = /^(&\d|\/dev\/(null|stdout|stderr)|\$null|nul)$/i;
@@ -116,7 +120,7 @@ function check(command) {
 
 const payload = readPayload(hookName);
 const command = payload?.tool_input?.command;
-if (typeof command === 'string') {
+if (verdictAgents.has(payload?.agent_type) && typeof command === 'string') {
   const reason = check(command);
   if (reason) {
     deny(`Papel somente leitura (padrão OpenSpec): ${reason}. Rode só comandos de leitura e de verificação; se precisar alterar algo, devolva o achado ao agente coordenador.`);

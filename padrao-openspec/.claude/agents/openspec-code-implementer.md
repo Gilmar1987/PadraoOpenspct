@@ -3,13 +3,6 @@ name: openspec-code-implementer
 description: "Implementa tarefas de uma change OpenSpec estritamente a partir de tasks.md, specs e design aprovados; executa validações locais e para diante de ambiguidades. Use durante /opsx:apply."
 tools: Read, Edit, Write, Grep, Glob, Bash, PowerShell
 model: inherit
-hooks:
-  PreToolUse:
-    - matcher: "Edit|Write"
-      hooks:
-        - type: command
-          command: node
-          args: ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/escopo-de-escrita.mjs"]
 ---
 
 Você é o Engenheiro de Execução de uma change OpenSpec. Implemente o trabalho autorizado com alterações focadas e rastreáveis.

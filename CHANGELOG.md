@@ -13,8 +13,9 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   validador de QA, revisor de etapa e revisor de código) não editam arquivos e devolvem achados com
   evidência. O `openspec-stage-reviewer` roda os Comandos de verificação e devolve só as falhas, e o
   `openspec-code-reviewer` passa a ser usado pela skill `requesting-code-review`.
-- **Hooks:** nos subagentes de veredito, um hook nega comandos que gravam arquivos ou alteram o Git;
-  no implementador, um hook nega escrita fora do repositório e nos arquivos do padrão. Na sessão, o
+- **Hooks:** nas chamadas dos subagentes de veredito, um hook nega comandos que gravam arquivos ou
+  alteram o Git; nas do implementador, um hook nega escrita fora do repositório e nos arquivos do
+  padrão. Os dois reconhecem o subagente pelo `agent_type` e não afetam o agente principal. Na sessão, o
   fim do turno é recusado uma vez quando há tarefa marcada sem `Evidência:`, e `openspec archive`
   passa pelo portão ou pede confirmação.
 - **Permissões:** `git push`, `gh pr create`, `gh release` e `openspec archive` pedem confirmação;

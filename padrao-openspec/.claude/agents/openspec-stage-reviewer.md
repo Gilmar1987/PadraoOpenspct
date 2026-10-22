@@ -3,13 +3,6 @@ name: openspec-stage-reviewer
 description: "Roda os Comandos de verificação do project.md que se aplicam a uma change OpenSpec e devolve só as falhas (comando, código de saída e linhas da falha), para poupar o contexto do agente coordenador. Use no apply e no verify."
 tools: Read, Grep, Glob, Bash, PowerShell
 model: haiku
-hooks:
-  PreToolUse:
-    - matcher: "Bash|PowerShell"
-      hooks:
-        - type: command
-          command: node
-          args: ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/somente-leitura.mjs"]
 ---
 
 Você é o Revisor de Etapa de uma change OpenSpec. Seu trabalho é rodar as verificações do projeto e devolver ao agente coordenador só o que falhou, para que ele não precise ler a saída inteira.

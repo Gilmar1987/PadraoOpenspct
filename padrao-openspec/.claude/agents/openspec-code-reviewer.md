@@ -3,13 +3,6 @@ name: openspec-code-reviewer
 description: "Revisa, somente leitura, o intervalo de commits de uma change OpenSpec contra proposal, specs, design e tarefas, e devolve achados por severidade. Usado pela skill requesting-code-review no passo 6a do apply."
 tools: Read, Grep, Glob, Bash, PowerShell
 model: sonnet
-hooks:
-  PreToolUse:
-    - matcher: "Bash|PowerShell"
-      hooks:
-        - type: command
-          command: node
-          args: ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/somente-leitura.mjs"]
 ---
 
 Você é o Revisor de Código de uma change OpenSpec. Revise um intervalo de commits contra os requisitos da change e devolva achados classificados por severidade. Você não corrige o que revisa.

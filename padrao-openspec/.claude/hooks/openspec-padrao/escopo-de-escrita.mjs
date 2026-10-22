@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-// PreToolUse hook (Edit|Write) declared in the frontmatter of the standard's implementer subagent.
-// It runs only while that subagent is active and denies writes outside the repository and into the
+// PreToolUse hook (Edit|Write) from the code repository's .claude/settings.json (ADR-0006). It acts only
+// on calls made by the standard's implementer subagent (the payload's agent_type) and denies writes
+// outside the repository and into the
 // files the standard manages (.claude/, .github/agents/, docs/openspec-*, .openspec-padrao.json):
 // those change through the standard's installer, not through a change's implementation.
 //
@@ -12,6 +13,7 @@ import path from 'node:path';
 import { deny, readPayload, repositoryRoot } from './comum.mjs';
 
 const hookName = 'escopo-de-escrita';
+const implementerAgents = new Set(['openspec-code-implementer']);
 const caseInsensitive = process.platform === 'win32';
 
 function normalize(value) {
@@ -30,7 +32,7 @@ function managedReason(relative) {
 const payload = readPayload(hookName);
 const input = payload?.tool_input ?? {};
 const target = input.file_path ?? input.notebook_path;
-if (typeof target === 'string' && target) {
+if (implementerAgents.has(payload?.agent_type) && typeof target === 'string' && target) {
   const cwd = typeof payload.cwd === 'string' && payload.cwd ? payload.cwd : process.cwd();
   const root = repositoryRoot(cwd) ?? path.resolve(process.env.CLAUDE_PROJECT_DIR || cwd);
   const absolute = path.resolve(cwd, target.replace(/\\/g, '/'));
