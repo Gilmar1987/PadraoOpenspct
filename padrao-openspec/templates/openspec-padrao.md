@@ -4,9 +4,26 @@ Este repositório usa o padrão OpenSpec do [PadraoOpenspct](https://github.com/
 skills, comandos `/opsx:*` e agentes que guiam o fluxo propose → apply → verify → archive.
 Este guia é gerenciado pelo padrão e é substituído a cada atualização; não o edite à mão.
 
+## Entrar neste projeto
+
+Para trabalhar neste projeto numa máquina nova, você precisa também do store OpenSpec do projeto,
+registrado na máquina. Peça ao tech lead a URL do repositório do store e rode, na pasta onde os
+repositórios devem ficar (no macOS e no Linux, `curl` no lugar de `curl.exe`):
+
+```powershell
+curl.exe -LO https://github.com/Gilmar1987/PadraoOpenspct/releases/latest/download/comecar.mjs
+node comecar.mjs --modo existente
+```
+
+O script clona este repositório e o store, lê o id na linha `store:` do `openspec/config.yaml`,
+registra o store e confere que o OpenSpec CLI o encontra a partir daqui. Se você já clonou este
+repositório, rode o script em outra pasta ou siga os passos à mão da seção "Sem o script" do
+[COMECE-AQUI.md](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/COMECE-AQUI.md#5-sem-o-script).
+O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira change.
+
 ## Primeiros passos
 
-1. **Inicialize o projeto**, se ainda não fez: abra o agente neste repositório e rode `/opsx:init`.
+1. **Se o projeto é novo, inicialize-o**: abra o agente neste repositório e rode `/opsx:init`.
    A entrevista registra no store OpenSpec a stack, os comandos de verificação e as ADRs.
 2. **Commite** os arquivos que o padrão instalou (os listados em `managedFiles` do
    `.openspec-padrao.json`, o próprio `.openspec-padrao.json`, o `.gitignore` e o

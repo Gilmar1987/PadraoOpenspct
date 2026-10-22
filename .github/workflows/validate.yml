@@ -65,6 +65,7 @@ jobs:
           node --check scripts/setup-project.mjs
           node --check scripts/sync-root.mjs
           node --check scripts/changelog-range.mjs
+          node --check scripts/comecar.mjs
           python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' templates/openspec-padrao-update.yml
 
       # VERSION é a versão do padrão; a primeira seção do CHANGELOG da raiz tem de ser ela,
@@ -370,6 +371,69 @@ jobs:
           grep -qx 'store: ci-store' "$work/other/openspec/config.yaml"
           test "$(grep -c '^store:' "$work/other/openspec/config.yaml")" -eq 1
 
+      # Script de entrada (comecar.mjs) contra um padrão local com tags: projeto novo com um
+      # único clone na última release, entrada num projeto em andamento e as recusas.
+      - name: Smoke test do script de entrada
+        run: |
+          work="$(mktemp -d)"
+          v="$(tr -d '\r\n' < VERSION)"
+          commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
+          mkdir -p "$work/padrao"
+          cp -r . "$work/padrao/padrao-openspec"
+          git -C "$work/padrao" init -q
+          git -C "$work/padrao" add -A
+          commit "$work/padrao" -m base
+          git -C "$work/padrao" tag v1.0.0
+          commit "$work/padrao" --allow-empty -m next
+          git -C "$work/padrao" tag "v$v"
+          # Projeto novo: store na última tag, na branch main, e código ligado a ele.
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada --yes > "$RUNNER_TEMP/novo.txt"
+          store="$work/a/ci-entrada-openspec"
+          code="$work/a/ci-entrada"
+          test "$(git -C "$store" branch --show-current)" = main
+          test "$(git -C "$store" describe --tags --exact-match)" = "v$v"
+          test -f "$code/.claude/commands/opsx/init.md"
+          grep -qx 'store: ci-entrada' "$code/openspec/config.yaml"
+          grep -qF '/opsx:init' "$RUNNER_TEMP/novo.txt"
+          # A pasta do projeto já existe: recusa sem alterar nada.
+          before="$(git -C "$store" status --porcelain)"
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/a" --nome "CI Entrada" --id ci-entrada --yes; then exit 1; fi
+          test "$(git -C "$store" status --porcelain)" = "$before"
+          # Sem terminal, uma resposta que falta para com a opção que a informa.
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/c" --id ci-falta --yes < /dev/null 2> "$RUNNER_TEMP/falta.txt"; then exit 1; fi
+          grep -qF 'Falta --nome' "$RUNNER_TEMP/falta.txt"
+          test ! -e "$work/c/ci-falta-openspec"
+          # Id já registrado nesta máquina: recusa antes do resumo, sem criar pastas.
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/e" --nome "CI Entrada" --id ci-entrada --yes 2> "$RUNNER_TEMP/registrado.txt"; then exit 1; fi
+          grep -qF 'openspec store unregister ci-entrada' "$RUNNER_TEMP/registrado.txt"
+          test ! -e "$work/e"
+          # Projeto em andamento: publica os dois repositórios e entra por outra pasta.
+          git -C "$code" add -A
+          commit "$code" -m setup
+          git -C "$store" add -A
+          commit "$store" -m init
+          mkdir "$work/remotos"
+          git clone -q --bare "$code" "$work/remotos/ci-entrada.git"
+          git clone -q --bare "$store" "$work/remotos/ci-entrada-openspec.git"
+          openspec store unregister ci-entrada
+          node scripts/comecar.mjs --modo existente --pasta "$work/b" --url-codigo "$work/remotos/ci-entrada.git" --url-store "$work/remotos/ci-entrada-openspec.git" --yes > "$RUNNER_TEMP/existente.txt"
+          # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
+          resolved="$(cd "$work/b/ci-entrada" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
+          expected="$(cd "$work/b/ci-entrada-openspec/padrao-openspec" && node -p 'require("fs").realpathSync(process.cwd())')"
+          test "$resolved" = "$expected"
+          grep -qF '/opsx:propose' "$RUNNER_TEMP/existente.txt"
+          grep -qF 'não rode /opsx:init' "$RUNNER_TEMP/existente.txt"
+          # Código sem a linha store: recusa sem registrar nada.
+          mkdir "$work/sem-store"
+          git -C "$work/sem-store" init -q
+          commit "$work/sem-store" --allow-empty -m vazio
+          git clone -q --bare "$work/sem-store" "$work/remotos/sem-store.git"
+          registered="$(openspec store list --json)"
+          if node scripts/comecar.mjs --modo existente --pasta "$work/d" --url-codigo "$work/remotos/sem-store.git" --url-store "$work/remotos/ci-entrada-openspec.git" --yes 2> "$RUNNER_TEMP/sem-store.txt"; then exit 1; fi
+          grep -qF 'store:' "$RUNNER_TEMP/sem-store.txt"
+          test "$(openspec store list --json)" = "$registered"
+          openspec store unregister ci-entrada
+
       # Store e repositório de código de exemplo com datas conhecidas e autor fictício:
       # confere o CSV linha a linha, o resumo, a ausência de dados pessoais e que nada muda.
       - name: Smoke test das métricas de fluxo
@@ -498,4 +562,14 @@ jobs:
           grep -qF '](COMECE-AQUI.md)' README.md
           grep -qF 'setup-project.mjs' COMECE-AQUI.md
           grep -qF '/opsx:init' COMECE-AQUI.md
+          grep -qF 'git clone --branch v' COMECE-AQUI.md
+          grep -qF -- '-openspec switch -c main' COMECE-AQUI.md
+          # O início de projeto clona a última release, não a main.
+          if grep -nE 'git clone https://github\.com/Gilmar1987/PadraoOpenspct' COMECE-AQUI.md README.md padrao-openspec/README.md; then exit 1; fi
           grep -qF '## Primeiros passos' padrao-openspec/templates/openspec-padrao.md
+          # A entrada começa pelo script anexado à última release.
+          grep -qF 'releases/latest/download/comecar.mjs' COMECE-AQUI.md
+          grep -qF 'releases/latest/download/comecar.mjs' README.md
+          grep -qF 'releases/latest/download/comecar.mjs' padrao-openspec/templates/openspec-padrao.md
+          grep -qF '## Entrar neste projeto' padrao-openspec/templates/openspec-padrao.md
+          grep -qF 'padrao-openspec/scripts/comecar.mjs' README.md

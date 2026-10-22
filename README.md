@@ -2,8 +2,17 @@
 
 Repositório central de padrões OpenSpec para desenvolvimento orientado a especificação (spec-driven development). Serve como ponto de partida para qualquer projeto novo, garantindo que o agente de IA tenha contexto preciso, regras claras e fluxo de trabalho padronizado antes de tocar no código.
 
-> **Vai começar um projeto?** Siga o [COMECE-AQUI.md](COMECE-AQUI.md): pré-requisitos, passos até
-> a primeira change e problemas comuns. Este README é a referência completa.
+> **Vai criar um projeto ou entrar num que já usa o padrão?** Não clone este repositório: baixe e
+> rode o script de entrada, que pergunta o seu caso e faz o resto.
+>
+> ```powershell
+> curl.exe -LO https://github.com/Gilmar1987/PadraoOpenspct/releases/latest/download/comecar.mjs
+> node comecar.mjs
+> ```
+>
+> No macOS e no Linux, use `curl` no lugar de `curl.exe`. O [COMECE-AQUI.md](COMECE-AQUI.md) tem
+> os pré-requisitos, exemplos das duas conversas, os passos sem o script e os problemas comuns.
+> Este README é a referência completa.
 
 ## O que está aqui
 
@@ -37,8 +46,11 @@ ciclo de uma change estão no [COMECE-AQUI.md](COMECE-AQUI.md).
 ### Fluxo validado (recomendado)
 
 ```powershell
-# 1. Clone o repositório com o nome do projeto (sufixo -openspec por convenção)
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
+# 1. Clone a última release do padrão com o nome do projeto (sufixo -openspec por convenção)
+#    e crie a branch main a partir dela. A última tag aparece com:
+#    gh release view --repo Gilmar1987/PadraoOpenspct --json tagName -q .tagName
+git clone --branch vX.Y.Z https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\<projeto>-openspec
+git -C C:\openspec\<projeto>-openspec switch -c main
 
 # 2. Crie e inicialize o repositório de código
 mkdir C:\openspec\<projeto>
@@ -59,7 +71,8 @@ node C:\openspec\<projeto>-openspec\padrao-openspec\scripts\setup-project.mjs `
 Exemplo real (projeto Livraria):
 
 ```powershell
-git clone https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\livraria-openspec
+git clone --branch v1.2.0 https://github.com/Gilmar1987/PadraoOpenspct C:\openspec\livraria-openspec
+git -C C:\openspec\livraria-openspec switch -c main
 mkdir C:\openspec\livraria
 cd C:\openspec\livraria
 git init -b main
@@ -93,9 +106,12 @@ repositório de código **antes** do setup, porque ele recusa pastas que já tê
 `.github/` ou `openspec/`. Se o setup já rodou, gere o app numa pasta temporária e copie
 os arquivos para o repositório de código.
 
-Quem clona um repositório de código já configurado recebe o `openspec/config.yaml` com o
-id do store. Para o CLI encontrar o store, clone o repositório do store e registre-o com o
-mesmo id: `openspec store register <caminho-do-store> --id <projeto>`.
+Quem vai entrar num projeto já configurado roda o script de entrada no modo projeto em
+andamento (`node comecar.mjs --modo existente`): ele clona o código e o store, lê o id na linha
+`store:` do `openspec/config.yaml` do código e registra o store. À mão, clone o repositório do
+store e registre a pasta `padrao-openspec` dele com esse id:
+`openspec store register <pasta-do-store>\padrao-openspec --id <id> --yes`
+(veja [Sem o script](COMECE-AQUI.md#5-sem-o-script)).
 
 Sem registrar o store (por exemplo, em CI), troque `--register-id <projeto>` por
 `--no-register`. O setup mostra ao final o comando de registro e a linha `store:` a
@@ -248,14 +264,19 @@ Publicar é ação do responsável, feita só com pedido explícito:
 1. No PR da mudança, atualize `padrao-openspec/VERSION` e acrescente a seção da versão no topo do
    `CHANGELOG.md`, com "O que mudou" e "Ações no projeto" ("Nenhuma" quando não houver). A CI
    falha se os dois não baterem.
-2. Depois do merge na `main`, crie a tag e a release com as notas da seção:
+2. Depois do merge na `main`, crie a tag e a release com as notas da seção e o script de entrada
+   anexado:
 
    ```powershell
    git tag vX.Y.Z
    git push origin vX.Y.Z
    node padrao-openspec/scripts/changelog-range.mjs --from <versão-anterior> --to X.Y.Z > notas.md
-   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file notas.md
+   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file notas.md padrao-openspec/scripts/comecar.mjs
    ```
+
+   O anexo é o que `releases/latest/download/comecar.mjs` baixa. Uma release sem ele faz o link
+   do guia falhar até a próxima; para corrigir, rode
+   `gh release upload vX.Y.Z padrao-openspec/scripts/comecar.mjs`.
 
 Na semana seguinte, o workflow de cada projeto abre o PR de atualização.
 
