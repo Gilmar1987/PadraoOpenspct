@@ -9,7 +9,8 @@
 
 ## 2. Propose e regras
 
-- [ ] 2.1 Aplicar o D1 nos dois arquivos do propose e o D2 no `rules.md`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills" (com a checagem nova de "Check concurrent changes"), "Smoke test dos blocos de agentes" e `sync-root --check` passando.
+- [x] 2.1 Aplicar o D1 nos dois arquivos do propose e o D2 no `rules.md`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills" (com a checagem nova de "Check concurrent changes"), "Smoke test dos blocos de agentes" e `sync-root --check` passando.
+  - Evidência: passo "6a. **Check concurrent changes**" nos dois arquivos do propose, antes do "7. **Show final status**"; seção "8. Trabalho em paralelo" no `rules.md`, com a antiga 8 virando "9. Quando em dúvida" (nenhum outro arquivo cita a seção pelo número); checagem do trecho no passo da CI; `sync-root.mjs` → "Synced 3 paths.", `--check` → em dia; `[PASS]` em "Trechos customizados das skills", "Smoke test dos blocos de agentes" (as regras entregues aos projetos seguem iguais à fonte) e "Lint de Markdown"; nenhum id `ci-` registrado no fim.
 
 ## 3. Documentação, versão e integração
 

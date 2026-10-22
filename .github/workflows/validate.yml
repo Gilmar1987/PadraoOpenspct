@@ -138,6 +138,7 @@ jobs:
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
+            check "$f" "Check concurrent changes"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
