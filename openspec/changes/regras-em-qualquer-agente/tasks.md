@@ -16,7 +16,8 @@
 
 ## 3. Guias e versão
 
-- [ ] 3.1 Aplicar o D4 no `templates/openspec-padrao.md`, no COMECE-AQUI e no README, e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint nos dois lugares sem issues e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+- [x] 3.1 Aplicar o D4 no `templates/openspec-padrao.md`, no COMECE-AQUI e no README, e o D6 no `VERSION` e no `CHANGELOG.md`. Verificar com o lint nos dois lugares sem issues e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
+  - Evidência: seção "Usar com outros agentes" no `templates/openspec-padrao.md` e tabela de agentes no COMECE-AQUI; lista de commit do COMECE-AQUI e mensagem final do setup com os arquivos novos; README ("Regras globais de agentes") com a fonte em `padrao-openspec/openspec/rules.md`, o sync e a entrega aos projetos; `VERSION` → 1.5.0 e seção `## 1.5.0` no CHANGELOG. `[PASS]` em "Lint de Markdown" (nos dois lugares), "Versão e changelog", "Smoke test do instalador", "Raiz em dia com padrao-openspec" e "Guia de primeiros passos" (exit 0).
 - [ ] 3.2 Rodar o instalador sobre uma cópia do repositório de código do Lava Jato numa pasta temporária. Verificar que o bloco do Next.js no `AGENTS.md` continua igual e que os cinco arquivos e o `docs/openspec-regras.md` aparecem como o D2 descreve.
 - [ ] 3.3 Promover a ADR-0005 de `Proposed` para `Accepted` (o responsável aprova junto com a change) e rodar os comandos de verificação do `openspec/project.md` (todos os passos dos jobs `store` e `root`). Verificar que todos saem com código 0.
 

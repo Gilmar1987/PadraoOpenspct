@@ -368,8 +368,10 @@ Pronto. Próximos passos:
      verificação e as ADRs fundacionais no project.md deste store. Os próximos passos
      estão em docs/openspec-padrao.md, no repositório de código.
   2. Faça commit das mudanças deste store e do repositório de código, inclusive
-     .openspec-padrao.json (versão instalada do padrão), docs/openspec-padrao.md e
-     .github/workflows/openspec-padrao-update.yml.
+     .openspec-padrao.json (versão instalada do padrão), docs/openspec-padrao.md,
+     docs/openspec-regras.md, .github/workflows/openspec-padrao-update.yml e os arquivos
+     de instrução dos agentes (AGENTS.md, CLAUDE.md, GEMINI.md,
+     .github/copilot-instructions.md e .amazonq/rules/).
   3. Quando o repositório de código estiver no GitHub, ligue em Settings → Actions → General
      "Allow GitHub Actions to create and approve pull requests": o workflow abre um PR a cada
      versão nova do padrão (veja docs/openspec-padrao.md).${remoteNote}`);

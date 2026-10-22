@@ -4,6 +4,26 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.5.0 — 2026-10-22
+
+### O que mudou
+
+- **Regras em qualquer agente:** as regras globais ganham fonte única em
+  `padrao-openspec/openspec/rules.md` e chegam ao repositório de código como
+  `docs/openspec-regras.md`. O instalador mantém um bloco `openspec-padrao`, entre marcadores, em
+  `AGENTS.md`, `CLAUDE.md` (que importa o `AGENTS.md`), `GEMINI.md`,
+  `.github/copilot-instructions.md` e `.amazonq/rules/openspec-padrao.md`, para que Claude Code,
+  Cursor, Codex, Windsurf, Copilot, Gemini CLI e Amazon Q recebam as regras sem configuração
+  ([ADR-0005](openspec/adrs/0005-regras-entregues-por-blocos-gerenciados.md)).
+- **Guias:** o COMECE-AQUI e o `docs/openspec-padrao.md` ganham a tabela "Usar com outros agentes".
+
+### Ações no projeto
+
+- O PR de atualização cria ou atualiza `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
+  `.github/copilot-instructions.md`, `.amazonq/rules/openspec-padrao.md` e
+  `docs/openspec-regras.md`. Nos arquivos que já existiam (por exemplo, um `AGENTS.md` do
+  Next.js), revise o diff: só o bloco entre os marcadores é acrescentado.
+
 ## 1.4.0 — 2026-10-22
 
 ### O que mudou

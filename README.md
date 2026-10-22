@@ -192,13 +192,14 @@ Fonte em `padrao-openspec/.github/agents/`, espelhados em `.github/agents/`:
 ## Regras globais de agentes
 
 Todas as regras que governam o comportamento dos agentes de IA estão em uma única
-fonte da verdade:
+fonte da verdade ([ADR-0005](openspec/adrs/0005-regras-entregues-por-blocos-gerenciados.md)):
 
 ```text
-openspec/rules.md    ← fonte única, agnóstica de agente
+padrao-openspec/openspec/rules.md   ← fonte única, agnóstica de agente
+openspec/rules.md                   ← cópia gerada pelo sync-root.mjs
 ```
 
-Cada agente carrega automaticamente um stub mínimo que aponta para esse arquivo:
+Neste repositório, cada agente carrega automaticamente um stub mínimo que aponta para a cópia:
 
 | Agente | Arquivo carregado automaticamente |
 |---|---|
@@ -208,8 +209,13 @@ Cada agente carrega automaticamente um stub mínimo que aponta para esse arquivo
 | Cursor | `.cursorrules` |
 | Windsurf | `.windsurfrules` |
 
-Para atualizar uma regra, edite apenas `openspec/rules.md`. Os stubs não precisam
-ser alterados.
+Para atualizar uma regra, edite `padrao-openspec/openspec/rules.md` e rode o `sync-root.mjs`.
+Os stubs não precisam ser alterados.
+
+Nos projetos, o instalador entrega as regras como `docs/openspec-regras.md` e mantém um bloco
+`openspec-padrao`, entre marcadores, em `AGENTS.md`, `CLAUDE.md` (que importa o `AGENTS.md`),
+`GEMINI.md`, `.github/copilot-instructions.md` e `.amazonq/rules/openspec-padrao.md`. O resto de cada
+arquivo pertence ao projeto e não é alterado.
 
 ---
 
