@@ -164,6 +164,8 @@ jobs:
             check "$f" "Dependencies in Impact"
             check "$f" "Agent-run browser scripts"
           done
+          # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
+          check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
             check "$f" "Standard version check"
@@ -192,6 +194,139 @@ jobs:
           check "$f" '3.6 é "0) Sem autenticação no MVP" (ou um "Outro" equivalente)'
           check "$f" "leve a restrição de uso"
           exit $missing
+
+      - name: Paridade de papéis
+        run: |
+          # Cada agente do Copilot tem um subagente do Claude Code (ADR-0006). Os papéis de veredito
+          # não têm Edit nem Write.
+          missing=0
+          declare -A alias=([business-requirements-ingestor]=requirements-ingestor)
+          only_claude=" stage-reviewer code-reviewer requirements-ingestor "
+          for f in .github/agents/*.agent.md; do
+            role=$(basename "$f" .agent.md)
+            role=${alias[$role]:-$role}
+            if [ ! -f ".claude/agents/openspec-$role.md" ]; then
+              echo "::error file=padrao-openspec/$f::Falta o subagente .claude/agents/openspec-$role.md"
+              missing=1
+            fi
+          done
+          found=0
+          for f in .claude/agents/openspec-*.md; do
+            [ -f "$f" ] || continue
+            found=1
+            role=$(basename "$f" .md)
+            role=${role#openspec-}
+            case "$only_claude" in *" $role "*) ;; *)
+              if [ ! -f ".github/agents/$role.agent.md" ]; then
+                echo "::error file=padrao-openspec/$f::Papel sem agente do Copilot e fora das exceções: $role"
+                missing=1
+              fi ;;
+            esac
+            if [ "$role" != code-implementer ] && grep -E '^tools:' "$f" | grep -qE '(^|[^A-Za-z])(Edit|Write)([^A-Za-z]|$)'; then
+              echo "::error file=padrao-openspec/$f::Papel de veredito com Edit ou Write"
+              missing=1
+            fi
+          done
+          if [ "$found" = 0 ]; then
+            echo "::error::Nenhum subagente em .claude/agents/"
+            missing=1
+          fi
+          exit $missing
+
+      - name: Smoke test dos hooks do Claude Code
+        run: |
+          # Cada hook recebe um payload JSON simulado no stdin (ADR-0006). "deny"/"ask" na saída
+          # nega ou pede confirmação; saída vazia libera.
+          h=.claude/hooks/openspec-padrao
+          for f in "$h"/*.mjs; do node --check "$f"; done
+          fail=0
+          payload() { node -e 'const [tool, key, value, cwd, agent] = process.argv.slice(1); const p = { tool_name: tool, tool_input: { [key]: value } }; if (cwd) p.cwd = cwd; if (agent) p.agent_type = agent; process.stdout.write(JSON.stringify(p));' "$@"; }
+          expect() {
+            local want="$1" hook="$2" json="$3" out
+            out=$(printf '%s' "$json" | node "$h/$hook")
+            case "$want" in
+              allow) [ -z "$out" ] || { echo "::error::$hook deveria liberar: $json -> $out"; fail=1; } ;;
+              *) case "$out" in *"\"$want\""*) ;; *) echo "::error::$hook deveria responder $want: $json -> $out"; fail=1 ;; esac ;;
+            esac
+          }
+          # somente-leitura.mjs
+          for cmd in 'echo x > a.txt' 'git push origin main' 'python -c "print(1)"' 'Set-Content a.txt x' \
+                     'npm test && rm -rf dist' 'sed -i s/a/b/ f.txt' 'git -C . commit -m x' 'cat a | tee b' \
+                     'cp a b' 'mkdir -p out' 'git pull' 'git branch -D feat' 'sed --in-place s/a/b/ f' \
+                     '(rm -rf x)' 'del x' 'env rm x' 'find . -delete' 'git config user.name x' \
+                     'for f in *.tmp; do rm "$f"; done' 'if true; then rm x; fi' 'f() { rm x; }; f' '! rm x' \
+                     'xargs rm < lista' 'echo $(rm x)' 'Get-ChildItem | ForEach-Object { Remove-Item $_ }'; do
+            expect deny somente-leitura.mjs "$(payload Bash command "$cmd" '' openspec-qa-validator)"
+          done
+          for cmd in 'git status' 'npm test' 'grep -rn "a > b" src' 'npm test 2>&1 | tail -5' \
+                     'ls > /dev/null' 'git diff HEAD~1' 'openspec validate --all --strict' 'Get-Content a.txt' \
+                     'python -m pytest -p no:cacheprovider' 'node -r ts-node/register x.ts' 'git stash list' \
+                     'git tag -l' 'echo x > /dev/stderr' 'git config --get user.name' 'npx playwright test' \
+                     'echo ${HOME}' 'git show stash@{0}' 'git tag --contains HEAD@{1}'; do
+            expect allow somente-leitura.mjs "$(payload Bash command "$cmd" '' openspec-stage-reviewer)"
+          done
+          # Agente principal (sem agent_type) e outro subagente: o hook de papel não interfere.
+          expect allow somente-leitura.mjs "$(payload Bash command 'echo x > a.txt')"
+          expect allow somente-leitura.mjs "$(payload Bash command 'git push origin main' '' openspec-code-implementer)"
+          expect deny somente-leitura.mjs "$(payload PowerShell command 'Set-Content a.txt x' '' openspec-code-reviewer)"
+          expect allow somente-leitura.mjs 'isto não é JSON'
+          # escopo-de-escrita.mjs, num repositório temporário
+          repo=$(mktemp -d)
+          git -C "$repo" init -q
+          repo_native=$(cygpath -m "$repo" 2>/dev/null || echo "$repo")
+          for target in .claude/settings.json docs/openspec-regras.md .openspec-padrao.json ../fora.txt .github/agents/x.agent.md; do
+            expect deny escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native" openspec-code-implementer)"
+          done
+          for target in src/app.ts 'src\app.ts' "$repo_native/README.md" docs/guia.md; do
+            expect allow escopo-de-escrita.mjs "$(payload Write file_path "$target" "$repo_native" openspec-code-implementer)"
+          done
+          # Agente principal (sem agent_type): o hook de papel não interfere.
+          expect allow escopo-de-escrita.mjs "$(payload Write file_path .claude/settings.json "$repo_native")"
+          rm -rf "$repo"
+          # cobra-evidencia.mjs, numa raiz OpenSpec local temporária (sem registrar store)
+          w=$(mktemp -d)
+          git -C "$w" init -q
+          mkdir -p "$w/openspec/changes/demo" "$w/openspec/specs"
+          printf 'schema: spec-driven\n' > "$w/openspec/config.yaml"
+          printf '# Proposal\n\n## Why\n\nTeste.\n' > "$w/openspec/changes/demo/proposal.md"
+          printf '## 1. A\n\n- [x] 1.1 primeira\n  - Evidência: `x` → ok (exit 0)\n- [x] 1.2 segunda sem prova\n- [ ] 1.3 terceira\n' > "$w/openspec/changes/demo/tasks.md"
+          w_native=$(cygpath -m "$w" 2>/dev/null || echo "$w")
+          stop() { node -e 'const [cwd, active] = process.argv.slice(1); process.stdout.write(JSON.stringify({ hook_event_name: "Stop", cwd, stop_hook_active: active === "1" }));' "$w_native" "$1"; }
+          expect block cobra-evidencia.mjs "$(stop 0)"
+          out=$(printf '%s' "$(stop 0)" | node "$h/cobra-evidencia.mjs")
+          case "$out" in *"1.2 segunda"*) ;; *) echo "::error::cobra-evidencia deveria citar a tarefa 1.2: $out"; fail=1 ;; esac
+          case "$out" in *"1.1 primeira"*) echo "::error::cobra-evidencia citou a tarefa com evidência: $out"; fail=1 ;; esac
+          expect allow cobra-evidencia.mjs "$(stop 1)"
+          printf '## 1. A\n\n- [x] 1.1 primeira\n  - Evidência: `x` → ok (exit 0)\n- [ ] 1.2 segunda\n' > "$w/openspec/changes/demo/tasks.md"
+          expect allow cobra-evidencia.mjs "$(stop 0)"
+          # Todas as tarefas marcadas (status "complete" no CLI) continuam sendo cobradas.
+          printf '## 1. A\n\n- [x] 1.1 primeira\n- [x] 1.2 segunda\n' > "$w/openspec/changes/demo/tasks.md"
+          expect block cobra-evidencia.mjs "$(stop 0)"
+          # Com o transcript da conversa, um tasks.md anterior a ela não bloqueia; um alterado depois, sim.
+          transcript="$w_native/transcript.jsonl"
+          node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({ timestamp: new Date().toISOString() }) + "\n")' "$transcript"
+          node -e 'const t = new Date(Date.now() - 3600e3); require("fs").utimesSync(process.argv[1], t, t)' "$w_native/openspec/changes/demo/tasks.md"
+          stop_t() { node -e 'const [cwd, transcript_path] = process.argv.slice(1); process.stdout.write(JSON.stringify({ hook_event_name: "Stop", cwd, transcript_path, stop_hook_active: false }));' "$w_native" "$transcript"; }
+          expect allow cobra-evidencia.mjs "$(stop_t)"
+          printf '## 1. A\n\n- [x] 1.1 primeira\n- [x] 1.2 segunda\n' > "$w/openspec/changes/demo/tasks.md"
+          expect block cobra-evidencia.mjs "$(stop_t)"
+          # portao-do-archive.mjs: sem portão pede confirmação; com portão, segue o código de saída dele.
+          bash_in() { node -e 'const [command, cwd] = process.argv.slice(1); process.stdout.write(JSON.stringify({ tool_name: "Bash", cwd, tool_input: { command } }));' "$1" "$w_native"; }
+          expect ask portao-do-archive.mjs "$(bash_in 'openspec archive demo --yes')"
+          expect allow portao-do-archive.mjs "$(bash_in 'git status')"
+          mkdir -p "$w/docs"
+          printf 'console.log(JSON.stringify({ ok: false, acao: "archive", change: process.argv[3], motivos: ["verification.md ausente"] })); process.exit(1);\n' > "$w/docs/openspec-portao.mjs"
+          expect deny portao-do-archive.mjs "$(bash_in 'openspec archive demo --yes')"
+          out=$(printf '%s' "$(bash_in 'openspec archive demo')" | node "$h/portao-do-archive.mjs")
+          case "$out" in *"verification.md ausente"*) ;; *) echo "::error::portao-do-archive deveria mostrar os motivos: $out"; fail=1 ;; esac
+          printf 'console.log(JSON.stringify({ ok: true, acao: "archive", change: process.argv[3], motivos: [] }));\n' > "$w/docs/openspec-portao.mjs"
+          expect allow portao-do-archive.mjs "$(bash_in 'openspec archive demo --yes')"
+          expect deny portao-do-archive.mjs "$(bash_in 'openspec archive nome%invalido')"
+          printf 'console.log(JSON.stringify({ ok: false, motivos: [process.argv.slice(2).join(" ")] })); process.exit(1);\n' > "$w/docs/openspec-portao.mjs"
+          out=$(printf '%s' "$(bash_in 'openspec --no-color archive "demo" --store=meu-store -y')" | node "$h/portao-do-archive.mjs")
+          case "$out" in *'archive demo --json --store meu-store'*) ;; *) echo "::error::portao-do-archive deveria repassar change e --store=: $out"; fail=1 ;; esac
+          rm -rf "$w"
+          exit $fail
 
       - name: Smoke test do instalador
         run: |
@@ -326,6 +461,116 @@ jobs:
           grep -q 'linha nova' "$tx/.claude/commands/opsx/apply.md"
           test -n "$(git -C "$tx" status --porcelain)"
           node -e 'process.exit(JSON.parse(require("fs").readFileSync(process.argv[1] + "/.openspec-padrao.json", "utf8")).version === "1.0.1" ? 0 : 1)' "$tx"
+
+      - name: Smoke test da camada do Claude Code no instalador
+        run: |
+          # ADR-0006: subagentes e hooks como arquivos gerenciados; no .claude/settings.json, só as
+          # entradas do padrão mudam, um JSON inválido para tudo, e o prefixo openspec- é reservado.
+          export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
+          p="$(mktemp -d)"
+          git -C "$p" init -q
+          mkdir -p "$p/.claude"
+          printf '{\n  "permissions": { "allow": ["Bash(npm test)"], "ask": ["Bash(git push *)"] },\n  "hooks": { "PreToolUse": [ { "matcher": "Edit", "hooks": [ { "type": "command", "command": "echo projeto" } ] } ] }\n}\n' > "$p/.claude/settings.json"
+          node scripts/install-skills.mjs "$p" > /dev/null
+          for f in .claude/agents/*.md .claude/hooks/openspec-padrao/*.mjs; do cmp "$f" "$p/$f"; done
+          s="$p/.claude/settings.json"
+          node -e '
+            const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            const has = (list, rule) => (s.permissions[list] || []).includes(rule);
+            const hooks = JSON.stringify(s.hooks);
+            const ok = has("allow", "Bash(npm test)") && has("ask", "Bash(git push *)") && has("ask", "Bash(openspec archive *)")
+              && has("deny", "Bash(git reset --hard *)") && hooks.includes("echo projeto")
+              && hooks.includes("cobra-evidencia.mjs") && hooks.includes("portao-do-archive.mjs")
+              && hooks.includes("somente-leitura.mjs") && hooks.includes("escopo-de-escrita.mjs");
+            // Cada script do padrão no matcher certo: um hook de papel no grupo errado nunca agiria.
+            const where = (script) => (s.hooks.PreToolUse || []).filter((g) => JSON.stringify(g.hooks).includes(script)).map((g) => g.matcher);
+            const placed = JSON.stringify(where("somente-leitura.mjs")) === JSON.stringify(["Bash|PowerShell"])
+              && JSON.stringify(where("portao-do-archive.mjs")) === JSON.stringify(["Bash|PowerShell"])
+              && JSON.stringify(where("escopo-de-escrita.mjs")) === JSON.stringify(["Edit|Write"]);
+            if (!ok || !placed) { console.error(JSON.stringify(s, null, 2)); process.exit(1); }' "$s"
+          # A permissão que o projeto já tinha não vira do padrão.
+          node -e '
+            const m = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            if ((m.managedSettings.ask || []).includes("Bash(git push *)")) process.exit(1);
+            if (!(m.managedSettings.ask || []).includes("Bash(gh release *)")) process.exit(1);
+            if (!m.managedFiles.includes(".claude/agents/openspec-code-reviewer.md")) process.exit(1);' "$p/.openspec-padrao.json"
+          # Reinstalação sem mudanças: nada muda, nem sem modo.
+          cp "$s" "$RUNNER_TEMP/settings-antes.json"
+          node scripts/install-skills.mjs "$p" > "$RUNNER_TEMP/reinstalacao.txt"
+          cmp "$RUNNER_TEMP/settings-antes.json" "$s"
+          grep -qF 'Unchanged: .claude/settings.json' "$RUNNER_TEMP/reinstalacao.txt"
+          # Versão que retira uma permissão: exige modo; com --in-place, só a entrada do padrão sai.
+          st="$(mktemp -d)"
+          cp -r . "$st/padrao-openspec"
+          node -e '
+            const fs = require("fs"); const f = process.argv[1]; const t = JSON.parse(fs.readFileSync(f, "utf8"));
+            t.permissions.ask = t.permissions.ask.filter((rule) => rule !== "Bash(gh release *)");
+            fs.writeFileSync(f, JSON.stringify(t, null, 2));' "$st/padrao-openspec/templates/claude-settings.json"
+          if node "$st/padrao-openspec/scripts/install-skills.mjs" "$p" > "$RUNNER_TEMP/sem-modo.txt" 2>&1; then exit 1; fi
+          grep -qF 'openspec-padrao entries' "$RUNNER_TEMP/sem-modo.txt"
+          cmp "$RUNNER_TEMP/settings-antes.json" "$s"
+          node "$st/padrao-openspec/scripts/install-skills.mjs" "$p" --in-place > /dev/null
+          if grep -qF 'gh release' "$s"; then exit 1; fi
+          grep -qF 'Bash(npm test)' "$s"
+          grep -qF 'echo projeto' "$s"
+          grep -qF 'Bash(git push *)' "$s"
+          # CRLF, BOM e indentação de 4 espaços do projeto são mantidos.
+          c="$(mktemp -d)"
+          git -C "$c" init -q
+          mkdir -p "$c/.claude"
+          printf '\357\273\277{\r\n    "permissions": {\r\n        "allow": ["Bash(npm test)"]\r\n    }\r\n}\r\n' > "$c/.claude/settings.json"
+          node scripts/install-skills.mjs "$c" > /dev/null
+          head -c 3 "$c/.claude/settings.json" | od -An -tx1 | grep -q 'ef bb bf'
+          node -e 'process.exit(require("fs").readFileSync(process.argv[1], "utf8").includes("\r\n") ? 0 : 1)' "$c/.claude/settings.json"
+          grep -q '^        "allow"' "$c/.claude/settings.json"
+          # Formato inválido (permissions.allow que não é lista): erro e nada escrito.
+          v="$(mktemp -d)"
+          git -C "$v" init -q
+          mkdir -p "$v/.claude"
+          printf '{ "permissions": { "allow": "Bash(npm test)" } }\n' > "$v/.claude/settings.json"
+          if node scripts/install-skills.mjs "$v" > "$RUNNER_TEMP/forma.txt" 2>&1; then exit 1; fi
+          grep -qF 'must be lists' "$RUNNER_TEMP/forma.txt"
+          test ! -e "$v/.openspec-padrao.json"
+          # Um subagente que sai do padrão é removido na atualização, e a reinstalação seguinte não trava.
+          rt="$(mktemp -d)"
+          cp -r . "$rt/padrao-openspec"
+          rm "$rt/padrao-openspec/.claude/agents/openspec-task-planner.md"
+          node "$rt/padrao-openspec/scripts/install-skills.mjs" "$c" --in-place > "$RUNNER_TEMP/retirado.txt"
+          grep -qF 'Removed: .claude/agents/openspec-task-planner.md' "$RUNNER_TEMP/retirado.txt"
+          test ! -e "$c/.claude/agents/openspec-task-planner.md"
+          node "$rt/padrao-openspec/scripts/install-skills.mjs" "$c" > /dev/null
+          rm -rf "$c" "$v" "$rt"
+          # Atualização a partir do formato anterior, com um hook do projeto no mesmo grupo do padrão:
+          # o hook do projeto fica, os do padrão vão para o lugar certo e a reinstalação não muda nada.
+          u="$(mktemp -d)"
+          git -C "$u" init -q
+          mkdir -p "$u/.claude"
+          printf '{\n  "hooks": {\n    "PreToolUse": [\n      { "matcher": "Bash|PowerShell", "hooks": [ { "type": "command", "command": "node", "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/portao-do-archive.mjs"] }, { "type": "command", "command": "echo meu-bash" } ] }\n    ]\n  }\n}\n' > "$u/.claude/settings.json"
+          node scripts/install-skills.mjs "$u" --in-place > /dev/null
+          grep -qF 'echo meu-bash' "$u/.claude/settings.json"
+          grep -qF 'escopo-de-escrita.mjs' "$u/.claude/settings.json"
+          cp "$u/.claude/settings.json" "$RUNNER_TEMP/misto.json"
+          node scripts/install-skills.mjs "$u" > /dev/null
+          cmp "$RUNNER_TEMP/misto.json" "$u/.claude/settings.json"
+          rm -rf "$u"
+          # JSON inválido: erro e nada escrito.
+          q="$(mktemp -d)"
+          git -C "$q" init -q
+          mkdir -p "$q/.claude"
+          printf '{ "permissions": { "allow": ["x",] } }\n' > "$q/.claude/settings.json"
+          if node scripts/install-skills.mjs "$q" > "$RUNNER_TEMP/json.txt" 2>&1; then exit 1; fi
+          grep -qF 'is not valid JSON' "$RUNNER_TEMP/json.txt"
+          test ! -e "$q/.openspec-padrao.json"
+          test ! -e "$q/.claude/agents"
+          # Agente do projeto com o prefixo reservado: erro e nada escrito.
+          r="$(mktemp -d)"
+          git -C "$r" init -q
+          mkdir -p "$r/.claude/agents"
+          echo x > "$r/.claude/agents/openspec-revisor.md"
+          if node scripts/install-skills.mjs "$r" > "$RUNNER_TEMP/alheio.txt" 2>&1; then exit 1; fi
+          grep -qF 'openspec-revisor.md' "$RUNNER_TEMP/alheio.txt"
+          test ! -e "$r/.openspec-padrao.json"
+          rm -rf "$p" "$q" "$r" "$st"
 
       - name: Smoke test do setup de projeto
         run: |

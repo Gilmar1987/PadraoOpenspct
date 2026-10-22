@@ -10,6 +10,13 @@ const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.
 const sourceSkills = path.join(sourceRoot, '.claude', 'skills');
 const sourceAgents = path.join(sourceRoot, '.github', 'agents');
 const sourceCommands = path.join(sourceRoot, '.claude', 'commands', 'opsx');
+// Claude Code layer (ADR-0006): subagents, hook scripts and the managed entries of .claude/settings.json.
+const sourceClaudeAgents = path.join(sourceRoot, '.claude', 'agents');
+const sourceClaudeHooks = path.join(sourceRoot, '.claude', 'hooks', 'openspec-padrao');
+const settingsTemplate = 'claude-settings.json';
+const settingsPath = '.claude/settings.json';
+const hookPathMarker = '.claude/hooks/openspec-padrao/';
+const permissionLists = ['allow', 'ask', 'deny'];
 const sourceTemplates = path.join(sourceRoot, 'templates');
 const versionFile = path.join(sourceRoot, 'VERSION');
 const manifestName = '.openspec-padrao.json';
@@ -46,8 +53,9 @@ const stackRemovedMessage =
 function usage() {
   console.log(`Usage: node scripts/install-skills.mjs <consumer-project> [options]
 
-Install bundled skills, OPSX slash commands, VS Code agents, the standard update workflow, guide and rules into a
-consumer project, keep the standard's block in the agents' instruction files (${instructionFiles.map((file) => file.path).join(', ')}),
+Install bundled skills, OPSX slash commands, VS Code agents, Claude Code subagents and hooks, the standard update
+workflow, guide and rules into a consumer project, keep the standard's block in the agents' instruction files
+(${instructionFiles.map((file) => file.path).join(', ')}) and its entries in ${settingsPath},
 record the installed version in ${manifestName}, and ignore its local openspec/ directory in Git.
 
 A first install writes to the working tree. Reinstalling over files that would change needs a mode:
@@ -620,6 +628,150 @@ function writeInstructionBlock(plan) {
   }
 }
 
+// A project agent named like the standard's subagents would be overwritten: refuse unless a previous
+// install of the standard already manages it.
+function assertNoForeignClaudeAgents(projectRoot, previous) {
+  const directory = path.join(projectRoot, '.claude', 'agents');
+  if (!existsSync(directory)) return;
+  const managed = new Set(previous?.managedFiles ?? []);
+  const foreign = readdirSync(directory)
+    .filter((name) => /^openspec-.*\.md$/i.test(name) && !managed.has(`.claude/agents/${name}`));
+  if (foreign.length > 0) {
+    throw new Error(
+      `.claude/agents/ already has ${foreign.join(', ')}, which the standard did not install; the openspec- ` +
+      'prefix is reserved for the standard\'s subagents. Rename those files. Nothing was changed.',
+    );
+  }
+}
+
+// Subagents and hook scripts a previous version installed and the current one no longer ships. They are
+// the standard's, so they go away with the update instead of being taken for project files.
+function retiredClaudeFiles(projectRoot, previous, manifestPaths) {
+  const current = new Set(manifestPaths);
+  return (previous?.managedFiles ?? [])
+    .filter((file) => /^\.claude\/agents\/openspec-[^/]+\.md$/i.test(file) || file.startsWith(hookPathMarker))
+    .filter((file) => !current.has(file) && existsSync(path.join(projectRoot, ...file.split('/'))));
+}
+
+function isStandardHook(entry) {
+  const parts = [entry?.command, ...(Array.isArray(entry?.args) ? entry.args : [])];
+  return parts.some((part) => typeof part === 'string' && part.replace(/\\/g, '/').includes(hookPathMarker));
+}
+
+// Removes the standard's hook entries from settings.hooks and puts the template's back at the position
+// of the first one removed, so a reinstall of the same version leaves the file byte for byte as it was.
+function mergeHooks(settings, template) {
+  const hooks = settings.hooks ?? {};
+  for (const event of new Set([...Object.keys(hooks), ...Object.keys(template.hooks ?? {})])) {
+    const groups = hooks[event] ?? [];
+    let insertAt = -1;
+    const kept = [];
+    for (const group of groups) {
+      const entries = Array.isArray(group?.hooks) ? group.hooks : [];
+      const own = entries.filter(isStandardHook);
+      if (own.length === 0) {
+        kept.push(group);
+        continue;
+      }
+      if (insertAt === -1) insertAt = kept.length;
+      const others = entries.filter((entry) => !isStandardHook(entry));
+      if (others.length > 0) kept.push({ ...group, hooks: others });
+    }
+    const added = structuredClone(template.hooks?.[event] ?? []);
+    kept.splice(insertAt === -1 ? kept.length : insertAt, 0, ...added);
+    if (kept.length > 0) hooks[event] = kept;
+    else delete hooks[event];
+  }
+  if (Object.keys(hooks).length > 0) settings.hooks = hooks;
+  else delete settings.hooks;
+}
+
+// Same for the permission rules the standard added before (manifest managedSettings); a rule the
+// project already has is the project's and is never recorded as the standard's.
+function mergePermissions(settings, template, previousManaged) {
+  const permissions = settings.permissions ?? {};
+  const managed = {};
+  for (const list of permissionLists) {
+    const wanted = template.permissions?.[list] ?? [];
+    const before = permissions[list] ?? [];
+    const ownBefore = new Set(previousManaged?.[list] ?? []);
+    let insertAt = -1;
+    const kept = [];
+    for (const rule of before) {
+      if (ownBefore.has(rule)) {
+        if (insertAt === -1) insertAt = kept.length;
+      } else {
+        kept.push(rule);
+      }
+    }
+    const added = wanted.filter((rule) => !kept.includes(rule));
+    kept.splice(insertAt === -1 ? kept.length : insertAt, 0, ...added);
+    if (added.length > 0) managed[list] = added;
+    if (kept.length > 0) permissions[list] = kept;
+    else delete permissions[list];
+  }
+  if (Object.keys(permissions).length > 0) settings.permissions = permissions;
+  else delete settings.permissions;
+  return managed;
+}
+
+// Plans the standard's entries in .claude/settings.json (ADR-0006). The rest of the file belongs to the
+// project and is kept as it is; a file that is not valid JSON stops the install with nothing changed.
+function planClaudeSettings(projectRoot, previous) {
+  const templatePath = path.join(sourceTemplates, settingsTemplate);
+  const template = JSON.parse(readFileSync(templatePath, 'utf8'));
+  const destination = path.join(projectRoot, ...settingsPath.split('/'));
+  const info = lstatIfPresent(destination);
+  if (info?.isSymbolicLink()) return { destination, skip: 'is a symbolic link; edit its target by hand' };
+  if (isIgnoredByProject(projectRoot, settingsPath)) return { destination, skip: 'is ignored by the project (.gitignore)' };
+  assertSafeDestination(projectRoot, destination, templatePath);
+  if (info && !info.isFile()) throw new Error(`Refusing to modify a non-regular file: ${destination}`);
+  const original = info ? readFileSync(destination, 'utf8') : '';
+  let parsed = {};
+  if (original.trim()) {
+    try {
+      parsed = JSON.parse(original.replace(/^﻿/, ''));
+    } catch (error) {
+      throw new Error(`${settingsPath} is not valid JSON (${error.message}); fix it by hand. Nothing was changed.`);
+    }
+    const isObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+    let shapeError = null;
+    if (!isObject(parsed)) shapeError = 'the file must hold a JSON object';
+    else if (parsed.hooks !== undefined
+      && (!isObject(parsed.hooks) || Object.values(parsed.hooks).some((groups) => !Array.isArray(groups)))) {
+      shapeError = '"hooks" must map each event to a list';
+    } else if (parsed.permissions !== undefined && (!isObject(parsed.permissions)
+      || permissionLists.some((list) => parsed.permissions[list] !== undefined && !Array.isArray(parsed.permissions[list])))) {
+      shapeError = '"permissions.allow", "ask" and "deny" must be lists';
+    }
+    if (shapeError) throw new Error(`${settingsPath}: ${shapeError}; fix it by hand. Nothing was changed.`);
+  }
+  const before = JSON.stringify(parsed);
+  // An install that already recorded managedSettings counts as having the entries, even if someone
+  // deleted them by hand: putting them back is then a change that needs --update or --in-place.
+  const hadEntries = previous?.managedSettings !== undefined
+    || JSON.stringify(parsed.hooks ?? {}).includes(hookPathMarker);
+  const desired = structuredClone(parsed);
+  mergeHooks(desired, template);
+  const managedSettings = mergePermissions(desired, template, previous?.managedSettings);
+  const eol = original.includes('\r\n') ? '\r\n' : '\n';
+  const indent = original.replace(/^﻿/, '').match(/^[{[][^\n]*\n([ \t]+)\S/)?.[1] ?? '  ';
+  const bom = original.startsWith('﻿') ? '﻿' : '';
+  return {
+    destination,
+    desired: `${bom}${JSON.stringify(desired, null, indent)}\n`.replace(/\n/g, eol),
+    mode: info?.mode,
+    exists: Boolean(info),
+    hadEntries,
+    changed: JSON.stringify(desired) !== before,
+    managedSettings,
+  };
+}
+
+function writeClaudeSettings(plan) {
+  writeInstructionBlock(plan);
+}
+
 function readManifest(projectRoot) {
   try {
     return JSON.parse(readFileSync(path.join(projectRoot, manifestName), 'utf8'));
@@ -678,7 +830,10 @@ function main() {
   }
   listAgents();
   assertCommands();
-  for (const file of [...templateFiles, { source: blockTemplate }]) {
+  for (const directory of [sourceClaudeAgents, sourceClaudeHooks]) {
+    if (!existsSync(directory)) throw new Error(`Claude Code source directory not found: ${directory}`);
+  }
+  for (const file of [...templateFiles, { source: blockTemplate }, { source: settingsTemplate }]) {
     if (!existsSync(path.join(sourceTemplates, file.source))) {
       throw new Error(`Template not found: ${path.join(sourceTemplates, file.source)}`);
     }
@@ -707,6 +862,18 @@ function main() {
       source: sourceAgents,
       destination: path.join(projectRoot, '.github', 'agents'),
     },
+    {
+      name: 'Claude Code subagents',
+      label: '.claude/agents (Claude Code subagents)',
+      source: sourceClaudeAgents,
+      destination: path.join(projectRoot, '.claude', 'agents'),
+    },
+    {
+      name: 'Claude Code hooks',
+      label: '.claude/hooks/openspec-padrao (Claude Code hooks)',
+      source: sourceClaudeHooks,
+      destination: path.join(projectRoot, '.claude', 'hooks', 'openspec-padrao'),
+    },
     ...templateFiles.map((file) => ({
       name: file.label,
       label: `${file.destination} (${file.label})`,
@@ -719,8 +886,12 @@ function main() {
   for (const { source, destination } of operations) {
     assertSafeDestination(projectRoot, destination, source);
   }
-  // Planned before anything is written, so broken markers stop the install with no changes.
+  // Planned before anything is written, so broken markers, a foreign openspec-* agent or an invalid
+  // settings.json stop the install with no changes.
   const blocks = planInstructionBlocks(projectRoot);
+  const previous = readManifest(projectRoot);
+  assertNoForeignClaudeAgents(projectRoot, previous);
+  const settings = planClaudeSettings(projectRoot, previous);
 
   if (options.force) {
     console.warn('Warning: --force is ignored; reinstalling over changed files needs --update or --in-place.');
@@ -742,9 +913,10 @@ function main() {
     installedAt: new Date().toISOString().slice(0, 10),
     managedFiles: manifestPaths,
     managedBlocks: instructionFiles.map((file) => file.path),
+    managedSettings: settings.skip ? (previous?.managedSettings ?? {}) : settings.managedSettings,
   };
-  const previous = readManifest(projectRoot);
   const manifestChanged = previous !== null && comparableManifest(previous) !== comparableManifest(manifest);
+  const retired = retiredClaudeFiles(projectRoot, previous, manifestPaths);
 
   // Installed files that would change, or a different recorded version: rewriting them needs an
   // explicit mode (ADR-0004).
@@ -752,12 +924,15 @@ function main() {
     existsSync(destination) && !sameContent(from, destination));
   // A block the standard already wrote counts like a managed file; adding a missing block does not.
   const changingBlocks = blocks.filter((block) => !block.skip && block.hadBlock && block.changed);
-  if ((changing.length > 0 || changingBlocks.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
+  const changingSettings = !settings.skip && settings.hadEntries && settings.changed;
+  if ((changing.length > 0 || changingBlocks.length > 0 || changingSettings || retired.length > 0 || manifestChanged) && !options.update && !options.inPlace) {
     const details = [
       ...changing.map(({ name, destination }) => `  ${name}: ${destination}`),
       ...changingBlocks.map(({ destination }) => (previous === null
         ? `  existing openspec-padrao block, not written by this installer (it would be replaced): ${destination}`
         : `  openspec-padrao block: ${destination}`)),
+      ...(changingSettings ? [`  openspec-padrao entries: ${settings.destination}`] : []),
+      ...retired.map((file) => `  retired by the standard (will be removed): ${file}`),
       ...(manifestChanged ? [`  ${manifestName}: v${previous.version ?? '?'} -> v${version}`] : []),
     ].join('\n');
     throw new Error(
@@ -805,6 +980,21 @@ function main() {
       console.log(`${block.exists ? 'Updated' : 'Created'}: ${block.path} (openspec-padrao block)`);
       installed += 1;
     }
+    for (const file of retired) {
+      rmSync(path.join(projectRoot, ...file.split('/')), { force: true });
+      console.log(`Removed: ${file} (no longer part of the standard)`);
+      installed += 1;
+    }
+    if (settings.skip) {
+      console.log(`Skipped: ${settingsPath} ${settings.skip}`);
+    } else if (!settings.changed) {
+      console.log(`Unchanged: ${settingsPath} (openspec-padrao entries)`);
+      unchanged += 1;
+    } else {
+      writeClaudeSettings(settings);
+      console.log(`${settings.exists ? 'Updated' : 'Created'}: ${settingsPath} (openspec-padrao entries)`);
+      installed += 1;
+    }
     if (writeManifest(projectRoot, manifest)) console.log(`Recorded: ${manifestName} (v${version})`);
     console.log(`\nDone. ${installed} installed, ${unchanged} already current.`);
   };
@@ -814,7 +1004,10 @@ function main() {
     return;
   }
 
-  const missing = operations.some(({ destination }) => !existsSync(destination)) || blocks.some((block) => !block.skip && block.changed);
+  const missing = operations.some(({ destination }) => !existsSync(destination))
+    || blocks.some((block) => !block.skip && block.changed)
+    || (!settings.skip && settings.changed)
+    || retired.length > 0;
   if (previous !== null && changing.length === 0 && !missing && !manifestChanged) {
     console.log(`Already at v${version}; nothing to update.`);
     return;
@@ -841,6 +1034,7 @@ function main() {
       '.gitignore', manifestName,
       ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')),
       ...blocks.filter((block) => !block.skip).map((block) => block.path),
+      ...(settings.skip ? [] : [settingsPath]),
     ])];
     gitIn(projectRoot, ['add', '-A', '--', ...paths]);
     if (tryGit(projectRoot, ['diff', '--cached', '--quiet']) !== null) {

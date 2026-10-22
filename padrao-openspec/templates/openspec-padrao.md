@@ -51,6 +51,82 @@ resolvido: rode na pasta deste repositório ou passe `--store <id>`). Os fluxos 
 `/opsx:archive` rodam o portão sozinhos. Para recusar também commits `OpenSpec-Change: <change>` de
 changes não aprovadas, rode uma vez `node docs/openspec-portao.mjs instalar-hook`.
 
+## Camada do Claude Code
+
+No Claude Code, o padrão também impõe limites por mecanismo, e não só por instrução
+([ADR-0006](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)).
+
+**Subagentes** em `.claude/agents/openspec-*.md`, um por papel, com ferramentas e modelo próprios:
+
+| Subagente | Ferramentas | Papel |
+|---|---|---|
+| `openspec-spec-architect` | leitura | Analisa specs e impactos e prepara drafts de proposal, specs e design |
+| `openspec-task-planner` | leitura | Deriva o checklist de tarefas dos artefatos aprovados |
+| `openspec-consistency-guardian` | leitura | Aponta contradições e duplicações entre changes, specs e ADRs |
+| `openspec-requirements-ingestor` | leitura | Extrai requisitos de atas e documentos de negócio |
+| `openspec-qa-validator` | leitura e shell somente leitura | Valida a change antes do archive |
+| `openspec-stage-reviewer` | leitura e shell somente leitura | Roda os Comandos de verificação e devolve só as falhas |
+| `openspec-code-reviewer` | leitura e shell somente leitura | Revisa o intervalo de commits da change (passo 6a do apply) |
+| `openspec-code-implementer` | leitura, edição e shell | Implementa as tarefas aprovadas |
+
+Os de veredito não têm ferramenta de edição e devolvem achados com evidência, sem corrigir. Nas
+chamadas dos que têm shell, um hook nega comandos que gravam arquivos ou alteram o Git
+(redirecionamento, `tee`, `sed -i`, código inline, `git commit`, `git push`, `rm`, `mv`). Nas chamadas
+do implementador, um hook nega a escrita fora do repositório e nos arquivos do padrão (`.claude/`,
+`.github/agents/`, `docs/openspec-*` e `.openspec-padrao.json`). Esses hooks ficam no
+`.claude/settings.json` e reconhecem o subagente pelo campo `agent_type` da chamada; o agente
+principal não é afetado. Uma sessão aberta com `claude --agent openspec-<papel>` assume o papel e
+passa a ter os mesmos limites.
+
+**Hooks de sessão** em `.claude/hooks/openspec-padrao/`, ligados pelo `.claude/settings.json`:
+
+- **Fim do turno:** se um `tasks.md` alterado nesta conversa tem tarefa marcada sem a linha
+  `Evidência:` logo abaixo, o turno não encerra uma vez, e o agente recebe a lista das tarefas. Tarefas
+  de changes que a conversa não tocou não bloqueiam. Uma falha de ambiente (CLI ausente, store não
+  resolvido) nunca bloqueia, e o hook desiste depois de alguns segundos.
+- **`openspec archive <change>`:** roda o portão (`docs/openspec-portao.mjs archive <change>`) e nega o
+  comando com os motivos quando ele bloqueia. Sem o portão, pede a sua confirmação.
+
+**Permissões:** `git push`, `gh pr create`, `gh release` e `openspec archive` pedem a sua confirmação;
+`git push --force ...`, `git push -f ...` e `git reset --hard ...` são negados (outras formas de push
+forçado, como `--force-with-lease`, caem na confirmação do `git push`). O padrão não acrescenta nada em
+`allow`. As regras valem para a ferramenta Bash; no Windows sem Git Bash, em que o Claude Code usa a
+ferramenta PowerShell, elas não se aplicam, e valem só os hooks e as regras de `docs/openspec-regras.md`.
+
+No `.claude/settings.json`, o instalador só mexe nas entradas dele: os hooks que apontam para
+`.claude/hooks/openspec-padrao/` e as permissões listadas em `managedSettings` no
+`.openspec-padrao.json`. Para desligar uma entrada, apague-a do arquivo. A próxima reinstalação ou
+atualização do padrão pede `--update` ou `--in-place` e a põe de volta, e o PR de atualização mostra
+isso no diff. O instalador mantém a indentação, o fim de linha e o BOM do arquivo.
+
+Avisos:
+
+- **Confiança na pasta:** os hooks e as regras `allow` do projeto só valem depois que a pasta é marcada
+  como confiável no Claude Code; `ask` e `deny` valem logo.
+- **Limite:** os hooks e as permissões são heurísticas sobre o texto do comando, não uma sandbox. Um
+  comando por outro caminho (o caminho absoluto de outro interpretador, uma expansão de variável,
+  `$( )`) pode escapar. As regras
+  de `docs/openspec-regras.md` continuam valendo.
+- **Outros agentes** não recebem esta camada; para eles valem os blocos de instrução e o portão.
+- **Versão:** os hooks de papel dependem do campo `agent_type`, que o Claude Code envia nas chamadas
+  de subagente; o roteiro abaixo foi validado no Claude Code 2.1.243. Sem esse campo, os hooks de papel
+  liberam tudo sem aviso: repita o passo 1 do roteiro no ambiente que o time usa (terminal, VS Code).
+
+### Roteiro de verificação no Claude Code
+
+Depois de instalar ou atualizar o padrão, confira num repositório de teste, com uma conversa nova:
+
+1. Peça ao agente que despache o `openspec-qa-validator` e que ele rode `python -c "print(1)"`, um
+   comando que só lê e que o agente não tem motivo para recusar. O comando deve ser negado com "Papel
+   somente leitura"; se aparecer `1`, o hook não disparou.
+2. Com a conversa aberta, marque à mão, no editor, uma tarefa de uma change de teste sem a linha
+   `Evidência:` e peça ao agente uma resposta curta. O turno deve continuar uma vez, citando a tarefa.
+3. Peça `openspec archive <change de teste>`. Com o portão, o comando deve ser negado com os motivos;
+   sem ele, o Claude Code deve pedir confirmação.
+
+Registre quem executou, quando e o resultado de cada passo no `verification.md` da change que mexeu
+nesta camada.
+
 ## Usar com outros agentes
 
 As regras do padrão chegam a este repositório como `docs/openspec-regras.md`. Cada agente as recebe por
@@ -60,7 +136,7 @@ deles.
 
 | Agente | Arquivo que lê | Como rodar o fluxo |
 |---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`) | Comandos `/opsx:*` |
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` |
 | Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
 | GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
 | Gemini CLI | `GEMINI.md` | Idem |
