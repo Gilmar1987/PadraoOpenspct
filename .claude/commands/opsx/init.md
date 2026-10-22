@@ -297,6 +297,7 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 **3.6 — Qual será a estratégia de autenticação?**
 
 ```
+0) Sem autenticação no MVP
 1) JWT Bearer — token stateless, validado em cada requisição
 2) Sessão + cookie — stateful, armazenado no servidor
 3) OAuth2 / OpenID Connect — provedor externo (Google, GitHub, Entra ID)
@@ -711,12 +712,17 @@ Avalie ao menos estas combinações:
 | 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis) e 6.5 é 0 | Dados pessoais sem nenhum controle de LGPD/GDPR | Registrar ao menos o consentimento com registro de aceite e o direito de exclusão (1,2), ou justificar |
 | 3.8 cita uma biblioteca presa a um banco (por exemplo, pg-boss) e 3.3 é outro banco | A fila exige um banco que o projeto não tem | Fila no banco da 3.3 (tabela de jobs, Hangfire etc.), ou registrar o banco extra na 3.3 e no deploy |
 | 3.8 é Redis ou broker dedicado e o bloco 4 não prevê esse serviço | Infraestrutura que o deploy não tem | Registrar o serviço no bloco 4 (desenvolvimento e produção), ou trocar por fila no próprio banco |
+| 7.1 "Auditoria de dependências" é "Não aplicável" e a stack (3.1, 3.2, 3.5) usa dependências de terceiros | Vulnerabilidades conhecidas nas dependências não serão detectadas por nenhuma etapa do fluxo | Registrar a ferramenta do ecossistema (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable`, `osv-scanner`) ou "Adiar"; se mantiver "Não aplicável" ou adiar, registrar a justificativa na coluna "Observações" da linha em "Comandos de verificação" do `project.md` |
+| 7.1 "Varredura de secrets" é "Não aplicável" e o projeto usa credenciais (4.4 com `.env` ou cofre, banco na 3.3, serviços externos na 3.9 ou 3.10) | Um secret commitado por engano não será detectado | Registrar uma ferramenta que examine o conteúdo a commitar (por exemplo, `gitleaks git --staged`, `trufflehog filesystem .`, `git secrets --scan`) ou "Adiar"; se mantiver "Não aplicável" ou adiar, registrar a justificativa na coluna "Observações" da linha em "Comandos de verificação" do `project.md` |
+| 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis), 3.6 é "0) Sem autenticação no MVP" (ou um "Outro" equivalente) e 6.4 é só "0) Nenhuma no MVP" | Qualquer pessoa com acesso à aplicação lê e altera dados pessoais, sem limite de requisições | Registrar em "Key Constraints" do `project.md` a restrição "uso só em ambiente local, com dados de teste, até existir autenticação", ou adotar autenticação (3.6) e limite de requisições (6.4) |
 
 Para cada combinação encontrada:
 
 1. Mostre as respostas envolvidas, a consequência e a proposta.
 2. Pergunte: **"Ajustar ou manter?"**. "Ajustar" volta à pergunta e atualiza o resumo do bloco; "Manter" pede uma justificativa em uma frase.
 3. Registre a combinação, a decisão e a justificativa para a seção "Checagem de coerência" do `project-setup.md`.
+
+Quando a combinação "dados pessoais ou sensíveis, sem autenticação e sem proteção" for mantida, leve a restrição de uso (a da proposta, ou a que o responsável justificou) também para "Key Constraints" do `project.md` e para a ADR de autenticação (`0005-autenticacao.md`). A justificativa só no `project-setup.md` não basta: é o `project.md` que as changes leem. A combinação 1.5×6.5 (LGPD) é avaliada à parte e pode aparecer junto dela.
 
 Se nenhuma combinação for encontrada, diga "Nenhuma incoerência encontrada" e siga. Com arquivo de respostas, a checagem também roda; a decisão de cada combinação é perguntada no chat.
 
@@ -893,7 +899,7 @@ Após gerar todas as ADRs, exiba a lista com nome e título de cada uma.
 
 ### Arquivo 5: `<root>/openspec/arquitetura.md`
 
-Gere este arquivo depois das ADRs, para poder linká-las. Use só as respostas confirmadas: um componente "Não aplicável" não entra na tabela nem no diagrama, e nada é inventado. O diagrama mostra só os componentes da tabela e, como ator, o público da 1.3; as setas são as dependências reais entre eles (por exemplo, front-end → back-end → acesso a dados → banco), no estilo de comunicação da 2.4.
+Gere este arquivo depois das ADRs, para poder linká-las. Use só as respostas confirmadas: um componente "Não aplicável" (ou "Sem autenticação no MVP", na 3.6) não entra na tabela nem no diagrama, e nada é inventado. O diagrama mostra só os componentes da tabela e, como ator, o público da 1.3; as setas são as dependências reais entre eles (por exemplo, front-end → back-end → acesso a dados → banco), no estilo de comunicação da 2.4.
 
 ````markdown
 # Arquitetura — {{Nome do Projeto}}

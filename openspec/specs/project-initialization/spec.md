@@ -123,6 +123,25 @@ Antes da confirmação final, o `/opsx:init` SHALL listar as combinações incoe
 - **WHEN** o responsável responde no 1.5 que o produto coleta dados pessoais ou sensíveis e responde `0` (não aplicável) no 6.5
 - **THEN** o init aponta que o produto trata dados pessoais sem nenhum controle e propõe ao menos o consentimento com registro de aceite e o direito de exclusão
 
+### Requirement: Combinações de segurança na checagem de coerência
+
+A checagem de coerência do `/opsx:init` SHALL avaliar também três combinações de segurança: auditoria de dependências "Não aplicável" num projeto com dependências de terceiros, varredura de secrets "Não aplicável" num projeto com credenciais, e dados pessoais ou sensíveis sem autenticação e sem proteção contra ataques.
+
+#### Scenario: Auditoria de dependências desligada num projeto com dependências
+
+- **WHEN** a stack escolhida usa dependências de terceiros e o responsável responde "Não aplicável" para a auditoria de dependências
+- **THEN** o init aponta que vulnerabilidades conhecidas nessas dependências não serão detectadas e oferece registrar uma ferramenta do ecossistema ou adiar com justificativa
+
+#### Scenario: Varredura de secrets desligada num projeto com credenciais
+
+- **WHEN** o projeto usa credenciais (por exemplo, `.env` com senha do banco) e o responsável responde "Não aplicável" para a varredura de secrets
+- **THEN** o init aponta que um secret commitado por engano não será detectado e oferece registrar uma ferramenta de varredura ou adiar com justificativa
+
+#### Scenario: Dados pessoais sem autenticação nem proteção
+
+- **WHEN** o produto trata dados pessoais ou sensíveis, não tem autenticação e não tem proteção contra ataques
+- **THEN** o init aponta que qualquer pessoa com acesso lê e altera esses dados sem limite e oferece registrar no `project.md` a restrição a ambiente local com dados de teste, ou adotar autenticação e limite de requisições
+
 ### Requirement: Comandos de segurança do projeto
 
 No registro dos comandos de verificação, o `/opsx:init` SHALL perguntar também o comando de auditoria de dependências e o de varredura de secrets, com sugestões de ao menos três ecossistemas ou ferramentas, além de "Não aplicável", "Adiar" e "Outro", e SHALL gravá-los na seção "Comandos de verificação" do `project.md`.
@@ -220,3 +239,12 @@ Depois de gerar os artefatos, o `/opsx:init` SHALL commitar só a pasta `openspe
 
 - **WHEN** a raiz OpenSpec não está num repositório Git
 - **THEN** o init gera os arquivos, informa que não houve commit e termina sem erro
+
+### Requirement: Opção sem autenticação
+
+A pergunta de autenticação do `/opsx:init` SHALL oferecer a opção "Sem autenticação no MVP", para que a decisão fique registrada sem depender de "Outro" e possa ser considerada pela checagem de coerência.
+
+#### Scenario: Projeto sem login no MVP
+
+- **WHEN** o responsável decide que o MVP não terá autenticação
+- **THEN** existe uma opção que registra essa decisão, sem precisar de "Outro"

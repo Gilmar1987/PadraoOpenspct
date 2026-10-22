@@ -4,6 +4,30 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.7.0 — 2026-10-22
+
+### O que mudou
+
+- **Sem autenticação no MVP:** a pergunta 3.6 do `/opsx:init` ganha a opção "0) Sem
+  autenticação no MVP", para a decisão ficar registrada sem depender de "Outro".
+- **Coerência de segurança:** a checagem de coerência do init aponta auditoria de dependências
+  "Não aplicável" num projeto com dependências, varredura de secrets "Não aplicável" num projeto
+  com credenciais e dados pessoais sem autenticação e sem proteção contra ataques. Quando esta
+  última é mantida, a restrição de uso vai para "Key Constraints" do `project.md` e para a ADR
+  de autenticação.
+- **Triagem de relatório externo:** o `/opsx:verify` confere no código e nas decisões cada
+  achado de uma ferramenta de análise externa e o classifica como real, não se aplica, risco
+  aceito ou falso positivo, com evidência. Achado real mantém a severidade, e o resultado vai
+  para a seção opcional `Triagem:` do `verification.md`.
+
+### Ações no projeto
+
+- No `project.md` do store, reveja as respostas "Não aplicável" para auditoria de dependências e
+  varredura de secrets em "Comandos de verificação": registre a ferramenta do ecossistema, ou
+  mantenha "Não aplicável" ou "Adiado" com a justificativa na coluna "Observações".
+- Se o projeto trata dados pessoais sem autenticação, registre em "Key Constraints" a restrição
+  de uso (por exemplo, "uso só em ambiente local, com dados de teste, até existir autenticação").
+
 ## 1.6.0 — 2026-10-22
 
 ### O que mudou
