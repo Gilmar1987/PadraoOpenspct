@@ -954,6 +954,19 @@ flowchart LR
 
 ---
 
+## Commit the init
+
+Depois de gerar todos os arquivos, quando `git -C "<root>" rev-parse --is-inside-work-tree` funcionar, commite só a pasta `openspec/` da raiz:
+
+```bash
+git -C "<root>" add -- openspec/
+git -C "<root>" commit -m "chore: inicializa o projeto <Nome do Projeto>" -- openspec/
+```
+
+O pathspec mantém fora do commit qualquer outra coisa que o responsável tenha preparado. Se a raiz não estiver num repositório Git, diga que o init não foi commitado. Nunca faça push.
+
+---
+
 ## Próximos passos (exibir ao final)
 
 ```
@@ -962,10 +975,9 @@ Inicialização concluída. Próximos passos:
   1. Revise <root>/openspec/project.md e complete os campos de domínio e capabilities.
   2. Revise as ADRs geradas em <root>/openspec/adrs/ e o <root>/openspec/arquitetura.md —
      ajuste contexto, consequências e o diagrama com detalhes que só você conhece do projeto.
-  3. Faça commit dos artefatos gerados. <root> pode ser uma subpasta do repositório git
-     (por exemplo, padrao-openspec/); o git -C <root> funciona a partir dela:
-       git -C <root> add openspec/
-       git -C <root> commit -m "chore: initialize project setup and foundational ADRs"
+  3. Os artefatos foram commitados no store (ou: não houve commit, porque a raiz não está
+     num repositório Git). Ajustes de revisão viram um commit seu. Para publicar o store,
+     crie o remoto e faça o push.
   4. Quando tiver uma funcionalidade para especificar, rode /opsx:explore.
   5. Qualquer mudança de arquitetura futura MUST ser registrada como nova ADR
      antes de ser implementada e refletida no <root>/openspec/arquitetura.md.

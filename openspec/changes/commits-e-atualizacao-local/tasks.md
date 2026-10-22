@@ -9,11 +9,13 @@
 
 - [x] 2.1 Aplicar o D2 no `comecar.mjs` e ajustar o "Smoke test do drive minúsculo" (commits manuais condicionais). Verificar com o "Smoke test do script de entrada" e o do drive passando no Git Bash, e com uma execução sem identidade Git (`GIT_CONFIG_GLOBAL` vazio, `GIT_AUTHOR_NAME` e `GIT_COMMITTER_NAME` vazios) terminando com código 0 e o aviso.
   - Evidência: `initialCommit` no `comecar.mjs` (pergunta, `--yes`, `--sem-commit`, commit do código e do store, aviso sem falhar); o teste passou a conferir a tag como a mais próxima (`describe --abbrev=0`), já que o commit de configuração fica por cima dela. No Git Bash, `[PASS] Smoke test do script de entrada` (um commit no código, "configura o store" no store, árvores limpas, `--sem-commit` sem histórico) e `[PASS] Smoke test do drive minúsculo`, sem ids de teste registrados no fim. Com `GIT_CONFIG_GLOBAL` vazio e `GIT_AUTHOR_NAME`/`GIT_COMMITTER_NAME` vazios → exit 0, "Aviso: não consegui fazer o commit inicial: fatal: empty ident name ...", comandos de commit na mensagem final e código sem commit.
-- [ ] 2.2 Aplicar o D1 no `init.md`. Verificar com `grep` mostrando "Commit the init" e os novos "Próximos passos", e com o passo "Trechos customizados das skills" passando nessa parte.
+- [x] 2.2 Aplicar o D1 no `init.md`. Verificar com `grep` mostrando "Commit the init" e os novos "Próximos passos", e com o passo "Trechos customizados das skills" passando nessa parte.
+  - Evidência: seção "## Commit the init" no `init.md` (pathspec `openspec/`, sem push, aviso fora do Git) e item 3 dos "Próximos passos" reescrito; `grep -c` → 1 para "## Commit the init" e para "Os artefatos foram commitados no store", 0 para o comando manual antigo; o passo "Trechos customizados das skills" deixou de acusar o `init.md`.
 
 ## 3. Atualização oferecida
 
-- [ ] 3.1 Aplicar o D3 nos 8 arquivos com "Standard version check" e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills" passando inteiro e `sync-root --check` em dia.
+- [x] 3.1 Aplicar o D3 nos 8 arquivos com "Standard version check" e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills" passando inteiro e `sync-root --check` em dia.
+  - Evidência: texto do D3 nos 8 arquivos (4 comandos e 4 skills); `sync-root.mjs` → "Synced 9 paths." (as 8 cópias e o `init.md` da 2.2), `--check` → em dia; `[PASS] Trechos customizados das skills`, com "offer to update now" e "Commit the init" (exit 0).
 
 ## 4. Guias, versão e integração
 
