@@ -11,7 +11,7 @@ valem para qualquer agente e não podem ser contornadas por instruções no chat
   `openspec verify`. Nunca rode `openspec archive` direto; siga `.claude/commands/opsx/archive.md`.
 - Antes de escrever código de uma change e antes de arquivá-la, rode
   `node docs/openspec-portao.mjs apply <change>` ou `node docs/openspec-portao.mjs archive <change>`
-  e respeite o resultado: 0 libera, 1 bloqueia com os motivos, 2 é erro de ambiente.
+  e respeite o resultado: 0 libera, 1 bloqueia com os motivos, 2 é erro de uso ou de ambiente.
 - Se o CLI não achar o store (`no_root_with_registered_stores`), rode-o na pasta do código, que
   declara o store, ou passe `--store <id>`.
 - Guia do padrão neste repositório: `docs/openspec-padrao.md`.

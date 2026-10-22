@@ -557,38 +557,59 @@ jobs:
           mkdir -p "$ch"
           proposal() { printf '# Proposal\n\n## Why\n\nTeste.\n\n## Aprovação\n\n- Responsável: %s\n- Data: %s\n- Escopo: %s\n- Condições: —\n- Origem: %s\n' "$@" > "$ch/proposal.md"; }
           gate() { (cd "$work/code" && node docs/openspec-portao.mjs "$@"); }
+          codecommit() { printf '%s\n' "$1" > "$work/code/$1.txt"; git -C "$work/code" add "$1.txt"; git -C "$work/code" commit -q -m "feat: $1" -m "OpenSpec-Change: $2"; }
           printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [ ] 1.2 b\n' > "$ch/tasks.md"
-          # Aprovação pendente: apply bloqueia (1), também em JSON.
+          # Aprovação pendente (também com texto extra): apply bloqueia (1), em texto e em JSON.
           proposal Pendente — — —
           if gate apply ci-change > "$RUNNER_TEMP/portao1.txt"; then exit 1; fi
           grep -qiF 'pendente' "$RUNNER_TEMP/portao1.txt"
           out="$(gate apply ci-change --json || true)"
           grep -qF '"ok":false' <<< "$out"
-          # Aprovação completa para apply: libera o apply e bloqueia o archive.
+          grep -qF '"motivos":[' <<< "$out"
+          proposal 'Pendente (aguardando ci)' 2026-10-22 apply '"Aprovo"'
+          if gate apply ci-change; then exit 1; fi
+          # Aprovação de apply: libera o apply e bloqueia o archive.
           proposal ci 2026-10-22 apply '"Aprovo"'
           gate apply ci-change
           if gate archive ci-change; then exit 1; fi
-          # Escopo archive, mas tarefa pendente e sem verification.md: bloqueia citando as duas faltas.
-          proposal ci 2026-10-22 archive '"Aprovo para archive"'
+          # Escopo archive (entre crases vale), tarefa pendente e sem verification.md: bloqueia citando as duas.
+          proposal ci 2026-10-22 '`archive`' '"Aprovo para archive"'
           if gate archive ci-change > "$RUNNER_TEMP/portao2.txt"; then exit 1; fi
           grep -qF 'tarefa' "$RUNNER_TEMP/portao2.txt"
           grep -qF 'verification.md' "$RUNNER_TEMP/portao2.txt"
-          # Tudo pronto, mas a change tem commit de código e falta o review.md.
           printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [x] 1.2 b\n' > "$ch/tasks.md"
           printf '# Verificações\n' > "$ch/verification.md"
-          git -C "$work/code" commit -q --allow-empty -m "feat: x" -m "OpenSpec-Change: ci-change"
+          # Prefixo de nome não conta: só um commit de código de "ci-change-extra" não exige review.md.
+          codecommit extra ci-change-extra
+          gate archive ci-change
+          # Com um commit de código da própria change, o review.md passa a ser exigido.
+          codecommit feature ci-change
           if gate archive ci-change > "$RUNNER_TEMP/portao3.txt"; then exit 1; fi
           grep -qF 'review.md' "$RUNNER_TEMP/portao3.txt"
           printf '# Revisão\n' > "$ch/review.md"
           gate archive ci-change
-          # Change inexistente: erro de ambiente (2).
+          # Change inexistente, nome inválido e store não resolvido: erro de uso ou de ambiente (2).
           set +e; gate apply nao-existe; status=$?; set -e
           test "$status" -eq 2
-          # Hook opcional: recusa commit de change não aprovada e libera commit sem trailer.
+          set +e; gate apply 'nome%invalido'; status=$?; set -e
+          test "$status" -eq 2
+          mkdir -p "$work/sem-store"
+          git -C "$work/sem-store" init -q
+          set +e; out="$(cd "$work/sem-store" && node "$work/code/docs/openspec-portao.mjs" apply ci-change --json)"; status=$?; set -e
+          test "$status" -eq 2
+          grep -qF -- '--store' <<< "$out"
+          grep -qF '"motivos":[' <<< "$out"
+          # Hook opcional: recusa commit de código de change não aprovada; libera commit sem trailer,
+          # commit que só toca openspec/ e commit que cita change arquivada (retrabalho).
           proposal Pendente — — —
           gate instalar-hook
-          if git -C "$work/code" commit -q --allow-empty -m "feat: y" -m "OpenSpec-Change: ci-change"; then exit 1; fi
+          if codecommit recusado ci-change; then exit 1; fi
+          git -C "$work/code" reset -q
           git -C "$work/code" commit -q --allow-empty -m "chore: sem trailer"
+          codecommit retrabalho change-arquivada
+          printf 'store: ci-portao\n# nota\n' > "$work/code/openspec/config.yaml"
+          git -C "$work/code" add openspec/config.yaml
+          git -C "$work/code" commit -q -m "docs: planejamento" -m "OpenSpec-Change: ci-change"
 
       # Regras do padrão entregues ao código por blocos gerenciados (ADR-0005): o conteúdo fora dos
       # marcadores fica intacto, a reinstalação não duplica e um bloco quebrado faz o instalador parar.

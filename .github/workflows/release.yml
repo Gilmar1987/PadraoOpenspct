@@ -24,7 +24,8 @@ jobs:
         run: |
           assets="$(gh release view "$TAG" --json assets -q '.assets[].name')"
           if ! grep -qx 'comecar.mjs' <<< "$assets"; then
-            gh release upload "$TAG" padrao-openspec/scripts/comecar.mjs
+            # --clobber: se alguém anexou à mão no meio, o arquivo é o mesmo da tag.
+            gh release upload "$TAG" padrao-openspec/scripts/comecar.mjs --clobber
             echo "Anexado: comecar.mjs da tag $TAG"
           fi
           assets="$(gh release view "$TAG" --json assets -q '.assets[].name')"

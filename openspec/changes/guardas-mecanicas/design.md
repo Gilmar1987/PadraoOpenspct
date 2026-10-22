@@ -65,7 +65,7 @@ O instalador entrega o arquivo como `docs/openspec-portao.mjs` (`templateFiles`,
 
 ### D2. Fluxos
 
-Trecho novo **"Run the gate"** no passo 4a do apply e no 4a do archive (comandos e skills):
+Trecho novo **"Run the gate"** no passo 4a do apply e num passo 3a do archive, antes da sincronização das specs (comandos e skills). No archive, quando o único motivo é o escopo, o agente faz a confirmação do passo 4a e roda o portão de novo:
 
 > when the code repository has `docs/openspec-portao.mjs`, run `node docs/openspec-portao.mjs apply <change>` (archive: `archive <change>`) and follow its exit code: 1 stops with its reasons, 2 stops with its fix. Without the gate file, keep the checks below.
 
