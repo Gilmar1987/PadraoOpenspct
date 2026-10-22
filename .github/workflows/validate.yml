@@ -10,11 +10,17 @@ permissions:
 
 jobs:
   # padrao-openspec/ é a fonte única de skills, comandos e agentes, sem stack embutida (ADR-0003).
+  # Roda em Linux e em Windows: defeitos de caminho, console e Git aparecem só num dos dois.
   store:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: padrao-openspec
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
@@ -66,7 +72,13 @@ jobs:
           node --check scripts/sync-root.mjs
           node --check scripts/changelog-range.mjs
           node --check scripts/comecar.mjs
-          python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' templates/openspec-padrao-update.yml
+          # No Windows o Python se chama python e pode não ter o PyYAML.
+          py="$(command -v python3 || command -v python)"
+          if ! "$py" -c 'import yaml' 2>/dev/null; then
+            # Ubuntu protege o Python do sistema (PEP 668); o fallback instala só para o usuário.
+            "$py" -m pip install -q 'pyyaml==6.*' || "$py" -m pip install -q --user --break-system-packages 'pyyaml==6.*'
+          fi
+          "$py" -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' templates/openspec-padrao-update.yml
 
       # VERSION é a versão do padrão; a primeira seção do CHANGELOG da raiz tem de ser ela,
       # com "O que mudou" e "Ações no projeto" (ADR-0004).
@@ -384,6 +396,7 @@ jobs:
       # único clone na última release, entrada num projeto em andamento e as recusas.
       - name: Smoke test do script de entrada
         run: |
+          trap 'openspec store unregister ci-entrada >/dev/null 2>&1 || true' EXIT
           work="$(mktemp -d)"
           v="$(tr -d '\r\n' < VERSION)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
@@ -444,6 +457,40 @@ jobs:
           grep -qF 'store:' "$RUNNER_TEMP/sem-store.txt"
           test "$(openspec store list --json)" = "$registered"
           openspec store unregister ci-entrada
+
+      # No Windows, a pasta base digitada com o drive em minúscula (c:\...) não pode virar um falso
+      # "not this store": o CLI devolve C:\..., e a comparação tem de reconhecer a mesma pasta.
+      # O %TEMP% do runner fica em c:\Users\RUNNER~1, então o passo cobre também o nome curto 8.3.
+      - name: Smoke test do drive minúsculo
+        if: runner.os == 'Windows'
+        run: |
+          trap 'openspec store unregister ci-drive >/dev/null 2>&1 || true' EXIT
+          work="$(mktemp -d)"
+          v="$(tr -d '\r\n' < VERSION)"
+          commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
+          mkdir -p "$work/padrao"
+          cp -r . "$work/padrao/padrao-openspec"
+          # O .gitattributes da raiz mantém LF no repositório temporário, como no checkout.
+          cp ../.gitattributes "$work/padrao/"
+          git -C "$work/padrao" init -q
+          git -C "$work/padrao" add -A
+          commit "$work/padrao" -m base
+          git -C "$work/padrao" tag "v$v"
+          low="$(cygpath -w "$work" | sed -E 's/^([A-Za-z]):/\L\1:/')"
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$low\a" --nome "CI Drive" --id ci-drive --yes
+          git -C "$work/a/ci-drive" add -A
+          commit "$work/a/ci-drive" -m setup
+          git -C "$work/a/ci-drive-openspec" add -A
+          commit "$work/a/ci-drive-openspec" -m init
+          mkdir "$work/remotos"
+          git clone -q --bare "$work/a/ci-drive" "$work/remotos/ci-drive.git"
+          git clone -q --bare "$work/a/ci-drive-openspec" "$work/remotos/ci-drive-openspec.git"
+          openspec store unregister ci-drive
+          node scripts/comecar.mjs --modo existente --pasta "$low\b" --url-codigo "$work/remotos/ci-drive.git" --url-store "$work/remotos/ci-drive-openspec.git" --yes
+          resolved="$(cd "$work/b/ci-drive" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync.native(JSON.parse(d).root.path)))')"
+          expected="$(cd "$work/b/ci-drive-openspec/padrao-openspec" && node -p 'require("fs").realpathSync.native(process.cwd())')"
+          test "$resolved" = "$expected"
+          openspec store unregister ci-drive
 
       # Regras do padrão entregues ao código por blocos gerenciados (ADR-0005): o conteúdo fora dos
       # marcadores fica intacto, a reinstalação não duplica e um bloco quebrado faz o instalador parar.
