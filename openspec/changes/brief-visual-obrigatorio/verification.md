@@ -7,11 +7,11 @@
 - Sugestões: 0
 - Não verificado: o efeito real dos trechos de prompt (o propose escrevendo o `design.md` com o brief numa change com telas; o verify perguntando ao responsável); a CI confere só a presença dos trechos
 - Cobertura fora da suíte: —
-- Avaliação: Nenhum crítico. Um warning aguardando a resposta do responsável. Não verificados: os fluxos de prompt em uso real, como previsto nas tarefas.
+- Avaliação: Nenhum crítico. Um warning respondido: o responsável confirmou que a change não tem telas. Não verificados: os fluxos de prompt em uso real, como previsto nas tarefas.
 
 Itens:
 
-- [warning] Screens without visual brief: disparado por "tela", "formulário" e `interface-quality` em `tasks.md`, `design.md` e nas delta specs; pergunta feita ao responsável em 2026-10-22 ("esta change tem telas?"), aguardando a resposta antes do archive.
+- [warning] Screens without visual brief: o responsável disse que não há tela (disparado por "tela", "formulário" e `interface-quality` em `tasks.md`, `design.md` e nas delta specs; resposta "não" a "esta change tem telas?", 2026-10-22).
 
 Comandos:
 
