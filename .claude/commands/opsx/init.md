@@ -902,6 +902,7 @@ Use numeração sequencial a partir de `0001`. Siga estritamente o template em `
 - preencha `Decisão` com a escolha confirmada, usando SHALL/MUST quando impõe regra a changes futuras
 - preencha `Alternativas consideradas` com as opções que não foram escolhidas
 - preencha `Consequências` com o que fica mais fácil, mais difícil e riscos aceitos
+- defina `imposicao: norma` e, em `Limite`, "Garante: nada automaticamente" e "Fica sob palavra: toda a decisão", salvo quando a ADR já tiver `verificacao`; nesse caso, use a imposição e o limite do teste
 
 ADRs obrigatórias (sempre gerar quando a resposta não for "Ainda não sei" ou "Não aplicável"). Uma resposta negativa também gera a ADR, com a restrição explícita na Decisão; por exemplo, "Não" na 4.2 gera "O projeto SHALL NOT usar contêiner no MVP":
 
@@ -1020,7 +1021,8 @@ verify aponta a condição já cumprida com o item ainda aqui.
 
 Falhas conhecidas de comandos de verificação, aceitas por um proposal aprovado (linha `Falhas aceitas:`
 do Impact). A lista só encolhe: falha fora dela é regressão; linha cuja falha não acontece mais sai.
-"Falha" é o identificador exato (nome do teste, ou regra mais arquivo do linter), e "Sai quando"
+"Verificação" é o comando do `project.md` ou a `verificacao` da ADR que falha; "Falha" é o
+identificador exato (nome do teste, ou regra mais arquivo do linter), e "Sai quando"
 segue a mesma regra da tabela acima.
 
 | Verificação | Falha | Motivo | Desde | Origem | Sai quando |

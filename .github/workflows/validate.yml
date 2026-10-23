@@ -288,7 +288,7 @@ jobs:
           check "$f" "Uma data sozinha não é condição"
           check openspec/adrs/template.md "imposicao:"
           check openspec/adrs/template.md "## Limite"
-          check openspec/adrs/README.md "`imposicao`"
+          check openspec/adrs/README.md '`imposicao` (opcional)'
           check openspec/config.yaml "Impacto medido"
           # Contratos de interface (contratos-de-interface): template do project.md e regra global.
           check openspec/project.md "### Contratos de interface"

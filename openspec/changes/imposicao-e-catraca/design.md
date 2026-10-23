@@ -84,7 +84,7 @@ O item "ADR verification" do verify (comando e skill, com o mesmo texto) passa a
   - **Origem:** a change.
 
   O init cria a seção com a linha "Nenhuma".
-- **Propose:** item novo depois de "Related debts". Quando o `estado-atual.md` tem a seção "Falhas aceitas", o Impact do proposal ganha a linha `Falhas aceitas: aceita <verificação>: <falha> (motivo: <...>; sai quando: <...>); retira <falha>`, ou `Falhas aceitas: nenhuma`. "Aceita" só entra para uma falha que a change não vai corrigir e que tem motivo.
+- **Propose:** item novo depois de "Related debts". Quando o `estado-atual.md` tem a seção "Falhas aceitas", o Impact do proposal ganha a linha ``Falhas aceitas: aceita `<falha>` em `<verificação>` (motivo: <...>; sai quando: <...>); retira `<falha>` ``, ou `Falhas aceitas: nenhuma`. As crases mantêm inteiros os identificadores que têm `:` (como `tests/x.py::test_y`). "Aceita" só entra para uma falha que a change não vai corrigir e que tem motivo. Sem a seção, o propose diz isso, e o destino "falha aceita" do Impacto medido fica indisponível até o projeto criar a seção.
 - **Archive:** "Update the open debts" também aplica a linha `Falhas aceitas:`. "Aceita" acrescenta uma linha, com a data e a change; "retira" remove a linha. Uma retirada sem linha correspondente é reportada.
 - **Verify:** "Project validation commands" ganha o parágrafo "**Accepted failures**":
   - quando a seção existe, comparar cada falha dos comandos que rodaram com a coluna Falha;
