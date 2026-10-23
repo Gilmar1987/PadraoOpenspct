@@ -4,7 +4,7 @@
 
 ### Requirement: Telas sem brief no verify
 
-Quando o `design.md` de uma change não tiver "Brief visual" e as tarefas, o design ou as delta specs citarem tela, página, formulário, layout, componente visual, front-end ou UI, ou a change tiver `interface/jornadas.json`, o verify SHALL registrar um warning e perguntar ao responsável se a change tem telas. Com a confirmação, o verify SHALL registrar um crítico e indicar o update da change para receber o brief.
+Quando a change não tiver `design.md`, ou o `design.md` não tiver "Brief visual", e as tarefas, o design ou as delta specs citarem tela, página, formulário, layout, componente visual, front-end ou interface de usuário, ou a change tiver `interface/jornadas.json`, o verify SHALL registrar um warning que cita o que o disparou e perguntar ao responsável se a change tem telas. Com a confirmação, SHALL registrar um crítico e indicar o update; sem resposta, MUST NOT seguir para o archive.
 
 #### Scenario: Formulário sem brief
 

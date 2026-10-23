@@ -24,7 +24,7 @@ Não há ADR nova: a change completa o fluxo da `qualidade-de-interface`, sem de
 
 ### D1. Trecho "Interface brief" no propose
 
-No comando e na skill do propose, logo depois do "Architectural Decision Check", um bloco **"Interface brief"**:
+No comando e na skill do propose, logo antes do "Architectural Decision Check" (que trata do que vem antes de escrever o `design.md`), um bloco **"Interface brief"**:
 
 > When the change creates or changes screens, pages or visual components (in any front-end technology), write `design.md` even where the schema treats it as optional, and include a `## Brief visual` section following the template in the `interface-quality` skill. In `tasks.md`, name the states of each screen (loading, empty, error, success) and add, before marking a screen task, a browser validation with `docs/openspec-validar-interface.mjs` and a final grade of "médio" or better. Follow the `interface-quality` skill.
 
@@ -34,7 +34,7 @@ O passo 6b, que hoje permite pular um artefato condicional, ganha a exceção: o
 
 No verify, o trecho "Interface quality gate" ganha a frase:
 
-> When `design.md` has no "Brief visual" section but tasks, design or delta specs mention a screen, page, form, layout, visual component, front-end or UI (in Portuguese or English), or the change has `interface/jornadas.json`, add a WARNING "Screens without visual brief" and ask the user whether the change has screens. If they confirm, turn it into a CRITICAL issue and recommend `/opsx:update` to add the brief, the screen states and the browser validation; if they say no, record the answer under `Itens:`.
+> When the change has no `design.md`, or its `design.md` has no "Brief visual" section, but tasks, design or delta specs mention a screen, page, form, layout, visual component, front-end or UI in the sense of something a user sees (in Portuguese: tela, página, formulário, layout, componente visual, front-end, interface de usuário), or the change has `interface/jornadas.json`, add a WARNING "Screens without visual brief" that quotes the words or files that triggered it, and ask the user whether the change has screens. If they confirm, turn it into a CRITICAL issue and recommend `/opsx:update` to add the brief, the screen states and the browser validation. If they say no, keep one line under `Itens:`: `[warning] Screens without visual brief: o responsável disse que não há tela (<trigger>)`. Without an answer, keep the WARNING and do not continue to archive, also under `Escopo: archive`.
 
 O título "Screens without visual brief" vira marcador conferido pela CI.
 
