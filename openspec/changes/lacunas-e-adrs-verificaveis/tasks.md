@@ -36,6 +36,7 @@
 
 ## 5. Versão e integração
 
-- [ ] 5.1 Atualizar `padrao-openspec/VERSION` e `CHANGELOG.md` com a versão combinada na 1.1, com "O que mudou" e "Ações no projeto" do Migration Plan. Verificar com o passo "Versão e changelog".
+- [x] 5.1 Atualizar `padrao-openspec/VERSION` e `CHANGELOG.md` com a versão combinada na 1.1, com "O que mudou" e "Ações no projeto" do Migration Plan. Verificar com o passo "Versão e changelog".
+  - Evidência: pelo modelo de versão acumulada, `VERSION` continua 1.12.0 e a change acrescentou três itens em "O que mudou" e três ações recomendadas em "Ações no projeto" da seção `## 1.12.0` aberta; "Versão e changelog", "Smoke test do changelog-range" e "Lint de Markdown da raiz" → PASS (exit 0)
 - [ ] 5.2 Revisar a [ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) com o responsável e promovê-la a `Accepted` antes do archive, acrescentando-a ao `openspec/adrs/README.md`. Verificar com o `status: Accepted` no frontmatter e a linha no índice.
 - [ ] 5.3 Rodar `node padrao-openspec/scripts/sync-root.mjs` e `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o markdownlint nos dois lugares e os passos dos jobs `store` e `root` do `validate.yml` localmente, avisando a outra sessão antes. Verificar que todos saem com código 0.
