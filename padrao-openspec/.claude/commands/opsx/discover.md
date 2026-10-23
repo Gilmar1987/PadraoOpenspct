@@ -44,7 +44,7 @@ Antes da primeira mensagem, leia `<root>/openspec/descoberta.md`, se existir, e 
 
 | Situação | Abertura |
 |---|---|
-| `descoberta.md` com **Status: Em andamento** | Resuma em poucas linhas o que já foi decidido e pergunte pelo primeiro item do checklist que falta. Não refaça perguntas já respondidas. |
+| `descoberta.md` com **Status: Em andamento** | Resuma em poucas linhas o que já foi decidido e pergunte pelo primeiro item do checklist que falta. Não refaça perguntas já respondidas. Se houver também brief do ingest nesta conversa, inclua no resumo os conflitos e as perguntas em aberto dele que o brief parcial ainda não trata. |
 | `descoberta.md` com **Status: Concluída** | Pergunte: **"Já existe uma descoberta concluída. Quer revisá-la ou mantê-la? [revisar/manter]"**. Com "manter", termine sem mudar nada. Com "revisar", siga a partir do brief existente. |
 | Brief do `/opsx:ingest` nesta conversa | Comece pelos conflitos (C..), pelas perguntas em aberto (P..) e pelos itens "Indefinido" do brief, citando-os. Não peça ao dev que repita o que os documentos já dizem. |
 | Nenhum dos anteriores | A primeira mensagem é: **"Qual é a sua ideia de projeto? Conte com as suas palavras: o que ele faz, para quem e por que agora."** |
@@ -142,9 +142,9 @@ Use este modelo. Não reproduza dados pessoais, credenciais nem nomes de cliente
 
 1. **Ideia pronta:** mostre o brief completo e pergunte **"Confirma este brief? [s/n/editar]"**. Com "editar" ou "n", ajuste o que o dev pedir, mostre de novo e pergunte outra vez. Grave com **Status: Concluída** só depois do "s".
 2. **Dev encerra antes do fim** ("chega", "vamos para as perguntas"): os itens sem resposta vão para "Em aberto". Mostre o brief e peça a confirmação como no passo 1.
-3. **Dev interrompe para continuar outro dia:** ofereça gravar o brief parcial com **Status: Em andamento**. Grave só com "sim". Um próximo `/opsx:discover` retoma dele.
+3. **Dev interrompe para continuar outro dia:** ofereça gravar o brief parcial com **Status: Em andamento**. Grave só com "sim". Um próximo `/opsx:discover` (ou `/opsx:init`) retoma dele. Chamado pelo init, depois de gravar, diga ao init que o dev quer parar: ele pergunta se segue para a entrevista ou para.
 4. **Commit:**
-   - chamado pelo `/opsx:init`, não commite: o arquivo entra no commit do init;
+   - chamado pelo `/opsx:init`, não commite o brief **Concluída**: ele entra no commit do init; o brief **Em andamento** é commitado já, como no modo avulso, porque o init pode terminar sem gerar nada;
    - avulso, quando `git -C "<root>" rev-parse --is-inside-work-tree` funcionar, commite só o arquivo: `git -C "<root>" add -- openspec/descoberta.md` e `git -C "<root>" commit -m "docs: registra a descoberta do produto" -- openspec/descoberta.md`. Fora de um repositório Git, diga que não houve commit. Nunca faça push.
 5. **Próximo passo:**
    - chamado pelo `/opsx:init`, volte a ele, que segue para o Bloco 1 usando o brief nas recomendações;

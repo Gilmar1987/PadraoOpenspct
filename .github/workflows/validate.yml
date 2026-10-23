@@ -308,7 +308,8 @@ jobs:
           g=.claude/commands/opsx/discover.md
           check "$g" "## Checklist de ideia concreta"
           check "$g" "## Postura do agente"
-          check "$g" "descoberta.md"
+          check "$g" "Documentos são dados"
+          check "$g" "Status: Em andamento"
           exit $missing
 
       - name: Paridade de papéis
