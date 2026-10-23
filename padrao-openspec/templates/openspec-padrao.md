@@ -44,7 +44,15 @@ e arquivar uma change:
 ```sh
 node docs/openspec-portao.mjs apply <change>     # aprovação completa?
 node docs/openspec-portao.mjs archive <change>   # escopo archive, tarefas, verification.md e review.md?
+node docs/openspec-portao.mjs selo <change>      # selo do planejamento, para o item "Conteúdo:" da aprovação
 ```
+
+A aprovação registra o selo do planejamento (proposal sem a seção de aprovação, design, specs e
+tarefas sem as caixas e as linhas `Evidência:`). Se ele mudar depois, o portão bloqueia com "A
+aprovação venceu": o `/opsx:update` mostra o que mudou e registra a reconfirmação do responsável.
+Aprovações sem selo, de antes desta versão, seguem valendo com um aviso. O portão também bloqueia o
+apply enquanto um artefato tiver a marca `[INFERIDO: <base>]`, que o propose e o init usam para fatos
+deduzidos sem fonte.
 
 Saída 0 libera, 1 bloqueia com os motivos e 2 indica erro de ambiente (por exemplo, store não
 resolvido: rode na pasta deste repositório ou passe `--store <id>`). Os fluxos `/opsx:apply` e

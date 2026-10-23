@@ -11,18 +11,21 @@
 
 ## 3. Fluxos e regras
 
-- [ ] 3.1 Aplicar o D4 em propose, apply, update e archive (comandos e skills), o D5 no init e o D6 no `rules.md`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills", `sync-root --check` e o lint passando.
-- [ ] 3.2 Validar o fluxo de ponta a ponta numa pasta temporária com o setup do padrão:
+- [x] 3.1 Aplicar o D4 em propose, apply, update e archive (comandos e skills), o D5 no init e o D6 no `rules.md`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills", `sync-root --check` e o lint passando.
+  - Evidência: trecho "Approval content seal" em apply (4a), propose (depois da autorização prévia), archive (4a, item `Archive:`) e update (reconfirmação e `Aprovação anterior` com o selo antigo), comandos e skills; "Declared inference" nas Artifact Creation Guidelines do propose; regra da marca `[INFERIDO: <base>]` e etapa "Inferências" antes do commit no init; duas regras novas na seção de aprovação do `rules.md`; raiz regenerada (10 caminhos). Git Bash: "Trechos customizados das skills" e "Lint de Markdown" → PASS; `sync-root --check` → em dia.
+- [x] 3.2 Validar o fluxo de ponta a ponta numa pasta temporária com o setup do padrão:
   - aprovar uma change com selo;
   - acrescentar uma tarefa → o portão bloqueia;
   - reconfirmar → o portão libera;
   - pôr uma marca de inferência → o portão bloqueia citando a linha.
 
   Verificar com as saídas do portão citadas na evidência.
+  - Evidência: projeto temporário de repositório único (sem store, para não usar o registro compartilhado enquanto a outra sessão rodava a suíte; o setup com store é coberto pelo "Smoke test do portão") com `docs/openspec-portao.mjs` da change: aprovada com `Conteúdo:` → "✔ liberado" (exit 0); tarefa 1.2 acrescentada → "A aprovação venceu" (exit 1); `Reconfirmação` com o selo novo → "✔ liberado" (exit 0); design com `[INFERIDO: prática do mercado]` → "Inferência não confirmada em design.md:3" (exit 1).
 
 ## 4. Documentação, versão e integração
 
-- [ ] 4.1 Atualizar README e guia do projeto com o selo, a reconfirmação e as marcas, e aplicar o D8 com a versão aprovada. Verificar com o lint e o passo "Versão e changelog" passando.
+- [x] 4.1 Atualizar README e guia do projeto com o selo, a reconfirmação e as marcas, e aplicar o D8 com a versão aprovada. Verificar com o lint e o passo "Versão e changelog" passando.
+  - Evidência: README (parágrafo sobre o selo e as inferências no Fluxo de trabalho), guia `templates/openspec-padrao.md` (comando `selo` e explicação na seção Portão) e dois itens em "O que mudou" e um em "Ações no projeto" da seção 1.12.0 aberta do CHANGELOG, sem subir o `VERSION` (modelo de versão confirmado pelo responsável). Git Bash: "Lint de Markdown" (padrão e raiz), "Versão e changelog", "Raiz em dia" e "Guia de primeiros passos" → PASS.
 - [ ] 4.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
 
 ## Workflow follow-up

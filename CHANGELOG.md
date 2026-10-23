@@ -24,6 +24,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   não tem o relatório, não tem a avaliação do validador ou tem nota final "fraco".
 - **Init:** com front-end na 3.2, o `project.md` ganha a linha "Validação de interface" nos Comandos de
   verificação, e o `config.yaml` orienta o uso da skill nas changes com telas.
+- **Aprovação presa ao conteúdo:** o portão ganha o comando `selo`, e os fluxos gravam o resultado no
+  item `Conteúdo:` da aprovação. Se o planejamento mudar depois (marcar tarefas e registrar evidências
+  não conta), o portão bloqueia com "A aprovação venceu" até o `/opsx:update` registrar a
+  reconfirmação do responsável. O JSON do portão ganha o campo opcional `avisos`.
+- **Inferência declarada:** o propose e o init marcam com `[INFERIDO: <base>]` o que deduziram sem
+  fonte, e o portão de apply bloqueia enquanto houver marca fora de código.
 
 ### Ações no projeto
 
@@ -38,6 +44,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   antes de marcar a tarefa da tela."
 - Rode a validação contra a aplicação com dados de desenvolvimento: o script requisita os links
   internos da página inicial, menos os que parecem mudar estado (sair, excluir, remover).
+- Aprovações registradas antes do selo seguem valendo, com um aviso do portão; as próximas gravam o
+  selo. Nenhuma ação obrigatória.
 
 ## 1.11.0 — 2026-10-22
 
