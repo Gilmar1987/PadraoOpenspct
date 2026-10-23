@@ -16,9 +16,12 @@
 
 ## 3. Ciclo das changes
 
-- [ ] 3.1 Aplicar o D3 ("Related debts") ao propose e ao explore, no comando e na skill, com o mesmo texto. Verificar com `diff` vazio entre os trechos do comando e da skill de cada um.
-- [ ] 3.2 Aplicar o D4 ("Update the open debts") ao archive, no comando e na skill, incluindo `openspec/estado-atual.md` no `git add` e no `git commit` do passo 5a. Verificar com `grep` nos dois arquivos e com `diff` vazio entre os trechos.
-- [ ] 3.3 Aplicar o D6 ("Verification layers") ao verify, no comando e na skill, com a linha `- Camadas:` no formato do registro. Verificar com `diff` vazio entre os trechos e com o smoke das métricas de fluxo passando (a linha nova não muda as contagens).
+- [x] 3.1 Aplicar o D3 ("Related debts") ao propose e ao explore, no comando e na skill, com o mesmo texto. Verificar com `diff` vazio entre os trechos do comando e da skill de cada um.
+  - Evidência: "Related debts" no propose (Artifact Creation Guidelines, depois de "Interface contract first") e no explore (antes de "## Guardrails"), comando e skill; `diff` dos trechos → iguais nos dois pares; "Trechos customizados" → PASS
+- [x] 3.2 Aplicar o D4 ("Update the open debts") ao archive, no comando e na skill, incluindo `openspec/estado-atual.md` no `git add` e no `git commit` do passo 5a. Verificar com `grep` nos dois arquivos e com `diff` vazio entre os trechos.
+  - Evidência: "Update the open debts" depois de "Update the project overview" no archive (comando e skill) e o `estado-atual.md` nos dois pathspecs do passo 5a quando o arquivo existe; `grep -c "add it to both pathspecs"` → 1 em cada; `diff` dos trechos → iguais
+- [x] 3.3 Aplicar o D6 ("Verification layers") ao verify, no comando e na skill, com a linha `- Camadas:` no formato do registro. Verificar com `diff` vazio entre os trechos e com o smoke das métricas de fluxo passando (a linha nova não muda as contagens).
+  - Evidência: "Verification layers" depois de "Interface contract check" e a linha `- Camadas:` depois de `Não verificado` no formato do registro (comando e skill); `diff` → iguais; "Smoke test das métricas de fluxo" → PASS (a linha nova não muda as contagens)
 
 ## 4. Versão, documentação e integração
 

@@ -864,7 +864,7 @@ Após todos os blocos confirmados:
 
 ### Arquivo 2: `<root>/openspec/project.md`
 
-Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Registre a 7.3 em "Idioma do código". Preencha a tabela "Contratos de interface" com a 2.6 (uma linha por contrato; com 2.6 = 0, uma linha "Não aplicável"), e o item 1 de "Precedência dos documentos" com o caminho do contrato principal quando houver. Na seção "Architecture", escreva um resumo de 3 a 5 linhas e o link `[Arquitetura detalhada](arquitetura.md)`, sem repetir o conteúdo do Arquivo 5. Nas subseções "Componentes e limites" e "Fluxo de dados e integrações", registre só os componentes e fluxos em uma linha cada, apontando para o `arquitetura.md` para o detalhe. Quando a 3.2 não for "0" (o projeto tem front-end), acrescente à tabela "Comandos de verificação" a linha `` | Validação de interface | `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>` | Rodada pelo subagente validador nas changes com telas (skill interface-quality) | ``, com a URL local do comando "Executar localmente". Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
+Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Registre a 7.3 em "Idioma do código". Preencha a tabela "Contratos de interface" com a 2.6 (uma linha por contrato; com 2.6 = 0, uma linha "Não aplicável"), e o item 1 de "Precedência dos documentos" com o caminho do contrato principal quando houver. Na seção "Architecture", escreva um resumo de 3 a 5 linhas e o link `[Arquitetura detalhada](arquitetura.md)`, sem repetir o conteúdo do Arquivo 5. Nas subseções "Componentes e limites" e "Fluxo de dados e integrações", registre só os componentes e fluxos em uma linha cada, apontando para o `arquitetura.md` para o detalhe. Quando a 3.2 não for "0" (o projeto tem front-end), acrescente à tabela "Comandos de verificação" a linha `` | Validação de interface | `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>` | Rodada pelo subagente validador nas changes com telas (skill interface-quality) | ``, com a URL local do comando "Executar localmente". Preencha a seção "Camadas de verificação" só com respostas que já existem, sem pergunta nova: Unitário pela 5.4 e o comando de testes da 7.1 ("Onde roda" ganha "CI" quando a 5.3 inclui testes); Contrato pelo "Teste de contrato" da 7.1, "Não aplicável" quando a 2.6 é 0 e "Adiado" quando há contrato sem comando; Arquitetura "Adiado" (nenhuma resposta define teste de arquitetura); E2E pela 5.5 e o comando de E2E (ou o de testes, se for o mesmo), "Não aplicável" quando a 5.5 é 0; Roteiro manual quando a 5.5 é 0 e há front-end (3.2), com a orientação do `config.yaml`, senão "Não aplicável"; Produção "Não aplicável" quando o bloco 4 não tem produção, senão "Adiado". Toda camada "Adiado" também entra como débito no Arquivo 6. Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
 
 ### Arquivo 3: `<root>/openspec/config.yaml`
 
@@ -926,8 +926,9 @@ Gere este arquivo depois das ADRs, para poder linká-las. Use só as respostas c
 ````markdown
 # Arquitetura — {{Nome do Projeto}}
 
-> Gerado pelo /opsx:init em {{data atual}}. Mantenha em dia: toda mudança de arquitetura vira ADR
-> (openspec/adrs/) e é refletida aqui na mesma change.
+> Gerado pelo /opsx:init em {{data atual}}. Normativo: esta é a arquitetura-alvo. O estado atual, descritivo,
+> está em [estado-atual.md](estado-atual.md); onde os dois divergem, é o código que converge para o alvo, ou uma
+> ADR muda o alvo. Toda mudança de arquitetura vira ADR (openspec/adrs/) e é refletida aqui na mesma change.
 
 ## Visão geral
 
@@ -977,7 +978,28 @@ flowchart LR
 
 ## Pontos adiados
 
-{{respostas "Adiado" e combinações mantidas na checagem de coerência; "Nenhum" se não houver}}
+Ver [Fora do ciclo atual](estado-atual.md#fora-do-ciclo-atual).
+````
+
+### Arquivo 6: `<root>/openspec/estado-atual.md`
+
+Gere este arquivo depois do Arquivo 5. A tabela "Fora do ciclo atual" recebe uma linha por resposta "Adiado" da entrevista, por combinação mantida na checagem de coerência e por camada "Adiado" na matriz "Camadas de verificação" do `project.md`; sem nenhuma, uma linha "Nenhum". Um item só sai da lista quando é feito ou quando uma ADR Accepted diz que não será feito.
+
+````markdown
+# Estado atual — {{Nome do Projeto}}
+
+> Descritivo: o que o projeto é hoje. O alvo está em [arquitetura.md](arquitetura.md), que é
+> normativo; onde os dois divergem, é o código que converge para o alvo, ou uma ADR muda o alvo.
+
+## Fora do ciclo atual
+
+Itens adiados de propósito. Um item sai daqui quando é feito (a change que o fecha é citada no
+commit do archive) ou quando uma ADR Accepted diz que não será feito. "Não é para agora" não tira
+um item da lista.
+
+| Item | Motivo | Desde | Origem | Sai quando |
+|---|---|---|---|---|
+| {{uma linha por item adiado}} | {{motivo da resposta ou da justificativa}} | {{data do init}} | {{pergunta, por exemplo "7.1 Migrações"}} | {{condição, por exemplo "primeira change com banco"}} |
 ````
 
 ---
@@ -1007,6 +1029,7 @@ Inicialização concluída. Próximos passos:
   1. Revise <root>/openspec/project.md e complete os campos de domínio e capabilities.
   2. Revise as ADRs geradas em <root>/openspec/adrs/ e o <root>/openspec/arquitetura.md —
      ajuste contexto, consequências e o diagrama com detalhes que só você conhece do projeto.
+     Confira os itens adiados em <root>/openspec/estado-atual.md ("Fora do ciclo atual").
   3. Os artefatos foram commitados no store (ou: não houve commit, porque a raiz não está
      num repositório Git). Ajustes de revisão viram um commit seu. Para publicar o store,
      crie o remoto e faça o push.
