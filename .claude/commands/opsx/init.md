@@ -38,6 +38,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 - Não avance para o próximo bloco sem confirmar o bloco atual.
 - Ao final de cada bloco, exiba um resumo das respostas do bloco e pergunte: **"Confirma este bloco? [s/n]"**. Se o dev responder `n`, volte ao início do bloco.
 - Ao final de todos os blocos, exiba o resumo completo e solicite confirmação final + nome do dev.
+- Nos arquivos gerados, tudo o que não veio de uma resposta (da entrevista ou do arquivo de respostas) leva a marca `[INFERIDO: <base>]` no ponto em que aparece, com o que serviu de base para a dedução. Escolhas que o próprio comando manda gerar (estrutura, títulos, comandos padrão do template) não são marcadas.
 
 ---
 
@@ -961,6 +962,10 @@ flowchart LR
 ````
 
 ---
+
+## Inferências
+
+Antes do commit, procure a marca `[INFERIDO: <base>]` nos arquivos gerados e mostre ao dev a lista, com arquivo e trecho. Pergunte uma a uma: **"Mantém? [s/n/editar]"**. Com "s", tire a marca e mantenha o texto; com "n", tire a frase; com "editar", troque pelo texto do dev. O commit só acontece quando não sobra nenhuma marca.
 
 ## Commit the init
 
