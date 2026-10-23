@@ -232,7 +232,7 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 6) Outro (digitar livremente)
 ```
 
-Para cada opção de 1 a 5, pergunte o caminho do contrato no repositório de código (por exemplo, `api/openapi.yaml`). Na opção 5, pergunte também a origem (URL ou fornecedor) e a versão. Um caminho que ainda não existe é aceito: o arquivo nasce na primeira change que mexer na interface.
+A opção 0 exclui as demais. Para cada opção escolhida de 1 a 6, pergunte o caminho de cada contrato no repositório de código (por exemplo, `api/openapi.yaml`); aceite mais de um contrato por opção. Nas opções 3 e 4, pergunte também a direção (expõe, consome ou ambas); nas opções 5 e 6, o formato; na opção 5, a origem (URL ou fornecedor) e a versão. Um caminho que ainda não existe é aceito: o arquivo nasce na primeira change que mexer na interface. Com arquivo de respostas, a célula da 2.6 traz as opções e, para cada contrato, os dados entre parênteses, separados por ponto e vírgula, por exemplo `1 (api/openapi.yaml); 5 (contratos/pagamentos.yaml, OpenAPI, origem: fornecedor X, versão 2.3)`.
 
 ---
 
@@ -947,7 +947,7 @@ Gere este arquivo depois das ADRs, para poder linká-las. Use só as respostas c
 
 ## Comunicação
 
-{{2.4: como os componentes se falam; integrações externas citadas nas respostas}}
+{{2.4: como os componentes se falam; 2.6: as APIs expostas e consumidas, com o contrato de cada uma; integrações externas citadas nas respostas}}
 
 ## Diagrama
 

@@ -51,7 +51,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   e onde está o contrato (OpenAPI, GraphQL SDL, Protocol Buffers ou AsyncAPI), e o `project.md` ganha a
   tabela "Contratos de interface" e a linha "Teste de contrato". O propose põe o contrato no Impact e
   a tarefa de atualizá-lo antes do código; o apply commita contrato e código juntos; o verify confere
-  as duas direções pelo teste de contrato e o SHA-256 das cópias de terceiros contra o `ORIGEM.md`.
+  as duas direções pelo teste de contrato e o SHA-256 das cópias de terceiros contra o `ORIGEM.md`. O
+  `rules.md` passa a exigir o contrato antes do código, no mesmo commit.
 
 ### Ações no projeto
 

@@ -253,6 +253,10 @@ jobs:
           check "$f" "Fila no próprio banco"
           check "$f" 'acrescente ao `operations.apply.guidance`'
           check "$f" "**2.6 — O sistema expõe ou consome uma API"
+          # Contratos de interface (contratos-de-interface): template do project.md e regra global.
+          check openspec/project.md "### Contratos de interface"
+          check openspec/project.md "| Teste de contrato |"
+          check openspec/rules.md "contrato de interface (seção"
           # Coerência de segurança (1.7.0): opção sem autenticação, combinações novas e a restrição no project.md.
           check "$f" "0) Sem autenticação no MVP"
           check "$f" '7.1 "Auditoria de dependências" é "Não aplicável"'

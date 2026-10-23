@@ -43,8 +43,10 @@
 |---|---|---|---|---|
 | <!-- A definir ou Não aplicável --> | | | | |
 
-"Direção" é `expõe` ou `consome`. Uma cópia de contrato de terceiros fica fixada com o SHA-256 num
-`ORIGEM.md` ao lado dela (de onde veio, quando, qual versão e o hash). Recomendado: o serviço expõe o
+"Direção" é `expõe`, `consome` ou `ambas`. Uma cópia de contrato de terceiros fica fixada por um
+`ORIGEM.md` ao lado dela, com as linhas `Origem:`, `Data:`, `Versão:` e `SHA-256:`. O SHA-256 é do
+conteúdo com o fim de linha normalizado para LF, para não mudar entre Windows e Linux:
+`node -e "const c=require('crypto');const t=require('fs').readFileSync(process.argv[1],'utf8').replace(/\r\n/g,'\n');console.log(c.createHash('sha256').update(t).digest('hex'))" <arquivo>`. Recomendado: o serviço expõe o
 SHA-256 do contrato que implementa (por exemplo, num cabeçalho de resposta), para o consumidor detectar
 a divergência.
 

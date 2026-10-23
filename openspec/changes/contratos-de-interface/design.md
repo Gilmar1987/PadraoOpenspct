@@ -87,7 +87,7 @@ O requisito "Comandos de verificação do projeto" (`project-initialization`) n�
 
 Trecho novo, **"Interface contract first"**, igual no comando e na skill de propose, junto das regras de criação de `tasks.md`:
 
-> **Interface contract first**: when `openspec/project.md` registers an interface contract (section "Contratos de interface") and the change creates, changes or removes an operation of that interface (route, message, schema field), list the contract file in the proposal's Impact and add a task that updates the contract before any implementation task. When the project has no registered contract, say so in the proposal and continue.
+> **Interface contract first**: when `openspec/project.md` registers an interface contract (section "Contratos de interface") and the change creates, changes or removes an operation of that interface to other systems (route, message, schema field), list the contract file in the proposal's Impact and add a task that updates the contract before any implementation task. When the change touches an interface to other systems and the project has no registered contract (section missing or "Não aplicável"), say so in the proposal's Impact and continue.
 
 ### D5. Apply: mesmo commit e nada fora do contrato
 
@@ -99,7 +99,7 @@ Trecho novo, **"Contract and code in the same commit"**, igual no comando e na s
 
 Trecho novo, **"Interface contract check"**, igual no comando e na skill de verify, depois de "Project validation commands":
 
-> **Interface contract check**: when the change touches an interface registered in "Contratos de interface", run the "Teste de contrato" command from `project.md` and report both directions: operations declared but not implemented, and operations implemented but not declared. A confirmed divergence is CRITICAL. A missing or postponed command is not verified, with the reason. When the change touches a third-party contract copy or its integration, recompute its SHA-256 and compare it with `ORIGEM.md`; a mismatch is CRITICAL. A service that does not expose its contract hash is not an issue.
+> **Interface contract check**: when the change touches an interface registered in "Contratos de interface", run the "Teste de contrato" command from `project.md` and report both directions: operations declared but not implemented, and operations implemented but not declared. A confirmed divergence is CRITICAL. A missing or postponed command is not verified, with the reason. When the change touches a third-party contract copy or its integration, recompute its SHA-256 over the content with CRLF normalized to LF (the command in the "Contratos de interface" note of `project.md`) and compare it with the `SHA-256:` line of `ORIGEM.md`; a mismatch is CRITICAL. A service that does not expose its contract hash is not an issue.
 
 Os resultados entram em `Comandos:` do `verification.md`, como os outros comandos. O formato do registro não muda.
 
