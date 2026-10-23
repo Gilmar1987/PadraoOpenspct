@@ -14,8 +14,10 @@
 
 ## 3. Skills e explore
 
-- [ ] 3.1 Aplicar o D2 em `padrao-openspec/.claude/skills/docker/SKILL.md` e `docker-guidelines.md` (regra das portas em `127.0.0.1` em "Princípios" e no checklist, exemplo de compose e, no guia, as seções "docker-compose" e ".env.example"). Verificar com `grep -n "127.0.0.1"` nos dois arquivos e com o marcador passando.
-- [ ] 3.2 Aplicar o D3 em `padrao-openspec/.claude/commands/opsx/explore.md` e `skills/openspec-explore/SKILL.md` ("Number the alternatives", com o mesmo texto). Verificar com `diff` vazio entre os dois itens e com o marcador passando.
+- [x] 3.1 Aplicar o D2 em `padrao-openspec/.claude/skills/docker/SKILL.md` e `docker-guidelines.md` (regra das portas em `127.0.0.1` em "Princípios" e no checklist, exemplo de compose e, no guia, as seções "docker-compose" e ".env.example"). Verificar com `grep -n "127.0.0.1"` nos dois arquivos e com o marcador passando.
+  - Evidência: skill `docker`: item em "Princípios" (portas de desenvolvimento só em `127.0.0.1`, justificativa no design para exceção) e `.env.example` com marcadores; exemplo de compose com `127.0.0.1` na aplicação e porta do banco em `127.0.0.1`; dois itens novos no checklist; guia: `127.0.0.1` nas portas do compose de desenvolvimento, parágrafo sobre a rede local e `.env.example` com `<troque>`; `grep -n "127.0.0.1"` → 5 linhas na skill e 4 no guia; nenhuma outra porta publicada sem o IP
+- [x] 3.2 Aplicar o D3 em `padrao-openspec/.claude/commands/opsx/explore.md` e `skills/openspec-explore/SKILL.md` ("Number the alternatives", com o mesmo texto). Verificar com `diff` vazio entre os dois itens e com o marcador passando.
+  - Evidência: item "Number the alternatives" antes de "Offer grounded recommendations" no `explore.md` e na skill do explore; `diff` dos dois itens → iguais; "Trechos customizados das skills" e "Lint de Markdown" → PASS (exit 0)
 
 ## 4. Documentação, versão e integração
 

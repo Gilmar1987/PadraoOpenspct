@@ -31,6 +31,8 @@ e boas práticas de ambiente, integrada ao fluxo OpenSpec.
 - Secrets via variáveis de ambiente, nunca copiados na imagem
 - Health check declarado em todo serviço de longa duração
 - `.dockerignore` sempre presente para excluir `node_modules`, `.git`, artefatos de build
+- Serviços de desenvolvimento (bancos, filas, caches, painéis de administração) MUST publicar portas só em `127.0.0.1`, por exemplo `"127.0.0.1:${DB_PORT:-5432}:5432"`: sem o IP, a porta abre em todas as interfaces da máquina. Um serviço que outra máquina precisa alcançar exige justificativa no `design.md`
+- O `.env.example` traz marcadores (`POSTGRES_PASSWORD=<troque>`), nunca senhas que funcionem
 
 ## Dockerfile — Estrutura padrão
 
@@ -81,7 +83,8 @@ services:
   app:
     build: .
     ports:
-      - "${APP_PORT:-8000}:<porta>"
+      # Sem o 127.0.0.1, a porta abre em todas as interfaces da máquina.
+      - "127.0.0.1:${APP_PORT:-8000}:<porta>"
     environment:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
@@ -95,6 +98,8 @@ services:
 
   db:
     image: postgres:16-alpine
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -153,7 +158,8 @@ Ao criar tarefas de containerização em `tasks.md`, use este padrão:
 - [ ] Nenhum secret hardcoded na imagem (`docker history` não expõe credenciais)
 - [ ] Health check responde dentro do timeout configurado
 - [ ] `.dockerignore` exclui artefatos de build e arquivos sensíveis
-- [ ] Variáveis de ambiente documentadas em `.env.example`
+- [ ] Variáveis de ambiente documentadas em `.env.example`, com marcadores no lugar das senhas
+- [ ] Portas de serviços de desenvolvimento publicadas só em `127.0.0.1` (`docker compose config` mostra `host_ip: 127.0.0.1`)
 
 ## Referência completa
 
