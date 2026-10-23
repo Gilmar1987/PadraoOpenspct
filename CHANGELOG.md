@@ -4,6 +4,24 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.13.0 — 2026-10-23
+
+### O que mudou
+
+- **Débitos e camadas de verificação:** o `/opsx:init` gera `openspec/estado-atual.md`, descritivo, com a
+  lista "Fora do ciclo atual" (itens adiados com motivo, data, origem e condição de saída), e o
+  `arquitetura.md` passa a se declarar normativo. O propose e o explore citam os débitos que a change fecha
+  ou abre, e o archive atualiza a lista. O `project.md` ganha a matriz "Camadas de verificação", que o
+  verify usa para registrar as camadas exercitadas (linha `Camadas:`) e as que ficaram sem rodar. Camadas
+  adiadas que se aplicam entram em "Não verificado" como `<camada> (Adiado na matriz)`, e por isso a
+  contagem de não verificados das métricas de fluxo pode subir.
+
+### Ações no projeto
+
+- Recomendado: no store, crie `openspec/estado-atual.md` a partir das respostas "Adiado" do
+  `project-setup.md` (modelo no Arquivo 6 do `init.md`) e acrescente ao `project.md` a seção "Camadas de
+  verificação".
+
 ## 1.12.0 — 2026-10-22
 
 ### O que mudou
