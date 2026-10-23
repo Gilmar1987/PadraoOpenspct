@@ -20,7 +20,8 @@
 
 ## 3. Documentação, versão e integração
 
-- [ ] 3.1 Atualizar README e guia do projeto com os três hooks e o `estado`, e aplicar o D7 com a versão aprovada. Verificar com o lint e o passo "Versão e changelog" passando.
+- [x] 3.1 Atualizar README e guia do projeto com os três hooks e o `estado`, e aplicar o D7 com a versão aprovada. Verificar com o lint e o passo "Versão e changelog" passando.
+  - Evidência: guia `templates/openspec-padrao.md` (três hooks de sessão novos, comando `estado` na seção Portão e passos 4 a 6 no "Roteiro de verificação no Claude Code"), README (hooks de sessão) e três itens em "O que mudou" e um em "Ações no projeto" da seção 1.12.0 aberta do CHANGELOG, sem subir o `VERSION`. Git Bash: "Lint de Markdown" (padrão e raiz), "Versão e changelog", "Raiz em dia", "Guia de primeiros passos" e validate da raiz → PASS.
 - [ ] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
 
 ## Workflow follow-up

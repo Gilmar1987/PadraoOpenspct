@@ -217,8 +217,10 @@ confere a paridade. Dois papéis existem só no Claude Code:
 
 Os papéis de veredito não têm `Edit` nem `Write`. Todos os hooks ficam no `.claude/settings.json`. Os de papel
 (`somente-leitura.mjs`, `escopo-de-escrita.mjs`) agem só nas chamadas dos subagentes do papel, pelo campo
-`agent_type`; os de sessão (`cobra-evidencia.mjs` no `Stop`, `portao-do-archive.mjs` no `PreToolUse`) valem para
-toda a sessão. Todos são
+`agent_type`; os de sessão (`contexto-de-sessao.mjs` no `SessionStart`, `cobra-evidencia.mjs` no `Stop`,
+`portao-do-archive.mjs`, `protege-ganchos.mjs` e `exige-change.mjs` no `PreToolUse`) valem para toda a sessão: o
+estado das changes no início, o archive pelo portão, os ganchos do Git protegidos e a confirmação de uma escrita fora
+do fluxo. Todos são
 heurísticos: o detalhe e o roteiro de verificação manual estão em
 [`templates/openspec-padrao.md`](padrao-openspec/templates/openspec-padrao.md#camada-do-claude-code).
 
