@@ -59,7 +59,8 @@ services:
       target: build
     command: <comando de execução local dos Comandos de verificação>
     ports:
-      - "${APP_PORT:-8000}:<porta>"
+      # Sem o 127.0.0.1, a porta abre em todas as interfaces da máquina.
+      - "127.0.0.1:${APP_PORT:-8000}:<porta>"
     volumes:
       - .:/src
     environment:
@@ -83,7 +84,7 @@ services:
   db:
     image: postgres:17-alpine
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -99,6 +100,10 @@ services:
 volumes:
   postgres_data:
 ```
+
+No ambiente de desenvolvimento, publique as portas só em `127.0.0.1`. O banco com a senha do
+`.env.example` em `0.0.0.0` fica acessível a qualquer máquina da rede local. Um serviço que outra
+máquina precisa alcançar exige justificativa no `design.md`.
 
 Ao montar o código como volume (`.:/src`), exclua do volume as pastas de dependências
 instaladas dentro do contêiner, com um volume anônimo por pasta (por exemplo,
@@ -198,18 +203,20 @@ docs
 
 ## .env.example
 
-Sempre versionar um `.env.example` com as variáveis necessárias sem valores reais:
+Sempre versionar um `.env.example` com as variáveis necessárias sem valores reais. Senhas e
+chaves levam um marcador (`<troque>`), e não um valor que funcione: quem copia o arquivo para
+`.env` sem trocar nada não sobe um banco com uma senha conhecida.
 
 ```env
 # Banco de dados
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+DATABASE_URL=postgresql://user:<troque>@localhost:5432/dbname
 POSTGRES_USER=user
-POSTGRES_PASSWORD=password
+POSTGRES_PASSWORD=<troque>
 POSTGRES_DB=dbname
 
 # Aplicação
 APP_PORT=8000
-APP_SECRET_KEY=troque-por-um-valor-gerado-localmente
+APP_SECRET_KEY=<troque-por-um-valor-gerado-localmente>
 
 # Integrações (uma linha por chave, sem valor real)
 EMAIL_API_KEY=

@@ -417,7 +417,17 @@ ficar lento:
 O `/opsx:apply` confirma o progresso no CLI ao fim de cada grupo de tarefas, e não depois de
 cada tarefa, para limitar o número de chamadas. O `.gitattributes` mantém os arquivos de
 texto em LF também no Windows, para que o `sync-root.mjs --check` não acuse divergências
-que existem só na quebra de linha.
+que existem só na quebra de linha. O instalador cria o mesmo tipo de `.gitattributes` no repositório
+de código que ainda não tem um (texto em LF, `*.bat` e `*.cmd` em CRLF), e não mexe num arquivo que o
+projeto já tenha.
+
+**Git Bash e caminhos.** O Git Bash converte argumentos que parecem caminhos POSIX: o `/fr` de uma
+URL vira `C:/Program Files/Git/fr`. Rode esses comandos no PowerShell, ou use `MSYS_NO_PATHCONV=1`
+só em comandos sem caminho de arquivo, porque a variável também desliga a conversão dos caminhos
+legítimos (um `curl -o C:/saida.txt` passa a falhar).
+
+**`.env.example` ignorado.** Muitos geradores escrevem `.env*` no `.gitignore`, o que ignora também
+o `.env.example`. Acrescente `!.env.example` depois dessa linha.
 
 ## Migração dos stores removidos
 

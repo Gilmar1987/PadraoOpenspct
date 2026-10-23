@@ -21,5 +21,6 @@
 
 ## 4. Documentação, versão e integração
 
-- [ ] 4.1 Aplicar o D4 no `README.md` ("Desempenho e ambiente") e atualizar o `CHANGELOG.md` (itens na 1.15.0, ou a seção aberta, com a ação recomendada) e o `padrao-openspec/VERSION`, se esta change abrir a versão. Verificar com o lint e com o passo "Versão e changelog" passando.
+- [x] 4.1 Aplicar o D4 no `README.md` ("Desempenho e ambiente") e atualizar o `CHANGELOG.md` (itens na 1.15.0, ou a seção aberta, com a ação recomendada) e o `padrao-openspec/VERSION`, se esta change abrir a versão. Verificar com o lint e com o passo "Versão e changelog" passando.
+  - Evidência: README, em "Desempenho e ambiente": o `.gitattributes` do repositório de código, "Git Bash e caminhos" e "`.env.example` ignorado"; CHANGELOG com a seção `## 1.15.0` (item "Entrega no código" e duas ações recomendadas) e `VERSION` 1.15.0, porque a `descoberta-do-produto` (PR #45) ainda não entrou; no rebase depois dela, os itens vão para a seção que ela abre; `sync-root.mjs` → 4 caminhos; "Versão e changelog", "Smoke test do changelog-range", lint nos dois lugares e "Raiz em dia" → PASS (exit 0)
 - [ ] 4.2 Rodar o `sync-root.mjs` e o `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.

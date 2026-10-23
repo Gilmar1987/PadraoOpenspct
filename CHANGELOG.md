@@ -22,11 +22,20 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   da resposta que a cria, com a combinação nova "microsserviços num projeto pequeno". O arquivo de respostas
   continua compatível nos números; uma pergunta que ele não responde e que uma regra de salto cobre recebe o
   valor da regra, em vez de ser perguntada no chat.
+- **Entrega no código:** o instalador cria um `.gitattributes` com o bloco gerenciado do padrão (texto em LF,
+  `*.bat` e `*.cmd` em CRLF) no repositório de código que não tem um, e só sugere as linhas quando o
+  projeto já tem o arquivo. A skill `docker` publica as portas dos serviços de desenvolvimento só em
+  `127.0.0.1` e pede marcadores, e não senhas, no `.env.example`. O explore numera as alternativas das
+  perguntas e trata um "sim" a "isto ou aquilo" como ambíguo. O README explica a conversão de caminhos
+  do Git Bash e o `!.env.example` no `.gitignore`.
 
 ### Ações no projeto
 
-- Nenhuma. O `/opsx:discover` chega com a atualização do padrão; um projeto já inicializado pode
-  rodá-lo para registrar a ideia do produto em `openspec/descoberta.md`.
+- Descoberta do produto: nenhuma ação. O `/opsx:discover` chega com a atualização do padrão; um
+  projeto já inicializado pode rodá-lo para registrar a ideia do produto em `openspec/descoberta.md`.
+- Recomendado: nos repositórios de código sem `.gitattributes`, rode o instalador com `--update` (ou crie o
+  arquivo à mão) e decida se renormaliza os arquivos já commitados (`git add --renormalize .`).
+- Recomendado: no compose de desenvolvimento, publique as portas dos bancos e das filas em `127.0.0.1`.
 
 ## 1.14.0 — 2026-10-23
 
