@@ -7,8 +7,10 @@
 
 ## 2. Portão e hooks
 
-- [ ] 2.1 Implementar o comando `estado` no `portao.mjs` (D1). Verificar com os casos do `estado` no "Smoke test do portão" passando no Git Bash e no PowerShell.
-- [ ] 2.2 Criar `contexto-de-sessao.mjs`, `protege-ganchos.mjs` e `exige-change.mjs` (D2–D4) sobre o `comum.mjs` e acrescentá-los ao template (D5). Verificar com o "Smoke test dos hooks do Claude Code" e o smoke da camada do Claude Code no instalador passando.
+- [x] 2.1 Implementar o comando `estado` no `portao.mjs` (D1). Verificar com os casos do `estado` no "Smoke test do portão" passando no Git Bash e no PowerShell.
+  - Evidência: comando `estado` no `portao.mjs` (D1): uma chamada `openspec list --json`, aprovação lida do proposal, selo válido/vencido/ilegível/ausente, inferências e próximo passo; texto `<change>: N/M tarefas, … → <próximo>` e JSON `{ok, acao: "estado", changes: [...]}`. Git Bash: "Smoke test do portão" → PASS (pendente → pedir a aprovação; tarefas abertas → /opsx:apply; sem verification.md → /opsx:verify; completo com escopo archive → /opsx:archive; linha de texto `ci-change: 2/2 tarefas`), 0 ids `ci-*` depois; nesta worktree, `estado` → "ganchos-de-sessao-e-fluxo: 1/6 tarefas, aprovada (archive), selo ausente → /opsx:apply" (exit 0).
+- [x] 2.2 Criar `contexto-de-sessao.mjs`, `protege-ganchos.mjs` e `exige-change.mjs` (D2–D4) sobre o `comum.mjs` e acrescentá-los ao template (D5). Verificar com o "Smoke test dos hooks do Claude Code" e o smoke da camada do Claude Code no instalador passando.
+  - Evidência: `contexto-de-sessao.mjs` (SessionStart, nunca bloqueia), `protege-ganchos.mjs` (nega `--no-verify`, `-n` em `git commit`, inclusive agrupado, e escrita de `core.hooksPath` por `git config` e `git -c`) e `exige-change.mjs` (`ask` sem change aprovada, cache positivo de 60 s por `session_id`, nada dentro de `openspec/` ou sem portão) sobre o `comum.mjs`; template `claude-settings.json` com o grupo `SessionStart`, o `protege-ganchos` no início do `Bash|PowerShell` e o `exige-change` no fim do `Edit|Write`. Git Bash: "Smoke test dos hooks do Claude Code", "Smoke test da camada do Claude Code no instalador" e "Sintaxe dos scripts" → PASS. A primeira rodada local falhou por um erro de citação do executor local (script passado por `bash -c` no Windows); o passo roda como arquivo, como no GitHub Actions, e passou.
 - [ ] 2.3 Testar os três hooks no Claude Code real, num projeto de teste com o padrão instalado:
   - abrir a sessão e ver o estado no contexto;
   - pedir `git commit --no-verify` e ver a negação;

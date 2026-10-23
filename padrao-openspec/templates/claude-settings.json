@@ -1,5 +1,19 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -18,6 +32,14 @@
       {
         "matcher": "Bash|PowerShell",
         "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/protege-ganchos.mjs"
+            ],
+            "timeout": 30
+          },
           {
             "type": "command",
             "command": "node",
@@ -44,6 +66,14 @@
             "command": "node",
             "args": [
               "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/escopo-de-escrita.mjs"
+            ],
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/exige-change.mjs"
             ],
             "timeout": 30
           }
