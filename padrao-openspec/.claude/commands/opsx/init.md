@@ -61,7 +61,7 @@ Quando uma resposta torna outra pergunta sem sentido, não faça essa pergunta: 
 | 1.5 = 4 (Não) | 6.5 e 6.6 | 6.5: 0) Não aplicável; 6.6: 4) Não aplicável — sem dados sensíveis |
 | 2.6 = 0 | Teste de contrato na 7.1 | Não aplicável |
 
-- No resumo do bloco, antes de "Confirma este bloco?", mostre a linha `Puladas: 3.8 (porque a 2.5 é Não)`, com cada pergunta pulada do bloco e o motivo, e diga que qualquer uma delas pode ser respondida. Uma pulada que o dev pede para responder é feita como as outras, e a resposta dele substitui o valor da regra.
+- No resumo do bloco, antes de "Confirma este bloco?", mostre a linha `Puladas: 3.8 (porque a 2.5 é Não)`, com cada pergunta pulada do bloco e o motivo, e diga que qualquer uma delas pode ser respondida. Sem pulada no bloco, omita a linha. Depois de responder uma pulada, mostre o resumo do bloco de novo antes de pedir a confirmação. Uma pulada que o dev pede para responder é feita como as outras, e a resposta dele substitui o valor da regra.
 - Uma pergunta pulada não recebe linha de recomendação nem entra nos filtros de opções.
 - Uma resposta "Não aplicável" vinda de uma regra de salto segue a regra das ADRs: não gera ADR.
 
@@ -82,8 +82,8 @@ Quando uma resposta anterior torna uma opção incompatível, oculte essa opçã
 | 5.5 | 3.2 = 0 (sem front-end) | 0, 5, 6 |
 
 - Mostre as opções visíveis com os números originais e, logo abaixo, a linha `(N opções ocultas porque <resposta>; digite "todas" para ver)`, por exemplo `(3 opções ocultas porque a 3.1 é Python; digite "todas" para ver)`.
-- Com `todas`, mostre a lista completa e aceite qualquer número dela.
-- Uma pergunta da qual o filtro depende que foi pulada ou respondida com "Outro" não filtra nada: mostre todas as opções.
+- Com `todas`, mostre a lista completa, sem a linha de ocultas, e aceite qualquer número dela. Se a pergunta for feita de novo, o filtro volta a valer.
+- O filtro usa o valor registrado da pergunta da qual depende, inclusive o valor que uma regra de salto registrou (por exemplo, a 3.2 pulada com "0) Não há front-end próprio" filtra a 3.6 e a 5.5). Quando esse valor é "Não aplicável" ou "Outro", não filtre: mostre todas as opções.
 - As opções "0", "Ainda não sei" e "Outro" nunca são ocultadas.
 - Uma opção oculta nunca recebe a linha de recomendação.
 
@@ -831,7 +831,7 @@ O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo o
 
 > Respostas válidas uma a uma podem ser incoerentes entre si. Aponte cada combinação antes da confirmação final.
 
-**Na hora:** avalie cada combinação desta tabela assim que a última resposta envolvida for dada, inclusive a de uma pergunta pulada que o dev pediu para responder, e siga os passos abaixo nesse momento. A checagem antes da confirmação final continua: ela lista todas as combinações encontradas, mostra as já decididas como "Ajustada" ou "Mantida", com a justificativa, sem perguntar de novo, e pergunta só as que ainda não foram decididas. Uma resposta ajustada que desfaz a combinação a tira da lista. Com arquivo de respostas, a checagem roda só no fim.
+**Na hora:** avalie cada combinação desta tabela assim que a última resposta envolvida for dada, inclusive a de uma pergunta pulada que o dev pediu para responder, e siga os passos abaixo nesse momento. Uma combinação que cita um bloco inteiro (por exemplo, "o bloco 4 não prevê esse serviço") é avaliada no resumo desse bloco. Quando o dev responde "manter" já com a justificativa (por exemplo, "manter: só teste"), registre-a sem perguntar de novo. A checagem antes da confirmação final continua: ela lista todas as combinações encontradas, mostra as já decididas como "Ajustada" ou "Mantida", com a justificativa, sem perguntar de novo, e pergunta só as que ainda não foram decididas. Uma resposta ajustada que desfaz a combinação a tira da lista. Com arquivo de respostas, a checagem roda só no fim.
 
 Avalie ao menos estas combinações:
 

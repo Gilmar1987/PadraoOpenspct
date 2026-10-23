@@ -28,13 +28,14 @@
 
 ## 4. Verificação de comportamento
 
-- [ ] 4.1 Roteiro manual numa cópia temporária do store, fora do repositório, com um subagente seguindo o `init.md` e o agente da change no papel do dev, registrado na evidência:
+- [x] 4.1 Roteiro manual numa cópia temporária do store, fora do repositório, com um subagente seguindo o `init.md` e o agente da change no papel do dev, registrado na evidência:
   - (a) 1.5 = "Não" e 2.2 = "Apenas back-end": a 3.2, a 6.5 e a 6.6 não são feitas e aparecem em "Puladas";
   - (b) 2.5 = "Não": a 3.8 não é feita; o dev pede para respondê-la e escolhe uma fila, e a combinação "fila sem jobs" é apontada na hora;
   - (c) 3.1 = Python: a 3.5, a 3.7 e a 5.4 mostram só as opções do ecossistema, com os números originais e a linha de ocultas; `todas` mostra a lista inteira;
   - (d) 1.4 = "Pequeno" e 2.1 = "Microsserviços": a combinação é apontada logo depois da 2.1.
 
   Verificar que os quatro itens se comportam como os cenários da spec.
+  - Evidência: roteiro numa cópia temporária do store (scratchpad), com um subagente seguindo o `init.md` e respostas do dev roteirizadas, Blocos 1 a 6. (a) 1.5 = Não e 2.2 = Apenas back-end → 3.2, 6.5 e 6.6 não feitas, com "Puladas: 3.2 (porque a 2.2 é Apenas back-end)" e "Puladas: 6.5 (...), 6.6 (...)" nos resumos; (b) 2.5 = Não → 3.8 pulada; o dev pediu para respondê-la e escolheu Redis → "fila sem jobs" apontada na hora e "Redis sem serviço no Bloco 4" apontada no resumo do Bloco 4; (c) 3.1 = Python → 3.5 com 0, 3, 4, 6 e "(3 opções ocultas porque a 3.1 é Python; digite \"todas\" para ver)", `todas` mostrou as 7; 3.7 com 3, 5, 6; 5.4 com 2, 6; 5.5 com 0, 5, 6 pela 3.2 = 0; 4.5 ocultou a Vercel Edge com AWS; (d) 1.4 = Pequeno e 2.1 = Microsserviços → combinação apontada logo depois da 2.1. Defeito encontrado e corrigido: "pergunta pulada não filtra nada" deixava a 3.6 sem filtro com a 3.2 pulada como "0"; o filtro passou a usar o valor registrado pela regra (contraria o texto do D3, que dizia o contrário, e atende ao cenário "E2E sem front-end" da spec). Também esclarecidos: linha de ocultas some com `todas`; "Puladas" omitida sem pulada; resumo mostrado de novo depois de responder uma pulada; combinação de bloco inteiro avaliada no resumo do bloco; "manter: <justificativa>" na mesma mensagem. Ambiguidades restantes em linhas de coerência anteriores a esta change (Redis no Bloco 4, "sem produção" em 4.1/4.3, "0" exclusivo na 6.4) ficam para a `init-coerencia-e-ferramentas`
 
 ## Workflow follow-up
 
