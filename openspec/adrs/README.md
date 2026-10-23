@@ -25,6 +25,16 @@ uma ADR antes do arquivamento, porque o `design.md` passa a viver em
 - Com pull request, a aprovação é a revisão do PR que muda o status para `Accepted`. Em projetos sem pull request, a aprovação é a declaração explícita do responsável, citada na mensagem do commit que muda o status. Nos dois casos, o histórico do Git é o registro de autoria e data; não duplique revisor, aprovação ou hash de commit no arquivo.
 - As ADRs fundacionais geradas pelo `/opsx:init` nascem `Accepted`, porque as respostas da entrevista foram confirmadas bloco a bloco pelo responsável.
 - `verificacao` (opcional): lista dos testes ou comandos que conferem a decisão no código, por exemplo um teste de arquitetura que proíbe o domínio de importar a camada de banco (`tests/architecture/test_dependencias.py`, `npx depcruise src`, `dotnet test --filter Architecture`). O `/opsx:verify` roda esses testes nas changes que tocam a ADR. Fica vazio quando a decisão não se confere por código (hospedagem, processo). Acrescentar ou corrigir `verificacao` numa ADR `Accepted` não muda a decisão e não exige ADR nova.
+- `imposicao` (opcional): a forma como a decisão é imposta, e com ela a severidade no `/opsx:verify`:
+  - `controle`: a verificação roda e a falha é crítica;
+  - `consultivo`: a verificação roda e a falha é registrada como warning, sem bloquear;
+  - `externo`: a regra mora na configuração de uma ferramenta do projeto, e a `verificacao` cita `<arquivo de configuração>#<regra>`; o verify confere que a regra está lá e não está desligada;
+  - `norma`: sob palavra, sem verificação automática.
+
+  Sem o campo, a ADR conta como `controle` quando tem `verificacao` e como `norma` quando não tem. `controle` ou `consultivo` sem `verificacao` é crítico ("verificador ausente"). Uma verificação nova costuma nascer `consultivo` e só é promovida a `controle` depois de vista reprovando e sem falso positivo no registro.
+- **Visto reprovando:** uma verificação só conta depois de rodar com a violação injetada, falhando, e no caso limpo, passando, com os dois códigos de saída na evidência da tarefa. A violação injetada é temporária e não entra no commit.
+- **Limite:** a seção separa o que o mecanismo garante do que fica sob palavra, nomeando o campo exato ("confere as importações declaradas", e não "confere a arquitetura").
+- Mudar `imposicao` ou "Limite" numa ADR `Accepted` não muda a decisão e não exige ADR nova; promover a `controle` exige a prova de reprovação.
 
 ## Relação com os agentes
 

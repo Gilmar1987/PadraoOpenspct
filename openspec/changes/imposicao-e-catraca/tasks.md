@@ -33,5 +33,6 @@
 
 ## 5. Documentação, versão e integração
 
-- [ ] 5.1 Atualizar o `README.md` (trechos customizados novos), o `CHANGELOG.md` (itens na seção 1.14.0, ou a seção aberta, com as ações recomendadas do Migration Plan) e o `padrao-openspec/VERSION`, se esta change abrir a versão. Verificar com o lint e com o passo "Versão e changelog" passando.
+- [x] 5.1 Atualizar o `README.md` (trechos customizados novos), o `CHANGELOG.md` (itens na seção 1.14.0, ou a seção aberta, com as ações recomendadas do Migration Plan) e o `padrao-openspec/VERSION`, se esta change abrir a versão. Verificar com o lint e com o passo "Versão e changelog" passando.
+  - Evidência: README com os trechos novos na tabela de trechos customizados (propose, archive, verify, init e modelo de ADR); CHANGELOG com o item "Imposição das decisões e catraca de falhas" na seção 1.14.0 aberta e as ações recomendadas e opcionais do Migration Plan; `VERSION` continua 1.14.0 (a change não abre versão); "Versão e changelog", "Smoke test do changelog-range", "Raiz em dia" e "Lint de Markdown da raiz" → PASS (exit 0)
 - [ ] 5.2 Rodar o `sync-root.mjs` e o `--check`, o `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.

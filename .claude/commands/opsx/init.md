@@ -993,7 +993,7 @@ Ver [Fora do ciclo atual](estado-atual.md#fora-do-ciclo-atual).
 
 ### Arquivo 6: `<root>/openspec/estado-atual.md`
 
-Gere este arquivo depois do Arquivo 5. A tabela "Fora do ciclo atual" recebe uma linha por resposta "Adiado" da entrevista e por combinação mantida na checagem de coerência; sem nenhuma, uma linha "Nenhum". As camadas "Adiado" da matriz que não vêm de uma resposta adiada ficam só na matriz: o verify as aponta como não verificadas quando se aplicam. Um item só sai da lista quando é feito ou quando uma ADR Accepted diz que não será feito.
+Gere este arquivo depois do Arquivo 5. A tabela "Fora do ciclo atual" recebe uma linha por resposta "Adiado" da entrevista e por combinação mantida na checagem de coerência; sem nenhuma, uma linha "Nenhum". As camadas "Adiado" da matriz que não vêm de uma resposta adiada ficam só na matriz: o verify as aponta como não verificadas quando se aplicam. Um item só sai da lista quando é feito ou quando uma ADR Accepted diz que não será feito. Escreva o "Sai quando" de cada item como um fato que se confere no repositório ou no store (por exemplo, "linha Migrações preenchida no `project.md`", "existe `apps/web/`", "change `x` arquivada" ou "ADR-00NN Accepted"); uma data sozinha não serve. A seção "Falhas aceitas" nasce com a linha "Nenhuma".
 
 ````markdown
 # Estado atual — {{Nome do Projeto}}
@@ -1008,9 +1008,24 @@ commit do archive) ou quando uma ADR Accepted diz que não será feito. "Não é
 um item da lista. Um item que é divergência entre o código e uma spec, ADR ou documento de referência
 também precisa de linha em [lacunas.md](lacunas.md), senão o verify o aponta como lacuna nova.
 
+"Sai quando" é um fato que se confere no repositório ou no store: um caminho que passa a existir, uma
+change arquivada, uma ADR aceita ou uma linha do `project.md`. Uma data sozinha não é condição. O
+verify aponta a condição já cumprida com o item ainda aqui.
+
 | Item | Motivo | Desde | Origem | Sai quando |
 |---|---|---|---|---|
-| {{uma linha por item adiado}} | {{motivo da resposta ou da justificativa}} | {{data do init}} | {{pergunta, por exemplo "7.1 Migrações"}} | {{condição, por exemplo "primeira change com banco"}} |
+| {{uma linha por item adiado}} | {{motivo da resposta ou da justificativa}} | {{data do init}} | {{pergunta, por exemplo "7.1 Migrações"}} | {{fato conferível, por exemplo "linha Migrações preenchida no `project.md`"}} |
+
+## Falhas aceitas
+
+Falhas conhecidas de comandos de verificação, aceitas por um proposal aprovado (linha `Falhas aceitas:`
+do Impact). A lista só encolhe: falha fora dela é regressão; linha cuja falha não acontece mais sai.
+"Falha" é o identificador exato (nome do teste, ou regra mais arquivo do linter), e "Sai quando"
+segue a mesma regra da tabela acima.
+
+| Verificação | Falha | Motivo | Desde | Origem | Sai quando |
+|---|---|---|---|---|---|
+| Nenhuma | | | | | |
 ````
 
 ---

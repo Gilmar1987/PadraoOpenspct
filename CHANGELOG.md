@@ -15,12 +15,25 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   erro sem detalhe interno. O `config.yaml` liga o Why ao objetivo do produto e pede o padrão de projeto
   no design. A revisão de código e o verify ("Engineering principles") conferem esses pontos, e o init
   registra a convenção na pergunta 7.4; só o log de três estados aceita "Não aplicável", com justificativa.
+- **Imposição das decisões e catraca de falhas** ([ADR-0008](openspec/adrs/0008-imposicao-declarada-e-catraca-de-falhas.md)):
+  o modelo de ADR ganha o campo `imposicao` (`controle`, `consultivo`, `externo` ou `norma`) e a seção
+  "Limite" (o que o mecanismo garante e o que fica sob palavra), e o verify dá a severidade pela
+  imposição. Uma verificação de ADR nova só conta vista reprovando (falha com a violação injetada,
+  passa no caso limpo), e a que roda sem nada a varrer não conta como aprovada. Criar ou endurecer a
+  verificação de uma ADR pede o "Impacto medido" no design. O `estado-atual.md` ganha "Falhas
+  aceitas", uma catraca que só encolhe, mantida pela linha `Falhas aceitas:` do proposal e conferida no
+  verify, e o "Sai quando" passa a ser um fato conferível, cobrado quando já se cumpriu.
 
 ### Ações no projeto
 
 - Recomendado: no store, acrescente ao `project.md` a linha "Princípios de engenharia" em Development
   Conventions e, se o log de três estados não se aplicar, a exceção com justificativa (por exemplo, "Log
   de três estados: Não aplicável (script de uso único)"). Sem a linha, o verify aplica os três itens.
+- Recomendado: no `estado-atual.md`, acrescente a seção "Falhas aceitas" (copie o modelo do Arquivo 6 do
+  `init.md`) com a linha "Nenhuma", e reescreva como fato conferível os "Sai quando" que não se
+  conferem. Sem a seção, toda falha continua crítica.
+- Opcional: declare `imposicao` e "Limite" nas ADRs com `verificacao`. Sem o campo, a ADR conta como
+  `controle` quando tem `verificacao` e como `norma` quando não tem, como antes.
 
 ## 1.13.0 — 2026-10-23
 
