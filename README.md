@@ -313,8 +313,10 @@ Publicar é ação do responsável, feita só com pedido explícito:
    `CHANGELOG.md`, com "O que mudou" e "Ações no projeto" ("Nenhuma" quando não houver); as changes
    seguintes não mexem no `VERSION` e só acrescentam itens nessa seção. A release sai quando o
    responsável pedir. A CI falha se o `VERSION` e a primeira seção do CHANGELOG não baterem.
-2. Depois do merge na `main`, crie a tag e a release com as notas da seção e o script de entrada
-   anexado:
+2. No dia da publicação, acerte a data da seção da versão para esse dia (`## X.Y.Z — AAAA-MM-DD`),
+   num PR curto (`chore: data da versão X.Y.Z`); a seção foi aberta antes, na primeira change da versão.
+3. Depois do merge na `main`, crie a tag no commit do merge e a release com as notas da seção e o
+   script de entrada anexado:
 
    ```powershell
    git tag vX.Y.Z
