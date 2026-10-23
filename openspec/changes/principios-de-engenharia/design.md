@@ -70,9 +70,9 @@ Os critérios citam o `project.md` como fonte das ferramentas. O resto do templa
 
 ### D4. Verify
 
-Heurística nova, com o mesmo texto no comando e na skill, depois das heurísticas existentes:
+Heurística nova, com o mesmo texto no comando e na skill, depois das heurísticas existentes; o Scenario Coverage passa a mapear os testes pela citação do requisito e do cenário:
 
-> **Engineering principles**: for a change that altered code, read the "Princípios de engenharia" line and the validation and logging decisions of `project.md`, then check the code the change wrote. An external input (request, message, file, environment variable) used without the project's validation tool is a WARNING. A mutation or critical boundary without the initiated, success and failed log states is a WARNING, unless `project.md` marks that item "Não aplicável". An error response that returns an internal exception message, a stack trace or personal data, or a log that writes personal data or credentials unmasked, is CRITICAL. A scenario test that does not cite its requirement and scenario is a SUGGESTION. Cite file and line for each.
+> **Engineering principles**: for a change that altered code, read the "Princípios de engenharia" line and the validation and logging decisions of `project.md`, then check the code the change wrote. Without that line, all three items apply. An external input (request, message, file, environment variable) used without the project's validation tool (for example Zod, Pydantic, Bean Validation or FluentValidation, whichever `project.md` records) is a WARNING; when the validation decision is postponed, report the boundary as a WARNING citing the postponed decision. A mutation or critical boundary without the initiated, success and failed log states is a WARNING, unless `project.md` marks the three-state log "Não aplicável". An error response that returns an internal exception, driver or stack text, or the personal data or credentials of someone other than the caller, or a log that writes personal data or credentials unmasked, is CRITICAL; field-level validation messages meant for the client and the caller's own data returned to them are not leaks. A scenario test that does not cite its requirement and scenario is a SUGGESTION. Cite file and line for each.
 
 As severidades seguem o efeito: vazamento é dano real (crítico); falta de validação ou de log reduz defesa e diagnóstico (warning); rastreabilidade é qualidade do registro (sugestão).
 
@@ -83,3 +83,43 @@ As severidades seguem o efeito: vazamento é dano real (crítico); falta de vali
   - 0) Sim (recomendado);
   - 1) Não, com a justificativa em uma frase;
   - Outro.
+- A 7.2 passa a dizer que "Princípios de engenharia" vem da 7.4.
+- O resumo do bloco 7 mostra a 7.4 com as outras respostas do bloco (o `project-setup.md` não tem tabela própria do bloco 7).
+- **Sem linha nova na tabela de coerência:** a combinação "dados pessoais com log sem mascaramento" fica coberta pela regra de erro e log sem vazamento (D1 e D4), que vale sempre. Assim não há conflito com a change `init-coerencia-e-ferramentas` da outra sessão.
+
+### D6. CI e README
+
+- **Passo "Trechos customizados das skills":**
+  - `check "$f" "Engineering principles"` no laço do verify;
+  - check do bloco no `code-reviewer.md` e no `openspec-code-reviewer.md`;
+  - check da 7.4 no `init.md`;
+  - check de "Princípios de engenharia" no `rules.md` e no modelo de `project.md`.
+- **README:** os trechos novos na tabela de trechos customizados.
+
+## Raio de impacto
+
+| Arquivo-alvo | Mudança | Dependentes afetados |
+|---|---|---|
+| `padrao-openspec/openspec/rules.md` | D1 | `docs/openspec-regras.md` e blocos dos agentes nos projetos; espelho da raiz |
+| `padrao-openspec/openspec/config.yaml` | D2 | passo "Config base carrega sem avisos" da CI; stores novos |
+| `padrao-openspec/.claude/skills/requesting-code-review/code-reviewer.md`, `padrao-openspec/.claude/agents/openspec-code-reviewer.md` | D3 | apply passo 6a; espelhos |
+| `padrao-openspec/.claude/commands/opsx/verify.md`, `skills/openspec-verify-change/SKILL.md` | D4 | espelhos; `flow-metrics.mjs` (só lê as linhas de contagem, que não mudam) |
+| `padrao-openspec/.claude/commands/opsx/init.md`, `padrao-openspec/openspec/project.md` | D5 | arquivo de respostas do init (campo novo, opcional) |
+| `.github/workflows/validate.yml`, `README.md`, `VERSION`, `CHANGELOG.md` | D6 e versão | nenhum |
+
+## Risks / Trade-offs
+
+- **[Warnings demais em projetos pequenos]** → o log de três estados vale só para mutações e fronteiras críticas, e o projeto pode desligá-lo na 7.4 com justificativa.
+- **[O verify julga "fronteira crítica" de formas diferentes]** → a heurística exige arquivo e linha, e a classificação é revisável pelo responsável; a falta de log é warning, nunca crítico.
+- **[Conflito de edição com changes paralelas no `rules.md`, no init e no verify]** → rebasear na main antes do apply e manter os trechos novos em blocos próprios, sem renumerar seções (por isso o bloco vai dentro da seção 3, e não numa seção nova).
+- **[Falso crítico de vazamento]** → o crítico só vale para a mensagem interna devolvida ao cliente ou para dado pessoal ou credencial em log; uma mensagem genérica de erro não conta.
+
+## Migration Plan
+
+- Projetos existentes recebem as regras pelo PR de atualização.
+- O CHANGELOG pede para acrescentar a linha "Princípios de engenharia" ao `project.md` do store, com a exceção do log de três estados, se o projeto quiser. Sem a linha, o verify aplica os três itens.
+- Rollback: reverter os commits e voltar o `VERSION`.
+
+## Open Questions
+
+Nenhuma.
