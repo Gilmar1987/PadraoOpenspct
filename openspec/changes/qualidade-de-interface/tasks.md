@@ -23,7 +23,8 @@
 
 - [x] 4.1 Atualizar README, COMECE-AQUI e guia do projeto com a validação de interface, e aplicar o D7 (1.12.0). Verificar com o lint nos dois lugares e os passos "Guia de primeiros passos" e "Versão e changelog" passando.
   - Evidência: README (skill `interface-quality` na tabela, `validador-de-interface` nos agentes do Copilot e um parágrafo sobre a validação), `COMECE-AQUI.md` (changes com telas no passo 4), guia `templates/openspec-padrao.md` (seção "Validação de interface" e o subagente na tabela) e D7: `VERSION` 1.12.0 e seção 1.12.0 no `CHANGELOG.md` com "O que mudou" e "Ações no projeto". Git Bash: "Lint de Markdown" (padrão e raiz), "Versão e changelog", "Smoke test do changelog-range", "Guia de primeiros passos", "Raiz em dia", "Ids de teste com sufixo" e validate da raiz → PASS.
-- [ ] 4.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+- [x] 4.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+  - Evidência: outra sessão avisada antes (liberou a máquina e as portas 4173/4174); suíte local completa no Git Bash depois das correções da revisão (3b122b3) → job `store` 22/22 e `root` 5/5 PASS, 0 ids `ci-*` no registro; PR #33, run 39875699297 → store (ubuntu-latest), store (windows-latest) e root = pass, com "Cache do navegador da validação de interface" e "Smoke test da validação de interface" = success no Ubuntu.
 
 ## Workflow follow-up
 
