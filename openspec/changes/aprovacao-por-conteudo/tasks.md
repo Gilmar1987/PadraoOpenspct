@@ -2,7 +2,8 @@
 
 ## 1. Testes na CI
 
-- [ ] 1.1 Acrescentar ao "Smoke test do portão" os casos do D7 e aos "Trechos customizados" o "Approval content seal". Verificar rodando os passos no Git Bash: os casos novos devem falhar (o comando `selo` e o trecho não existem).
+- [x] 1.1 Acrescentar ao "Smoke test do portão" os casos do D7 e aos "Trechos customizados" o "Approval content seal". Verificar rodando os passos no Git Bash: os casos novos devem falhar (o comando `selo` e o trecho não existem).
+  - Evidência: casos do D7 no "Smoke test do portão" (selo estável com caixas e evidências, tarefa nova → "venceu", reconfirmação → libera, sem selo → `avisos`, `[INFERIDO:` no design → `design.md:3`, entre crases → libera, CRLF = LF) e marcadores "Approval content seal" (propose, apply, archive, update), "Declared inference" (propose) e `[INFERIDO: <base>]` (init) nos "Trechos customizados". Git Bash: "Trechos customizados das skills" → FAIL com os 11 trechos ausentes (exit 1), como esperado. O "Smoke test do portão" registra um store e não rodou antes da implementação porque a outra sessão pediu a máquina para a suíte dela; o comportamento novo foi conferido antes numa raiz OpenSpec local sem store (tarefa 2.1).
 
 ## 2. Portão
 

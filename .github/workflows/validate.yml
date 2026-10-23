@@ -137,6 +137,8 @@ jobs:
           for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md; do
             check "$f" "Architectural Decision Check"
             check "$f" "Prior authorization exception"
+            check "$f" "Approval content seal"
+            check "$f" "Declared inference"
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
@@ -144,6 +146,7 @@ jobs:
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
+            check "$f" "Approval content seal"
             check "$f" "OpenSpec-Change:"
             check "$f" "Confirm progress per task group"
             check "$f" "Standard version check"
@@ -181,15 +184,18 @@ jobs:
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Check the archive authorization"
+            check "$f" "Approval content seal"
             check "$f" "Commit the archive"
             check "$f" "Run the gate"
           done
           for f in .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
             check "$f" "Scope change resets approval"
+            check "$f" "Approval content seal"
           done
           # Entrevista do init: documento de arquitetura, idioma do código, fila por banco e E2E acrescentado.
           f=.claude/commands/opsx/init.md
           check "$f" "Commit the init"
+          check "$f" "[INFERIDO: <base>]"
           check "$f" "| Validação de interface |"
           check "$f" "seguir a skill interface-quality"
           check "$f" '### Arquivo 5: `<root>/openspec/arquitetura.md`'
@@ -912,6 +918,36 @@ jobs:
           grep -qF 'review.md' "$RUNNER_TEMP/portao3.txt"
           printf '# Revisão\n' > "$ch/review.md"
           gate archive ci-change
+          # Selo do conteúdo aprovado (aprovacao-por-conteudo): ignora caixas e evidências, vence com uma
+          # tarefa nova, volta a valer com a reconfirmação; aprovação sem selo segue, com aviso.
+          selo="$(gate selo ci-change)"
+          grep -Eqx 'sha256:[0-9a-f]{64}' <<< "$selo"
+          sealed() { proposal ci 2026-10-22 apply '"Aprovo"'; printf -- '- Conteúdo: %s\n' "$1" >> "$ch/proposal.md"; }
+          sealed "$selo"
+          gate apply ci-change
+          printf '# Tasks\n\n## 1. A\n\n- [ ] 1.1 a\n  - Evidência: `x` → ok (exit 0)\n- [X] 1.2 b\n' > "$ch/tasks.md"
+          test "$(gate selo ci-change)" = "$selo"
+          printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [x] 1.2 b\n- [ ] 1.3 nova\n' > "$ch/tasks.md"
+          if gate apply ci-change > "$RUNNER_TEMP/selo1.txt"; then exit 1; fi
+          grep -qF 'venceu' "$RUNNER_TEMP/selo1.txt"
+          novo="$(gate selo ci-change)"
+          test "$novo" != "$selo"
+          printf -- '- Reconfirmação: 2026-10-22; Origem: "confirmo"; Conteúdo: %s\n' "$novo" >> "$ch/proposal.md"
+          gate apply ci-change
+          proposal ci 2026-10-22 apply '"Aprovo"'
+          out="$(gate apply ci-change --json)"
+          grep -qF '"avisos":[' <<< "$out"
+          # Inferência marcada bloqueia o apply citando arquivo e linha; entre crases é documentação.
+          printf '# Design\n\nLimite de 20%% [INFERIDO: prática de varejo].\n' > "$ch/design.md"
+          if gate apply ci-change > "$RUNNER_TEMP/selo2.txt"; then exit 1; fi
+          grep -qF 'design.md:3' "$RUNNER_TEMP/selo2.txt"
+          printf '# Design\n\nUse a marca `[INFERIDO: base]` no propose.\n' > "$ch/design.md"
+          gate apply ci-change
+          # Fim de linha CRLF não muda o selo.
+          lf="$(gate selo ci-change)"
+          printf '# Design\r\n\r\nUse a marca `[INFERIDO: base]` no propose.\r\n' > "$ch/design.md"
+          test "$(gate selo ci-change)" = "$lf"
+          rm "$ch/design.md"
           # Change inexistente, nome inválido e store não resolvido: erro de uso ou de ambiente (2).
           set +e; gate apply nao-existe; status=$?; set -e
           test "$status" -eq 2
