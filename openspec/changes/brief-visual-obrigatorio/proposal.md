@@ -48,3 +48,4 @@ Nenhuma.
 - Escopo: apply
 - Condições: —
 - Origem: "Aprovo: brief-visual-obrigatorio: está proposta e commitada (3387790) [...] Falta a sua aprovação: só apply ou até archive, e com quais condições". A resposta não escolhe entre apply e archive nem dá condições, então o escopo registrado é apply; archive, push, PR e merge pedem confirmação.
+- Archive: 2026-10-22; Condições: archive, push, PR e merge, se a CI passar nos três jobs; release só quando o responsável pedir; Origem: "pode fazer archive, push, PR e merge se a CI passar nos três jobs", em resposta a "posso fazer archive, push, PR e merge se a CI passar nos três jobs?"
