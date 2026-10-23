@@ -18,9 +18,12 @@
 
 ## 3. Verify e propose
 
-- [ ] 3.1 Aplicar o D3 e o D4 (heurísticas "Declared gaps" e "ADR verification") em `padrao-openspec/.claude/commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md`, com o mesmo texto. Verificar com `diff` das duas heurísticas entre os arquivos vazio.
-- [ ] 3.2 Aplicar o item novo do D4 ao passo 5 da "Architectural Decision Check" em `padrao-openspec/.claude/commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md`. Verificar com `grep -n "verificacao"` nos dois arquivos.
-- [ ] 3.3 Acrescentar o campo `verificacao` ao `padrao-openspec/openspec/adrs/template.md` e a explicação ao `adrs/README.md` (D4). Verificar com `grep` nos dois arquivos e com o passo "Trechos customizados das skills" passando.
+- [x] 3.1 Aplicar o D3 e o D4 (heurísticas "Declared gaps" e "ADR verification") em `padrao-openspec/.claude/commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md`, com o mesmo texto. Verificar com `diff` das duas heurísticas entre os arquivos vazio.
+  - Evidência: heurísticas "Declared gaps" e "ADR verification" depois de "External report triage" no `verify.md` e na skill; `diff` das duas linhas entre os arquivos → vazio para as duas; "Trechos customizados" e "Smoke test das métricas de fluxo" → PASS (exit 0)
+- [x] 3.2 Aplicar o item novo do D4 ao passo 5 da "Architectural Decision Check" em `padrao-openspec/.claude/commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md`. Verificar com `grep -n "verificacao"` nos dois arquivos.
+  - Evidência: item novo no passo 5 da "Architectural Decision Check"; `grep -n "verificacao"` → propose.md:213 e SKILL.md:217
+- [x] 3.3 Acrescentar o campo `verificacao` ao `padrao-openspec/openspec/adrs/template.md` e a explicação ao `adrs/README.md` (D4). Verificar com `grep` nos dois arquivos e com o passo "Trechos customizados das skills" passando.
+  - Evidência: `verificacao: []` no frontmatter de `adrs/template.md` (linha 8) e explicação com exemplos de três ecossistemas no `adrs/README.md` (linha 27); `sync-root.mjs` → 6 caminhos, espelho da raiz com o campo; "Trechos customizados" e "Lint de Markdown" → PASS (exit 0)
 
 ## 4. Precedência e modelo de project.md
 

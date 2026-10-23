@@ -219,6 +219,7 @@ Before creating or updating `design.md`, you MUST:
    - Add it to `related_changes` in the ADR frontmatter
    - Reference the ADR filename in `design.md` under a dedicated "Architecture Decisions" section
    - Add a task in `tasks.md` to review and promote the ADR to `Accepted` before archiving
+   - If the decision can be checked by code (layer dependencies, forbidden imports, schema conformance), fill `verificacao` with the test that checks it and add a task to write that test
 
 **Guardrails**
 - The request that invoked this workflow authorizes planning only. Any implementation or apply instruction in that request does not carry forward. Do NOT implement the change, start the apply workflow, or edit project code during this workflow. After presenting the artifacts, stop and wait for a new user request to start the apply workflow

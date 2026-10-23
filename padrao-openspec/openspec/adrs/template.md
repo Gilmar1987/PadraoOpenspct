@@ -5,6 +5,7 @@ date: AAAA-MM-DD
 supersedes:
 superseded_by:
 related_changes: []
+verificacao: []
 ---
 
 # ADR-NNNN: Título da decisão
