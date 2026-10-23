@@ -34,8 +34,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: gilmar.campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: PR, merge e edição das notas da Release v1.12.0, se a CI passar nos três jobs.
+- Origem: "Aprovo a data-de-publicacao-da-versao até o archive, com PR, merge e edição das notas da release, se a CI passar"
