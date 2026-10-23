@@ -282,7 +282,12 @@ jobs:
           check openspec/project.md "## Camadas de verificação"
           for g in .claude/commands/opsx/explore.md .claude/skills/openspec-explore/SKILL.md; do
             check "$g" "Related debts"
+            # Alternativas numeradas no explore (entrega-no-codigo).
+            check "$g" "Number the alternatives"
           done
+          # Portas de desenvolvimento só no host local (entrega-no-codigo).
+          check .claude/skills/docker/SKILL.md '"127.0.0.1:${DB_PORT:-5432}:5432"'
+          check .claude/skills/docker/docker-guidelines.md "127.0.0.1"
           # Imposição e catraca (imposicao-e-catraca): Falhas aceitas e "Sai quando" conferível no Arquivo 6, modelo de ADR e config.
           check "$f" "## Falhas aceitas"
           check "$f" "Uma data sozinha não é condição"
@@ -517,6 +522,20 @@ jobs:
           node scripts/install-skills.mjs "$consumer" --target both | grep -q '^Done\. 0 installed'
           test "$(grep -cx '/openspec/\*' "$consumer/.gitignore")" -eq 1
           test "$(grep -cx '!/openspec/config.yaml' "$consumer/.gitignore")" -eq 1
+          # Quebra de linha no repositório de código: .gitattributes criado com o bloco do padrão
+          # (Repositório sem o arquivo), um único bloco na segunda instalação (Segunda instalação)
+          # e um arquivo do projeto intacto (Arquivo do projeto preservado).
+          grep -qx '\* text=auto eol=lf' "$consumer/.gitattributes"
+          grep -qx '\*.bat text eol=crlf' "$consumer/.gitattributes"
+          test "$(grep -cx '# BEGIN openspec-padrao' "$consumer/.gitattributes")" -eq 1
+          test "$(git -C "$consumer" check-attr eol -- exemplo.txt | sed 's/.*: //')" = lf
+          own="$(mktemp -d)"
+          git -C "$own" init -q
+          printf '*.png binary\r\n' > "$own/.gitattributes"
+          cp "$own/.gitattributes" "$RUNNER_TEMP/own-gitattributes"
+          node scripts/install-skills.mjs "$own" --target agents > "$RUNNER_TEMP/own.txt"
+          cmp "$own/.gitattributes" "$RUNNER_TEMP/own-gitattributes"
+          grep -qF '* text=auto eol=lf' "$RUNNER_TEMP/own.txt"
           # Migração do bloco antigo, que ignorava /openspec/ inteiro.
           legacy="$(mktemp -d)"
           git -C "$legacy" init -q
