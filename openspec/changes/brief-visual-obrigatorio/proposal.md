@@ -43,8 +43,8 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: gilmar.campelo
+- Data: 2026-10-22
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Origem: "Aprovo: brief-visual-obrigatorio: está proposta e commitada (3387790) [...] Falta a sua aprovação: só apply ou até archive, e com quais condições". A resposta não escolhe entre apply e archive nem dá condições, então o escopo registrado é apply; archive, push, PR e merge pedem confirmação.
