@@ -75,7 +75,7 @@ A arquitetura deve vir de uma ideia concreta, mas o dev que já sabe o que quer 
   - `principios-de-engenharia` (PR #43; `engineering-principles`, mas edita o `init.md` na 7.4).
 
   Ordem sugerida: esta change entra depois do merge do #43, com rebase. Com a `imposicao-e-catraca`, os requisitos de `project-initialization` são diferentes; quem arquivar por último rebaseia.
-- **Versão:** acrescenta itens à seção aberta do `CHANGELOG.md` (1.14.0, aberta pela `principios-de-engenharia`). Não mexe no `VERSION` se ele já estiver nela.
+- **Versão:** primeira change depois da release v1.14.0: sobe `padrao-openspec/VERSION` para 1.15.0 e abre a seção `## 1.15.0` do `CHANGELOG.md`. As changes seguintes acrescentam itens a ela.
 
 ## Aprovação
 
@@ -83,5 +83,7 @@ A arquitetura deve vir de uma ideia concreta, mas o dev que já sabe o que quer 
 - Data: 2026-10-23
 - Escopo: archive
 - Condições: verify sem críticos e CI verde nos três jobs (root, store no Ubuntu e no Windows); push e PR só quando o responsável pedir
+- Push e PR: Gilmar Campelo, 2026-10-23; Origem: "push e PR liberado", em resposta a "Posso fazer push da `feat/descoberta-do-produto` e abrir um PR em rascunho?"
 - Conteúdo: sha256:78d21dfc5c0d6bebc427ae6bcd9bae47f6bf4c8eed7011ff37baa31e26be76b7
 - Origem: "Aprovo a change descoberta-do-produto para archive, com as condições. Por exemplo: \"verify sem críticos e CI verde nos três job", em resposta a "`Aprovo a change descoberta-do-produto para archive`, com as condições. Por exemplo: \"verify sem críticos e CI verde nos três jobs\"."
+- Reconfirmação: 2026-10-23; Origem: "sim para mudança para a 1.15.0", em resposta a "Confirma a mudança para a 1.15.0? [...] sobe `padrao-openspec/VERSION` para 1.15.0 e move o item [...] para uma seção nova `## 1.15.0`"; Conteúdo: sha256:e12a190fa7f492dbe37f062e2d54af556e9de657f9ed07d886420f0e56ecb8e0
