@@ -46,7 +46,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 O comando aceita, opcionalmente, o caminho de um arquivo de respostas: `/opsx:init <caminho>`. Use-o para automação e testes do padrão.
 
-- O arquivo é Markdown, com uma tabela `| Pergunta | Resposta |`. A pergunta é o número (1.1, 3.2…) ou, no bloco 7, o nome da finalidade (por exemplo, "Testes"), do campo da Stack Summary ou do campo de Development Conventions; a 7.3 vai pelo número. Ele também pode trazer as linhas `Responsável: <nome>` e `Confirmação final: sim`.
+- O arquivo é Markdown, com uma tabela `| Pergunta | Resposta |`. A pergunta é o número (1.1, 3.2…) ou, no bloco 7, o nome da finalidade (por exemplo, "Testes"), do campo da Stack Summary ou do campo de Development Conventions; a 7.3 e a 7.4 vão pelo número. Ele também pode trazer as linhas `Responsável: <nome>` e `Confirmação final: sim`.
 - Aplique as respostas do arquivo e pergunte no chat só o que faltar, inclusive campos do bloco 7.
 - Mostre o resumo completo uma vez, em vez de confirmar bloco a bloco.
 - A confirmação final vale se vier do responsável no chat, ou se o arquivo trouxer `Confirmação final: sim` e o nome do responsável.
@@ -695,7 +695,7 @@ Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido 
 
 Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comandos rodam dentro do contêiner (por exemplo, `docker compose run --rm app pytest`) e registre a forma escolhida.
 
-**7.2 — Campos sem decisão.** Para cada campo da Stack Summary ou de Development Conventions que ainda é "A definir" e que nenhuma resposta dos blocos 1 a 6, nem a 7.3, cobre, pergunte o campo, uma pergunta por vez, com opções coerentes com a stack escolhida no bloco 3, mais **Adiar** (grava "Adiado: decidir na primeira change que precisar") e **Outro (digitar livremente)**. Se nenhum campo continuar "A definir", diga isso e siga para a 7.3. Em Development Conventions, "Idioma dos textos visíveis ao usuário" vem da 1.7, "Organização e estilo" de 2.2 e 2.3 (e do comando de lint da 7.1), "Git e revisão" do bloco 5, "Testes e critérios de qualidade" de 5.3 a 5.6, "Segurança e tratamento de dados" do bloco 6 e da 1.5, "Idioma do código" da 7.3 e "Princípios de engenharia" da 7.4.
+**7.2 — Campos sem decisão.** Para cada campo da Stack Summary ou de Development Conventions que ainda é "A definir" e que nenhuma resposta dos blocos 1 a 6, nem a 7.3 ou a 7.4, cobre, pergunte o campo, uma pergunta por vez, com opções coerentes com a stack escolhida no bloco 3, mais **Adiar** (grava "Adiado: decidir na primeira change que precisar") e **Outro (digitar livremente)**. Se nenhum campo continuar "A definir", diga isso e siga para a 7.3. Em Development Conventions, "Idioma dos textos visíveis ao usuário" vem da 1.7, "Organização e estilo" de 2.2 e 2.3 (e do comando de lint da 7.1), "Git e revisão" do bloco 5, "Testes e critérios de qualidade" de 5.3 a 5.6, "Segurança e tratamento de dados" do bloco 6 e da 1.5, "Idioma do código" da 7.3 e "Princípios de engenharia" da 7.4.
 
 **7.3 — Em que idioma o código será escrito (identificadores, comentários e mensagens de commit)?**
 
@@ -708,15 +708,15 @@ Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comando
 6) Outro (digitar livremente)
 ```
 
-**7.4 — Princípios de engenharia.** O padrão pede, no código de cada change: validação de toda entrada externa com a ferramenta da 3.7, log dos estados iniciado, sucesso e falha em mutações e fronteiras críticas com a ferramenta da 6.1, e erro sem detalhe interno nem dado pessoal na resposta. Algum deles não se aplica a este projeto?
+**7.4 — Princípios de engenharia.** O padrão pede, no código de cada change: validação de toda entrada externa com a ferramenta da 3.7, log dos estados iniciado, sucesso e falha em mutações e fronteiras críticas com o logger do projeto (que envia ao destino da 6.1), e erro sem detalhe interno nem dado pessoal na resposta. A validação e o erro sem detalhe interno valem sempre. O log de três estados se aplica a este projeto?
 
 ```
-0) Todos se aplicam (recomendado)
-1) Marcar exceções — diga o item e a justificativa, em uma frase cada
+0) Sim (recomendado)
+1) Não — diga a justificativa em uma frase (por exemplo, script de uso único)
 2) Outro (digitar livremente)
 ```
 
-Registre a resposta na linha "Princípios de engenharia" de Development Conventions: "Validação na fronteira, log de três estados e erro sem detalhe interno", seguido das exceções no formato "<item>: Não aplicável (<justificativa>)".
+Registre a resposta na linha "Princípios de engenharia" de Development Conventions: "Validação na fronteira, log de três estados e erro sem detalhe interno"; com a opção 1, acrescente "Log de três estados: Não aplicável (<justificativa>)". Com arquivo de respostas, a célula da 7.4 é `0`, ou `1 (<justificativa>)`.
 
 O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo ou comando adiado não deixa o projeto "não inicializado".
 

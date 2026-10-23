@@ -108,6 +108,8 @@ Subagent (general-purpose):
     - Error responses never return internal exception messages, stack traces or personal data,
       and logs never write personal data or credentials unmasked.
     - Scenario tests cite the requirement and scenario they cover.
+    - Severity: a leak is Critical; missing validation or three-state logs is Important; an
+      uncited scenario test is Minor.
 
     ## Calibration
 

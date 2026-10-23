@@ -24,7 +24,7 @@ O padrão é generalista ([ADR-0003](../../adrs/0003-padrao-sem-stack-embutida.m
   - tasks: os testes de cada cenário citam o requisito e o cenário no nome ou num comentário.
 - **Revisão de código:** o template do `requesting-code-review` e o subagente `openspec-code-reviewer` ganham os critérios dos três pilares.
 - **Verify:** nova heurística "Engineering principles", igual no comando e na skill, que confere as fronteiras e os erros da change, com severidade por item.
-- **Init e `project.md`:** a seção "Development Conventions" ganha a linha "Princípios de engenharia", preenchida pelo init com os padrões do guia (log de três estados, validação na fronteira e erro sem detalhe interno). O projeto pode marcar um item como "Não aplicável", com justificativa, e o verify respeita isso.
+- **Init e `project.md`:** a seção "Development Conventions" ganha a linha "Princípios de engenharia", preenchida pelo init com os padrões do guia (log de três estados, validação na fronteira e erro sem detalhe interno). O projeto pode marcar o log de três estados como "Não aplicável", com justificativa, e o verify respeita isso; a validação na fronteira e o erro sem detalhe interno valem sempre.
 - **CI:** marcadores dos trechos novos.
 - **Versão:** pelo modelo de versão acumulada, é a primeira change depois da release v1.13.0: sobe o `VERSION` para 1.14.0 e abre a seção `## 1.14.0` no `CHANGELOG.md` (se outra change entrar antes, acrescenta itens à seção que ela abrir); a release sai só quando o responsável pedir.
 

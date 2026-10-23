@@ -146,9 +146,10 @@ Você MUST:
 
 - Validar toda entrada que chega de fora do sistema (requisição, mensagem, arquivo, variável de
   ambiente) com a ferramenta de validação registrada no `project.md`, antes de processá-la
-- Registrar os estados iniciado, sucesso e falha em mutações e fronteiras críticas, com a
-  ferramenta de log do `project.md`, salvo quando a linha "Princípios de engenharia" do
-  `project.md` marcar o item como "Não aplicável"
+- Registrar os estados iniciado, sucesso e falha em mutações e fronteiras críticas, com o
+  logger do projeto (que envia ao destino registrado em Observabilidade no `project.md`), salvo
+  quando a linha "Princípios de engenharia" do `project.md` marcar o log de três estados como
+  "Não aplicável"; a validação na fronteira e o erro sem detalhe interno não têm exceção
 - Devolver ao cliente só mensagens de erro genéricas, sem a mensagem interna da exceção, o stack
   trace ou dados pessoais
 
