@@ -167,6 +167,13 @@ instaladas pelo setup.
 | `requesting-code-review` | Revisão de código via subagente isolado |
 | `docker` | Containerização com Dockerfile, docker-compose e boas práticas |
 | `versioning-ci-cd` | Versionamento, Git, CI, CD e deploy conforme a stack detectada |
+| `interface-quality` | Telas prontas para cliente: brief visual, checklist e validação no navegador com nota mínima |
+
+Numa change com telas, a skill `interface-quality` pede um "Brief visual" no `design.md` e a validação
+no navegador: `docs/openspec-validar-interface.mjs` abre a aplicação num navegador real (Playwright e axe-core
+instalados numa pasta temporária, fora do projeto), tira capturas em 390, 768 e 1280 px, confere acessibilidade,
+console, links, título, favicon e 404, executa as jornadas de usuário da change e grava o `interface-report.md`
+com uma nota automática. O subagente validador de interface dá a nota final, e o verify exige "médio" ou melhor.
 
 O padrão não tem skills de stack. Skills de fornecedor (por exemplo, as oficiais de um
 framework) podem ser instaladas à parte, pelo comando do próprio fornecedor; elas
@@ -186,6 +193,7 @@ Fonte em `padrao-openspec/.github/agents/`, espelhados em `.github/agents/`:
 | `qa-validator` | Avalia tarefas, requisitos, cenários e decisões de design |
 | `consistency-guardian` | Detecta contradições, duplicações e ambiguidades entre changes e specs |
 | `business-requirements-ingestor` | Extrai objetivos, atores e regras de materiais de negócio |
+| `validador-de-interface` | Roda a validação de interface no navegador e dá a nota final das telas |
 
 ## Subagentes e hooks do Claude Code
 

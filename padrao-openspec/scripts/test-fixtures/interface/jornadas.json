@@ -1,0 +1,37 @@
+{
+  "jornadas": [
+    {
+      "nome": "Cadastro com nome",
+      "passos": [
+        { "visitar": "/" },
+        { "preencher": { "Nome": "Ana" } },
+        { "clicar": "Enviar" },
+        { "conferir": "Obrigado, Ana!" }
+      ]
+    },
+    {
+      "nome": "Cadastro vazio mostra erro",
+      "passos": [
+        { "visitar": "/" },
+        { "clicar": "Enviar" },
+        { "conferir": "Informe o seu nome." }
+      ]
+    },
+    {
+      "nome": "Novidades que aparecem depois",
+      "passos": [
+        { "visitar": "/" },
+        { "clicar": "Ver novidades" },
+        { "conferir": "Nenhuma novidade esta semana." }
+      ]
+    },
+    {
+      "nome": "Navegação para Sobre",
+      "passos": [
+        { "visitar": "/" },
+        { "clicar": "Sobre" },
+        { "conferir": "Esta página existe" }
+      ]
+    }
+  ]
+}

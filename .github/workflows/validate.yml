@@ -79,6 +79,8 @@ jobs:
           node --check scripts/changelog-range.mjs
           node --check scripts/comecar.mjs
           node --check scripts/portao.mjs
+          node --check scripts/validar-interface.mjs
+          node --check scripts/test-fixtures/interface/servidor.mjs
           # No Windows o Python se chama python e pode não ter o PyYAML.
           py="$(command -v python3 || command -v python)"
           if ! "$py" -c 'import yaml' 2>/dev/null; then
@@ -170,6 +172,7 @@ jobs:
             check "$f" "Review before verify"
             check "$f" "Dependencies in Impact"
             check "$f" "Agent-run browser scripts"
+            check "$f" "Interface quality gate"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
@@ -187,6 +190,8 @@ jobs:
           # Entrevista do init: documento de arquitetura, idioma do código, fila por banco e E2E acrescentado.
           f=.claude/commands/opsx/init.md
           check "$f" "Commit the init"
+          check "$f" "| Validação de interface |"
+          check "$f" "seguir a skill interface-quality"
           check "$f" '### Arquivo 5: `<root>/openspec/arquitetura.md`'
           check "$f" "flowchart LR"
           check "$f" "ou de Development Conventions"
@@ -277,6 +282,10 @@ jobs:
           expect allow somente-leitura.mjs "$(payload Bash command 'git push origin main' '' openspec-code-implementer)"
           expect deny somente-leitura.mjs "$(payload PowerShell command 'Set-Content a.txt x' '' openspec-code-reviewer)"
           expect allow somente-leitura.mjs 'isto não é JSON'
+          # Validador de interface (qualidade-de-interface): roda o script de validação, não grava arquivo.
+          expect deny somente-leitura.mjs "$(payload Bash command 'echo x > a.txt' '' openspec-validador-de-interface)"
+          expect deny somente-leitura.mjs "$(payload Bash command 'rm -rf interface' '' openspec-validador-de-interface)"
+          expect allow somente-leitura.mjs "$(payload Bash command 'node docs/openspec-validar-interface.mjs http://localhost:3000 --jornadas interface/jornadas.json' '' openspec-validador-de-interface)"
           # escopo-de-escrita.mjs, num repositório temporário
           repo=$(mktemp -d)
           git -C "$repo" init -q
@@ -370,7 +379,7 @@ jobs:
           test -f "$consumer/.claude/commands/opsx/init.md"
           test -f "$consumer/.claude/commands/opsx/ingest.md"
           grep -q 'Architectural Decision Check' "$consumer/.claude/commands/opsx/propose.md"
-          for skill in docker requesting-code-review versioning-ci-cd; do
+          for skill in docker requesting-code-review versioning-ci-cd interface-quality; do
             test -f "$consumer/.agents/skills/$skill/SKILL.md"
           done
           # Comando customizado no consumidor: sem --force nada é copiado.
@@ -796,6 +805,63 @@ jobs:
           test "$resolved" = "$expected"
           openspec store unregister ci-drive-$sfx
 
+      # Validação de interface (qualidade-de-interface): navegador real contra páginas estáticas locais.
+      # Só no Linux: o download do navegador pesa, e o script é o mesmo nos dois sistemas.
+      - name: Cache do navegador da validação de interface
+        if: runner.os == 'Linux'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/openspec-validar-interface
+          key: validar-interface-${{ runner.os }}-${{ hashFiles('padrao-openspec/scripts/validar-interface.mjs') }}
+
+      - name: Smoke test da validação de interface
+        if: runner.os == 'Linux'
+        env:
+          OPENSPEC_VALIDAR_INTERFACE_DIR: ${{ runner.temp }}/openspec-validar-interface
+        run: |
+          fx=scripts/test-fixtures/interface
+          out=$(mktemp -d)
+          node "$fx/servidor.mjs" "$fx/boa" 4173 > "$out/boa.log" &
+          s1=$!
+          node "$fx/servidor.mjs" "$fx/ruim" 4174 > "$out/ruim.log" &
+          s2=$!
+          trap 'kill $s1 $s2 2>/dev/null || true' EXIT
+          for _ in $(seq 1 30); do
+            grep -q 4173 "$out/boa.log" && grep -q 4174 "$out/ruim.log" && break
+            sleep 1
+          done
+          grep -q 4173 "$out/boa.log" && grep -q 4174 "$out/ruim.log" || { cat "$out"/*.log; echo "::error::Servidores das fixtures não subiram"; exit 1; }
+          # Página boa com jornadas: saída 0, nota médio ou bom, capturas nas três larguras.
+          node scripts/validar-interface.mjs http://127.0.0.1:4173/ --jornadas "$fx/jornadas.json" --saida "$out/boa" --json > "$out/boa.json"
+          grep -Eq '"nota": *"(médio|bom)"' "$out/boa.json"
+          grep -q 'Cadastro com nome' "$out/boa/interface-report.md"
+          # O 422 esperado da jornada de erro aparece em "Respostas de rede" sem derrubar a nota, e o botão
+          # que surge depois de um atraso é encontrado pela jornada.
+          grep -q '422' "$out/boa/interface-report.md"
+          grep -q '### Novidades que aparecem depois: aprovada' "$out/boa/interface-report.md"
+          for w in 390 768 1280; do ls "$out/boa/interface/capturas/" | grep -q -- "-$w\.png$"; done
+          # Cada passo "conferir" deixa a captura do estado da tela.
+          test -f "$out/boa/interface/capturas/jornada-1-passo-4.png"
+          # Página com problemas plantados: saída 1, e o relatório cita texto alternativo, console e link.
+          set +e
+          node scripts/validar-interface.mjs http://127.0.0.1:4174/ --saida "$out/ruim"
+          code=$?
+          set -e
+          [ "$code" = 1 ]
+          grep -q 'fraco' "$out/ruim/interface-report.md"
+          grep -q 'image-alt' "$out/ruim/interface-report.md"
+          grep -q 'falha ao carregar o carrinho' "$out/ruim/interface-report.md"
+          grep -q '/promocoes.html' "$out/ruim/interface-report.md"
+          grep -q 'faltando.png' "$out/ruim/interface-report.md"
+          # O relatório fica na pasta da change e passa pelo lint de Markdown do projeto.
+          npx --yes markdownlint-cli2@0.23.2 --config .markdownlint-cli2.jsonc "$out/boa/interface-report.md" "$out/ruim/interface-report.md"
+          # URL fora do ar: erro de ambiente (saída 2).
+          set +e
+          node scripts/validar-interface.mjs http://127.0.0.1:4199/ --saida "$out/fora"
+          code=$?
+          set -e
+          [ "$code" = 2 ]
+
       # Portão (docs/openspec-portao.mjs): resposta determinística, para qualquer agente, sobre
       # escrever código (apply) e arquivar (archive); o hook commit-msg é opcional.
       - name: Smoke test do portão
@@ -810,6 +876,7 @@ jobs:
           git -C "$work/code" init -q
           node "$work/repo/padrao-openspec/scripts/setup-project.mjs" "$work/code" --register-id ci-portao-$sfx --yes > /dev/null
           cmp "$work/code/docs/openspec-portao.mjs" scripts/portao.mjs
+          cmp "$work/code/docs/openspec-validar-interface.mjs" scripts/validar-interface.mjs
           ch="$work/repo/padrao-openspec/openspec/changes/ci-change"
           mkdir -p "$ch"
           proposal() { printf '# Proposal\n\n## Why\n\nTeste.\n\n## Aprovação\n\n- Responsável: %s\n- Data: %s\n- Escopo: %s\n- Condições: —\n- Origem: %s\n' "$@" > "$ch/proposal.md"; }

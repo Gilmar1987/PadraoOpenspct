@@ -51,6 +51,23 @@ resolvido: rode na pasta deste repositório ou passe `--store <id>`). Os fluxos 
 `/opsx:archive` rodam o portão sozinhos. Para recusar também commits `OpenSpec-Change: <change>` de
 changes não aprovadas, rode uma vez `node docs/openspec-portao.mjs instalar-hook`.
 
+## Validação de interface
+
+Numa change que cria ou muda telas, siga a skill `interface-quality`: o `design.md` traz um "Brief
+visual", e antes de marcar a tarefa de uma tela a aplicação passa pela validação no navegador:
+
+```sh
+node docs/openspec-validar-interface.mjs http://localhost:<porta>/ --jornadas openspec/changes/<change>/interface/jornadas.json --saida openspec/changes/<change>
+```
+
+O script instala o Playwright e o axe-core numa pasta temporária fora do projeto (na primeira vez,
+baixa o Chromium, cerca de 100 MB) e precisa do Node.js 20 ou mais novo. Ele grava o
+`interface-report.md` com capturas em 390, 768 e 1280 px, acessibilidade, console, links, título,
+favicon, página 404, o resultado de cada jornada e uma nota automática. Saída 0 com nota "médio" ou
+"bom", 1 com "fraco" e 2 em erro de ambiente. No Claude Code, o subagente
+`openspec-validador-de-interface` roda o script, olha as capturas e dá a nota final, que vai para a
+seção "Avaliação do validador" do relatório; o `/opsx:verify` exige "médio" ou melhor.
+
 ## Camada do Claude Code
 
 No Claude Code, o padrão também impõe limites por mecanismo, e não só por instrução
@@ -67,6 +84,7 @@ No Claude Code, o padrão também impõe limites por mecanismo, e não só por i
 | `openspec-qa-validator` | leitura e shell somente leitura | Valida a change antes do archive |
 | `openspec-stage-reviewer` | leitura e shell somente leitura | Roda os Comandos de verificação e devolve só as falhas |
 | `openspec-code-reviewer` | leitura e shell somente leitura | Revisa o intervalo de commits da change (passo 6a do apply) |
+| `openspec-validador-de-interface` | leitura e shell somente leitura | Valida as telas da change no navegador e dá a nota final |
 | `openspec-code-implementer` | leitura, edição e shell | Implementa as tarefas aprovadas |
 
 Os de veredito não têm ferramenta de edição e devolvem achados com evidência, sem corrigir. Nas

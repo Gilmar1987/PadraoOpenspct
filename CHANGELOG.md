@@ -4,6 +4,41 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.12.0 — 2026-10-22
+
+### O que mudou
+
+- **Qualidade de interface:** skill nova `interface-quality`, neutra de stack. Numa change com telas, o
+  `design.md` traz um "Brief visual" (público e tom, paleta com contraste, tipografia, espaçamento,
+  layout em 390, 768 e 1280 px, componentes, estados de cada tela e textos reais), e a skill traz o
+  checklist "pronto para cliente" e os critérios de nota (fraco, médio, bom, ótimo).
+- **Validação no navegador:** o `docs/openspec-validar-interface.mjs` abre a aplicação num navegador
+  real, com o Playwright e o axe-core instalados numa pasta temporária fora do projeto. Ele grava
+  capturas nas três larguras, confere acessibilidade (WCAG 2.2 AA), console, links internos, título,
+  favicon, metadados, página 404 e rolagem horizontal, executa as jornadas de usuário da change
+  (visitar, clicar, preencher, conferir) e grava o `interface-report.md` com uma nota automática.
+- **Subagente validador:** `openspec-validador-de-interface` (Claude Code) e `validador-de-interface`
+  (Copilot) rodam o script, olham as capturas, conferem o brief e dão a nota final, sem editar
+  arquivos. O hook somente leitura passa a valer também para ele.
+- **Verify:** o trecho "Interface quality gate" registra um crítico quando uma change com "Brief visual"
+  não tem o relatório, não tem a avaliação do validador ou tem nota final "fraco".
+- **Init:** com front-end na 3.2, o `project.md` ganha a linha "Validação de interface" nos Comandos de
+  verificação, e o `config.yaml` orienta o uso da skill nas changes com telas.
+
+### Ações no projeto
+
+- Nenhuma obrigatória. Projetos com front-end: nas próximas changes com telas, o verify exige o
+  relatório de interface. O script precisa do Node.js 20 ou mais novo e, na primeira execução, baixa
+  o Chromium (cerca de 100 MB) para uma pasta temporária.
+- Para registrar o comando num projeto já iniciado, acrescente aos Comandos de verificação do
+  `openspec/project.md` a linha "Validação de interface" com
+  `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>`, e ao
+  `operations.apply.guidance` do `openspec/config.yaml` a linha "Em changes com telas, seguir a skill
+  interface-quality: brief visual antes do código e relatório de interface com nota médio ou superior
+  antes de marcar a tarefa da tela."
+- Rode a validação contra a aplicação com dados de desenvolvimento: o script requisita os links
+  internos da página inicial, menos os que parecem mudar estado (sair, excluir, remover).
+
 ## 1.11.0 — 2026-10-22
 
 ### O que mudou

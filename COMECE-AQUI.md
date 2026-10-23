@@ -219,6 +219,11 @@ Toda mudança de comportamento passa pelo ciclo abaixo, no Claude Code, dentro d
 
 O agente só faz push, abre PR ou faz deploy quando você pede explicitamente.
 
+**Changes com telas:** o agente segue a skill `interface-quality`, com um brief visual no design e a
+validação no navegador (`docs/openspec-validar-interface.mjs`) antes de dar a tela por pronta. O verify
+só aceita a change com nota "médio" ou melhor; as capturas ficam no `interface-report.md` da change
+para você conferir.
+
 **Outros agentes:** os comandos `/opsx:*` são do Claude Code, mas as regras e o fluxo valem para
 qualquer agente. O setup põe as regras em `docs/openspec-regras.md` e um bloco
 `openspec-padrao` no arquivo que cada agente lê; num agente sem os comandos, peça para ele seguir o
