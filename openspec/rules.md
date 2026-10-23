@@ -55,6 +55,12 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
 - Com Responsável `Pendente`, ou sem a seção, você MUST NOT escrever código.
 - Escopo `archive` autoriza seguir por apply, verify e archive sem nova confirmação
   enquanto todas as condições forem atendidas; se uma falhar, pare e informe.
+- Quando o repositório tem o portão, a aprovação guarda o selo do planejamento aprovado
+  (item `Conteúdo:`). Uma correção feita depois dela, mesmo sem mudar o escopo, muda o selo
+  e pede a reconfirmação do responsável antes do próximo apply.
+- Um fato atribuído ao usuário, ao negócio ou a um sistema externo, sem fonte no pedido,
+  num documento ou no código, fica marcado `[INFERIDO: <base>]` até alguém o confirmar;
+  com a marca, o portão de apply bloqueia.
 
 ---
 

@@ -170,6 +170,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Missing section or `Responsável: Pendente`: stop; the change was never approved, or an `- Aprovação anterior:` line shows that a scope change reset the approval. Ask for a new approval.
    - `Escopo: archive`: check every `Condições` item; if one fails, stop and report it.
    - `Escopo: apply`: ask the user to confirm the archive explicitly. When they do, append `- Archive: <YYYY-MM-DD>; Origem: "<their words>"` as the last item of the section, quoting your question too when their answer only makes sense with it. Do not change the other items. Without that confirmation, do not archive.
+   - **Approval content seal**: when the code repository has `docs/openspec-portao.mjs`, run `node docs/openspec-portao.mjs selo <change>` (with `--store <id>` when a store is selected) before recording the `Archive:` item. If it differs from the last `Conteúdo:` of the section, show the user what changed in the planning since the approval, and add `; Conteúdo: <new seal>` to the `Archive:` item only when their confirmation covers those changes.
 
 5. **Perform the archive**
 

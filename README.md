@@ -142,6 +142,11 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 
 > Toda mudança de comportamento passa por `/opsx:propose` antes do código.
 
+A aprovação de cada change fica na seção `## Aprovação` do `proposal.md`, com o selo do planejamento
+aprovado (`Conteúdo: sha256:...`, calculado por `node docs/openspec-portao.mjs selo <change>`). Se o
+planejamento mudar depois, o portão bloqueia o apply até o responsável reconfirmar. Fatos que o agente
+deduziu sem fonte ficam marcados `[INFERIDO: <base>]` e também bloqueiam o apply até alguém confirmar.
+
 Fluxo completo quando há documentos externos:
 
 ```text

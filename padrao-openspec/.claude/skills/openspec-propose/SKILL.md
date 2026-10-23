@@ -30,6 +30,8 @@ Leave it `Pendente` unless the user has explicitly approved the change. In `Orig
 
 **Prior authorization exception**: The planning boundary above has one exception. If the user's own request, or a document the user provided and asked you to follow, explicitly authorizes going past planning up to archive under stated conditions, record that authorization in `## Aprovação`: `Responsável`, `Data`, `Escopo: archive`, the `Condições` the user stated, and `Origem` quoting the user's words, and also your question when their answer only makes sense with it. After every artifact is complete, check each condition. If all hold, you may start the apply workflow in the same response; if any fails, or a material ambiguity appears, stop and report. Without such an explicit statement from the user, the boundary applies unchanged.
 
+**Approval content seal**: whenever this workflow records an approval (the prior authorization above), compute the seal after every artifact is complete: resolve every `[INFERIDO: ...]` marker with the user first, then, when the code repository has `docs/openspec-portao.mjs`, run `node docs/openspec-portao.mjs selo <change>` (with `--store <id>` when a store is selected) and add its output as `- Conteúdo: sha256:<...>` before `Origem`. Without the gate file, leave the item out.
+
 I'll create a change with the artifacts your schema defines. With the default spec-driven schema that is:
 - proposal.md (what & why)
 - `specs/<capability-path>/spec.md` (what the system must do - a delta, not the main spec)
@@ -178,6 +180,7 @@ After completing all artifacts, summarize:
 
 **Artifact Creation Guidelines**
 
+- **Declared inference**: a fact attributed to the user, the business or an external system (a value, rule, limit, format or name) that came neither from the request, a document the user gave, nor the code is marked `[INFERIDO: <base>]` right where it appears, `<base>` being what you deduced it from. Your own technical proposals are not marked: they wait for the approval anyway. In the final summary, list every marker and ask the user to confirm each one; a confirmed marker is removed, a rejected statement is corrected. The apply gate blocks while any marker remains.
 - Follow the `instruction` field from `openspec instructions` for each artifact type - it is the authoritative guidance, even for familiar artifact names
 - If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly
 - The schema defines what each artifact should contain - follow it
