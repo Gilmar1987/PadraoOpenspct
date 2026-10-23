@@ -179,6 +179,8 @@ no navegador: `docs/openspec-validar-interface.mjs` abre a aplicação num naveg
 instalados numa pasta temporária, fora do projeto), tira capturas em 390, 768 e 1280 px, confere acessibilidade,
 console, links, título, favicon e 404, executa as jornadas de usuário da change e grava o `interface-report.md`
 com uma nota automática. O subagente validador de interface dá a nota final, e o verify exige "médio" ou melhor.
+O propose escreve o `design.md` com o brief em toda change com telas, e o verify avisa quando a change cita telas
+sem brief.
 
 O padrão não tem skills de stack. Skills de fornecedor (por exemplo, as oficiais de um
 framework) podem ser instaladas à parte, pelo comando do próprio fornecedor; elas

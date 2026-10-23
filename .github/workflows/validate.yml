@@ -143,6 +143,7 @@ jobs:
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
             check "$f" "Check concurrent changes"
+            check "$f" "Interface brief"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
@@ -176,6 +177,7 @@ jobs:
             check "$f" "Dependencies in Impact"
             check "$f" "Agent-run browser scripts"
             check "$f" "Interface quality gate"
+            check "$f" "Screens without visual brief"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"

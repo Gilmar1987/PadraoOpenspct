@@ -18,10 +18,11 @@ qualquer stack (ADR-0003): ela descreve o resultado e como conferir, não a bibl
 
 ## Ordem de trabalho
 
-1. **Propose:** numa change com telas, o `design.md` traz a seção "Brief visual" (modelo abaixo), e as
-   tarefas citam os estados de cada tela. O verify só exige o relatório de interface quando o design
-   tem o brief: uma change com telas e sem brief escapa da validação, por isso o brief é obrigatório
-   no propose. Se o relatório existir sem brief, o validador dá "fraco".
+1. **Propose:** numa change com telas, o propose escreve o `design.md` mesmo quando o schema o
+   trata como opcional, com a seção "Brief visual" (modelo abaixo), e as tarefas citam os estados de
+   cada tela e a validação no navegador (trecho "Interface brief" do propose). Se a change citar telas
+   sem brief, o verify avisa ("Screens without visual brief") e, com a confirmação do responsável de que há tela,
+   registra um crítico. Se o relatório existir sem brief, o validador dá "fraco".
 2. **Apply:** o brief vem antes do código. Cada tela nasce com os estados de carregando, vazio, erro e
    sucesso, e com textos reais.
 3. **Antes de marcar a tarefa de uma tela:** suba a aplicação, escreva ou atualize
