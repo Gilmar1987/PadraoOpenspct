@@ -71,8 +71,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; rebase na main antes do PR se a `descoberta-do-produto` entrar antes, com a versão combinada com a outra sessão (1.15.0)
+- Origem: "Aprovo a entrega-no-codigo até o archive, com PR"
+- Conteúdo: sha256:fc29d139aed08da6774f9f02d51969e67506af72e53a68313339e294de09920c
