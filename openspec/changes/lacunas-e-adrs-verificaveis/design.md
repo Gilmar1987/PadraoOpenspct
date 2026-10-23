@@ -24,7 +24,7 @@
 
 ## Architecture Decisions
 
-[ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Proposed`), criada por decisão do responsável em 2026-10-22: lacunas declaradas com hash da fonte e precedência entre documentos. É promovida a `Accepted` na revisão, antes do archive. A change segue a ADR-0003 (o script é Node.js sem dependências, como os outros, e os exemplos citam vários ecossistemas), a ADR-0004 (versão e CHANGELOG) e a ADR-0005 (a regra de precedência chega aos agentes pelo `rules.md`).
+[ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Accepted` em 2026-10-23), criada por decisão do responsável em 2026-10-22: lacunas declaradas com hash da fonte e precedência entre documentos. A change segue a ADR-0003 (o script é Node.js sem dependências, como os outros, e os exemplos citam vários ecossistemas), a ADR-0004 (versão e CHANGELOG) e a ADR-0005 (a regra de precedência chega aos agentes pelo `rules.md`).
 
 ## Decisions
 

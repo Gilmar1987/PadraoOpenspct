@@ -39,7 +39,7 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 
 ## Impact
 
-- **ADR:** [ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Proposed`), criada por decisão do responsável.
+- **ADR:** [ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Accepted` em 2026-10-23), criada por decisão do responsável.
 - **Comandos e skills:** `padrao-openspec/.claude/commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` (heurísticas "Declared gaps" e "ADR verification"); `padrao-openspec/.claude/commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` (campo `verificacao` ao criar ADR). Espelhados na raiz pelo `sync-root.mjs`.
 - **Modelos do store:** `padrao-openspec/openspec/lacunas.md` (novo), `padrao-openspec/openspec/adrs/template.md` e `adrs/README.md` (campo `verificacao`), `padrao-openspec/openspec/project.md` (seção "Precedência dos documentos" e linha "Conferência de lacunas" em "Comandos de verificação").
 - **Regras:** `padrao-openspec/openspec/rules.md` (precedência); chega aos projetos como `docs/openspec-regras.md` e aos blocos gerenciados dos agentes.
