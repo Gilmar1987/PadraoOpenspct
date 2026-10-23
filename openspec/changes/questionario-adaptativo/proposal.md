@@ -65,8 +65,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: apply
+- Condições: decisões confirmadas: opções ocultas mantendo os números originais, e as outras combinações de coerência deixadas para a `init-coerencia-e-ferramentas`; cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável; o apply começa depois do merge do PR #45, com rebase na `main`
+- Conteúdo: sha256:1010d94ab3003ecdeec79af3255a76d1a4c3e01a1e60f6cbecac9fb1c5fb919b
+- Origem: "Aprovo a change questionario-adaptativo para apply . confirmo as duas decisões que tomei por conta própria: opções ocultas mantendo os números originais, e as outras combinações de coerência deixadas para a init-coerencia-e-ferramentas"
