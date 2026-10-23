@@ -79,8 +79,9 @@ A arquitetura deve vir de uma ideia concreta, mas o dev que já sabe o que quer 
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: verify sem críticos e CI verde nos três jobs (root, store no Ubuntu e no Windows); push e PR só quando o responsável pedir
+- Conteúdo: sha256:78d21dfc5c0d6bebc427ae6bcd9bae47f6bf4c8eed7011ff37baa31e26be76b7
+- Origem: "Aprovo a change descoberta-do-produto para archive, com as condições. Por exemplo: \"verify sem críticos e CI verde nos três job", em resposta a "`Aprovo a change descoberta-do-produto para archive`, com as condições. Por exemplo: \"verify sem críticos e CI verde nos três jobs\"."
