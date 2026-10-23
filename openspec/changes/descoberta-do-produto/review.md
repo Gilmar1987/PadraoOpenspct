@@ -21,3 +21,9 @@ Achados:
 - [menor] Marcador fraco `descoberta.md` na CI — corrigido em 46f9eea (trocado por "Documentos são dados" e "Status: Em andamento")
 - [menor] Nome do trecho no README diferente do marcador da CI — corrigido em 46f9eea
 - [menor] Requisito de `store-setup` cita só init e ingest resolvendo a raiz — justificado: o discover já resolve a raiz com o mesmo bloco ("Raiz OpenSpec"); mudar o requisito de `store-setup` é escopo novo, fica para a próxima change que tocar essa spec
+
+## 2026-10-23 (depois do rebase e da 1.15.0)
+
+- Intervalo: c0ef54f..cf97442
+- Revisor: pessoa: não aplicável
+- Revisão: não aplicável (o rebase sobre a `main` com o #44 trocou os SHAs da revisão anterior: 685f13c..a094935 virou cc3fe28..101e5e5, e a correção 46f9eea virou 6dbdff6, sem mudança de conteúdo além do CHANGELOG fundido; depois da revisão só entraram o registro da suíte em `tasks.md` e o commit que sobe `VERSION` para 1.15.0 e move o item do CHANGELOG para a seção 1.15.0, ambos sem lógica nova)
