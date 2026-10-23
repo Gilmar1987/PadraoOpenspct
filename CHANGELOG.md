@@ -46,6 +46,13 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - **Precedência entre documentos:** o `rules.md` e o modelo de `project.md` definem a ordem
   contrato → specs → arquitetura → ADRs → código; divergência entre contrato e specs vai ao
   responsável.
+- **Estado do fluxo:** o portão ganha o comando `estado` (changes ativas com tarefas, aprovação, selo,
+  inferências e próximo passo), e um hook de início de sessão do Claude Code entrega esse resumo ao
+  agente.
+- **Ganchos do Git protegidos:** um hook nega `git commit --no-verify`, `git commit -n` e a escrita de
+  `core.hooksPath`, para o agente principal e para os subagentes.
+- **Escrita fora do fluxo:** uma edição fora de `openspec/` sem change ativa aprovada pede a confirmação
+  do usuário no Claude Code.
 
 - **Contratos de interface:** o `/opsx:init` pergunta, na 2.6, se o sistema expõe ou consome uma API
   e onde está o contrato (OpenAPI, GraphQL SDL, Protocol Buffers ou AsyncAPI), e o `project.md` ganha a
@@ -77,6 +84,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - Recomendado (contratos): no store, acrescente ao `project.md` a tabela "Contratos de interface"
   (em Architecture) e a linha "Teste de contrato" nos Comandos de verificação, ou "Não aplicável" quando
   o sistema não tiver API para outros sistemas.
+- Rode a atualização do padrão para receber os três hooks novos no `.claude/settings.json` e repita os
+  passos 4 a 6 do "Roteiro de verificação no Claude Code" do `docs/openspec-padrao.md`.
 
 ## 1.11.0 — 2026-10-22
 

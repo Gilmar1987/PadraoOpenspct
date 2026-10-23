@@ -23,6 +23,7 @@ class UsageError extends Error {}
 
 function usage() {
   return `Uso: node docs/openspec-portao.mjs <apply|archive|selo> <change> [--json] [--store <id>]
+       node docs/openspec-portao.mjs estado [--json] [--store <id>]
        node docs/openspec-portao.mjs instalar-hook
 
   apply <change>    libera escrever código só com a aprovação completa no proposal, com o selo
@@ -31,6 +32,9 @@ function usage() {
                     e, numa change com commits de código, review.md
   selo <change>     imprime o selo (sha256) do planejamento da change, para o item "Conteúdo:"
                     da seção ## Aprovação
+  estado            lista as changes ativas com tarefas, aprovação (pendente, apply ou archive),
+                    selo (valido, vencido, ilegível ou ausente), inferências e o próximo passo
+                    do fluxo (sempre sai com 0, ou 2 em erro de ambiente)
   instalar-hook     instala um hook commit-msg que recusa commits "OpenSpec-Change: <change>"
                     de changes que o portão de apply bloqueia
 
@@ -272,6 +276,56 @@ function check(action, change, store) {
   return { ok: reasons.length === 0, acao: action, change, motivos: reasons, ...(warnings.length ? { avisos: warnings } : {}) };
 }
 
+// The next step of the flow for one change, in the order a person would take them.
+function nextStep(item, changeRoot) {
+  if (!existsSync(changeRoot)) return 'conferir a pasta da change, que o OpenSpec lista mas não está em openspec/changes/';
+  if (item.aprovacao === 'pendente') return 'pedir a aprovação ao responsável';
+  if (item.selo === 'vencido' || item.selo === 'ilegível') return 'reconfirmar a aprovação com /opsx:update';
+  if (item.inferencias > 0) return 'confirmar as inferências [INFERIDO] com o responsável';
+  if (item.tarefas.feitas < item.tarefas.total || item.tarefas.total === 0) return '/opsx:apply';
+  if (!existsSync(path.join(changeRoot, 'verification.md'))) return '/opsx:verify';
+  if (item.aprovacao === 'apply') return 'pedir a confirmação do archive ao responsável';
+  if (!existsSync(path.join(changeRoot, 'review.md'))) return '/opsx:archive (com review.md, se a change alterou código)';
+  return '/opsx:archive';
+}
+
+// One CLI call for the list; everything else comes from the change folders.
+function state(store) {
+  const list = openspecJson(['list'], store);
+  if (!list.root?.path) {
+    const message = list.message ?? list.error ?? '';
+    throw new UsageError(`Não encontrei a raiz OpenSpec.${message ? ` ${message}` : ''}\nRode o portão na pasta do código, que declara o store, ou passe --store <id>.`);
+  }
+  const changes = (list.changes ?? []).map((entry) => {
+    const changeRoot = path.join(list.root.path, 'openspec', 'changes', entry.name);
+    const fields = existsSync(changeRoot) ? readApproval(changeRoot) : null;
+    const approved = fields && approvalReasons(fields).length === 0;
+    const scope = /\barchive\b/i.test(fields?.escopo ?? '') || filled(fields?.archive) ? 'archive' : 'apply';
+    let seal = 'ausente';
+    if (approved && fields.selo === 'ilegível') seal = 'ilegível';
+    else if (approved && fields.selo) seal = fields.selo === sealOf(changeRoot).conteudo ? 'valido' : 'vencido';
+    const item = {
+      change: entry.name,
+      tarefas: { feitas: entry.completedTasks ?? 0, total: entry.totalTasks ?? 0 },
+      aprovacao: approved ? scope : 'pendente',
+      selo: seal,
+      inferencias: existsSync(changeRoot) ? inferenceReasons(changeRoot).length : 0,
+    };
+    item.proximo = nextStep(item, changeRoot);
+    return item;
+  });
+  return { ok: true, acao: 'estado', change: null, motivos: [], changes };
+}
+
+// The same wording as the SessionStart hook (contexto-de-sessao.mjs); the JSON keeps plain values.
+function stateLine(item) {
+  const approval = item.aprovacao === 'pendente' ? 'aprovação pendente' : `aprovada (${item.aprovacao})`;
+  const sealWords = { valido: 'válido', vencido: 'vencido', 'ilegível': 'ilegível', ausente: 'ausente' };
+  const seal = item.aprovacao === 'pendente' ? '' : `, selo ${sealWords[item.selo] ?? item.selo}`;
+  const marks = item.inferencias ? `, ${item.inferencias} inferência(s) a confirmar` : '';
+  return `${item.change}: ${item.tarefas.feitas}/${item.tarefas.total} tarefas, ${approval}${seal}${marks} → ${item.proximo}`;
+}
+
 function installHook() {
   const top = git(['rev-parse', '--show-toplevel']);
   const hooks = git(['rev-parse', '--git-path', 'hooks']);
@@ -328,6 +382,9 @@ function report(options, result, code) {
     console.error(`Erro: ${result.erro}`);
   } else if (result.acao === 'selo') {
     console.log(result.conteudo);
+  } else if (result.acao === 'estado') {
+    if (!result.changes.length) console.log('Nenhuma change ativa.');
+    for (const item of result.changes) console.log(stateLine(item));
   } else if (result.ok) {
     console.log(`✔ liberado: ${result.acao} da change ${result.change}`);
     for (const warning of result.avisos ?? []) console.log(`  aviso: ${warning}`);
@@ -356,6 +413,10 @@ function main() {
       return EXIT_OK;
     }
     if (options.action === 'commit-msg') return commitMsg(options.change, options.store);
+    if (options.action === 'estado') {
+      if (options.change) throw new UsageError(`Argumento inesperado: ${options.change}`);
+      return report(options, state(options.store), EXIT_OK);
+    }
     if (!['apply', 'archive', 'selo'].includes(options.action)) throw new UsageError(`Ação desconhecida: ${options.action}\n${usage()}`);
     validateChange(options.change, options.action);
     if (options.action === 'selo') {

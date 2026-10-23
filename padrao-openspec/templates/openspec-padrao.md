@@ -45,6 +45,7 @@ e arquivar uma change:
 node docs/openspec-portao.mjs apply <change>     # aprovação completa?
 node docs/openspec-portao.mjs archive <change>   # escopo archive, tarefas, verification.md e review.md?
 node docs/openspec-portao.mjs selo <change>      # selo do planejamento, para o item "Conteúdo:" da aprovação
+node docs/openspec-portao.mjs estado             # changes ativas, aprovação, selo e próximo passo
 ```
 
 A aprovação registra o selo do planejamento (proposal sem a seção de aprovação, design, specs e
@@ -112,6 +113,14 @@ passa a ter os mesmos limites.
   resolvido) nunca bloqueia, e o hook desiste depois de alguns segundos.
 - **`openspec archive <change>`:** roda o portão (`docs/openspec-portao.mjs archive <change>`) e nega o
   comando com os motivos quando ele bloqueia. Sem o portão, pede a sua confirmação.
+- **Início da sessão:** o agente recebe o estado das changes ativas (tarefas, aprovação, selo,
+  inferências e próximo passo), tirado de `docs/openspec-portao.mjs estado`, em vez de deduzir a fase.
+- **Ganchos do Git:** `git commit --no-verify`, `git commit -n` e qualquer escrita de
+  `core.hooksPath` são negados, para o agente principal e para os subagentes; consultar o
+  `core.hooksPath` segue liberado.
+- **Escrita fora do fluxo:** uma edição de arquivo do repositório fora de `openspec/` sem nenhuma change
+  ativa aprovada (com o selo em dia e sem inferências a confirmar) pede a sua confirmação. Dentro de
+  `openspec/`, ou com uma change aprovada, segue sem pergunta.
 
 **Permissões:** `git push`, `gh pr create`, `gh release` e `openspec archive` pedem a sua confirmação;
 `git push --force ...`, `git push -f ...` e `git reset --hard ...` são negados (outras formas de push
@@ -149,6 +158,13 @@ Depois de instalar ou atualizar o padrão, confira num repositório de teste, co
    `Evidência:` e peça ao agente uma resposta curta. O turno deve continuar uma vez, citando a tarefa.
 3. Peça `openspec archive <change de teste>`. Com o portão, o comando deve ser negado com os motivos;
    sem ele, o Claude Code deve pedir confirmação.
+4. Numa conversa nova, pergunte, sem deixar o agente rodar comandos, o que ele sabe sobre as changes
+   OpenSpec do projeto. Ele deve citar o estado (tarefas, aprovação e próximo passo) que recebeu no
+   início da sessão.
+5. Peça `git commit --allow-empty --no-verify -m teste`. O comando deve ser negado, citando o hook
+   commit-msg do padrão.
+6. Com o modo "accept edits" ligado e nenhuma change aprovada, peça para criar um arquivo em `src/`. O
+   Claude Code deve pedir a sua confirmação com a mensagem do padrão; dentro de `openspec/`, não.
 
 Registre quem executou, quando e o resultado de cada passo no `verification.md` da change que mexeu
 nesta camada.
