@@ -220,6 +220,22 @@ _(Múltipla escolha — separe os números por vírgula, ex: 1,3)_
 
 ---
 
+**2.6 — O sistema expõe ou consome uma API para outros sistemas?** _(Múltipla escolha — separe os números por vírgula)_
+
+```
+0) Não — nenhuma interface com outros sistemas
+1) Expõe uma API HTTP (REST) — contrato em OpenAPI
+2) Expõe uma API GraphQL — contrato em SDL
+3) Expõe ou consome gRPC — contrato em Protocol Buffers
+4) Publica ou consome eventos/mensagens — contrato em AsyncAPI ou esquema equivalente
+5) Consome a API de terceiros — cópia do contrato no repositório
+6) Outro (digitar livremente)
+```
+
+A opção 0 exclui as demais. Para cada opção escolhida de 1 a 6, pergunte o caminho de cada contrato no repositório de código (por exemplo, `api/openapi.yaml`); aceite mais de um contrato por opção. Nas opções 3 e 4, pergunte também a direção (expõe, consome ou ambas); nas opções 5 e 6, o formato; na opção 5, a origem (URL ou fornecedor) e a versão. Um caminho que ainda não existe é aceito: o arquivo nasce na primeira change que mexer na interface. Com arquivo de respostas, a célula da 2.6 traz as opções e, para cada contrato, os dados entre parênteses, separados por ponto e vírgula, por exemplo `1 (api/openapi.yaml); 5 (contratos/pagamentos.yaml, OpenAPI, origem: fornecedor X, versão 2.3)`.
+
+---
+
 > **Resumo do Bloco 2** — exiba todas as respostas e pergunte: **"Confirma este bloco? [s/n]"**
 
 ---
@@ -667,11 +683,13 @@ _(Múltipla escolha — separe os números por vírgula. Faça esta pergunta só
 
 > O padrão não embute nenhuma stack: os comandos que validam o código vêm desta entrevista.
 
-**7.1 — Comandos de verificação.** Para cada finalidade da seção "Comandos de verificação" de `<root>/openspec/project.md` (instalar dependências, executar localmente, testes, lint, typecheck/build, migrações, auditoria de dependências, varredura de secrets), pergunte o comando que o projeto usa, uma pergunta por vez. Ofereça até 3 sugestões coerentes com as respostas 3.1, 3.2, 3.5 e 5.4 (por exemplo, `pytest` quando a 5.4 for Pytest), mais:
+**7.1 — Comandos de verificação.** Para cada finalidade da seção "Comandos de verificação" de `<root>/openspec/project.md` (instalar dependências, executar localmente, testes, teste de contrato, lint, typecheck/build, migrações, auditoria de dependências, varredura de secrets), pergunte o comando que o projeto usa, uma pergunta por vez. Ofereça até 3 sugestões coerentes com as respostas 3.1, 3.2, 3.5 e 5.4 (por exemplo, `pytest` quando a 5.4 for Pytest), mais:
 
 - **Não aplicável**: o projeto não tem essa etapa;
 - **Adiar**: grava "Adiado: definir na primeira change que precisar";
 - **Outro (digitar livremente)**.
+
+Pergunte o teste de contrato só quando a 2.6 registrou um contrato; senão, grave "Não aplicável". Sugira a ferramenta do formato escolhido, por exemplo `schemathesis run api/openapi.yaml` (OpenAPI), um teste do próprio projeto que compara as rotas registradas com o contrato (`pytest tests/test_contrato.py`), `buf breaking` (Protocol Buffers) ou `graphql-inspector diff` (SDL).
 
 Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable` ou `osv-scanner`, que cobre vários). Para a varredura de secrets, sugira uma ferramenta que examine o conteúdo preparado para commit, e não o histórico: `gitleaks git --staged` (ou `gitleaks protect --staged` em versões anteriores à 8.19), `trufflehog filesystem .` ou `git secrets --scan`. O apply roda a varredura antes de cada commit e a auditoria quando a change mexe em dependências.
 
@@ -778,6 +796,7 @@ Após todos os blocos confirmados:
 | Organização das regras de negócio | {{resposta 2.3}} |
 | Comunicação entre módulos | {{resposta 2.4}} |
 | Jobs / background processing | {{resposta 2.5}} |
+| Contratos de interface | {{resposta 2.6: interface, direção, formato e caminho de cada contrato, ou Não aplicável}} |
 
 ## 3. Stack Técnica
 
@@ -845,7 +864,7 @@ Após todos os blocos confirmados:
 
 ### Arquivo 2: `<root>/openspec/project.md`
 
-Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Registre a 7.3 em "Idioma do código". Na seção "Architecture", escreva um resumo de 3 a 5 linhas e o link `[Arquitetura detalhada](arquitetura.md)`, sem repetir o conteúdo do Arquivo 5. Nas subseções "Componentes e limites" e "Fluxo de dados e integrações", registre só os componentes e fluxos em uma linha cada, apontando para o `arquitetura.md` para o detalhe. Quando a 3.2 não for "0" (o projeto tem front-end), acrescente à tabela "Comandos de verificação" a linha `` | Validação de interface | `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>` | Rodada pelo subagente validador nas changes com telas (skill interface-quality) | ``, com a URL local do comando "Executar localmente". Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
+Preencha o template de `<root>/openspec/project.md` com todas as escolhas confirmadas, inclusive a seção "Comandos de verificação" com as respostas do bloco 7. Na convenção "Git e revisão", registre a estratégia de branches (5.1), a revisão de código (5.7), o remoto (5.8, escrevendo "sem remoto" quando for o caso), o tamanho do time (5.9) e as decisões da checagem de coerência que afetem a revisão ou o CI. Registre a 7.3 em "Idioma do código". Preencha a tabela "Contratos de interface" com a 2.6 (uma linha por contrato; com 2.6 = 0, uma linha "Não aplicável"), e o item 1 de "Precedência dos documentos" com o caminho do contrato principal quando houver. Na seção "Architecture", escreva um resumo de 3 a 5 linhas e o link `[Arquitetura detalhada](arquitetura.md)`, sem repetir o conteúdo do Arquivo 5. Nas subseções "Componentes e limites" e "Fluxo de dados e integrações", registre só os componentes e fluxos em uma linha cada, apontando para o `arquitetura.md` para o detalhe. Quando a 3.2 não for "0" (o projeto tem front-end), acrescente à tabela "Comandos de verificação" a linha `` | Validação de interface | `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>` | Rodada pelo subagente validador nas changes com telas (skill interface-quality) | ``, com a URL local do comando "Executar localmente". Substitua todos os campos "A definir" e "{{Nome do Projeto}}" pelos valores reais. Mantenha a estrutura do template — apenas preencha os valores.
 
 ### Arquivo 3: `<root>/openspec/config.yaml`
 
@@ -928,7 +947,7 @@ Gere este arquivo depois das ADRs, para poder linká-las. Use só as respostas c
 
 ## Comunicação
 
-{{2.4: como os componentes se falam; integrações externas citadas nas respostas}}
+{{2.4: como os componentes se falam; 2.6: as APIs expostas e consumidas, com o contrato de cada uma; integrações externas citadas nas respostas}}
 
 ## Diagrama
 

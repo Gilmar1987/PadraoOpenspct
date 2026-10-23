@@ -101,6 +101,8 @@ nenhuma delas. Especificamente:
 - Quando o repositório de código tiver `docs/openspec-portao.mjs`, você MUST rodá-lo antes
   de escrever código de uma change (`apply <change>`) e antes de arquivá-la (`archive <change>`)
   e respeitar o resultado
+- Quando o `project.md` registra um contrato de interface (seção "Contratos de interface"), o
+  contrato MUST ser atualizado antes do código que o implementa e commitado junto com ele
 
 ---
 

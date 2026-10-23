@@ -181,6 +181,7 @@ jobs:
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
+            check "$f" "Interface contract first"
             check "$f" "verificacao"
             check "$f" "Check concurrent changes"
             check "$f" "Interface brief"
@@ -196,6 +197,7 @@ jobs:
             check "$f" "Push only on explicit request"
             check "$f" "Security checks"
             check "$f" "Request code review"
+            check "$f" "Contract and code in the same commit"
             check "$f" "Run the gate"
             check "$f" "Unrequested fixes are scope"
             check "$f" "Check the library API"
@@ -220,6 +222,7 @@ jobs:
             check "$f" "Screens without visual brief"
             check "$f" "Declared gaps"
             check "$f" "ADR verification"
+            check "$f" "Interface contract check"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
@@ -249,6 +252,11 @@ jobs:
           check "$f" "**7.3 — Em que idioma o código será escrito"
           check "$f" "Fila no próprio banco"
           check "$f" 'acrescente ao `operations.apply.guidance`'
+          check "$f" "**2.6 — O sistema expõe ou consome uma API"
+          # Contratos de interface (contratos-de-interface): template do project.md e regra global.
+          check openspec/project.md "### Contratos de interface"
+          check openspec/project.md "| Teste de contrato |"
+          check openspec/rules.md "contrato de interface (seção"
           # Coerência de segurança (1.7.0): opção sem autenticação, combinações novas e a restrição no project.md.
           check "$f" "0) Sem autenticação no MVP"
           check "$f" '7.1 "Auditoria de dependências" é "Não aplicável"'
