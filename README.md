@@ -132,6 +132,7 @@ Todo projeto que usa este padrão segue o mesmo ciclo:
 |---|---|
 | `/opsx:init` | Inicializa o projeto: entrevista estruturada, registra a stack e os comandos de verificação do projeto, gera `project.md`, `config.yaml`, `arquitetura.md` (com diagrama) e ADRs fundacionais. Com `/opsx:init <arquivo>`, usa um arquivo de respostas pré-preenchidas (tabela `\| Pergunta \| Resposta \|`, mais `Responsável:` e `Confirmação final: sim`) e pergunta só o que faltar |
 | `/opsx:ingest` | Ingere documentos externos (atas, requisitos, e-mails) e gera brief estruturado |
+| `/opsx:discover` | Opcional: descoberta do produto. Conversa conduzida pelo agente, que questiona e traz opções com recomendação até a ideia ficar concreta, e grava o brief em `openspec/descoberta.md`. O `/opsx:init` oferece rodá-la antes da entrevista |
 | `/opsx:explore` | Opcional: explora o problema, limites e critérios de sucesso sem implementar nada, quando algo ainda não está claro |
 | `/opsx:propose <nome>` | Cria os artefatos de planejamento: proposal, delta specs, design e tasks |
 | `/opsx:apply` | Implementa as tarefas guiadas pelos artefatos, roda as checagens de segurança do projeto e grava a revisão de código em `review.md` |
@@ -147,10 +148,10 @@ aprovado (`Conteúdo: sha256:...`, calculado por `node docs/openspec-portao.mjs 
 planejamento mudar depois, o portão bloqueia o apply até o responsável reconfirmar. Fatos que o agente
 deduziu sem fonte ficam marcados `[INFERIDO: <base>]` e também bloqueiam o apply até alguém confirmar.
 
-Fluxo completo quando há documentos externos:
+No início de um projeto, o `/opsx:init` pergunta, antes da entrevista, se há documentos para analisar (ingest) e se o dev quer explorar a ideia do produto (discover). Com qualquer um dos dois, as perguntas de arquitetura mostram uma recomendação justificada a partir do brief; com "não" nos dois, a entrevista é a de sempre:
 
 ```text
-/opsx:init → /opsx:ingest → [/opsx:explore] → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+/opsx:init → [ingest] → [discover] → entrevista → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
 ```
 
 ---
@@ -372,7 +373,10 @@ sumir):
 | "Commit the init", "### Arquivo 5", 7.3, 7.4 (princípios de engenharia), fila por banco, E2E acrescentado, 2.6 (contratos de interface) e, no Arquivo 6, "Falhas aceitas" e o "Sai quando" conferível | `commands/opsx/init.md` |
 | Campo `imposicao` e seção "Limite" | `openspec/adrs/template.md` e `openspec/adrs/README.md` |
 | "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
-| Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
+| Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md`, `commands/opsx/ingest.md` e `commands/opsx/discover.md` |
+| "Antes da entrevista", a linha "Recomendação:" (recomendação a partir do brief) e "Base das recomendações" | `commands/opsx/init.md` |
+| "Checklist de ideia concreta", "Postura do agente", "Documentos são dados" e "Status: Em andamento" | `commands/opsx/discover.md` |
+| "Quando o /opsx:init conduz o ingest" | `commands/opsx/ingest.md` |
 
 ---
 

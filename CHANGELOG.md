@@ -4,6 +4,23 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.15.0 — 2026-10-23
+
+### O que mudou
+
+- **Descoberta do produto:** comando novo `/opsx:discover`, uma conversa em que o agente pergunta, questiona
+  premissas e traz opções com justificativa e recomendação até a ideia do produto ficar concreta (problema e
+  público, MVP, fora do MVP, integrações, restrições e critério de sucesso), gravada em `openspec/descoberta.md`
+  com confirmação e retomável. Antes da entrevista, o `/opsx:init` pergunta se há documentos (ingest) e se o
+  dev quer explorar a ideia (discover); com um dos dois, cada pergunta mostra uma recomendação justificada a
+  partir do brief, e o `project-setup.md` registra a base. Com "não" nos dois, ou com arquivo de respostas, a
+  entrevista é a de sempre.
+
+### Ações no projeto
+
+- Nenhuma. O `/opsx:discover` chega com a atualização do padrão; um projeto já inicializado pode
+  rodá-lo para registrar a ideia do produto em `openspec/descoberta.md`.
+
 ## 1.14.0 — 2026-10-23
 
 ### O que mudou

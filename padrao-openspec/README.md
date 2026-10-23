@@ -83,6 +83,7 @@ mostra ao final.
 
 ## Fluxo de trabalho
 
+0. No início do projeto, `/opsx:init`: antes da entrevista, oferece o `/opsx:ingest` (documentos) e o `/opsx:discover` (descoberta do produto, conduzida pelo agente até uma ideia concreta), e usa o brief nas recomendações das perguntas de arquitetura.
 1. `/opsx:explore` — esclarecer problema, limites e critérios de sucesso.
 2. `/opsx:propose <nome-ou-descrição>` — criar os artefatos de planejamento exigidos pelo schema: proposta, delta specs, design e tarefas, conforme aplicável.
 3. Revisar os artefatos e resolver ambiguidades antes de implementar.
@@ -100,7 +101,7 @@ O arquivamento preserva o histórico da change; para que um agente use esse hist
 padrao-openspec/
 ├── README.md
 ├── .claude/
-│   ├── commands/opsx/                 # Slash commands /opsx:* (init, ingest, explore, propose, apply, verify, archive, sync, update)
+│   ├── commands/opsx/                 # Slash commands /opsx:* (init, ingest, discover, explore, propose, apply, verify, archive, sync, update)
 │   └── skills/
 │       ├── openspec-explore/          # Exploração sem implementação
 │       ├── openspec-propose/          # Planejamento da change
