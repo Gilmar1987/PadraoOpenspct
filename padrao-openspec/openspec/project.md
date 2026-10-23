@@ -37,6 +37,17 @@
 
 <!-- Registre os fluxos e sistemas externos relevantes. -->
 
+### Contratos de interface
+
+| Interface | Direção | Formato | Contrato | Origem (terceiros) |
+|---|---|---|---|---|
+| <!-- A definir ou Não aplicável --> | | | | |
+
+"Direção" é `expõe` ou `consome`. Uma cópia de contrato de terceiros fica fixada com o SHA-256 num
+`ORIGEM.md` ao lado dela (de onde veio, quando, qual versão e o hash). Recomendado: o serviço expõe o
+SHA-256 do contrato que implementa (por exemplo, num cabeçalho de resposta), para o consumidor detectar
+a divergência.
+
 ## Domain Model
 
 | Conceito | Responsabilidade | Regras importantes |
@@ -57,7 +68,7 @@
 
 Ordem usada num conflito entre documentos (ajuste se o projeto precisar):
 
-1. Contrato de interface (não aplicável enquanto o projeto não tiver contrato de API)
+1. Contrato de interface (o da tabela "Contratos de interface"; não aplicável enquanto o projeto não tiver contrato de API)
 2. Specs principais (`openspec/specs/`)
 3. Arquitetura (`openspec/arquitetura.md` e este `project.md`)
 4. ADRs `Accepted` (`openspec/adrs/`)
@@ -86,6 +97,7 @@ Divergências declaradas ficam em `openspec/lacunas.md`.
 | Instalar dependências | <!-- A definir --> | |
 | Executar localmente | <!-- A definir --> | |
 | Testes | <!-- A definir --> | |
+| Teste de contrato | <!-- A definir ou não aplicável --> | Confere o contrato e a implementação nas duas direções |
 | Lint | <!-- A definir ou não aplicável --> | |
 | Typecheck/build | <!-- A definir ou não aplicável --> | |
 | Migrações | <!-- A definir ou não aplicável --> | |

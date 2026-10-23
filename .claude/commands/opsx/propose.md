@@ -177,6 +177,7 @@ After completing all artifacts, summarize:
 **Artifact Creation Guidelines**
 
 - **Declared inference**: a fact attributed to the user, the business or an external system (a value, rule, limit, format or name) that came neither from the request, a document the user gave, nor the code is marked `[INFERIDO: <base>]` right where it appears, `<base>` being what you deduced it from. Your own technical proposals are not marked: they wait for the approval anyway. In the final summary, list every marker and ask the user to confirm each one; a confirmed marker is removed, a rejected statement is corrected. The apply gate blocks while any marker remains.
+- **Interface contract first**: when `openspec/project.md` registers an interface contract (section "Contratos de interface") and the change creates, changes or removes an operation of that interface (route, message, schema field), list the contract file in the proposal's Impact and add a task that updates the contract before any implementation task. When the project has no registered contract, say so in the proposal and continue.
 - Follow the `instruction` field from `openspec instructions` for each artifact type - it is the authoritative guidance, even for familiar artifact names
 - If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly
 - The schema defines what each artifact should contain - follow it
