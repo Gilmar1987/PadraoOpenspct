@@ -14,7 +14,8 @@
 
 - [x] 3.1 Atualizar README e CHANGELOG (itens na 1.12.0). Verificar com o lint e o passo "Versão e changelog" passando.
   - Evidência: README (frase na seção da skill) e item "Brief visual obrigatório" em "O que mudou" da seção 1.12.0 do CHANGELOG, sem subir o `VERSION`; "Ações no projeto": nenhuma nova. Git Bash: "Lint de Markdown" (padrão e raiz) e "Versão e changelog" → PASS.
-- [ ] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente, fazer o verify e o archive, e só então abrir o PR e conferir os três jobs. Verificar que todos passam.
+- [x] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente, fazer o verify e o archive, e só então abrir o PR e conferir os três jobs. Verificar que todos passam.
+  - Evidência: outra sessão avisada antes; suíte local completa no Git Bash → 27 passos PASS (`store` e `root`), 0 ids `ci-*`; depois do rebase sobre a `aprovacao-por-conteudo` (conflito no CHANGELOG resolvido mantendo os itens das duas), validate, lint, versão, trechos e o job `root` → PASS; PR #36 (rascunho), run 39887206712 (head 8cce50a) → store (ubuntu-latest), store (windows-latest) e root = success. Verify e archive entram no mesmo PR antes do merge.
 
 ## Workflow follow-up
 
