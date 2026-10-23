@@ -24,7 +24,7 @@ O segundo problema é o verify. Hoje ele roda os comandos do `project.md`, mas n
   - nova seção, depois de "Comandos de verificação", com uma linha por camada (unitário, contrato, arquitetura, E2E, roteiro manual, produção), dizendo o que ela cobre, o comando ou procedimento e onde roda (local, CI);
   - o init a preenche só com respostas que já tem (5.2 a 5.5 e bloco 7), sem pergunta nova; camada sem resposta fica "Adiado" ou "Não aplicável";
   - o verify usa a matriz: registra no `verification.md` quais camadas a change exercitou e põe em "Não verificado" as que se aplicavam à change e não rodaram.
-- **Versão:** acrescenta os seus itens à seção da versão aberta no `CHANGELOG.md` (1.12.0, aberta pela `qualidade-de-interface`), sem mexer no `VERSION` se ele já estiver nela; a release sai só quando o responsável pedir (modelo decidido em 2026-10-22).
+- **Versão:** pelo modelo de versão acumulada (decidido em 2026-10-22), é a primeira change depois da release v1.12.0: sobe o `VERSION` para 1.13.0 e abre a seção `## 1.13.0` no `CHANGELOG.md`; a release sai só quando o responsável pedir.
 - Marcadores novos na CI para os trechos do init, do verify, do archive, do propose e do explore.
 
 ### Fora do escopo
