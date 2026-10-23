@@ -27,7 +27,8 @@
 
 - [x] 4.1 Atualizar README e guia do projeto com o selo, a reconfirmação e as marcas, e aplicar o D8 com a versão aprovada. Verificar com o lint e o passo "Versão e changelog" passando.
   - Evidência: README (parágrafo sobre o selo e as inferências no Fluxo de trabalho), guia `templates/openspec-padrao.md` (comando `selo` e explicação na seção Portão) e dois itens em "O que mudou" e um em "Ações no projeto" da seção 1.12.0 aberta do CHANGELOG, sem subir o `VERSION` (modelo de versão confirmado pelo responsável). Git Bash: "Lint de Markdown" (padrão e raiz), "Versão e changelog", "Raiz em dia" e "Guia de primeiros passos" → PASS.
-- [ ] 4.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+- [x] 4.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+  - Evidência: outra sessão avisada antes e depois; suíte local completa no Git Bash → `store` 22/22 e `root` 5/5 PASS, 0 ids `ci-*`; PR #35 (rascunho), run 39885706984 (head 813e23a) → store (ubuntu-latest), store (windows-latest) e root = success.
 
 ## Workflow follow-up
 
