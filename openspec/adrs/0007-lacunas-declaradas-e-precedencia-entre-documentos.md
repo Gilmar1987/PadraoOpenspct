@@ -1,5 +1,5 @@
 ---
-id: ADR-0008
+id: ADR-0007
 status: Proposed
 date: 2026-10-22
 supersedes:
@@ -7,7 +7,7 @@ superseded_by:
 related_changes: [lacunas-e-adrs-verificaveis]
 ---
 
-# ADR-0008: Lacunas declaradas com hash da fonte e precedência entre documentos
+# ADR-0007: Lacunas declaradas com hash da fonte e precedência entre documentos
 
 ## Contexto
 

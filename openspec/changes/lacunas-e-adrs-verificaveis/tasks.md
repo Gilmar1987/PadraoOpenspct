@@ -2,7 +2,8 @@
 
 ## 1. Preparação e proteção na CI
 
-- [ ] 1.1 Rebasear a branch na `main` atual e combinar com a outra sessão o número da próxima minor livre (usado no grupo 5). Verificar com `git log --oneline HEAD..origin/main` vazio e o número registrado na evidência.
+- [x] 1.1 Rebasear a branch na `main` atual e combinar com a outra sessão o número da próxima minor livre (usado no grupo 5). Verificar com `git log --oneline HEAD..origin/main` vazio e o número registrado na evidência.
+  - Evidência: rebase em `origin/main` fe31307 (PR #34) sem conflito; `git log --oneline HEAD..origin/main` vazio (exit 0); versão: pelo modelo decidido em 2026-10-22, a change acrescenta itens à seção `## 1.12.0` aberta no CHANGELOG, sem mexer no `VERSION` (já em 1.12.0, sem tag `v1.12.0`); outra sessão avisada
 - [ ] 1.2 Acrescentar os marcadores do D6 ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` ("Declared gaps" e "ADR verification" no laço do verify; "verificacao" no laço do propose). Verificar rodando só esse passo localmente: deve falhar nos quatro arquivos que ainda não têm os trechos.
 
 ## 2. Registro de lacunas e script
@@ -26,5 +27,5 @@
 ## 5. Versão e integração
 
 - [ ] 5.1 Atualizar `padrao-openspec/VERSION` e `CHANGELOG.md` com a versão combinada na 1.1, com "O que mudou" e "Ações no projeto" do Migration Plan. Verificar com o passo "Versão e changelog".
-- [ ] 5.2 Revisar a [ADR-0008](../../adrs/0008-lacunas-declaradas-e-precedencia-entre-documentos.md) com o responsável e promovê-la a `Accepted` antes do archive, acrescentando-a ao `openspec/adrs/README.md`. Verificar com o `status: Accepted` no frontmatter e a linha no índice.
+- [ ] 5.2 Revisar a [ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) com o responsável e promovê-la a `Accepted` antes do archive, acrescentando-a ao `openspec/adrs/README.md`. Verificar com o `status: Accepted` no frontmatter e a linha no índice.
 - [ ] 5.3 Rodar `node padrao-openspec/scripts/sync-root.mjs` e `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o markdownlint nos dois lugares e os passos dos jobs `store` e `root` do `validate.yml` localmente, avisando a outra sessão antes. Verificar que todos saem com código 0.

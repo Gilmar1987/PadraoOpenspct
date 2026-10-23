@@ -39,7 +39,7 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 
 ## Impact
 
-- **ADR:** [ADR-0008](../../adrs/0008-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Proposed`), criada por decisão do responsável.
+- **ADR:** [ADR-0007](../../adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md) (`Proposed`), criada por decisão do responsável.
 - **Comandos e skills:** `padrao-openspec/.claude/commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` (heurísticas "Declared gaps" e "ADR verification"); `padrao-openspec/.claude/commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` (campo `verificacao` ao criar ADR). Espelhados na raiz pelo `sync-root.mjs`.
 - **Modelos do store:** `padrao-openspec/openspec/lacunas.md` (novo), `padrao-openspec/openspec/adrs/template.md` e `adrs/README.md` (campo `verificacao`), `padrao-openspec/openspec/project.md` (seção "Precedência dos documentos" e linha "Conferência de lacunas" em "Comandos de verificação").
 - **Regras:** `padrao-openspec/openspec/rules.md` (precedência); chega aos projetos como `docs/openspec-regras.md` e aos blocos gerenciados dos agentes.
@@ -61,3 +61,4 @@ Dois projetos de referência analisados em 2026-10-21 (um motor de cálculo e um
 - Versão (atualizada em 2026-10-22): a versão só sobe quando o responsável decidir publicar; esta change acrescenta itens à seção aberta (1.12.0). Origem: "sim", em resposta a "Confirma esse modelo? [...] tudo entra na 1.12.0 [...] a release sai quando você pedir"
 - Origem: "Aprovado 2, 3 e 4", em resposta a "2. ADR para a lacunas-e-adrs-verificaveis [...] Crio a ADR-0008 (Proposed) nessa change? 3. Ordem do apply: a minha sugestão é primeiro a guardas-mecanicas [...] e depois subagentes-e-ganchos, lacunas-e-adrs-verificaveis, contratos-de-interface e debitos-e-camadas-de-verificacao. 4. Aprovação para o apply: pode ser de uma change por vez, ou de várias de uma vez com condições."
 - Archive: pendente de aprovação
+- Nota: a ADR criada por esta change foi renumerada de 0008 para 0007 em 2026-10-22, porque a 0007 reservada para a guardas-mecanicas não foi usada; a citação acima mantém o número original da pergunta.
