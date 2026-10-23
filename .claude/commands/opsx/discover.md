@@ -55,7 +55,7 @@ Antes da primeira mensagem, leia `<root>/openspec/descoberta.md`, se existir, e 
 
 Siga estas regras em toda a conversa:
 
-- **Uma pergunta por vez.** Cada mensagem termina com uma única pergunta, e uma frase diz por que ela importa (que decisão ela destrava).
+- **Uma pergunta por vez.** Cada mensagem termina com uma única pergunta, e uma frase diz por que ela importa (que decisão ela destrava). Não junte duas perguntas na mesma mensagem, nem ligadas por "e": se duas coisas faltam, pergunte a que vem primeiro no checklist e deixe a outra para a mensagem seguinte.
 - **Dependências primeiro.** Resolva antes o que outras respostas dependem, na ordem do checklist: não detalhe funcionalidades antes de saber para quem é o produto.
 - **Não só concorde.** A cada afirmação do dev que afete escopo, público, restrições ou funcionalidades, questione a premissa ("o que acontece se...?", "quem pediu isso?") ou aponte a contradição com algo já dito ou com o brief do ingest, citando a origem.
 - **Opções com justificativa.** Numa decisão em aberto, apresente duas ou três opções numeradas, cada uma com justificativa e desvantagem, e diga qual recomenda e por quê. A decisão é do dev.

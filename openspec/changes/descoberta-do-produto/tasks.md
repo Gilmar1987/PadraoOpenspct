@@ -37,13 +37,14 @@
 
 ## 5. Verificação de comportamento
 
-- [ ] 5.1 Roteiro manual numa cópia temporária de store, fora do repositório, registrado na evidência:
+- [x] 5.1 Roteiro manual numa cópia temporária de store, fora do repositório, registrado na evidência:
   - (a) `/opsx:discover` avulso: confirmar a primeira pergunta, uma pergunta por vez e uma afirmação contraditória do dev ("12 funcionalidades, time de 1 pessoa") contestada com opções e recomendação;
   - (b) interromper e conferir o `descoberta.md` "Em andamento", depois retomar;
   - (c) `/opsx:init` com "não" e "não": a entrevista começa no Bloco 1 sem linha de recomendação;
   - (d) `/opsx:init` com o `descoberta.md` "Concluída": a 1.4 mostra a recomendação com a fonte, e uma pergunta não coberta mostra "o brief não cobre".
 
   Verificar que os quatro itens se comportam como os cenários das specs.
+  - Evidência: roteiro numa cópia temporária do store (scratchpad, fora do repositório), com subagentes seguindo os comandos e eu no papel do dev. (a) primeira mensagem "Qual é a sua ideia de projeto?..."; a afirmação "12 funcionalidades, só eu, 2 meses" foi contestada (conflito de escopo, prazo e time; NF, convênios e prontuário apontados como produtos inteiros), depois vieram três opções com justificativa, desvantagem e recomendação e uma única pergunta; desvio: a segunda mensagem trouxe duas perguntas ligadas por "E", corrigido no `discover.md` (regra "Não junte duas perguntas na mesma mensagem") e sincronizado na raiz. (b) com "preciso parar", o agente ofereceu gravar "Em andamento" e gravou só depois do "sim": `descoberta.md` no modelo, com Decisões e Em aberto, e commit só do arquivo (`7accab5` no store de teste); um agente novo retomou com o resumo do que já estava decidido e perguntou pelo primeiro item em falta, sem refazer perguntas. (c) init com n/n → Bloco 1 a partir da 1.1, sem linha de recomendação. (d) init com `descoberta.md` Concluída → "Encontrei uma descoberta concluída...", pergunta B não feita; 1.1 com "Recomendação: o brief não cobre esta pergunta."; 1.4 com "Recomendação: 1) Pequeno — a descoberta prevê 3 clínicas piloto... (descoberta.md, Restrições > Volume)", opções de sempre e escolha esperada do dev
 
 ## Workflow follow-up
 
