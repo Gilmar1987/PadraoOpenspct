@@ -7,7 +7,8 @@
 
 ## 2. Fluxos
 
-- [ ] 2.1 Aplicar o D1 no propose, o D2 no verify e o D3 na skill `interface-quality`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills", `sync-root --check` e o lint passando.
+- [x] 2.1 Aplicar o D1 no propose, o D2 no verify e o D3 na skill `interface-quality`, e regenerar a raiz com `sync-root.mjs`. Verificar com "Trechos customizados das skills", `sync-root --check` e o lint passando.
+  - Evidência: trecho **"Interface brief"** antes do "Architectural Decision Check" no propose (comando e skill) e exceção no passo 6b (o `design.md` de change com telas não é pulado); caso "Screens without visual brief" no "Interface quality gate" do verify (comando e skill); item 1 da "Ordem de trabalho" da skill `interface-quality` reescrito; raiz regenerada (5 caminhos). Git Bash: "Trechos customizados das skills" e "Lint de Markdown" → PASS; `sync-root --check` → em dia.
 
 ## 3. Documentação e integração
 

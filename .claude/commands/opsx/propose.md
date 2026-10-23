@@ -149,7 +149,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
       - `status` is file-existence only, so an `applyRequires` artifact reading `done` does NOT mean its dependencies exist - writing `tasks.md` early marks `tasks` done while `specs` was never written. Use each artifact's `requires` edges, not its `status`, to build the required set: a `done` artifact still lists what it depends on
       - An artifact already reading `status: "skipped"` is satisfied: the change declares `skip_specs` in `.openspec.yaml`, so its files must NOT exist. Never try to create one
       - Create every artifact in the required set that is missing, then re-check - creating one can unblock others
-      - Skip one only when `status` already reports it `skipped`, or when its own `instruction` says it is conditional: run `openspec instructions <artifact-id> --change "<name>" --json` and skip only if its `instruction` field marks it optional (e.g. "create only if..."). Spec-driven's `design.md` qualifies; `specs` qualifies only via the `skipped` status above, never by your own judgment. Tell the user, and do not reconsider it
+      - Skip one only when `status` already reports it `skipped`, or when its own `instruction` says it is conditional: run `openspec instructions <artifact-id> --change "<name>" --json` and skip only if its `instruction` field marks it optional (e.g. "create only if..."). Spec-driven's `design.md` qualifies, except in a change with screens (see **Interface brief**); `specs` qualifies only via the `skipped` status above, never by your own judgment. Tell the user, and do not reconsider it
       - Dependencies are enablers, not gates: if a required artifact is still `blocked` only because you skipped a conditional dependency, write it anyway
       - Stop when every artifact in the required set is `done`, `skipped`, or was deliberately skipped
 
@@ -185,6 +185,8 @@ After completing all artifacts, summarize:
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
+
+**Interface brief**: when the change creates or changes screens, pages or visual components (in any front-end technology), write `design.md` even where the schema treats it as optional, and include a `## Brief visual` section following the template in the `interface-quality` skill. In `tasks.md`, name the states of each screen (loading, empty, error, success) and add, before marking a screen task, a browser validation with `docs/openspec-validar-interface.mjs` and a final grade of "médio" or better. Follow the `interface-quality` skill.
 
 **Architectural Decision Check (before writing design.md)**
 
