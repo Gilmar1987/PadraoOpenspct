@@ -2,7 +2,8 @@
 
 ## 1. Testes na CI
 
-- [ ] 1.1 Acrescentar aos "Trechos customizados das skills" os marcadores "Interface brief" (par do propose) e "Screens without visual brief" (par do verify). Verificar rodando o passo no Git Bash: deve falhar (os trechos não existem).
+- [x] 1.1 Acrescentar aos "Trechos customizados das skills" os marcadores "Interface brief" (par do propose) e "Screens without visual brief" (par do verify). Verificar rodando o passo no Git Bash: deve falhar (os trechos não existem).
+  - Evidência: marcadores "Interface brief" (par do propose) e "Screens without visual brief" (par do verify) nos "Trechos customizados"; passo rodado no Git Bash → FAIL com os 4 trechos ausentes (exit 1), como esperado.
 
 ## 2. Fluxos
 
