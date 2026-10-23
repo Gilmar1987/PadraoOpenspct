@@ -11,17 +11,17 @@
 
 Achados:
 
-- [importante] Escritas de `core.hooksPath` que passavam (`git config set|unset`, `-f`/`--file`, `--type`) — corrigido em dc25158: subcomandos do `git config` e opções com valor reconhecidos; casos na CI.
-- [importante] `--config-env core.hooksPath=V` separado e `--no-verif` (prefixo aceito pelo git) passavam — corrigido em dc25158.
-- [importante] `git config core.hooksPath` sem valor (leitura) era negado, contra a spec — corrigido em dc25158: só nega com valor ou opção de escrita.
-- [importante] `git commit -uno` e `-S` eram negados, e `-m -n` também — corrigido em dc25158: letras que levam valor encerram o grupo, e o valor separado de `-m`, `-F`, `-c`, `-C` e `-t` é pulado.
-- [importante] Prefixos `VAR=`, `env`, `sudo`, `command` e as variáveis `GIT_CONFIG_*` passavam — corrigido em dc25158 (o hook pula os prefixos e nega `GIT_CONFIG_*` com `core.hooksPath`).
+- [importante] Escritas de `core.hooksPath` que passavam (`git config set|unset`, `-f`/`--file`, `--type`) — corrigido em ad3108d: subcomandos do `git config` e opções com valor reconhecidos; casos na CI.
+- [importante] `--config-env core.hooksPath=V` separado e `--no-verif` (prefixo aceito pelo git) passavam — corrigido em ad3108d.
+- [importante] `git config core.hooksPath` sem valor (leitura) era negado, contra a spec — corrigido em ad3108d: só nega com valor ou opção de escrita.
+- [importante] `git commit -uno` e `-S` eram negados, e `-m -n` também — corrigido em ad3108d: letras que levam valor encerram o grupo, e o valor separado de `-m`, `-F`, `-c`, `-C` e `-t` é pulado.
+- [importante] Prefixos `VAR=`, `env`, `sudo`, `command` e as variáveis `GIT_CONFIG_*` passavam — corrigido em ad3108d (o hook pula os prefixos e nega `GIT_CONFIG_*` com `core.hooksPath`).
 - [importante] O guia e o CHANGELOG prometiam "qualquer escrita de core.hooksPath" sem cobrir esses casos — resolvido pelas correções acima; o limite heurístico segue declarado no guia.
-- [menor] Change listada sem pasta aparecia como "aprovação pendente" — corrigido em dc25158 (próximo passo próprio).
-- [menor] O próximo passo ignorava o `review.md` antes do archive — corrigido em dc25158 (`/opsx:archive (com review.md, se a change alterou código)`).
-- [menor] Duas versões do texto da linha de estado (portão e hook) e "valido" sem acento — corrigido em dc25158: mesmo texto nos dois, "válido" na saída de texto, valores do JSON documentados no uso.
-- [menor] Links, junções e nomes 8.3 faziam um arquivo do repositório parecer fora dele — corrigido em dc25158 com `realpathSync.native` do ancestral existente.
-- [menor] Casos de borda sem teste na CI — corrigido em dc25158 (formas novas de deny e allow; `estado` com selo vencido, inferência e confirmação do archive).
+- [menor] Change listada sem pasta aparecia como "aprovação pendente" — corrigido em ad3108d (próximo passo próprio).
+- [menor] O próximo passo ignorava o `review.md` antes do archive — corrigido em ad3108d (`/opsx:archive (com review.md, se a change alterou código)`).
+- [menor] Duas versões do texto da linha de estado (portão e hook) e "valido" sem acento — corrigido em ad3108d: mesmo texto nos dois, "válido" na saída de texto, valores do JSON documentados no uso.
+- [menor] Links, junções e nomes 8.3 faziam um arquivo do repositório parecer fora dele — corrigido em ad3108d com `realpathSync.native` do ancestral existente.
+- [menor] Casos de borda sem teste na CI — corrigido em ad3108d (formas novas de deny e allow; `estado` com selo vencido, inferência e confirmação do archive).
 - [menor] Isenção de `openspec/` literal na raiz Git — justificado: no layout do padrão a raiz OpenSpec é a raiz Git (repositório único) ou fica no store, fora do repositório de código.
 - [menor] Ramo `notebook_path` sem o `NotebookEdit` no matcher — justificado: o grupo `Edit|Write` é compartilhado com o `escopo-de-escrita.mjs` da `subagentes-e-ganchos`, que tem o mesmo ramo; mudar o matcher é decisão dessa camada, fora desta change.
 
