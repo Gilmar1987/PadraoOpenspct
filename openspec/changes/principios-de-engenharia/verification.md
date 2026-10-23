@@ -24,3 +24,4 @@ Comandos:
 - Requisitos × implementação: design na revisão (`code-reviewer.md` e `openspec-code-reviewer.md`); contrato de entrada (`config.yaml`, design); log de três estados, validação e erro sem vazamento (`rules.md` seção 5 e heurística do verify, com a exceção só para o log); teste rastreável (`config.yaml`, Scenario Coverage e heurística do verify); Why ligado ao objetivo (`config.yaml`); convenção no init (7.4 e linha do modelo de `project.md`)
 - Coerência: proposal, design (D5), spec, `rules.md`, init, CHANGELOG e modelo de `project.md` dizem que só o log de três estados aceita "Não aplicável"
 - `review.md` → f024a09~1..6d4a8cd, subagente requesting-code-review; correções em ca7238b e 28ea5b4
+- `git diff c99cb9c -- design.md` → o script de correção (ca7238b) tinha cortado o `design.md` do fim do D5 ao fim do arquivo; restaurado em f713796 a partir da versão aprovada, só com as mudanças pretendidas no D4, no D5 e no Migration Plan

@@ -20,5 +20,5 @@ Achados:
 - [menor] O verify não dizia o que fazer sem a linha "Princípios de engenharia" ou com a validação adiada — corrigido em ca7238b: sem a linha, os três itens valem; validação adiada vira WARNING citando a decisão adiada
 - [menor] A revisão não indicava a severidade de cada princípio — corrigido em ca7238b: vazamento é crítico, falta de validação ou de log é importante, teste sem citação é menor
 - [menor] O requisito "Change ligada ao objetivo do produto" só é cobrado no planejamento — aceito: coerente com o design, que cobra o Why pela regra do `config.yaml`; revisão e verify conferem código
-- [menor] O D5 do design citava uma tabela do bloco 7 no `project-setup.md` que não existe — corrigido em ca7238b: o D5 diz que a 7.4 entra pelo resumo do bloco
+- [menor] O D5 do design citava uma tabela do bloco 7 no `project-setup.md` que não existe — corrigido em ca7238b e f713796: o D5 diz que a 7.4 entra pelo resumo do bloco
 - [menor] A proposal prometia exemplos de vários ecossistemas, e o texto não trazia nenhum — corrigido em ca7238b: a heurística cita Zod, Pydantic, Bean Validation e FluentValidation, sempre a que o `project.md` registra
