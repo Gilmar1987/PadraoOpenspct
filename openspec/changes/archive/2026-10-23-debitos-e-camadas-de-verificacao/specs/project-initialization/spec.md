@@ -4,7 +4,7 @@
 
 ### Requirement: Documento de arquitetura gerado pelo init
 
-O `/opsx:init` SHALL gerar `<root>/openspec/arquitetura.md` a partir das respostas confirmadas, com: visão geral, estilo e organização, componentes e responsabilidades, comunicação, um diagrama Mermaid dos componentes, dados, infraestrutura e deploy, observabilidade e segurança, decisões com links para as ADRs geradas e pontos adiados. A seção "Architecture" do `project.md` gerado SHALL resumir e apontar para esse documento. O `arquitetura.md` SHALL se declarar normativo (a arquitetura-alvo), e a seção de pontos adiados SHALL apontar para a lista "Fora do ciclo atual" do `estado-atual.md` em vez de repetir os itens.
+O `/opsx:init` SHALL gerar `<root>/openspec/arquitetura.md` a partir das respostas confirmadas, com: visão geral, estilo e organização, componentes e responsabilidades, comunicação, um diagrama Mermaid dos componentes, dados, infraestrutura e deploy, observabilidade e segurança, decisões com links para as ADRs geradas e pontos adiados. A seção "Architecture" do `project.md` gerado SHALL resumir e apontar para esse documento.
 
 #### Scenario: Init concluído
 
@@ -15,11 +15,6 @@ O `/opsx:init` SHALL gerar `<root>/openspec/arquitetura.md` a partir das respost
 
 - **WHEN** o projeto não tem jobs, e-mail nem armazenamento de arquivos
 - **THEN** o `arquitetura.md` não inventa esses componentes nem os desenha no diagrama
-
-#### Scenario: Pontos adiados sem duplicação
-
-- **WHEN** a entrevista tem respostas "Adiado"
-- **THEN** a seção de pontos adiados do `arquitetura.md` traz só o link para "Fora do ciclo atual" do `estado-atual.md`, onde os itens estão listados
 
 ### Requirement: Init commita os artefatos no store
 
@@ -36,6 +31,15 @@ Depois de gerar os artefatos, o `/opsx:init` SHALL commitar só a pasta `openspe
 - **THEN** o init gera os arquivos, informa que não houve commit e termina sem erro
 
 ## ADDED Requirements
+
+### Requirement: Arquitetura normativa ligada ao estado atual
+
+O `arquitetura.md` gerado pelo init SHALL se declarar normativo (a arquitetura-alvo), e a seção de pontos adiados SHALL apontar para a lista "Fora do ciclo atual" do `estado-atual.md` em vez de repetir os itens.
+
+#### Scenario: Pontos adiados sem duplicação
+
+- **WHEN** a entrevista tem respostas "Adiado"
+- **THEN** a seção de pontos adiados do `arquitetura.md` traz só o link para "Fora do ciclo atual" do `estado-atual.md`, onde os itens estão listados
 
 ### Requirement: Estado atual gerado pelo init
 
