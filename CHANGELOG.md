@@ -30,6 +30,10 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   reconfirmação do responsável. O JSON do portão ganha o campo opcional `avisos`.
 - **Inferência declarada:** o propose e o init marcam com `[INFERIDO: <base>]` o que deduziram sem
   fonte, e o portão de apply bloqueia enquanto houver marca fora de código.
+- **Brief visual obrigatório:** o propose escreve o `design.md`, com a seção "Brief visual", em toda
+  change que cria ou muda telas, mesmo onde o schema o trata como opcional. O verify registra o
+  warning "Screens without visual brief" quando a change cita telas sem brief e, com a confirmação do
+  responsável de que há tela, um crítico.
 
 ### Ações no projeto
 
