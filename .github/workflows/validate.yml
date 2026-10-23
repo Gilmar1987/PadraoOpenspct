@@ -79,6 +79,9 @@ jobs:
           node --check scripts/changelog-range.mjs
           node --check scripts/comecar.mjs
           node --check scripts/portao.mjs
+          node --check .claude/hooks/openspec-padrao/contexto-de-sessao.mjs
+          node --check .claude/hooks/openspec-padrao/protege-ganchos.mjs
+          node --check .claude/hooks/openspec-padrao/exige-change.mjs
           node --check scripts/validar-interface.mjs
           node --check scripts/lacunas.mjs
           node --check scripts/test-fixtures/interface/servidor.mjs
@@ -399,6 +402,51 @@ jobs:
           printf 'console.log(JSON.stringify({ ok: false, motivos: [process.argv.slice(2).join(" ")] })); process.exit(1);\n' > "$w/docs/openspec-portao.mjs"
           out=$(printf '%s' "$(bash_in 'openspec --no-color archive "demo" --store=meu-store -y')" | node "$h/portao-do-archive.mjs")
           case "$out" in *'archive demo --json --store meu-store'*) ;; *) echo "::error::portao-do-archive deveria repassar change e --store=: $out"; fail=1 ;; esac
+          # protege-ganchos.mjs (ganchos-de-sessao-e-fluxo): vale para todos os agentes.
+          for cmd in 'git commit --no-verify -m x' 'git commit -nm x' 'git commit -an -m x' 'git push --no-verify' \
+                     'git -c core.hooksPath=/dev/null commit -m x' 'git config core.hooksPath x' \
+                     'git config --unset core.hooksPath' 'git config --global core.hooksPath x'; do
+            expect deny protege-ganchos.mjs "$(payload Bash command "$cmd")"
+          done
+          expect deny protege-ganchos.mjs "$(payload PowerShell command 'git commit --no-verify -m x' '' openspec-code-implementer)"
+          for cmd in 'git log -n 5' 'git config --get core.hooksPath' 'git commit -m "sem --no-verify aqui"' 'git status' \
+                     'echo git commit --no-verify'; do
+            expect allow protege-ganchos.mjs "$(payload Bash command "$cmd")"
+          done
+          # exige-change.mjs e contexto-de-sessao.mjs, com um portão falso que responde ao "estado".
+          w=$(mktemp -d)
+          git -C "$w" init -q
+          mkdir -p "$w/docs" "$w/src"
+          w_native=$(cygpath -m "$w" 2>/dev/null || echo "$w")
+          estado() { printf 'console.log(JSON.stringify({ ok: true, acao: "estado", changes: %s }));\n' "$1" > "$w/docs/openspec-portao.mjs"; }
+          write_in() { node -e 'const [file_path, cwd, session_id] = process.argv.slice(1); const p = { tool_name: "Write", cwd, tool_input: { file_path } }; if (session_id) p.session_id = session_id; process.stdout.write(JSON.stringify(p));' "$1" "$w_native" "$2"; }
+          aprovada='[{ "change": "demo", "tarefas": { "feitas": 3, "total": 7 }, "aprovacao": "apply", "selo": "valido", "inferencias": 0, "proximo": "/opsx:apply" }]'
+          pendente='[{ "change": "demo", "tarefas": { "feitas": 0, "total": 7 }, "aprovacao": "pendente", "selo": "ausente", "inferencias": 0, "proximo": "pedir a aprovação ao responsável" }]'
+          estado "$pendente"
+          expect ask exige-change.mjs "$(write_in src/app.ts)"
+          expect allow exige-change.mjs "$(write_in openspec/changes/nova/proposal.md)"
+          expect allow exige-change.mjs "$(write_in ../fora.txt)"
+          estado "$aprovada"
+          sid="ci-$$-$RANDOM"
+          expect allow exige-change.mjs "$(write_in src/app.ts "$sid")"
+          # A resposta positiva fica em cache na sessão; a negativa nunca.
+          estado "$pendente"
+          expect allow exige-change.mjs "$(write_in src/app.ts "$sid")"
+          expect ask exige-change.mjs "$(write_in src/app.ts)"
+          vencida='[{ "change": "demo", "tarefas": { "feitas": 3, "total": 7 }, "aprovacao": "apply", "selo": "vencido", "inferencias": 0, "proximo": "reconfirmar" }]'
+          estado "$vencida"
+          expect ask exige-change.mjs "$(write_in src/app.ts)"
+          session() { node -e 'process.stdout.write(JSON.stringify({ hook_event_name: "SessionStart", source: "startup", cwd: process.argv[1] }))' "$w_native"; }
+          estado "$aprovada"
+          out=$(printf '%s' "$(session)" | node "$h/contexto-de-sessao.mjs")
+          case "$out" in *additionalContext*demo*3/7*'/opsx:apply'*) ;; *) echo "::error::contexto-de-sessao deveria resumir o estado: $out"; fail=1 ;; esac
+          estado '[]'
+          out=$(printf '%s' "$(session)" | node "$h/contexto-de-sessao.mjs")
+          case "$out" in *'/opsx:propose'*) ;; *) echo "::error::contexto-de-sessao sem changes deveria sugerir o propose: $out"; fail=1 ;; esac
+          # Sem portão, nenhum dos dois interfere.
+          rm "$w/docs/openspec-portao.mjs"
+          expect allow exige-change.mjs "$(write_in src/app.ts)"
+          expect allow contexto-de-sessao.mjs "$(session)"
           rm -rf "$w"
           exit $fail
 
@@ -560,7 +608,10 @@ jobs:
             const where = (script) => (s.hooks.PreToolUse || []).filter((g) => JSON.stringify(g.hooks).includes(script)).map((g) => g.matcher);
             const placed = JSON.stringify(where("somente-leitura.mjs")) === JSON.stringify(["Bash|PowerShell"])
               && JSON.stringify(where("portao-do-archive.mjs")) === JSON.stringify(["Bash|PowerShell"])
-              && JSON.stringify(where("escopo-de-escrita.mjs")) === JSON.stringify(["Edit|Write"]);
+              && JSON.stringify(where("escopo-de-escrita.mjs")) === JSON.stringify(["Edit|Write"])
+              && JSON.stringify(where("protege-ganchos.mjs")) === JSON.stringify(["Bash|PowerShell"])
+              && JSON.stringify(where("exige-change.mjs")) === JSON.stringify(["Edit|Write"])
+              && (s.hooks.SessionStart || []).some((g) => JSON.stringify(g.hooks).includes("contexto-de-sessao.mjs"));
             if (!ok || !placed) { console.error(JSON.stringify(s, null, 2)); process.exit(1); }' "$s"
           # A permissão que o projeto já tinha não vira do padrão.
           node -e '
@@ -1043,6 +1094,20 @@ jobs:
           printf "store: ci-portao-$sfx\n# nota\n" > "$work/code/openspec/config.yaml"
           git -C "$work/code" add openspec/config.yaml
           git -C "$work/code" commit -q -m "docs: planejamento" -m "OpenSpec-Change: ci-change"
+          # estado (ganchos-de-sessao-e-fluxo): aprovação, progresso e próximo passo de cada change ativa.
+          out="$(gate estado --json)"
+          grep -qF '"change":"ci-change"' <<< "$out"
+          grep -qF '"aprovacao":"pendente"' <<< "$out"
+          grep -qF 'pedir a aprovação' <<< "$out"
+          proposal ci 2026-10-22 archive '"Aprovo para archive"'
+          printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [ ] 1.2 b\n' > "$ch/tasks.md"
+          grep -qF '/opsx:apply' <<< "$(gate estado --json)"
+          printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [x] 1.2 b\n' > "$ch/tasks.md"
+          rm "$ch/verification.md"
+          grep -qF '/opsx:verify' <<< "$(gate estado --json)"
+          printf '# Verificações\n' > "$ch/verification.md"
+          grep -qF '/opsx:archive' <<< "$(gate estado --json)"
+          gate estado | grep -qF 'ci-change: 2/2 tarefas'
 
       # Regras do padrão entregues ao código por blocos gerenciados (ADR-0005): o conteúdo fora dos
       # marcadores fica intacto, a reinstalação não duplica e um bloco quebrado faz o instalador parar.

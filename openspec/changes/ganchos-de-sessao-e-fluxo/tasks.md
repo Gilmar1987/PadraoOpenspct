@@ -2,7 +2,8 @@
 
 ## 1. Testes na CI
 
-- [ ] 1.1 Acrescentar ao `validate.yml` os casos do D6 (portão e hooks), a lista `placed` do D5 e o `node --check` dos três scripts. Verificar rodando os passos no Git Bash: os casos novos devem falhar (o comando e os scripts não existem).
+- [x] 1.1 Acrescentar ao `validate.yml` os casos do D6 (portão e hooks), a lista `placed` do D5 e o `node --check` dos três scripts. Verificar rodando os passos no Git Bash: os casos novos devem falhar (o comando e os scripts não existem).
+  - Evidência: casos do D6 em `validate.yml` (`estado` no "Smoke test do portão"; `protege-ganchos`, `exige-change` com portão falso, cache positivo e sem portão, e `contexto-de-sessao` no "Smoke test dos hooks do Claude Code"), os três pares da lista `placed` e o `node --check` dos três scripts. Git Bash: "Sintaxe dos scripts" FAIL (exit 1), "Smoke test dos hooks do Claude Code" FAIL (exit 2, scripts ausentes) e "Smoke test da camada do Claude Code no instalador" FAIL (exit 1), como esperado. O "Smoke test do portão" (registra store) fica para a suíte completa.
 
 ## 2. Portão e hooks
 
