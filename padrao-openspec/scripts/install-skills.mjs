@@ -348,6 +348,7 @@ function escapeRegExp(text) {
 function cleanStaleInstallerFiles(projectRoot, parents) {
   const stale = [
     { dir: projectRoot, pattern: new RegExp(`^\\.gitignore-${uuidPattern}\\.tmp$`, 'i') },
+    { dir: projectRoot, pattern: new RegExp(`^\\.gitattributes-${uuidPattern}\\.tmp$`, 'i') },
     ...parents.map((dir) => ({ dir, pattern: new RegExp(`^\\.(?:skill-tree|skill-file|openspec-block)-${uuidPattern}\\.tmp$`, 'i') })),
   ];
   const backupPattern = new RegExp(`^\\.skill-tree-${uuidPattern}\\.bak$`, 'i');
@@ -491,6 +492,63 @@ function ensureConsumerGitignore(projectRoot) {
       console.warn('Warning: could not check whether openspec/ already has Git-tracked files.');
     }
   }
+}
+
+// The code repository gets LF line endings for text files, so Git stops warning about CRLF on Windows
+// and the standard's managed files compare equal on every machine. A .gitattributes the project already
+// has is never edited: the installer only suggests the lines. A file the installer created keeps its
+// managed block current, and the file itself stays out of the manifest, so it is never removed.
+const gitattributesBegin = '# BEGIN openspec-padrao';
+const gitattributesEnd = '# END openspec-padrao';
+const gitattributesLines = ['* text=auto eol=lf', '*.bat text eol=crlf', '*.cmd text eol=crlf'];
+
+function ensureConsumerGitattributes(projectRoot) {
+  const relative = '.gitattributes';
+  const destination = path.join(projectRoot, relative);
+  const info = lstatIfPresent(destination);
+  const suggestion = gitattributesLines.join('\n  ');
+  if (info && !info.isFile()) {
+    console.warn(`Kept: ${relative} is not a regular file; consider adding:\n  ${suggestion}`);
+    return;
+  }
+  if (!info && isIgnoredByProject(projectRoot, relative)) {
+    console.warn(`Skipped: ${relative} is ignored by the project (.gitignore).`);
+    return;
+  }
+  const original = info ? readFileSync(destination, 'utf8') : '';
+  const eol = original.includes('\r\n') ? '\r\n' : '\n';
+  const block = [gitattributesBegin, ...gitattributesLines, gitattributesEnd].join(eol);
+  let updated;
+  if (!info) {
+    updated = `${block}${eol}`;
+  } else {
+    const lines = original.split(/\r?\n/).map((line) => line.replace(/[ \t]+$/, ''));
+    const begins = lines.filter((line) => line === gitattributesBegin).length;
+    const ends = lines.filter((line) => line === gitattributesEnd).length;
+    if (begins === 0 && ends === 0) {
+      console.log(`Kept: ${relative} belongs to the project; consider adding:\n  ${suggestion}`);
+      return;
+    }
+    const start = original.indexOf(gitattributesBegin);
+    const endAt = original.indexOf(gitattributesEnd);
+    if (begins !== 1 || ends !== 1 || endAt < start) {
+      console.warn(`Kept: ${relative} has unbalanced openspec-padrao markers; review it by hand.`);
+      return;
+    }
+    updated = `${original.slice(0, start)}${block}${original.slice(endAt + gitattributesEnd.length)}`;
+    if (updated === original) {
+      console.log(`Unchanged: ${relative} (openspec-padrao block)`);
+      return;
+    }
+  }
+  const stagedPath = path.join(projectRoot, `.gitattributes-${randomUUID()}.tmp`);
+  try {
+    writeFileSync(stagedPath, updated, { mode: info?.mode ?? 0o666 });
+    renameWithRetry(stagedPath, destination);
+  } finally {
+    if (existsSync(stagedPath)) rmSync(stagedPath, { force: true });
+  }
+  console.log(`${info ? 'Updated' : 'Created'}: ${relative} (openspec-padrao block: text files in LF, .bat and .cmd in CRLF)`);
 }
 
 function readVersion() {
@@ -949,6 +1007,7 @@ function main() {
       ...blocks.map(({ destination }) => path.dirname(destination)),
     ])]);
     ensureConsumerGitignore(projectRoot);
+    ensureConsumerGitattributes(projectRoot);
 
     let installed = 0;
     let unchanged = 0;
@@ -1033,6 +1092,7 @@ function main() {
     install();
     const paths = [...new Set([
       '.gitignore', manifestName,
+      ...(existsSync(path.join(projectRoot, '.gitattributes')) ? ['.gitattributes'] : []),
       ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')),
       ...blocks.filter((block) => !block.skip).map((block) => block.path),
       ...(settings.skip ? [] : [settingsPath]),

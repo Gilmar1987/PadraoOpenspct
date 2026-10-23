@@ -9,7 +9,8 @@
 
 ## 2. Instalador
 
-- [ ] 2.1 Implementar o D1 em `padrao-openspec/scripts/install-skills.mjs` (`ensureConsumerGitattributes`, com os casos ausente, com bloco, sem bloco, marcadores inválidos e arquivo não regular, gravação atômica, fora do manifesto). Verificar com o "Smoke test do instalador" passando, com `node --check` e com os smoke tests do setup, do setup em subpasta e do script de entrada passando.
+- [x] 2.1 Implementar o D1 em `padrao-openspec/scripts/install-skills.mjs` (`ensureConsumerGitattributes`, com os casos ausente, com bloco, sem bloco, marcadores inválidos e arquivo não regular, gravação atômica, fora do manifesto). Verificar com o "Smoke test do instalador" passando, com `node --check` e com os smoke tests do setup, do setup em subpasta e do script de entrada passando.
+  - Evidência: `ensureConsumerGitattributes` no `install-skills.mjs`, chamada depois da `ensureConsumerGitignore`: cria o arquivo com o bloco quando falta, troca só o bloco quando existe e mudou, deixa intacto e sugere as linhas quando o arquivo é do projeto, avisa nos marcadores desbalanceados, no arquivo não regular e no ignorado; gravação atômica preservando o fim de linha; fora do manifesto e no pathspec do commit do `--update` só quando existe; temporário na limpeza de restos; `node --check` → ok; "Smoke test do instalador", "Smoke test da camada do Claude Code no instalador", "Smoke test do setup de projeto", "Smoke test do setup em subpasta", "Smoke test do script de entrada" e "Sintaxe dos scripts" → PASS; manual: `git add` sem aviso de CRLF, bloco desatualizado trocado com o CRLF preservado (`od -c`) e marcadores desbalanceados intactos
 
 ## 3. Skills e explore
 
