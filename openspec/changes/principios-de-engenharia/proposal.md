@@ -26,7 +26,7 @@ O padrão é generalista ([ADR-0003](../../adrs/0003-padrao-sem-stack-embutida.m
 - **Verify:** nova heurística "Engineering principles", igual no comando e na skill, que confere as fronteiras e os erros da change, com severidade por item.
 - **Init e `project.md`:** a seção "Development Conventions" ganha a linha "Princípios de engenharia", preenchida pelo init com os padrões do guia (log de três estados, validação na fronteira e erro sem detalhe interno). O projeto pode marcar um item como "Não aplicável", com justificativa, e o verify respeita isso.
 - **CI:** marcadores dos trechos novos.
-- **Versão:** acrescenta os seus itens à seção da versão aberta no `CHANGELOG.md` (1.12.0, aberta pela `qualidade-de-interface`), sem mexer no `VERSION` se ele já estiver nela; a release sai só quando o responsável pedir (modelo decidido em 2026-10-22).
+- **Versão:** pelo modelo de versão acumulada, é a primeira change depois da release v1.13.0: sobe o `VERSION` para 1.14.0 e abre a seção `## 1.14.0` no `CHANGELOG.md` (se outra change entrar antes, acrescenta itens à seção que ela abrir); a release sai só quando o responsável pedir.
 
 ### Fora do escopo
 
@@ -68,8 +68,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável
+- Origem: "Aprovo : 1, 2, 3, 4 e 5", em resposta a "1. principios-de-engenharia: está planejada, com a aprovação pendente. Se aprovar, faço o rebase na main, confiro os arquivos que mudaram desde a proposta e sigo o fluxo completo: apply, revisão, verify, archive com selo e PR."
+- Conteúdo: sha256:7452642c2d49411e1f018c56a242c5d33f17827c67269ccae1a28dca55ef34da

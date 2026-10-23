@@ -1,6 +1,6 @@
 ## 1. Preparação e proteção na CI
 
-- [ ] 1.1 Rebasear a branch na `main` e combinar com a outra sessão a versão (próxima minor livre). Verificar com `git log --oneline HEAD..origin/main` vazio e a versão citada na evidência.
+- [ ] 1.1 Rebasear a branch na `main` e confirmar com a outra sessão que esta change abre a 1.14.0 (modelo de versão acumulada). Verificar com `git log --oneline HEAD..origin/main` vazio e a versão citada na evidência.
 - [ ] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` os marcadores do D6. Verificar rodando o passo localmente antes da implementação: ele deve falhar nos arquivos citados.
 
 ## 2. Regras e config
@@ -19,5 +19,5 @@
 
 ## 5. Documentação, versão e integração
 
-- [ ] 5.1 Atualizar o `README.md` (trechos customizados novos), `padrao-openspec/VERSION` e `CHANGELOG.md`, com a versão combinada na 1.1 e as ações no projeto (acrescentar a linha "Princípios de engenharia" ao `project.md` do store). Verificar com o lint e com o passo "Versão e changelog" passando.
+- [ ] 5.1 Atualizar o `README.md` (trechos customizados novos), `padrao-openspec/VERSION` e `CHANGELOG.md`, com a seção `## 1.14.0` (VERSION 1.14.0), ou os itens na seção aberta por outra change, e as ações no projeto (acrescentar a linha "Princípios de engenharia" ao `project.md` do store). Verificar com o lint e com o passo "Versão e changelog" passando.
 - [ ] 5.2 Rodar o `sync-root.mjs` e o `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.
