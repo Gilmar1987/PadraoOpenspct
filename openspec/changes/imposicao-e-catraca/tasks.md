@@ -19,8 +19,10 @@
 
 - [x] 3.1 Aplicar o D3, o D4, o D5 e o D6 em `padrao-openspec/.claude/commands/opsx/propose.md` e em `skills/openspec-propose/SKILL.md`, com o mesmo texto: a tarefa de prova de reprovação, a seção "Impacto medido" no "Architectural Decision Check", a linha `Falhas aceitas:` depois de "Related debts" e o "sai quando" conferível. Verificar com `diff` vazio entre os trechos do comando e da skill e com o marcador "Impacto medido" passando.
   - Evidência: no `propose.md` e na skill do propose, com o mesmo texto: "Fill `imposicao`" e a tarefa **seen failing** no passo 5 do "Architectural Decision Check", passo 6 "Impacto medido", "sai quando" conferível em "Related debts" e o item "Accepted failures" com a linha `Falhas aceitas:`; `diff` dos cinco trechos entre comando e skill → iguais
-- [ ] 3.2 Aplicar o D5 em `padrao-openspec/.claude/commands/opsx/archive.md` e em `skills/openspec-archive-change/SKILL.md` ("Update the open debts" também aplica `Falhas aceitas:`). Verificar com `diff` vazio entre os dois trechos e com o marcador "Falhas aceitas" no archive passando.
-- [ ] 3.3 Aplicar as regras do D3 (`tasks`) e do D4 (`design`) em `padrao-openspec/openspec/config.yaml`. Verificar com o passo "Config base carrega sem avisos" passando.
+- [x] 3.2 Aplicar o D5 em `padrao-openspec/.claude/commands/opsx/archive.md` e em `skills/openspec-archive-change/SKILL.md` ("Update the open debts" também aplica `Falhas aceitas:`). Verificar com `diff` vazio entre os dois trechos e com o marcador "Falhas aceitas" no archive passando.
+  - Evidência: "Update the open debts" do `archive.md` e da skill do archive aplica também a linha `Falhas aceitas:` (aceita acrescenta a linha com verificação, falha, motivo, sai quando, data e change; retira remove; retirada sem linha é reportada); `diff` dos dois parágrafos → iguais
+- [x] 3.3 Aplicar as regras do D3 (`tasks`) e do D4 (`design`) em `padrao-openspec/openspec/config.yaml`. Verificar com o passo "Config base carrega sem avisos" passando.
+  - Evidência: duas regras novas no `config.yaml`: design (Impacto medido, com comando, código de saída, violações e destino) e tasks (violação injetada e caso limpo, com os dois códigos de saída); "Config base carrega sem avisos" → PASS (exit 0)
 
 ## 4. Verify
 
