@@ -57,6 +57,7 @@ Nenhuma ADR nova. As mudanças:
 - **Arquivo com marcadores fora de ordem, ou mais de um bloco:** não toca. Avisa para revisar à mão, como o `withManagedBlock` faz nos arquivos de instrução.
 - **Arquivo ignorado pelo projeto ou que não é regular** (link, pasta): não toca e avisa.
 - **Gravação:** atômica (arquivo temporário e `rename`), no mesmo estilo da `ensureConsumerGitignore`, preservando o fim de linha do arquivo existente.
+- **Script de entrada:** a lista de arquivos do commit inicial (`standardPaths` no `comecar.mjs`) inclui o `.gitattributes` quando ele tem o bloco do padrão e o `.claude/settings.json` quando o manifesto registra entradas do padrão (`managedSettings` não vazio). Sem isso, numa pasta de gerador com histórico, os dois ficam fora do commit e o próximo `--update` falha com a árvore suja.
 - **Manifesto:** o `.gitattributes` não entra em `managedFiles`. Ele é do projeto, e o padrão só gerencia o bloco. Assim, o instalador nunca o apaga numa desinstalação ou numa troca de versão.
 
 ### D2. Skill `docker`
@@ -99,6 +100,7 @@ Em "Desempenho e ambiente", dois parágrafos:
 | Arquivo-alvo | Mudança | Dependentes afetados |
 |---|---|---|
 | `padrao-openspec/scripts/install-skills.mjs` | D1 | `setup-project.mjs` e `comecar.mjs` (chamam o instalador); smoke tests do instalador, do setup e do script de entrada |
+| `padrao-openspec/scripts/comecar.mjs`, `padrao-openspec/templates/openspec-padrao.md` | D1 | commit inicial do script de entrada; "Smoke test do script de entrada" |
 | `padrao-openspec/.claude/skills/docker/SKILL.md`, `docker-guidelines.md` | D2 | espelho da raiz; projetos que recebem a skill |
 | `padrao-openspec/.claude/commands/opsx/explore.md`, `skills/openspec-explore/SKILL.md` | D3 | espelhos |
 | `README.md` | D4 | nenhum |

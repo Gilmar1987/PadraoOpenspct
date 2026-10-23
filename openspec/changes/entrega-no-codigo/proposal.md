@@ -20,6 +20,7 @@ A change preserva a qualidade da entrega no código: menos ruído no Git, nenhum
     - `*.bat` e `*.cmd` com `eol=crlf`, porque o `cmd.exe` exige CRLF.
   - Quando o arquivo já existe sem o bloco do padrão, o instalador não o altera: ele diz que o arquivo já existe e sugere as linhas.
   - No arquivo que tem o bloco, o instalador o mantém atualizado a cada execução, sem duplicá-lo.
+  - O commit inicial do `comecar.mjs` numa pasta de código que já tem histórico (a de um gerador de projeto) passa a incluir o `.gitattributes` com o bloco do padrão e o `.claude/settings.json` com as entradas do padrão. Este último ficava fora do commit, um defeito anterior achado pelo teste novo, e o próximo `--update` falhava com a árvore suja.
 - **Skill `docker`:**
   - serviços de desenvolvimento (bancos, filas, caches) publicam portas só em `127.0.0.1`, por exemplo `"127.0.0.1:${DB_PORT:-5432}:5432"`;
   - o exemplo de compose passa a usar isso;
@@ -28,7 +29,7 @@ A change preserva a qualidade da entrega no código: menos ruído no Git, nenhum
 - **README do padrão, em "Desempenho e ambiente":**
   - a conversão de caminhos do Git Bash e como contorná-la (PowerShell, ou `MSYS_NO_PATHCONV=1` só em comandos sem caminho de arquivo);
   - o `.gitignore` com `.env*` precisa de `!.env.example`.
-- **Versão:** pelo modelo de versão acumulada, se a `descoberta-do-produto` entrar antes, esta change acrescenta itens à seção `## 1.15.0`; se não, abre a 1.15.0. A release sai só quando o responsável pedir.
+- **Versão:** pelo modelo de versão acumulada, esta change acrescenta itens à seção `## 1.15.0`, aberta pela `descoberta-do-produto` (PR #45, já mergeado), sem mexer no `VERSION`. A release sai só quando o responsável pedir.
 - **CI:** marcadores dos trechos novos e o smoke test do instalador com o `.gitattributes`.
 
 ### Fora do escopo
@@ -51,29 +52,32 @@ Nenhuma.
   - o instalador entrega o `.gitattributes` ao repositório de código que não tem um;
   - a skill `docker` distribuída orienta portas só no host local.
 - `workflow-governance`: o explore numera as alternativas das perguntas.
+- `project-onboarding`: o commit inicial do script de entrada numa pasta de código com histórico leva todos os arquivos que o padrão escreveu.
 
 ## Impact
 
-- **Script:** `padrao-openspec/scripts/install-skills.mjs`, com a função nova para o `.gitattributes`, no padrão da `ensureConsumerGitignore`.
+- **Scripts:**
+  - `padrao-openspec/scripts/install-skills.mjs`, com a função nova para o `.gitattributes`, no padrão da `ensureConsumerGitignore`;
+  - `padrao-openspec/scripts/comecar.mjs`, na lista de arquivos do commit inicial.
 - **Skills e comandos, com as cópias da raiz espelhadas pelo `sync-root.mjs`:**
   - `padrao-openspec/.claude/skills/docker/SKILL.md` e `docker-guidelines.md`;
   - `padrao-openspec/.claude/commands/opsx/explore.md` e `skills/openspec-explore/SKILL.md`.
-- **Documentação:** `README.md`, em "Desempenho e ambiente".
+- **Documentação:** `README.md` ("Desempenho e ambiente" e a lista do que o setup faz) e `padrao-openspec/templates/openspec-padrao.md` (os arquivos a commitar sem o script).
 - **Versão e CI:** `padrao-openspec/VERSION`, `CHANGELOG.md` e `.github/workflows/validate.yml` (marcadores e o smoke test do instalador).
 - **Riscos:**
   - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam.
   - Compatibilidade:
     - projetos com `.gitattributes` não mudam;
     - nos projetos sem o arquivo, o `.gitattributes` novo só vale para o que for adicionado ou alterado depois. Os arquivos já commitados mantêm a quebra de linha até o projeto renormalizar.
-- Changes concorrentes: nenhuma ativa nesta branch. A `descoberta-do-produto` (outra sessão, branch `feat/descoberta-do-produto`) também mexe no `README.md`, mas em outras seções: tabela de comandos, fluxo e tabela de trechos customizados. Ela vai entrar antes e abrir a 1.15.0, e esta change rebaseia antes do apply.
+- Changes concorrentes: nenhuma ativa nesta branch. A `descoberta-do-produto` (outra sessão) já entrou na `main` (045e18c), abriu a 1.15.0 e mexeu no `README.md` em outras seções; esta change rebaseia sobre ela antes de continuar o apply. A `questionario-adaptativo`, da outra sessão, está em andamento.
 - Contrato de interface: não se aplica.
 - Débitos: o repositório do padrão não tem `openspec/estado-atual.md`; nenhum.
 
 ## Aprovação
 
-- Responsável: Gilmar Campelo
-- Data: 2026-10-23
-- Escopo: archive
-- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; rebase na main antes do PR se a `descoberta-do-produto` entrar antes, com a versão combinada com a outra sessão (1.15.0)
-- Origem: "Aprovo a entrega-no-codigo até o archive, com PR"
-- Conteúdo: sha256:fc29d139aed08da6774f9f02d51969e67506af72e53a68313339e294de09920c
+- Responsável: Pendente
+- Data: —
+- Escopo: —
+- Condições: —
+- Origem: —
+- Aprovação anterior: Gilmar Campelo, 2026-10-23, archive; Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; rebase na main antes do PR se a `descoberta-do-produto` entrar antes, com a versão combinada com a outra sessão (1.15.0); Origem: "Aprovo a entrega-no-codigo até o archive, com PR"; Conteúdo: sha256:fc29d139aed08da6774f9f02d51969e67506af72e53a68313339e294de09920c
