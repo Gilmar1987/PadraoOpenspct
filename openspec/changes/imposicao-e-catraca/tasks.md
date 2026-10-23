@@ -2,8 +2,10 @@
 
 ## 1. Preparação e proteção na CI
 
-- [ ] 1.1 Esperar o merge da `principios-de-engenharia` (PR #43) e rebasear a branch na `main`. Confirmar com a outra sessão que ela não tem change nos arquivos do Impact, e combinar a versão: esta change acrescenta itens à seção 1.14.0 aberta, ou a abre se entrar antes. Verificar com `git log --oneline HEAD..origin/main` vazio e com a resposta da outra sessão e a versão citadas na evidência.
-- [ ] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` os marcadores do D7. Verificar rodando o passo localmente antes da implementação: ele deve falhar só nos arquivos citados, o que vale como prova de reprovação dos marcadores.
+- [x] 1.1 Esperar o merge da `principios-de-engenharia` (PR #43) e rebasear a branch na `main`. Confirmar com a outra sessão que ela não tem change nos arquivos do Impact, e combinar a versão: esta change acrescenta itens à seção 1.14.0 aberta, ou a abre se entrar antes. Verificar com `git log --oneline HEAD..origin/main` vazio e com a resposta da outra sessão e a versão citadas na evidência.
+  - Evidência: PR #43 mergeado (362d8ab); rebase em `origin/main` sem conflito; `git log --oneline HEAD..origin/main` vazio; a outra sessão do projeto (projetoopenspct-57) respondeu que não usa ADR (a 0008 é desta change) e que a `descoberta-do-produto`, só planejada, toca `init.md` (Bloco 1, Arquivo 1 e próximos passos, não o Arquivo 6), CHANGELOG, README e `validate.yml`: conflitos só textuais, e quem arquivar por último rebaseia; versão: esta change acrescenta itens à seção 1.14.0 aberta pela `principios-de-engenharia`, sem mexer no `VERSION`
+- [x] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` os marcadores do D7. Verificar rodando o passo localmente antes da implementação: ele deve falhar só nos arquivos citados, o que vale como prova de reprovação dos marcadores.
+  - Evidência: marcadores do D7 no passo "Trechos customizados das skills" (propose: "Impacto medido", "Falhas aceitas:", "seen failing"; verify: "ADR check seen failing", "nada a varrer", "Accepted failures", "Exit conditions"; archive: "Falhas aceitas:"; init: "## Falhas aceitas" e "Uma data sozinha não é condição"; `adrs/template.md`: `imposicao:` e "## Limite"; `adrs/README.md`; `config.yaml`: "Impacto medido"); `run-ci-steps.py ... "Trechos customizados"` antes da implementação → FAIL (exit 1) com 14 ausências na saída truncada, só nos pontos esperados
 
 ## 2. ADR e modelos
 
