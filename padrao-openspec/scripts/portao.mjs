@@ -5,8 +5,9 @@
 // docs/openspec-portao.mjs. The change and its progress come from the OpenSpec CLI, run from the
 // current folder, so the store declared in openspec/config.yaml (or --store) is respected.
 
-import { existsSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync, chmodSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const EXIT_OK = 0;
@@ -21,17 +22,21 @@ const idPattern = /^[a-z0-9][a-z0-9-]*$/i;
 class UsageError extends Error {}
 
 function usage() {
-  return `Uso: node docs/openspec-portao.mjs <apply|archive> <change> [--json] [--store <id>]
+  return `Uso: node docs/openspec-portao.mjs <apply|archive|selo> <change> [--json] [--store <id>]
        node docs/openspec-portao.mjs instalar-hook
 
-  apply <change>    libera escrever código só com a aprovação completa no proposal
+  apply <change>    libera escrever código só com a aprovação completa no proposal, com o selo
+                    do conteúdo em dia e sem inferências [INFERIDO: ...] pendentes
   archive <change>  libera arquivar só com escopo archive, tarefas marcadas, verification.md
                     e, numa change com commits de código, review.md
+  selo <change>     imprime o selo (sha256) do planejamento da change, para o item "Conteúdo:"
+                    da seção ## Aprovação
   instalar-hook     instala um hook commit-msg que recusa commits "OpenSpec-Change: <change>"
                     de changes que o portão de apply bloqueia
 
 Saída: 0 libera, 1 bloqueia (com os motivos), 2 erro de uso ou de ambiente.
---json: {"ok":bool,"acao":"...","change":"...|null","motivos":[...],"erro":"..."} (erro só na saída 2).`;
+--json: {"ok":bool,"acao":"...","change":"...|null","motivos":[...],"avisos":[...],"erro":"..."}
+(avisos só quando houver; erro só na saída 2; selo acrescenta "conteudo" e "arquivos").`;
 }
 
 function parseArgs(args) {
@@ -108,8 +113,77 @@ function readApproval(changeRoot) {
   for (const line of end < 0 ? rest : rest.slice(0, end)) {
     const match = line.match(/^-\s+([^:]+):\s*(.*)$/);
     if (match) fields[clean(match[1]).toLowerCase()] = clean(match[2]);
+    // The seal in force is the last one: the approval's own "Conteúdo:" or one inside a "Reconfirmação:".
+    const seal = line.match(/Conteúdo:\s*`?(sha256:[0-9a-f]{64})/i);
+    if (seal) fields.selo = seal[1].toLowerCase();
   }
   return fields;
+}
+
+// Planning files of the change that the approval covers: every .md under the change folder except the
+// records written after it (review, verification, interface report) and generated reports.
+function planningFiles(changeRoot) {
+  const skipFiles = new Set(['review.md', 'verification.md', 'interface-report.md']);
+  const skipDirs = new Set(['interface', 'archive']);
+  const files = [];
+  const walk = (dir, prefix) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        if (!skipDirs.has(entry.name)) walk(path.join(dir, entry.name), relative);
+      } else if (entry.name.endsWith('.md') && !skipFiles.has(entry.name) && !entry.name.startsWith('relatorio')) {
+        files.push(relative);
+      }
+    }
+  };
+  walk(changeRoot, '');
+  return files.sort();
+}
+
+const readText = (file) => readFileSync(file, 'utf8').replace(/^﻿/, '').normalize('NFC').replace(/\r\n?/g, '\n');
+
+// What the approval is about, without what the apply legitimately changes: the approval record itself,
+// checkbox states and Evidência lines. Line endings, Unicode form and trailing spaces do not count.
+function normalizeForSeal(relative, text) {
+  let body = text.replace(/[ \t]+$/gm, '');
+  if (relative === 'proposal.md') {
+    const start = body.search(/^## Aprovação[ \t]*$/m);
+    if (start >= 0) {
+      const after = body.slice(start).split('\n');
+      const next = after.findIndex((line, index) => index > 0 && /^## /.test(line));
+      body = body.slice(0, start) + (next < 0 ? '' : after.slice(next).join('\n'));
+    }
+  }
+  return body.replace(/^(\s*[-*] )\[[xX]\]/gm, '$1[ ]').split('\n').filter((line) => !/^\s+[-*] Evidência:/.test(line)).join('\n');
+}
+
+function sealOf(changeRoot) {
+  const files = planningFiles(changeRoot);
+  const hash = createHash('sha256');
+  for (const relative of files) {
+    hash.update(`${relative}\0${normalizeForSeal(relative, readText(path.join(changeRoot, relative)))}\0`);
+  }
+  return { conteudo: `sha256:${hash.digest('hex')}`, arquivos: files };
+}
+
+// [INFERIDO: ...] markers outside code: fenced blocks and inline code quote the marker, they do not use it.
+function inferenceReasons(changeRoot) {
+  const reasons = [];
+  for (const relative of planningFiles(changeRoot)) {
+    let fenced = false;
+    readText(path.join(changeRoot, relative)).split('\n').forEach((line, index) => {
+      if (/^\s*(```|~~~)/.test(line)) {
+        fenced = !fenced;
+        return;
+      }
+      if (fenced) return;
+      const prose = line.replace(/`+[^`]*`+/g, '');
+      if (/\[INFERIDO:/i.test(prose)) {
+        reasons.push(`Inferência não confirmada em ${relative}:${index + 1} ("${line.trim().slice(0, 120)}"). Confirme com o responsável e tire a marca, ou corrija o texto.`);
+      }
+    });
+  }
+  return reasons;
 }
 
 // An empty value, a dash placeholder or anything that starts with "Pendente" is not filled.
@@ -153,6 +227,16 @@ function check(action, change, store) {
   const changeRoot = resolveChange(change, store);
   const fields = readApproval(changeRoot);
   const reasons = approvalReasons(fields);
+  const warnings = [];
+  if (fields && filled(fields['responsável'])) {
+    const current = sealOf(changeRoot).conteudo;
+    if (!fields.selo) {
+      warnings.push('Aprovação sem selo de conteúdo (registrada antes do selo): o portão não confere se o planejamento mudou depois dela.');
+    } else if (fields.selo !== current) {
+      reasons.push(`A aprovação venceu: o planejamento mudou depois dela (selo registrado ${fields.selo}, atual ${current}). Mostre ao responsável o que mudou e registre a reconfirmação com o /opsx:update, ou peça uma nova aprovação se o escopo mudou.`);
+    }
+  }
+  reasons.push(...inferenceReasons(changeRoot));
   if (action === 'archive') {
     const archiveScope = /\barchive\b/i.test(fields?.escopo ?? '') || filled(fields?.archive);
     if (fields && !archiveScope) {
@@ -168,7 +252,7 @@ function check(action, change, store) {
       reasons.push('A change tem commits de código e falta o review.md: faça a revisão de código (passo 6a do apply).');
     }
   }
-  return { ok: reasons.length === 0, acao: action, change, motivos: reasons };
+  return { ok: reasons.length === 0, acao: action, change, motivos: reasons, ...(warnings.length ? { avisos: warnings } : {}) };
 }
 
 function installHook() {
@@ -225,11 +309,15 @@ function report(options, result, code) {
     console.log(JSON.stringify(result));
   } else if (code === EXIT_ERROR) {
     console.error(`Erro: ${result.erro}`);
+  } else if (result.acao === 'selo') {
+    console.log(result.conteudo);
   } else if (result.ok) {
     console.log(`✔ liberado: ${result.acao} da change ${result.change}`);
+    for (const warning of result.avisos ?? []) console.log(`  aviso: ${warning}`);
   } else {
     console.log(`✗ bloqueado: ${result.acao} da change ${result.change}`);
     for (const reason of result.motivos) console.log(`  - ${reason}`);
+    for (const warning of result.avisos ?? []) console.log(`  aviso: ${warning}`);
   }
   return code;
 }
@@ -251,8 +339,12 @@ function main() {
       return EXIT_OK;
     }
     if (options.action === 'commit-msg') return commitMsg(options.change, options.store);
-    if (!['apply', 'archive'].includes(options.action)) throw new UsageError(`Ação desconhecida: ${options.action}\n${usage()}`);
+    if (!['apply', 'archive', 'selo'].includes(options.action)) throw new UsageError(`Ação desconhecida: ${options.action}\n${usage()}`);
     validateChange(options.change, options.action);
+    if (options.action === 'selo') {
+      const seal = sealOf(resolveChange(options.change, options.store));
+      return report(options, { ok: true, ...base, motivos: [], ...seal }, EXIT_OK);
+    }
     const result = check(options.action, options.change, options.store);
     return report(options, result, result.ok ? EXIT_OK : EXIT_BLOCKED);
   } catch (error) {
