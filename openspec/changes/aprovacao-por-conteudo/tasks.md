@@ -7,7 +7,8 @@
 
 ## 2. Portão
 
-- [ ] 2.1 Implementar no `portao.mjs` o comando `selo` (D1), a checagem do selo e o campo `avisos` (D2), e as marcas de inferência (D3). Verificar com o "Smoke test do portão" passando no Git Bash e no PowerShell (selo igual com CRLF e LF), e com o hook `portao-do-archive.mjs` da `subagentes-e-ganchos` lendo só `motivos` sem erro.
+- [x] 2.1 Implementar no `portao.mjs` o comando `selo` (D1), a checagem do selo e o campo `avisos` (D2), e as marcas de inferência (D3). Verificar com o "Smoke test do portão" passando no Git Bash e no PowerShell (selo igual com CRLF e LF), e com o hook `portao-do-archive.mjs` da `subagentes-e-ganchos` lendo só `motivos` sem erro.
+  - Evidência: `portao.mjs` com o comando `selo` (D1), a checagem do selo com `avisos` e "selo ilegível" (D2) e as marcas `[INFERIDO:` fora de código (D3), com as correções da revisão (cce145f). Suíte local completa no Git Bash → "Smoke test do portão" PASS com todos os casos do D7 e da revisão (Aprovação anterior, `.inputs/`, marca confirmada, selo malformado); PowerShell: selo LF = CRLF (`sha256:c8d5fa40…`) e apply liberado (exit 0); "Smoke test dos hooks do Claude Code" PASS, com o `portao-do-archive.mjs` lendo só `motivos`.
 
 ## 3. Fluxos e regras
 
