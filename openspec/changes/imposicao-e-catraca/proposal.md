@@ -111,8 +111,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: apply só depois do merge do PR #43 (principios-de-engenharia), com rebase na main; verify sem críticos; ADR-0008 promovida a Accepted na revisão do PR, antes do archive; o fluxo vai até o PR, e o merge fica com o responsável
+- Origem: "realize 1, 2, 3, 4 e 5", em resposta a "2. Aprovar a imposicao-e-catraca. O planejamento está pronto [...] Você decide se aprova e até onde o fluxo vai: só apply, ou também archive e PR. O apply só começa depois do merge do #43, com rebase na main. 3. Promover a ADR-0008 para Accepted. [...] A promoção é na revisão do PR dessa change, antes do archive."
+- Conteúdo: sha256:dc797d60687ff2b4c0cf51d932a9b62547ad03cdff7a23a7a5fab418a59f4d05
