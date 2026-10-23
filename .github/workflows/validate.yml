@@ -536,6 +536,39 @@ jobs:
           node scripts/install-skills.mjs "$own" --target agents > "$RUNNER_TEMP/own.txt"
           cmp "$own/.gitattributes" "$RUNNER_TEMP/own-gitattributes"
           grep -qF '* text=auto eol=lf' "$RUNNER_TEMP/own.txt"
+          # Bloco desatualizado: só o bloco muda, as linhas do projeto e o CRLF do arquivo ficam.
+          stale="$(mktemp -d)"
+          git -C "$stale" init -q
+          printf 'proj.txt -diff\r\n# antes: # BEGIN openspec-padrao era aqui\r\n# BEGIN openspec-padrao\r\n* text=auto\r\n# END openspec-padrao\r\n*.png binary\r\n' > "$stale/.gitattributes"
+          node scripts/install-skills.mjs "$stale" --target agents | grep -qF 'Updated: .gitattributes'
+          grep -q '^proj.txt -diff' "$stale/.gitattributes"
+          grep -q '^# antes: # BEGIN openspec-padrao era aqui' "$stale/.gitattributes"
+          grep -q '^\*.png binary' "$stale/.gitattributes"
+          grep -q '^\*.cmd text eol=crlf' "$stale/.gitattributes"
+          test "$(od -An -c "$stale/.gitattributes" | grep -o '\\r' | wc -l)" -eq 8
+          # Marcadores desbalanceados: o arquivo fica intacto, com aviso.
+          broken="$(mktemp -d)"
+          git -C "$broken" init -q
+          printf '# BEGIN openspec-padrao\n*.png binary\n' > "$broken/.gitattributes"
+          cp "$broken/.gitattributes" "$RUNNER_TEMP/broken-gitattributes"
+          node scripts/install-skills.mjs "$broken" --target agents 2> "$RUNNER_TEMP/broken.txt"
+          cmp "$broken/.gitattributes" "$RUNNER_TEMP/broken-gitattributes"
+          grep -qF 'unbalanced openspec-padrao markers' "$RUNNER_TEMP/broken.txt"
+          # Arquivo vazio: recebe o bloco, como um arquivo ausente.
+          empty="$(mktemp -d)"
+          git -C "$empty" init -q
+          : > "$empty/.gitattributes"
+          node scripts/install-skills.mjs "$empty" --target agents > /dev/null
+          grep -qx '# BEGIN openspec-padrao' "$empty/.gitattributes"
+          # .gitattributes ignorado pelo projeto, já existente: intacto, com aviso, e fora do commit do --update.
+          ignored="$(mktemp -d)"
+          git -C "$ignored" init -q
+          printf '.gitattributes\n' > "$ignored/.gitignore"
+          printf '# BEGIN openspec-padrao\n* text=auto\n# END openspec-padrao\n' > "$ignored/.gitattributes"
+          cp "$ignored/.gitattributes" "$RUNNER_TEMP/ignored-gitattributes"
+          node scripts/install-skills.mjs "$ignored" --target agents 2> "$RUNNER_TEMP/ignored.txt"
+          cmp "$ignored/.gitattributes" "$RUNNER_TEMP/ignored-gitattributes"
+          grep -qF 'Skipped: .gitattributes is ignored by the project' "$RUNNER_TEMP/ignored.txt"
           # Migração do bloco antigo, que ignorava /openspec/ inteiro.
           legacy="$(mktemp -d)"
           git -C "$legacy" init -q
@@ -871,7 +904,7 @@ jobs:
       - name: Smoke test do script de entrada
         run: |
           sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
-          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
+          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx ci-gerador-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
           # O script faz o commit inicial; o runner não tem identidade Git configurada.
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
@@ -914,6 +947,18 @@ jobs:
           if node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/e" --nome "CI Entrada" --id ci-entrada-$sfx --yes 2> "$RUNNER_TEMP/registrado.txt"; then exit 1; fi
           grep -qF "openspec store unregister ci-entrada-$sfx" "$RUNNER_TEMP/registrado.txt"
           test ! -e "$work/e"
+          # Pasta de gerador com histórico: o commit inicial leva só os arquivos do padrão, inclusive o
+          # .gitattributes criado com o bloco, e a árvore fica limpa para o próximo --update.
+          mkdir -p "$work/g/gerado"
+          git -C "$work/g/gerado" init -q
+          echo app > "$work/g/gerado/app.txt"
+          git -C "$work/g/gerado" add -A
+          commit "$work/g/gerado" -m gerador
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/g" --nome "CI Gerador" --id ci-gerador-$sfx --codigo "$work/g/gerado" --yes > "$RUNNER_TEMP/gerador.txt"
+          test "$(git -C "$work/g/gerado" rev-list --count HEAD)" -eq 2
+          git -C "$work/g/gerado" ls-files --error-unmatch .gitattributes > /dev/null
+          test -z "$(git -C "$work/g/gerado" status --porcelain)"
+          openspec store unregister ci-gerador-$sfx
           # Com --sem-commit, o código fica sem histórico e a mensagem mostra como commitar.
           node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/f" --nome "CI Sem Commit" --id ci-semcommit-$sfx --yes --sem-commit > "$RUNNER_TEMP/semcommit.txt"
           if git -C "$work/f/ci-semcommit-$sfx" rev-parse -q --verify HEAD; then exit 1; fi

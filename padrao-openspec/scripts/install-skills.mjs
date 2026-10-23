@@ -511,31 +511,32 @@ function ensureConsumerGitattributes(projectRoot) {
     console.warn(`Kept: ${relative} is not a regular file; consider adding:\n  ${suggestion}`);
     return;
   }
-  if (!info && isIgnoredByProject(projectRoot, relative)) {
+  if (isIgnoredByProject(projectRoot, relative)) {
     console.warn(`Skipped: ${relative} is ignored by the project (.gitignore).`);
     return;
   }
   const original = info ? readFileSync(destination, 'utf8') : '';
   const eol = original.includes('\r\n') ? '\r\n' : '\n';
-  const block = [gitattributesBegin, ...gitattributesLines, gitattributesEnd].join(eol);
+  const blockLines = [gitattributesBegin, ...gitattributesLines, gitattributesEnd];
   let updated;
-  if (!info) {
-    updated = `${block}${eol}`;
+  // An empty file carries no decision of the project, so it gets the block like a missing one.
+  if (original.trim() === '') {
+    updated = `${blockLines.join(eol)}${eol}`;
   } else {
-    const lines = original.split(/\r?\n/).map((line) => line.replace(/[ \t]+$/, ''));
-    const begins = lines.filter((line) => line === gitattributesBegin).length;
-    const ends = lines.filter((line) => line === gitattributesEnd).length;
-    if (begins === 0 && ends === 0) {
+    // Markers are whole lines, so a comment that only mentions them is never taken for the block.
+    const lines = original.split(/\r?\n/);
+    const trimmed = lines.map((line) => line.replace(/[ \t]+$/, ''));
+    const begins = trimmed.flatMap((line, index) => (line === gitattributesBegin ? [index] : []));
+    const ends = trimmed.flatMap((line, index) => (line === gitattributesEnd ? [index] : []));
+    if (begins.length === 0 && ends.length === 0) {
       console.log(`Kept: ${relative} belongs to the project; consider adding:\n  ${suggestion}`);
       return;
     }
-    const start = original.indexOf(gitattributesBegin);
-    const endAt = original.indexOf(gitattributesEnd);
-    if (begins !== 1 || ends !== 1 || endAt < start) {
+    if (begins.length !== 1 || ends.length !== 1 || ends[0] < begins[0]) {
       console.warn(`Kept: ${relative} has unbalanced openspec-padrao markers; review it by hand.`);
       return;
     }
-    updated = `${original.slice(0, start)}${block}${original.slice(endAt + gitattributesEnd.length)}`;
+    updated = [...lines.slice(0, begins[0]), ...blockLines, ...lines.slice(ends[0] + 1)].join(eol);
     if (updated === original) {
       console.log(`Unchanged: ${relative} (openspec-padrao block)`);
       return;
@@ -549,6 +550,14 @@ function ensureConsumerGitattributes(projectRoot) {
     if (existsSync(stagedPath)) rmSync(stagedPath, { force: true });
   }
   console.log(`${info ? 'Updated' : 'Created'}: ${relative} (openspec-padrao block: text files in LF, .bat and .cmd in CRLF)`);
+}
+
+// Whether .gitattributes carries the standard's block and Git can stage it, so --update commits it.
+// A project-owned file without the block is never part of the standard's commit.
+function hasManagedGitattributes(projectRoot) {
+  const destination = path.join(projectRoot, '.gitattributes');
+  if (!lstatIfPresent(destination)?.isFile() || isIgnoredByProject(projectRoot, '.gitattributes')) return false;
+  return readFileSync(destination, 'utf8').split(/\r?\n/).some((line) => line.replace(/[ \t]+$/, '') === gitattributesBegin);
 }
 
 function readVersion() {
@@ -1092,7 +1101,7 @@ function main() {
     install();
     const paths = [...new Set([
       '.gitignore', manifestName,
-      ...(existsSync(path.join(projectRoot, '.gitattributes')) ? ['.gitattributes'] : []),
+      ...(hasManagedGitattributes(projectRoot) ? ['.gitattributes'] : []),
       ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')),
       ...blocks.filter((block) => !block.skip).map((block) => block.path),
       ...(settings.skip ? [] : [settingsPath]),

@@ -204,8 +204,9 @@ docs
 ## .env.example
 
 Sempre versionar um `.env.example` com as variáveis necessárias sem valores reais. Senhas e
-chaves levam um marcador (`<troque>`), e não um valor que funcione: quem copia o arquivo para
-`.env` sem trocar nada não sobe um banco com uma senha conhecida.
+chaves levam um marcador (`<troque>`), que mostra o que precisa ser trocado, e não uma senha de
+exemplo com cara de pronta, como `password`. O marcador não protege nada sozinho: troque-o no
+`.env` antes de subir o banco, inclusive dentro da `DATABASE_URL`.
 
 ```env
 # Banco de dados

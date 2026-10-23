@@ -91,6 +91,7 @@ O setup:
 - instala no repositório de código as skills em `.agents/skills/` e `.claude/skills/` (padrão `--target both`), os comandos `/opsx:*` em `.claude/commands/opsx/`, os subagentes do Copilot em `.github/agents/` e os do Claude Code em `.claude/agents/`, com os hooks em `.claude/hooks/openspec-padrao/` e as entradas do padrão no `.claude/settings.json`;
 - grava o nome do projeto em `<projeto>-openspec\padrao-openspec\openspec\project.md`, sem mexer no resto do `project.md` nem no `config.yaml`, que continuam neutros até o `/opsx:init`;
 - acrescenta ao `.gitignore` do repositório de código um bloco que ignora o conteúdo local de `openspec/`, mas mantém no git o `openspec/config.yaml` com a declaração do store (commite esse arquivo);
+- cria um `.gitattributes` com o bloco do padrão (texto em LF, `*.bat` e `*.cmd` em CRLF) quando o repositório de código não tem um; um `.gitattributes` do projeto não é alterado, e o setup só sugere as linhas;
 - registra o store nesta máquina, grava `store: <projeto>` em `openspec/config.yaml` do repositório de código e confirma que o OpenSpec CLI encontra o store a partir dele.
 - renomeia para `padrao` o remote `origin` do store quando ele aponta para o repositório do padrão, para que um `git push` no store não publique o planejamento do projeto no PadraoOpenspct. As atualizações do padrão continuam disponíveis com `git fetch padrao`. Para publicar o store, crie um repositório para ele e rode `git -C <store> remote add origin <url>`; para manter o `origin`, passe `--keep-origin`.
 

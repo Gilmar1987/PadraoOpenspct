@@ -32,7 +32,7 @@ e boas práticas de ambiente, integrada ao fluxo OpenSpec.
 - Health check declarado em todo serviço de longa duração
 - `.dockerignore` sempre presente para excluir `node_modules`, `.git`, artefatos de build
 - Serviços de desenvolvimento (bancos, filas, caches, painéis de administração) MUST publicar portas só em `127.0.0.1`, por exemplo `"127.0.0.1:${DB_PORT:-5432}:5432"`: sem o IP, a porta abre em todas as interfaces da máquina. Um serviço que outra máquina precisa alcançar exige justificativa no `design.md`
-- O `.env.example` traz marcadores (`POSTGRES_PASSWORD=<troque>`), nunca senhas que funcionem
+- O `.env.example` traz marcadores (`POSTGRES_PASSWORD=<troque>`) que mostram o que trocar, nunca uma senha de exemplo com cara de pronta, como `password`
 
 ## Dockerfile — Estrutura padrão
 

@@ -254,9 +254,16 @@ function openWorkspaceSteps(codeDir, next) {
 // The paths the setup writes in the code repository, read from the manifest it just recorded.
 function standardPaths(codeDir) {
   const manifest = JSON.parse(readFileSync(path.join(codeDir, '.openspec-padrao.json'), 'utf8'));
+  // The .gitattributes is the project's file, outside the manifest; it goes in only with the standard's block.
+  const attributes = path.join(codeDir, '.gitattributes');
+  const managedAttributes = existsSync(attributes)
+    && /^# BEGIN openspec-padrao[ \t]*\r?$/m.test(readFileSync(attributes, 'utf8'));
   return [...new Set([
     ...(manifest.managedFiles ?? []), ...(manifest.managedBlocks ?? []),
     '.openspec-padrao.json', '.gitignore', 'openspec/config.yaml',
+    ...(managedAttributes ? ['.gitattributes'] : []),
+    // The standard's hooks and permissions live in .claude/settings.json, recorded as managedSettings.
+    ...(manifest.managedSettings !== undefined ? ['.claude/settings.json'] : []),
   ])].filter((file) => existsSync(path.join(codeDir, ...file.split('/'))));
 }
 
