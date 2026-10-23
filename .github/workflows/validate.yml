@@ -405,12 +405,17 @@ jobs:
           # protege-ganchos.mjs (ganchos-de-sessao-e-fluxo): vale para todos os agentes.
           for cmd in 'git commit --no-verify -m x' 'git commit -nm x' 'git commit -an -m x' 'git push --no-verify' \
                      'git -c core.hooksPath=/dev/null commit -m x' 'git config core.hooksPath x' \
-                     'git config --unset core.hooksPath' 'git config --global core.hooksPath x'; do
+                     'git config --unset core.hooksPath' 'git config --global core.hooksPath x' \
+                     'git config set core.hooksPath x' 'git config unset core.hooksPath' \
+                     'git config -f .git/config core.hooksPath x' 'git --config-env core.hooksPath=V commit' \
+                     'git commit --no-verif -m x' 'HUSKY=0 git commit --no-verify' 'env git commit -n' \
+                     'GIT_CONFIG_KEY_0=core.hooksPath git commit'; do
             expect deny protege-ganchos.mjs "$(payload Bash command "$cmd")"
           done
           expect deny protege-ganchos.mjs "$(payload PowerShell command 'git commit --no-verify -m x' '' openspec-code-implementer)"
           for cmd in 'git log -n 5' 'git config --get core.hooksPath' 'git commit -m "sem --no-verify aqui"' 'git status' \
-                     'echo git commit --no-verify'; do
+                     'echo git commit --no-verify' 'git config core.hooksPath' 'git config get core.hooksPath' \
+                     'git commit -uno -m x' 'git commit -m -n' 'git commit --amend --no-edit'; do
             expect allow protege-ganchos.mjs "$(payload Bash command "$cmd")"
           done
           # exige-change.mjs e contexto-de-sessao.mjs, com um portão falso que responde ao "estado".
@@ -1107,6 +1112,14 @@ jobs:
           grep -qF '/opsx:verify' <<< "$(gate estado --json)"
           printf '# Verificações\n' > "$ch/verification.md"
           grep -qF '/opsx:archive' <<< "$(gate estado --json)"
+          proposal ci 2026-10-22 apply '"Aprovo"'
+          grep -qF 'pedir a confirmação do archive' <<< "$(gate estado --json)"
+          printf -- '- Conteúdo: sha256:%064d\n' 0 >> "$ch/proposal.md"
+          grep -qF '"selo":"vencido"' <<< "$(gate estado --json)"
+          proposal ci 2026-10-22 archive '"Aprovo para archive"'
+          printf '# Design\n\nPrazo [INFERIDO: mercado].\n' > "$ch/design.md"
+          grep -qF '"inferencias":1' <<< "$(gate estado --json)"
+          rm "$ch/design.md"
           gate estado | grep -qF 'ci-change: 2/2 tarefas'
 
       # Regras do padrão entregues ao código por blocos gerenciados (ADR-0005): o conteúdo fora dos

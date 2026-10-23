@@ -32,8 +32,9 @@ function usage() {
                     e, numa change com commits de código, review.md
   selo <change>     imprime o selo (sha256) do planejamento da change, para o item "Conteúdo:"
                     da seção ## Aprovação
-  estado            lista as changes ativas com tarefas, aprovação, selo, inferências e o
-                    próximo passo do fluxo (sempre sai com 0, ou 2 em erro de ambiente)
+  estado            lista as changes ativas com tarefas, aprovação (pendente, apply ou archive),
+                    selo (valido, vencido, ilegível ou ausente), inferências e o próximo passo
+                    do fluxo (sempre sai com 0, ou 2 em erro de ambiente)
   instalar-hook     instala um hook commit-msg que recusa commits "OpenSpec-Change: <change>"
                     de changes que o portão de apply bloqueia
 
@@ -277,12 +278,14 @@ function check(action, change, store) {
 
 // The next step of the flow for one change, in the order a person would take them.
 function nextStep(item, changeRoot) {
+  if (!existsSync(changeRoot)) return 'conferir a pasta da change, que o OpenSpec lista mas não está em openspec/changes/';
   if (item.aprovacao === 'pendente') return 'pedir a aprovação ao responsável';
   if (item.selo === 'vencido' || item.selo === 'ilegível') return 'reconfirmar a aprovação com /opsx:update';
   if (item.inferencias > 0) return 'confirmar as inferências [INFERIDO] com o responsável';
   if (item.tarefas.feitas < item.tarefas.total || item.tarefas.total === 0) return '/opsx:apply';
   if (!existsSync(path.join(changeRoot, 'verification.md'))) return '/opsx:verify';
   if (item.aprovacao === 'apply') return 'pedir a confirmação do archive ao responsável';
+  if (!existsSync(path.join(changeRoot, 'review.md'))) return '/opsx:archive (com review.md, se a change alterou código)';
   return '/opsx:archive';
 }
 
@@ -314,10 +317,12 @@ function state(store) {
   return { ok: true, acao: 'estado', change: null, motivos: [], changes };
 }
 
+// The same wording as the SessionStart hook (contexto-de-sessao.mjs); the JSON keeps plain values.
 function stateLine(item) {
   const approval = item.aprovacao === 'pendente' ? 'aprovação pendente' : `aprovada (${item.aprovacao})`;
-  const seal = item.aprovacao === 'pendente' ? '' : `, selo ${item.selo}`;
-  const marks = item.inferencias ? `, ${item.inferencias} inferência(s)` : '';
+  const sealWords = { valido: 'válido', vencido: 'vencido', 'ilegível': 'ilegível', ausente: 'ausente' };
+  const seal = item.aprovacao === 'pendente' ? '' : `, selo ${sealWords[item.selo] ?? item.selo}`;
+  const marks = item.inferencias ? `, ${item.inferencias} inferência(s) a confirmar` : '';
   return `${item.change}: ${item.tarefas.feitas}/${item.tarefas.total} tarefas, ${approval}${seal}${marks} → ${item.proximo}`;
 }
 

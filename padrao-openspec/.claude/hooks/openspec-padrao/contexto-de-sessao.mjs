@@ -13,9 +13,11 @@ import { readPayload, repositoryRoot } from './comum.mjs';
 const hookName = 'contexto-de-sessao';
 const maxChanges = 20;
 
+// The same wording as the gate's text output (stateLine in docs/openspec-portao.mjs).
 function stateLine(item) {
   const approval = item.aprovacao === 'pendente' ? 'aprovação pendente' : `aprovada (${item.aprovacao})`;
-  const seal = item.aprovacao === 'pendente' ? '' : `, selo ${item.selo}`;
+  const sealWords = { valido: 'válido', vencido: 'vencido', 'ilegível': 'ilegível', ausente: 'ausente' };
+  const seal = item.aprovacao === 'pendente' ? '' : `, selo ${sealWords[item.selo] ?? item.selo}`;
   const marks = item.inferencias ? `, ${item.inferencias} inferência(s) a confirmar` : '';
   return `- ${item.change}: ${item.tarefas.feitas}/${item.tarefas.total} tarefas, ${approval}${seal}${marks} → ${item.proximo}`;
 }

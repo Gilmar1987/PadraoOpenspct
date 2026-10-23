@@ -11,7 +11,7 @@
 // Without the gate, or when the gate fails, the hook stays silent.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ask, idPattern, readPayload, repositoryRoot } from './comum.mjs';
@@ -24,6 +24,24 @@ const question = 'Nenhuma change ativa aprovada (ou a aprovação venceu, ou há
 function normalize(value) {
   const forward = value.split(path.sep).join('/').replace(/\\/g, '/');
   return caseInsensitive ? forward.toLowerCase() : forward;
+}
+
+// Real path of the nearest existing ancestor, so a link, a junction or a short 8.3 name does not make a
+// file inside the repository look like it is outside.
+function realPath(value) {
+  let current = path.resolve(value);
+  const tail = [];
+  while (!existsSync(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) return path.resolve(value);
+    tail.unshift(path.basename(current));
+    current = parent;
+  }
+  try {
+    return path.join(realpathSync.native(current), ...tail);
+  } catch {
+    return path.resolve(value);
+  }
 }
 
 function approvedChangeExists(gate, cwd) {
@@ -46,7 +64,7 @@ if (typeof target === 'string' && target) {
   const cwd = typeof payload.cwd === 'string' && payload.cwd ? payload.cwd : process.cwd();
   const root = repositoryRoot(cwd);
   const gate = root ? path.join(root, 'docs', 'openspec-portao.mjs') : null;
-  const relative = root ? normalize(path.relative(root, path.resolve(cwd, target.replace(/\\/g, '/')))) : '';
+  const relative = root ? normalize(path.relative(realPath(root), realPath(path.resolve(cwd, target.replace(/\\/g, '/'))))) : '';
   const inside = root && relative && !relative.startsWith('../') && relative !== '..' && !path.isAbsolute(relative);
   if (inside && !relative.startsWith('openspec/') && existsSync(gate)) {
     const session = typeof payload.session_id === 'string' && idPattern.test(payload.session_id) ? payload.session_id : null;
