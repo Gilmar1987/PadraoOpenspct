@@ -15,6 +15,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   dev quer explorar a ideia (discover); com um dos dois, cada pergunta mostra uma recomendação justificada a
   partir do brief, e o `project-setup.md` registra a base. Com "não" nos dois, ou com arquivo de respostas, a
   entrevista é a de sempre.
+- **Questionário adaptativo:** a entrevista do `/opsx:init` pula as perguntas que uma resposta anterior torna
+  sem sentido (por exemplo, o tipo de fila sem jobs, o front-end num projeto só de back-end), mostrando-as no
+  resumo do bloco com o motivo; oculta as opções que não combinam com a stack escolhida, mantendo os números
+  (digite `todas` para ver a lista inteira); pergunta a 2.2 antes da 2.1; e aponta cada incoerência logo depois
+  da resposta que a cria, com a combinação nova "microsserviços num projeto pequeno". O arquivo de respostas
+  continua compatível.
 
 ### Ações no projeto
 

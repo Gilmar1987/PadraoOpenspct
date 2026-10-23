@@ -173,6 +173,9 @@ requisitos, e-mails) para ele analisar e se quer explorar a ideia do produto (`/
 Na exploração, o agente conduz a conversa, questiona e traz opções até a ideia ficar concreta, e
 grava o resultado em `openspec/descoberta.md`. Com documentos ou exploração, cada pergunta da
 entrevista mostra uma recomendação justificada; com "não" nas duas, a entrevista é a de sempre.
+Em qualquer caso, a entrevista pula as perguntas que não se aplicam ao projeto, mostra só as opções
+que combinam com a stack escolhida (digite `todas` para ver o resto) e aponta uma incoerência
+logo depois da resposta que a cria.
 
 A entrevista registra no store a visão do produto, a arquitetura, a stack, os **comandos de
 verificação** (instalar, executar, testar, lint, build, migrar, auditar dependências, procurar
