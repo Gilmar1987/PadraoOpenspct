@@ -1,0 +1,32 @@
+## 1. Preparação e proteção na CI
+
+- [x] 1.1 Rebasear a branch na `main` e confirmar com a outra sessão que esta change abre a 1.14.0 (modelo de versão acumulada). Verificar com `git log --oneline HEAD..origin/main` vazio e a versão citada na evidência.
+  - Evidência: rebase em `origin/main` 85122da (release v1.13.0) sem conflito; `git log --oneline HEAD..origin/main` vazio; a outra sessão (projetoopenspct-04, antes 5a) confirmou que esta change abre a 1.14.0 e que não tem change em andamento
+- [x] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` os marcadores do D6. Verificar rodando o passo localmente antes da implementação: ele deve falhar nos arquivos citados.
+  - Evidência: marcadores do D6 ("Engineering principles" no verify, na revisão e no subagente revisor, a 7.4 no init, o bloco no `rules.md` e a linha no modelo de `project.md`); `run-ci-steps.py ... "Trechos customizados"` antes da implementação → FAIL (exit 1) com 7 ausências, só nos pontos esperados
+
+## 2. Regras e config
+
+- [x] 2.1 Aplicar o D1 em `padrao-openspec/openspec/rules.md` (bloco "Princípios de engenharia" na seção 3, três itens novos e o item de validação ajustado na seção 5). Verificar com `grep -n "Princípios de engenharia\|iniciado, sucesso e falha" padrao-openspec/openspec/rules.md` e com o `sync-root.mjs --check` em dia depois do sync.
+  - Evidência: bloco "Princípios de engenharia" na seção 3 do `rules.md` (linha 107), "Você MUST" com os três itens na seção 5 (linha 149: iniciado, sucesso e falha) e o item de validação sem citar o Zod; `sync-root.mjs --check` → em dia (exit 0)
+- [x] 2.2 Aplicar o D2 em `padrao-openspec/openspec/config.yaml`. Verificar com o passo "Config base carrega sem avisos" passando.
+  - Evidência: três regras novas no `config.yaml` (proposal: Why ligado ao objetivo; design: padrão existente e contrato de entrada; tasks: teste cita o cenário); "Config base carrega sem avisos" → PASS (exit 0)
+
+## 3. Revisão e verify
+
+- [x] 3.1 Aplicar o D3 em `padrao-openspec/.claude/skills/requesting-code-review/code-reviewer.md` e `padrao-openspec/.claude/agents/openspec-code-reviewer.md`. Verificar com o marcador do D6 passando e com o passo "Paridade de papéis" passando.
+  - Evidência: bloco "Engineering principles" no template `requesting-code-review/code-reviewer.md` (depois de "Production readiness") e item no `openspec-code-reviewer.md`; "Paridade de papéis" → PASS; os marcadores desses dois arquivos deixaram de falhar
+- [x] 3.2 Aplicar o D4 em `padrao-openspec/.claude/commands/opsx/verify.md` e `padrao-openspec/.claude/skills/openspec-verify-change/SKILL.md`, com o mesmo texto. Verificar com `diff` vazio entre as duas heurísticas, com o marcador passando e com o "Smoke test das métricas de fluxo" passando.
+  - Evidência: heurística "Engineering principles" depois de "Verification layers" no `verify.md` e na skill; `diff` → iguais; "Smoke test das métricas de fluxo" → PASS (exit 0)
+
+## 4. Init e project.md
+
+- [x] 4.1 Aplicar o D5 em `padrao-openspec/.claude/commands/opsx/init.md` (pergunta 7.4, a 7.2 ajustada, o resumo do bloco 7 e a tabela do `project-setup.md`) e em `padrao-openspec/openspec/project.md` (linha "Princípios de engenharia"). Verificar com o marcador da 7.4 passando e com `grep -n "Princípios de engenharia" padrao-openspec/openspec/project.md`.
+  - Evidência: pergunta 7.4 depois da 7.3 (linha 711), mapeamento na 7.2 e registro no Arquivo 2; o init não tem tabela de bloco 7 no `project-setup.md` nem para a 7.3, então a 7.4 entra pelo resumo genérico do bloco; linha "Princípios de engenharia" em Development Conventions do modelo de `project.md` (linha 133); `git diff` sem mudança na checagem de coerência; "Trechos customizados" → PASS
+
+## 5. Documentação, versão e integração
+
+- [x] 5.1 Atualizar o `README.md` (trechos customizados novos), `padrao-openspec/VERSION` e `CHANGELOG.md`, com a seção `## 1.14.0` (VERSION 1.14.0), ou os itens na seção aberta por outra change, e as ações no projeto (acrescentar a linha "Princípios de engenharia" ao `project.md` do store). Verificar com o lint e com o passo "Versão e changelog" passando.
+  - Evidência: README com "Engineering principles" e a 7.4 na tabela de trechos customizados; pelo modelo de versão acumulada, primeira change depois da v1.13.0: `VERSION` 1.14.0 e seção `## 1.14.0` com "O que mudou" e a ação recomendada; "Versão e changelog", "Smoke test do changelog-range", lint nos dois lugares, "Raiz em dia" e "Guia" → PASS (exit 0)
+- [x] 5.2 Rodar o `sync-root.mjs` e o `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.
+  - Evidência: a outra sessão (projetoopenspct-04) foi avisada antes e depois; `sync-root.mjs` e `--check` → em dia; `openspec validate --all --strict` → 21 passed, 0 failed; jobs `store` e `root` localmente → 28 PASS; o "Smoke test dos hooks do Claude Code" falhou só pelo executor local (`bash -c` estragava as aspas no Windows, também na `main`), e passou rodando o script a partir de um arquivo, como o runner do GitHub; depois das correções da revisão (ca7238b), os passos afetados ("Trechos customizados", lint nos dois lugares, "Paridade de papéis", "Smoke test das métricas de fluxo", "Config base", "Raiz em dia", "Guia") → PASS (exit 0)

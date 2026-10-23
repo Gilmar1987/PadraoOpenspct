@@ -33,6 +33,7 @@ context: |
 rules:
   proposal:
     - Explicar o problema, o resultado esperado e declarar explicitamente o que está fora do escopo
+    - "O Why cita o objetivo do produto (Product Vision) ou a capability do project.md que a change atende; uma change interna diz qual capability ou qualidade preserva"
     - Identificar dependências, riscos e impactos relevantes para o projeto consumidor
     - "Incluir uma seção de riscos que responda, marcando Não aplicável com justificativa quando for o caso: a change coleta, expõe, registra em log ou retém dados pessoais ou sensíveis (ex.: LGPD/GDPR)? Altera autenticação, autorização ou superfície exposta? Altera esquema, volume ou padrão de acesso a dados? Adiciona ou atualiza dependências? Exige configuração, segredo ou variável de ambiente nova em algum ambiente? Quebra compatibilidade com clientes, integrações ou dados existentes?"
     - "Terminar com a seção ## Aprovação, sem checkboxes, em itens de lista: Responsável (Pendente até o usuário aprovar), Data, Escopo (apply ou archive), Condições (só para archive) e Origem (citação da declaração explícita do usuário e, quando a resposta depende dela, da pergunta). Nunca preencher a aprovação sem essa declaração"
@@ -42,6 +43,7 @@ rules:
   design:
     - Registrar decisões técnicas relevantes, alternativas consideradas e consequências
     - Respeitar a arquitetura e as tecnologias registradas pelo projeto consumidor
+    - "Indicar o padrão de projeto existente que a change segue, ou justificar um novo; para fluxo novo, o contrato de entrada e onde a entidade se separa do esquema de persistência"
     - Citar as ADRs Accepted que se aplicam; se o design contrariar uma delas ou tomar uma decisão transversal nova, indicar a ADR a criar ou substituir
     - "Para cada risco marcado como aplicável na proposal, descrever a mitigação (ex.: mascaramento em log, índice, migração, plano de rollback, criação prévia da configuração)"
     - "Listar o raio de impacto: arquivos-alvo (que serão alterados) e dependentes afetados (arquivos, rotas ou componentes que usam os alvos e podem quebrar)"
@@ -52,6 +54,7 @@ rules:
     - Citar em cada tarefa os arquivos que ela toca
     - Toda dependência citada no Impact do proposal precisa aparecer numa tarefa
     - Em cada grupo, a tarefa que cria ou atualiza os testes dos cenários vem antes da tarefa que implementa o comportamento
+    - O teste de cada cenário cita o requisito e o cenário no nome ou num comentário
     - Tarefas que dependem de push, PR ou CI remoto só entram quando o project.md registra um remoto; sem ele, a tarefa usa a verificação local equivalente e diz qual é
 
 operations:

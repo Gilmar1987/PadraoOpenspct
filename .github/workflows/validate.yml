@@ -228,6 +228,7 @@ jobs:
             check "$f" "ADR verification"
             check "$f" "Interface contract check"
             check "$f" "Verification layers"
+            check "$f" "Engineering principles"
             check "$f" "   - Camadas: <layer (command)"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
@@ -263,6 +264,12 @@ jobs:
           check "$f" "**2.6 — O sistema expõe ou consome uma API"
           # Débitos e camadas (debitos-e-camadas-de-verificacao): Arquivo 6 e matriz no init; trecho no explore.
           check "$f" '### Arquivo 6: `<root>/openspec/estado-atual.md`'
+          # Princípios de engenharia (principios-de-engenharia): 7.4 no init, revisão, regras e modelo de project.md.
+          check "$f" "**7.4 — Princípios de engenharia"
+          check .claude/skills/requesting-code-review/code-reviewer.md "Engineering principles"
+          check .claude/agents/openspec-code-reviewer.md "Engineering principles"
+          check openspec/rules.md "Princípios de engenharia"
+          check openspec/project.md "**Princípios de engenharia:**"
           check "$f" 'Preencha a seção "Camadas de verificação"'
           check openspec/project.md "## Camadas de verificação"
           for g in .claude/commands/opsx/explore.md .claude/skills/openspec-explore/SKILL.md; do

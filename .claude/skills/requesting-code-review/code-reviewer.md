@@ -92,6 +92,25 @@ Subagent (general-purpose):
     - Documentation complete?
     - No obvious bugs?
 
+    **Engineering principles** (for the code the change wrote; tools and exceptions come from
+    the project's `openspec/project.md`, line "Princípios de engenharia"):
+    - Single responsibility: does any new function or module mix concerns (persistence,
+      external calls, notifications) that the codebase keeps apart?
+    - Open for extension: was new behavior added as one more branch where the code already
+      has an extension point (interface, strategy, polymorphism)?
+    - Existing patterns: does the change reuse the patterns the code already uses, or justify
+      a new one in design.md?
+    - New flows start from a typed input contract, with the domain entity kept apart from the
+      persistence schema.
+    - Every external input is validated with the project's validation tool before use.
+    - Mutations and critical boundaries log initiated, success and failed with the project's
+      logger, unless project.md marks it "Não aplicável".
+    - Error responses never return internal exception messages, stack traces or personal data,
+      and logs never write personal data or credentials unmasked.
+    - Scenario tests cite the requirement and scenario they cover.
+    - Severity: a leak is Critical; missing validation or three-state logs is Important; an
+      uncited scenario test is Minor.
+
     ## Calibration
 
     Categorize issues by actual severity. Not everything is Critical.
