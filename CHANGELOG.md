@@ -20,7 +20,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   resumo do bloco com o motivo; oculta as opções que não combinam com a stack escolhida, mantendo os números
   (digite `todas` para ver a lista inteira); pergunta a 2.2 antes da 2.1; e aponta cada incoerência logo depois
   da resposta que a cria, com a combinação nova "microsserviços num projeto pequeno". O arquivo de respostas
-  continua compatível.
+  continua compatível nos números; uma pergunta que ele não responde e que uma regra de salto cobre recebe o
+  valor da regra, em vez de ser perguntada no chat.
 
 ### Ações no projeto
 

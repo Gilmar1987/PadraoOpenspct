@@ -62,7 +62,7 @@ Quando uma resposta torna outra pergunta sem sentido, não faça essa pergunta: 
 | 2.6 = 0 | Teste de contrato na 7.1 | Não aplicável |
 
 - No resumo do bloco, antes de "Confirma este bloco?", mostre a linha `Puladas: 3.8 (porque a 2.5 é Não)`, com cada pergunta pulada do bloco e o motivo, e diga que qualquer uma delas pode ser respondida. Sem pulada no bloco, omita a linha. Depois de responder uma pulada, mostre o resumo do bloco de novo antes de pedir a confirmação. Uma pulada que o dev pede para responder é feita como as outras, e a resposta dele substitui o valor da regra.
-- Uma pergunta pulada não recebe linha de recomendação nem entra nos filtros de opções.
+- Uma pergunta pulada não recebe linha de recomendação. O valor que a regra registrou para ela vale nos filtros de opções, como qualquer resposta.
 - Uma resposta "Não aplicável" vinda de uma regra de salto segue a regra das ADRs: não gera ADR.
 
 ---
@@ -76,16 +76,16 @@ Quando uma resposta anterior torna uma opção incompatível, oculte essa opçã
 | 3.2 | 3.1 diferente de 2 (.NET) | Oculta 4 (Blazor) |
 | 3.5 | 3.1 | 1 → 0, 1, 6; 2 → 0, 2, 6; 3 → 0, 3, 4, 6; 4 → 0, 5, 6; 5 → 0, 6; 6 → todas |
 | 3.6 | 3.1 diferente de 1 e 3.2 diferente de 1 (sem Next.js) | Oculta 4 (Auth.js / NextAuth) |
-| 3.7 | 3.1 | 1 → 1, 5, 6; 2 → 2, 5, 6; 3 → 3, 5, 6; 4 → 4, 5, 6; 5 → 5, 6; 6 → todas |
+| 3.7 | 3.1 e 3.2 | 1 → 1, 5, 6; 2 → 2, 5, 6; 3 → 3, 5, 6; 4 → 4, 5, 6; 5 → 5, 6; 6 → todas; com a 3.2 em 1 ou 2 (front-end em JavaScript/TypeScript), mantém também a 1 |
 | 4.5 | 4.1 diferente de 1 (Vercel / Netlify) | Oculta 3 (Vercel Edge Network) |
-| 5.4 | 3.1 | 1 → 1, 6; 2 → 3, 6; 3 → 2, 6; 4 → 4, 6; 5 → 5, 6; 6 → todas |
+| 5.4 | 3.1 e 3.2 | 1 → 1, 6; 2 → 3, 6; 3 → 2, 6; 4 → 4, 6; 5 → 5, 6; 6 → todas; com a 3.2 em 1 ou 2 (front-end em JavaScript/TypeScript), mantém também a 1 |
 | 5.5 | 3.2 = 0 (sem front-end) | 0, 5, 6 |
 
 - Mostre as opções visíveis com os números originais e, logo abaixo, a linha `(N opções ocultas porque <resposta>; digite "todas" para ver)`, por exemplo `(3 opções ocultas porque a 3.1 é Python; digite "todas" para ver)`.
 - Com `todas`, mostre a lista completa, sem a linha de ocultas, e aceite qualquer número dela. Se a pergunta for feita de novo, o filtro volta a valer.
 - O filtro usa o valor registrado da pergunta da qual depende, inclusive o valor que uma regra de salto registrou (por exemplo, a 3.2 pulada com "0) Não há front-end próprio" filtra a 3.6 e a 5.5). Quando esse valor é "Não aplicável" ou "Outro", não filtre: mostre todas as opções.
 - As opções "0", "Ainda não sei" e "Outro" nunca são ocultadas.
-- Uma opção oculta nunca recebe a linha de recomendação.
+- Uma opção oculta nunca recebe a linha de recomendação. Se o brief sustentar uma opção oculta, mostre a lista inteira nessa pergunta e recomende a opção, dizendo que ela não combina com a resposta que a ocultaria.
 
 ---
 
@@ -831,7 +831,7 @@ O texto "A definir" sem decisão nunca vai para o `project.md` final. Um campo o
 
 > Respostas válidas uma a uma podem ser incoerentes entre si. Aponte cada combinação antes da confirmação final.
 
-**Na hora:** avalie cada combinação desta tabela assim que a última resposta envolvida for dada, inclusive a de uma pergunta pulada que o dev pediu para responder, e siga os passos abaixo nesse momento. Uma combinação que cita um bloco inteiro (por exemplo, "o bloco 4 não prevê esse serviço") é avaliada no resumo desse bloco. Quando o dev responde "manter" já com a justificativa (por exemplo, "manter: só teste"), registre-a sem perguntar de novo. A checagem antes da confirmação final continua: ela lista todas as combinações encontradas, mostra as já decididas como "Ajustada" ou "Mantida", com a justificativa, sem perguntar de novo, e pergunta só as que ainda não foram decididas. Uma resposta ajustada que desfaz a combinação a tira da lista. Com arquivo de respostas, a checagem roda só no fim.
+**Na hora:** avalie cada combinação desta tabela assim que a última resposta envolvida for dada, inclusive a de uma pergunta pulada que o dev pediu para responder, e siga os passos abaixo nesse momento. Uma combinação que cita um bloco inteiro (por exemplo, "o bloco 4 não prevê esse serviço") é avaliada no resumo desse bloco. Quando o dev responde "manter" já com a justificativa (por exemplo, "manter: só teste"), registre-a sem perguntar de novo. A checagem antes da confirmação final continua: ela lista todas as combinações encontradas, mostra as já decididas como "Ajustada" ou "Mantida", com a justificativa, sem perguntar de novo, e pergunta só as que ainda não foram decididas. Uma resposta ajustada que desfaz a combinação a tira da lista. "Ajustar" pode voltar a uma pergunta de um bloco já confirmado: refaça só essa pergunta, reavalie as regras de salto e os filtros que dependem dela (por exemplo, a 2.5 trocada de "Não" para "Sim" faz a 3.8) e retome a entrevista de onde parou. Com arquivo de respostas, a checagem roda só no fim.
 
 Avalie ao menos estas combinações:
 
@@ -841,7 +841,8 @@ Avalie ao menos estas combinações:
 | 5.2 tem CI, ou 5.1/5.7 dependem de PR, e 5.8 é "Sem remoto" | CI remoto e PR não existem sem remoto; tarefas que os exigem não fecham | Verificações locais obrigatórias até o remoto existir |
 | 3.8 tem um tipo de fila e 2.5 é "Não" | Serviços e dependências sem uso | Adiar a fila para a primeira change que precisar |
 | 2.4 é REST/HTTP, gRPC ou mensageria e 2.1 é um monólito | Chamadas de rede onde uma chamada direta bastaria | Confirmar o motivo, ou trocar por chamada direta entre módulos |
-| 2.1 é "Microsserviços" e 1.4 é "Pequeno" ou "Ainda não sei", ou 5.9 é "Uma pessoa" | Vários serviços para implantar, monitorar e versionar, sem volume ou time que justifique | Monólito modular, com módulos que possam virar serviços depois |
+| 2.1 é "Microsserviços" e 1.4 é "Pequeno" ou "Ainda não sei" | Vários serviços para implantar, monitorar e versionar, sem volume que justifique | Monólito modular, com módulos que possam virar serviços depois |
+| 2.1 é "Microsserviços" e 5.9 é "Uma pessoa" | Vários serviços para implantar, monitorar e versionar, sem time que justifique | Monólito modular, com módulos que possam virar serviços depois |
 | 4.4 usa variáveis ou cofre da plataforma e 4.1/4.3 não têm produção | Configuração para uma plataforma que não existe | Registrar só o `.env` local por enquanto |
 | 5.5 tem framework de E2E e 5.3 não inclui E2E, ou o contrário | Testes que ninguém roda, ou exigência sem ferramenta | Alinhar as duas respostas |
 | 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis) e 6.5 é 0 | Dados pessoais sem nenhum controle de LGPD/GDPR | Registrar ao menos o consentimento com registro de aceite e o direito de exclusão (1,2), ou justificar |
