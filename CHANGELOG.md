@@ -22,7 +22,7 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   `project-setup.md` (modelo no Arquivo 6 do `init.md`) e acrescente ao `project.md` a seção "Camadas de
   verificação".
 
-## 1.12.0 — 2026-10-22
+## 1.12.0 — 2026-10-23
 
 ### O que mudou
 
