@@ -107,6 +107,21 @@ Divergências declaradas ficam em `openspec/lacunas.md`.
 | Varredura de secrets | <!-- A definir ou não aplicável --> | |
 | Conferência de lacunas | Não aplicável | Opcional: teste próprio do projeto que compara as fontes com o código. A conferência do registro `openspec/lacunas.md` roda pelo `/opsx:verify` |
 
+## Camadas de verificação
+
+Que camada de teste cobre o quê neste projeto. O `/opsx:verify` registra as camadas que cada change exercitou;
+a que se aplica à change e não rodou vira "não verificado". Uma camada "Adiado" também é débito em
+[estado-atual.md](estado-atual.md#fora-do-ciclo-atual).
+
+| Camada | O que cobre | Comando ou procedimento | Onde roda |
+|---|---|---|---|
+| Unitário | <!-- regras de domínio, funções --> | <!-- comando de testes --> | <!-- local, CI --> |
+| Contrato | <!-- API x contrato da tabela "Contratos de interface" --> | <!-- Teste de contrato, Adiado ou Não aplicável --> | |
+| Arquitetura | <!-- dependências entre camadas, regras das ADRs --> | <!-- Adiado ou Não aplicável --> | |
+| E2E | <!-- fluxos de interface --> | <!-- comando de E2E --> | |
+| Roteiro manual | <!-- interface sem E2E, conferência humana --> | <!-- roteiro versionado --> | |
+| Produção | <!-- verificação depois do deploy --> | <!-- Adiado ou Não aplicável --> | |
+
 ## Development Conventions
 
 - **Idioma do código:** <!-- A definir -->

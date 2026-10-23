@@ -185,6 +185,7 @@ jobs:
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
             check "$f" "Interface contract first"
+            check "$f" "Related debts"
             check "$f" "verificacao"
             check "$f" "Check concurrent changes"
             check "$f" "Interface brief"
@@ -226,11 +227,15 @@ jobs:
             check "$f" "Declared gaps"
             check "$f" "ADR verification"
             check "$f" "Interface contract check"
+            check "$f" "Verification layers"
+            check "$f" "   - Camadas: <layer (command)"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
+            check "$f" "Update the open debts"
+            check "$f" "add it to both pathspecs"
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Check the archive authorization"
@@ -256,6 +261,13 @@ jobs:
           check "$f" "Fila no próprio banco"
           check "$f" 'acrescente ao `operations.apply.guidance`'
           check "$f" "**2.6 — O sistema expõe ou consome uma API"
+          # Débitos e camadas (debitos-e-camadas-de-verificacao): Arquivo 6 e matriz no init; trecho no explore.
+          check "$f" '### Arquivo 6: `<root>/openspec/estado-atual.md`'
+          check "$f" 'Preencha a seção "Camadas de verificação"'
+          check openspec/project.md "## Camadas de verificação"
+          for g in .claude/commands/opsx/explore.md .claude/skills/openspec-explore/SKILL.md; do
+            check "$g" "Related debts"
+          done
           # Contratos de interface (contratos-de-interface): template do project.md e regra global.
           check openspec/project.md "### Contratos de interface"
           check openspec/project.md "| Teste de contrato |"

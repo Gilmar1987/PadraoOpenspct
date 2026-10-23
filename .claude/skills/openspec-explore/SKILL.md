@@ -343,6 +343,8 @@ But this summary is optional. Sometimes the thinking IS the value.
 
 ---
 
+**Related debts**: when `openspec/estado-atual.md` exists, read its "Fora do ciclo atual" table and point out the debts the topic being explored would close or depend on. Without the file, say it does not exist and continue.
+
 ## Guardrails
 
 - **Don't implement** - Never write code or implement features. Workflow configuration counts too: creating or editing schemas, templates, or `openspec/config.yaml` is a change, not thinking. Creating or updating OpenSpec change artifacts within the confirmed scope is fine, writing anything else is not. When the user is ready to build, name the handoff rather than starting: `/opsx:propose` turns the discussion into a change, and the work happens there.

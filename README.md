@@ -263,7 +263,8 @@ padrao-openspec/
 ├── openspec/
 │   ├── config.yaml       # Stack, convenções e regras injetadas no agente
 │   ├── project.md        # Visão do produto, arquitetura, stack e comandos de verificação
-│   ├── arquitetura.md    # Componentes, comunicação, diagrama e deploy (gerado pelo /opsx:init)
+│   ├── arquitetura.md    # Componentes, comunicação, diagrama e deploy (gerado pelo /opsx:init; normativo)
+│   ├── estado-atual.md   # Estado atual e débitos "Fora do ciclo atual" (gerado pelo /opsx:init)
 │   ├── specs/            # Fonte da verdade (preenchida após /opsx:archive)
 │   ├── changes/          # Changes ativas e arquivadas
 │   └── adrs/             # Decisões de arquitetura duradouras
@@ -354,14 +355,15 @@ sumir):
 
 | Trecho | Arquivos |
 |---|---|
-| "Architectural Decision Check", o item `verificacao` e "Interface contract first" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
+| "Architectural Decision Check", o item `verificacao`, "Interface contract first" e "Related debts" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
+| "Related debts" | `commands/opsx/explore.md` e `skills/openspec-explore/SKILL.md` |
 | "Approval record", "Prior authorization exception" e "Commit the planning" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Check the approval record", trailer "OpenSpec-Change:", "Record task evidence", "Push only on explicit request", "Security checks", "Request code review" e "Contract and code in the same commit" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Write the verification record", "Evidence reuse", "Cobertura fora da suíte", "Project validation commands" e "Code review record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
-| "Update the project overview", "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
+| "Update the project overview", "Update the open debts", "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
 | "Standard version check" e "offer to update now" | `propose`, `apply`, `verify` e `archive` (comandos e skills) |
 | "Unrequested fixes are scope", "Check the library API", "Revalidate requirements after a version change", "Tool generators outside the repository", "Simulate CI on a clean copy" e "Production-mode check" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
-| "Review before verify", "Dependencies in Impact", "Agent-run browser scripts", "Declared gaps", "ADR verification" e "Interface contract check" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
+| "Review before verify", "Dependencies in Impact", "Agent-run browser scripts", "Declared gaps", "ADR verification", "Interface contract check" e "Verification layers" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Scope change resets approval" | `commands/opsx/update.md` e `skills/openspec-update-change/SKILL.md` |
 | "Run the gate" | `apply` e `archive` (comandos e skills) |
 | "Check concurrent changes" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
