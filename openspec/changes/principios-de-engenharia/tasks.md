@@ -1,12 +1,16 @@
 ## 1. Preparação e proteção na CI
 
-- [ ] 1.1 Rebasear a branch na `main` e confirmar com a outra sessão que esta change abre a 1.14.0 (modelo de versão acumulada). Verificar com `git log --oneline HEAD..origin/main` vazio e a versão citada na evidência.
-- [ ] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` os marcadores do D6. Verificar rodando o passo localmente antes da implementação: ele deve falhar nos arquivos citados.
+- [x] 1.1 Rebasear a branch na `main` e confirmar com a outra sessão que esta change abre a 1.14.0 (modelo de versão acumulada). Verificar com `git log --oneline HEAD..origin/main` vazio e a versão citada na evidência.
+  - Evidência: rebase em `origin/main` 85122da (release v1.13.0) sem conflito; `git log --oneline HEAD..origin/main` vazio; a outra sessão (projetoopenspct-04, antes 5a) confirmou que esta change abre a 1.14.0 e que não tem change em andamento
+- [x] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` os marcadores do D6. Verificar rodando o passo localmente antes da implementação: ele deve falhar nos arquivos citados.
+  - Evidência: marcadores do D6 ("Engineering principles" no verify, na revisão e no subagente revisor, a 7.4 no init, o bloco no `rules.md` e a linha no modelo de `project.md`); `run-ci-steps.py ... "Trechos customizados"` antes da implementação → FAIL (exit 1) com 7 ausências, só nos pontos esperados
 
 ## 2. Regras e config
 
-- [ ] 2.1 Aplicar o D1 em `padrao-openspec/openspec/rules.md` (bloco "Princípios de engenharia" na seção 3, três itens novos e o item de validação ajustado na seção 5). Verificar com `grep -n "Princípios de engenharia\|iniciado, sucesso e falha" padrao-openspec/openspec/rules.md` e com o `sync-root.mjs --check` em dia depois do sync.
-- [ ] 2.2 Aplicar o D2 em `padrao-openspec/openspec/config.yaml`. Verificar com o passo "Config base carrega sem avisos" passando.
+- [x] 2.1 Aplicar o D1 em `padrao-openspec/openspec/rules.md` (bloco "Princípios de engenharia" na seção 3, três itens novos e o item de validação ajustado na seção 5). Verificar com `grep -n "Princípios de engenharia\|iniciado, sucesso e falha" padrao-openspec/openspec/rules.md` e com o `sync-root.mjs --check` em dia depois do sync.
+  - Evidência: bloco "Princípios de engenharia" na seção 3 do `rules.md` (linha 107), "Você MUST" com os três itens na seção 5 (linha 149: iniciado, sucesso e falha) e o item de validação sem citar o Zod; `sync-root.mjs --check` → em dia (exit 0)
+- [x] 2.2 Aplicar o D2 em `padrao-openspec/openspec/config.yaml`. Verificar com o passo "Config base carrega sem avisos" passando.
+  - Evidência: três regras novas no `config.yaml` (proposal: Why ligado ao objetivo; design: padrão existente e contrato de entrada; tasks: teste cita o cenário); "Config base carrega sem avisos" → PASS (exit 0)
 
 ## 3. Revisão e verify
 

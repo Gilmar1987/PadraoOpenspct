@@ -104,6 +104,17 @@ nenhuma delas. Especificamente:
 - Quando o `project.md` registra um contrato de interface (seção "Contratos de interface"), o
   contrato MUST ser atualizado antes do código que o implementa e commitado junto com ele
 
+**Princípios de engenharia** (valem para o código que a change escreve, não para o código existente):
+
+- Responsabilidade única: cada módulo, classe ou função tem um motivo para mudar
+- Extensão sem modificação: comportamento novo entra por extensão (interface, polimorfismo,
+  estratégia) quando o código já tem esse ponto, e não por mais um `if` no meio do existente
+- Padrões existentes primeiro: replique o padrão que o código já usa; um padrão novo exige
+  justificativa no `design.md`
+- Fluxo novo começa num contrato de entrada tipado, e a entidade de domínio fica separada do
+  esquema de persistência
+- O teste de cada cenário cita o requisito e o cenário que cobre, no nome ou num comentário
+
 ---
 
 ## 4. Respeitar os limites de cada papel
@@ -131,10 +142,20 @@ projetos consumidores, o VS Code/Copilot tem um subagente por papel em `.github/
 
 ## 5. Segurança e dados sensíveis
 
+Você MUST:
+
+- Validar toda entrada que chega de fora do sistema (requisição, mensagem, arquivo, variável de
+  ambiente) com a ferramenta de validação registrada no `project.md`, antes de processá-la
+- Registrar os estados iniciado, sucesso e falha em mutações e fronteiras críticas, com a
+  ferramenta de log do `project.md`, salvo quando a linha "Princípios de engenharia" do
+  `project.md` marcar o item como "Não aplicável"
+- Devolver ao cliente só mensagens de erro genéricas, sem a mensagem interna da exceção, o stack
+  trace ou dados pessoais
+
 Você MUST NOT:
 
 - Incluir credenciais, tokens, senhas ou secrets em qualquer arquivo
-- Remover ou contornar validações de entrada (Zod ou equivalente)
+- Remover ou contornar validações de entrada (a ferramenta registrada no `project.md`)
 - Implementar autenticação ou autorização sem spec aprovada
 - Expor dados pessoais em logs ou respostas de API
 - Commitar código sem rodar a varredura de secrets que o projeto registrou nos Comandos
