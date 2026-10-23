@@ -23,7 +23,8 @@
 
 - [x] 3.1 Atualizar README e guia do projeto com os três hooks e o `estado`, e aplicar o D7 com a versão aprovada. Verificar com o lint e o passo "Versão e changelog" passando.
   - Evidência: guia `templates/openspec-padrao.md` (três hooks de sessão novos, comando `estado` na seção Portão e passos 4 a 6 no "Roteiro de verificação no Claude Code"), README (hooks de sessão) e três itens em "O que mudou" e um em "Ações no projeto" da seção 1.12.0 aberta do CHANGELOG, sem subir o `VERSION`. Git Bash: "Lint de Markdown" (padrão e raiz), "Versão e changelog", "Raiz em dia", "Guia de primeiros passos" e validate da raiz → PASS.
-- [ ] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+- [x] 3.2 Avisar a outra sessão, rodar os comandos de verificação do `openspec/project.md` localmente e conferir no PR os três jobs. Verificar que todos passam.
+  - Evidência: outra sessão avisada antes e depois; suíte local completa no Git Bash → 28 passos PASS, 0 ids `ci-*`; depois do rebase sobre a `contratos-de-interface`, passos afetados PASS; PR #40 (rascunho), run 39973456189 (head 301204f) → store (ubuntu-latest), store (windows-latest) e root = success.
 
 ## Workflow follow-up
 
