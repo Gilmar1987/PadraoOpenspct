@@ -14,8 +14,10 @@
 
 ## 3. Revisão e verify
 
-- [ ] 3.1 Aplicar o D3 em `padrao-openspec/.claude/skills/requesting-code-review/code-reviewer.md` e `padrao-openspec/.claude/agents/openspec-code-reviewer.md`. Verificar com o marcador do D6 passando e com o passo "Paridade de papéis" passando.
-- [ ] 3.2 Aplicar o D4 em `padrao-openspec/.claude/commands/opsx/verify.md` e `padrao-openspec/.claude/skills/openspec-verify-change/SKILL.md`, com o mesmo texto. Verificar com `diff` vazio entre as duas heurísticas, com o marcador passando e com o "Smoke test das métricas de fluxo" passando.
+- [x] 3.1 Aplicar o D3 em `padrao-openspec/.claude/skills/requesting-code-review/code-reviewer.md` e `padrao-openspec/.claude/agents/openspec-code-reviewer.md`. Verificar com o marcador do D6 passando e com o passo "Paridade de papéis" passando.
+  - Evidência: bloco "Engineering principles" no template `requesting-code-review/code-reviewer.md` (depois de "Production readiness") e item no `openspec-code-reviewer.md`; "Paridade de papéis" → PASS; os marcadores desses dois arquivos deixaram de falhar
+- [x] 3.2 Aplicar o D4 em `padrao-openspec/.claude/commands/opsx/verify.md` e `padrao-openspec/.claude/skills/openspec-verify-change/SKILL.md`, com o mesmo texto. Verificar com `diff` vazio entre as duas heurísticas, com o marcador passando e com o "Smoke test das métricas de fluxo" passando.
+  - Evidência: heurística "Engineering principles" depois de "Verification layers" no `verify.md` e na skill; `diff` → iguais; "Smoke test das métricas de fluxo" → PASS (exit 0)
 
 ## 4. Init e project.md
 
