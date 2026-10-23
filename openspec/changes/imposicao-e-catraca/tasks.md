@@ -10,7 +10,8 @@
 ## 2. ADR e modelos
 
 - [ ] 2.1 Revisar a [ADR-0008](../../adrs/0008-imposicao-declarada-e-catraca-de-falhas.md) com o responsável e promovê-la a `Accepted` antes do archive (com PR, na revisão do PR; sem PR, pela declaração do responsável citada no commit). Verificar com `grep -n "^status: Accepted" openspec/adrs/0008-*.md`.
-- [ ] 2.2 Aplicar o D1 em `padrao-openspec/openspec/adrs/template.md` (campo `imposicao` e seção `## Limite`) e em `padrao-openspec/openspec/adrs/README.md` (item de Convenções). Verificar com `grep -n "imposicao\|## Limite"` no template, com o lint de Markdown e com os marcadores do D7 desses arquivos passando.
+- [x] 2.2 Aplicar o D1 em `padrao-openspec/openspec/adrs/template.md` (campo `imposicao` e seção `## Limite`) e em `padrao-openspec/openspec/adrs/README.md` (item de Convenções). Verificar com `grep -n "imposicao\|## Limite"` no template, com o lint de Markdown e com os marcadores do D7 desses arquivos passando.
+  - Evidência: campo `imposicao` no frontmatter de `adrs/template.md` (linha 9, com os quatro valores e o padrão sem o campo) e seção `## Limite` (linha 32) com "Garante" e "Fica sob palavra"; `adrs/README.md` com `imposicao`, visto reprovando, Limite e a mudança sem ADR nova; lint em `padrao-openspec/` → 0 issues; os marcadores do template e do README deixaram de faltar
 - [ ] 2.3 Aplicar o D5 e o D6 ao Arquivo 6 de `padrao-openspec/.claude/commands/opsx/init.md` (seção "Falhas aceitas", com a linha "Nenhuma", e o "Sai quando" conferível nas duas tabelas, com exemplos). Verificar com o marcador "Falhas aceitas" no init passando e com `grep -n "data sozinha"` no `init.md`.
 
 ## 3. Propose, archive e config
