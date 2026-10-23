@@ -33,7 +33,8 @@
   - Evidência: `discover` na lista `$cmds` de `test-setup.ps1`; `grep -n "'discover'"` → linha 117
 - [x] 4.2 Atualizar `README.md`, `COMECE-AQUI.md` e `padrao-openspec/README.md` conforme o D8, e o `CHANGELOG.md`, com um item na seção aberta (1.14.0). Verificar com os passos "Versão e changelog", "Lint de Markdown da raiz" e "Guia de primeiros passos" passando.
   - Evidência: README com a linha `/opsx:discover` na tabela de comandos, o fluxo `init → [ingest] → [discover] → entrevista → propose` e três linhas na tabela de trechos customizados; COMECE-AQUI com as duas perguntas do init; README do `padrao-openspec` com o comando na árvore e o passo 0 do fluxo; CHANGELOG com o item "Descoberta do produto" na 1.14.0 aberta, sem ação obrigatória; `run-ci-steps.py` → "Versão e changelog", "Lint de Markdown", "Sintaxe dos scripts", "Trechos customizados", "Lint de Markdown da raiz" e "Guia de primeiros passos" PASS (exit 0)
-- [ ] 4.3 Rodar `sync-root.mjs` e `sync-root.mjs --check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão. Verificar que todos saem com código 0.
+- [x] 4.3 Rodar `sync-root.mjs` e `sync-root.mjs --check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão. Verificar que todos saem com código 0.
+  - Evidência: outra sessão avisada e liberou depois da suíte dela; `sync-root.mjs --check` → em dia; `openspec validate --all --strict` na raiz → 22 passed (exit 0); em `padrao-openspec/` → nada a validar (exit 0); `run-ci-steps.py` do job `store` → 24 PASS e do job `root` → 6 PASS (exit 0); nenhum `ci-*` no registro de stores ao final
 
 ## 5. Verificação de comportamento
 
