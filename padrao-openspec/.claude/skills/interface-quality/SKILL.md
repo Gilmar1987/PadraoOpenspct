@@ -19,7 +19,9 @@ qualquer stack (ADR-0003): ela descreve o resultado e como conferir, não a bibl
 ## Ordem de trabalho
 
 1. **Propose:** numa change com telas, o `design.md` traz a seção "Brief visual" (modelo abaixo), e as
-   tarefas citam os estados de cada tela. Sem brief, o verify registra um crítico.
+   tarefas citam os estados de cada tela. O verify só exige o relatório de interface quando o design
+   tem o brief: uma change com telas e sem brief escapa da validação, por isso o brief é obrigatório
+   no propose. Se o relatório existir sem brief, o validador dá "fraco".
 2. **Apply:** o brief vem antes do código. Cada tela nasce com os estados de carregando, vazio, erro e
    sucesso, e com textos reais.
 3. **Antes de marcar a tarefa de uma tela:** suba a aplicação, escreva ou atualize
@@ -49,7 +51,7 @@ Copie para o `design.md`, numa seção `## Brief visual`, e preencha cada item:
 | Item | Como conferir |
 |---|---|
 | Responsividade em 390, 768 e 1280 px | Capturas do relatório, sem rolagem horizontal |
-| Acessibilidade WCAG 2.2 AA | axe-core sem violação séria ou crítica; foco visível; navegação por teclado numa jornada |
+| Acessibilidade WCAG 2.2 AA | axe-core sem violação séria ou crítica; foco visível; navegação por teclado numa jornada (passo `pressionar`) |
 | Rótulos e texto alternativo | Todo campo com rótulo associado; toda imagem informativa com `alt` |
 | Estados de carregando, vazio, erro e sucesso | Uma jornada por estado relevante, ou capturas de cada um |
 | Formulários com validação e mensagens claras | Jornada que envia vazio e confere a mensagem de erro |
@@ -103,8 +105,18 @@ Formato das jornadas:
 }
 ```
 
+Passos aceitos: `visitar` (caminho), `clicar` (texto de botão ou link, ou rótulo), `preencher`
+(rótulo ou placeholder → valor), `selecionar` (rótulo de uma lista → texto da opção), `marcar` (rótulo
+de caixa ou opção), `pressionar` (tecla, como `Tab` ou `Enter`) e `conferir` (texto que deve aparecer).
 Os passos usam o que o usuário vê: texto de botão e link, rótulo de campo, texto na tela. Uma jornada
-que só passa por seletor de CSS não prova que a tela é usável.
+que só passa por seletor de CSS não prova que a tela é usável. Cada passo espera até 10 segundos pelo
+elemento, e cada `conferir` grava uma captura do estado da tela.
+
+O script requisita os links internos da página inicial para achar links quebrados, menos os que parecem
+mudar estado (sair, excluir, remover, delete, logout). Rode-o contra a aplicação com dados de
+desenvolvimento, nunca contra produção. Erros HTTP durante as jornadas (o 422 de uma validação, por
+exemplo) vão para "Respostas de rede com erro" sem derrubar a nota; na página inicial, contam como
+defeito.
 
 Saída do script: 0 com nota "médio" ou "bom", 1 com "fraco", 2 quando a URL não abre ou o ambiente
 falha (Node.js anterior ao 20, sem rede no primeiro download).

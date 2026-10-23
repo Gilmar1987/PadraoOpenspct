@@ -830,10 +830,15 @@ jobs:
             grep -q 4173 "$out/boa.log" && grep -q 4174 "$out/ruim.log" && break
             sleep 1
           done
+          grep -q 4173 "$out/boa.log" && grep -q 4174 "$out/ruim.log" || { cat "$out"/*.log; echo "::error::Servidores das fixtures não subiram"; exit 1; }
           # Página boa com jornadas: saída 0, nota médio ou bom, capturas nas três larguras.
           node scripts/validar-interface.mjs http://127.0.0.1:4173/ --jornadas "$fx/jornadas.json" --saida "$out/boa" --json > "$out/boa.json"
           grep -Eq '"nota": *"(médio|bom)"' "$out/boa.json"
           grep -q 'Cadastro com nome' "$out/boa/interface-report.md"
+          # O 422 esperado da jornada de erro aparece em "Respostas de rede" sem derrubar a nota, e o botão
+          # que surge depois de um atraso é encontrado pela jornada.
+          grep -q '422' "$out/boa/interface-report.md"
+          grep -q '### Novidades que aparecem depois: aprovada' "$out/boa/interface-report.md"
           for w in 390 768 1280; do ls "$out/boa/interface/capturas/" | grep -q -- "-$w\.png$"; done
           # Cada passo "conferir" deixa a captura do estado da tela.
           test -f "$out/boa/interface/capturas/jornada-1-passo-4.png"
@@ -847,6 +852,7 @@ jobs:
           grep -q 'image-alt' "$out/ruim/interface-report.md"
           grep -q 'falha ao carregar o carrinho' "$out/ruim/interface-report.md"
           grep -q '/promocoes.html' "$out/ruim/interface-report.md"
+          grep -q 'faltando.png' "$out/ruim/interface-report.md"
           # O relatório fica na pasta da change e passa pelo lint de Markdown do projeto.
           npx --yes markdownlint-cli2@0.23.2 --config .markdownlint-cli2.jsonc "$out/boa/interface-report.md" "$out/ruim/interface-report.md"
           # URL fora do ar: erro de ambiente (saída 2).

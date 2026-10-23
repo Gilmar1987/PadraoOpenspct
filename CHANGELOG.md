@@ -32,7 +32,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   o Chromium (cerca de 100 MB) para uma pasta temporária.
 - Para registrar o comando num projeto já iniciado, acrescente aos Comandos de verificação do
   `openspec/project.md` a linha "Validação de interface" com
-  `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>`.
+  `node docs/openspec-validar-interface.mjs <url local> --jornadas <arquivo>`, e ao
+  `operations.apply.guidance` do `openspec/config.yaml` a linha "Em changes com telas, seguir a skill
+  interface-quality: brief visual antes do código e relatório de interface com nota médio ou superior
+  antes de marcar a tarefa da tela."
+- Rode a validação contra a aplicação com dados de desenvolvimento: o script requisita os links
+  internos da página inicial, menos os que parecem mudar estado (sair, excluir, remover).
 
 ## 1.11.0 — 2026-10-22
 

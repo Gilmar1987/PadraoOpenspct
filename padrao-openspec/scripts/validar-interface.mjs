@@ -8,7 +8,7 @@
 // Playwright install would otherwise remove.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
@@ -23,6 +23,9 @@ const widths = [390, 768, 1280];
 const axeTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const stepTimeout = 10000;
 const maxLinks = 50;
+// Links that usually change state in the application: the link check does not request them.
+const unsafeLink = /(logout|log-out|signout|sign-out|sair|excluir|apagar|remover|delete|remove|destroy)/i;
+const installLockTimeout = 5 * 60 * 1000;
 
 class UsageError extends Error {}
 
@@ -32,7 +35,8 @@ function usage() {
   <url>                endereço da aplicação rodando (por exemplo, http://localhost:3000/)
   --jornadas <arquivo> jornadas de usuário: {"jornadas": [{"nome": "...", "passos": [...]}]} ou uma
                        lista de passos; passos: {"visitar": "/caminho"}, {"clicar": "texto ou rótulo"},
-                       {"preencher": {"Rótulo": "valor"}}, {"conferir": "texto esperado"}
+                       {"preencher": {"Rótulo": "valor"}}, {"selecionar": {"Rótulo": "opção"}},
+                       {"marcar": "rótulo"}, {"pressionar": "Tab"}, {"conferir": "texto esperado"}
   --saida <pasta>      onde gravar interface-report.md/.json e interface/capturas/ (padrão: pasta atual)
   --json               imprime o relatório em JSON
 
@@ -85,7 +89,9 @@ function readJourneys(file) {
   if (!Array.isArray(journeys) || journeys.some((journey) => !Array.isArray(journey?.passos))) {
     throw new UsageError(`Formato de jornadas inválido em ${file}: use {"jornadas": [{"nome": "...", "passos": [...]}]}.`);
   }
-  return journeys.map((journey, index) => ({ nome: String(journey.nome ?? `Jornada ${index + 1}`), passos: journey.passos }));
+  return journeys.map((journey, index) => ({
+    nome: String(journey.nome ?? `Jornada ${index + 1}`).replace(/\s+/g, ' ').trim(), passos: journey.passos,
+  }));
 }
 
 async function checkReachable(url) {
@@ -115,6 +121,43 @@ function environment() {
   const dir = path.join(base, `playwright-${PLAYWRIGHT_VERSION}-axe-${AXE_VERSION}`);
   // A browser folder of our own: Playwright reads it at install and at launch.
   process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(base, 'navegadores');
+  mkdirSync(base, { recursive: true });
+  // Two runs at once (parallel sessions) would race on the same npm install: the first one holds a lock.
+  const lock = `${dir}.lock`;
+  const started = Date.now();
+  for (;;) {
+    try {
+      mkdirSync(lock);
+      break;
+    } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+      const age = Date.now() - (statSync(lock, { throwIfNoEntry: false })?.mtimeMs ?? Date.now());
+      if (age > installLockTimeout) rmSync(lock, { recursive: true, force: true });
+      else if (Date.now() - started > installLockTimeout) {
+        throw new UsageError(`Outra execução segura a instalação em ${lock}; apague a pasta se nenhuma estiver rodando.`);
+      } else Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000);
+    }
+  }
+  try {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        installTools(dir);
+        const load = createRequire(path.join(dir, 'package.json'));
+        const axe = load('@axe-core/playwright');
+        return { chromium: load('playwright').chromium, AxeBuilder: axe.default ?? axe.AxeBuilder };
+      } catch (error) {
+        // A folder left half-installed (an interrupted run, a temp cleanup) is rebuilt once.
+        if (attempt > 1 || error instanceof UsageError) throw error;
+        process.stderr.write(`Instalação incompleta em ${dir}; reinstalando.\n`);
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  } finally {
+    rmSync(lock, { recursive: true, force: true });
+  }
+}
+
+function installTools(dir) {
   const installed = (name) => existsSync(path.join(dir, 'node_modules', ...name.split('/'), 'package.json'));
   if (!installed('playwright') || !installed('@axe-core/playwright')) {
     mkdirSync(dir, { recursive: true });
@@ -125,25 +168,33 @@ function environment() {
   // Idempotent: downloads the browser only when it is missing.
   process.stderr.write('Conferindo o Chromium do Playwright (o primeiro download tem cerca de 100 MB)...\n');
   run(process.execPath, [path.join(dir, 'node_modules', 'playwright', 'cli.js'), 'install', '--only-shell', 'chromium'], dir);
-  const load = createRequire(path.join(dir, 'package.json'));
-  const axe = load('@axe-core/playwright');
-  return { chromium: load('playwright').chromium, AxeBuilder: axe.default ?? axe.AxeBuilder };
 }
 
 const firstLine = (text) => String(text ?? '').split('\n')[0].trim();
 
 // The same message seen at several widths or journeys counts once, with every place it appeared.
-function watchConsole(page, sink, where) {
-  const add = (text) => {
+// The browser reports every HTTP error response as a console error ("Failed to load resource"): those
+// go to their own list, because a journey that checks a validation error expects a 4xx answer.
+function watchConsole(page, report, where) {
+  const add = (sink, text) => {
     const mensagem = firstLine(text);
     const existing = sink.find((item) => item.mensagem === mensagem);
     if (!existing) sink.push({ mensagem, onde: [where] });
     else if (!existing.onde.includes(where)) existing.onde.push(where);
   };
   page.on('console', (message) => {
-    if (message.type() === 'error') add(message.text());
+    if (message.type() !== 'error') return;
+    const text = message.text();
+    if (text.startsWith('Failed to load resource')) add(report.rede, `${text}: \`${message.location()?.url ?? ''}\``);
+    else add(report.console, text);
   });
-  page.on('pageerror', (error) => add(error.message));
+  page.on('pageerror', (error) => add(report.console, error.message));
+}
+
+// Brings the page to a settled state without waiting forever for apps that never go network-idle
+// (server-sent events, polling, analytics).
+async function settle(page) {
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 }
 
 function mergeViolations(target, violations, width) {
@@ -168,8 +219,10 @@ async function scanWidths(browser, AxeBuilder, report, capturas) {
   for (const width of widths) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
     const page = await context.newPage();
-    watchConsole(page, report.console, `página inicial em ${width} px`);
-    await page.goto(report.url, { waitUntil: 'networkidle', timeout: 30000 });
+    watchConsole(page, report, `página inicial em ${width} px`);
+    const response = await page.goto(report.url, { waitUntil: 'load', timeout: 30000 });
+    if (width === widths[0]) report.statusInicial = response?.status() ?? 0;
+    await settle(page);
     const file = path.join(capturas, `inicio-${width}.png`);
     await page.screenshot({ path: file, fullPage: true });
     report.capturas.push(`interface/capturas/inicio-${width}.png`);
@@ -186,16 +239,26 @@ async function scanWidths(browser, AxeBuilder, report, capturas) {
         favicon: document.querySelector('link[rel~="icon"]')?.href ?? '',
         links: [...new Set([...document.querySelectorAll('a[href]')]
           .map((link) => link.href.split('#')[0])
-          .filter((href) => href.startsWith(location.origin)))],
+          .filter((href) => {
+            try {
+              return new URL(href).origin === location.origin;
+            } catch {
+              return false;
+            }
+          }))],
       }));
       if (!report.pagina.favicon) {
         const fallback = new URL('/favicon.ico', report.url).href;
         const response = await context.request.get(fallback).catch(() => null);
         if (response?.ok()) report.pagina.favicon = fallback;
       }
-      for (const href of report.pagina.links.slice(0, maxLinks)) {
+      const pathOf = (href) => new URL(href).pathname;
+      const safe = report.pagina.links.filter((href) => !unsafeLink.test(pathOf(href)));
+      report.linksIgnorados = report.pagina.links.filter((href) => unsafeLink.test(pathOf(href))).map(pathOf);
+      report.linksNaoConferidos = Math.max(0, safe.length - maxLinks);
+      for (const href of safe.slice(0, maxLinks)) {
         const response = await context.request.get(href).catch((error) => ({ status: () => 0, error }));
-        report.links.push({ href: new URL(href).pathname, status: response.status() });
+        report.links.push({ href: pathOf(href), status: response.status() });
       }
       delete report.pagina.links;
     }
@@ -214,29 +277,26 @@ async function checkNotFound(browser, report) {
 
 async function runStep(page, step, baseUrl) {
   const [kind, value] = Object.entries(step ?? {})[0] ?? [];
+  // Locators combined with or() wait for whichever appears first, so screens that render late work.
+  const field = (label) => page.getByLabel(label).or(page.getByPlaceholder(label)).first();
   if (kind === 'visitar') {
-    await page.goto(new URL(String(value), baseUrl).href, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(new URL(String(value), baseUrl).href, { waitUntil: 'load', timeout: 30000 });
+    await settle(page);
   } else if (kind === 'clicar') {
     const name = String(value);
-    const candidates = [
-      page.getByRole('button', { name }), page.getByRole('link', { name }), page.getByLabel(name), page.getByText(name),
-    ];
-    let target = null;
-    for (const candidate of candidates) {
-      if (await candidate.count() > 0) {
-        target = candidate.first();
-        break;
-      }
-    }
-    if (!target) throw new Error(`nada clicável com o texto ou rótulo "${name}"`);
-    await target.click({ timeout: stepTimeout });
-    await page.waitForLoadState('networkidle', { timeout: stepTimeout }).catch(() => {});
+    await page.getByRole('button', { name }).or(page.getByRole('link', { name })).or(page.getByLabel(name))
+      .or(page.getByText(name)).first().click({ timeout: stepTimeout });
+    await settle(page);
   } else if (kind === 'preencher') {
-    for (const [label, text] of Object.entries(value ?? {})) {
-      const field = page.getByLabel(label);
-      const target = await field.count() > 0 ? field.first() : page.getByPlaceholder(label).first();
-      await target.fill(String(text), { timeout: stepTimeout });
+    for (const [label, text] of Object.entries(value ?? {})) await field(label).fill(String(text), { timeout: stepTimeout });
+  } else if (kind === 'selecionar') {
+    for (const [label, option] of Object.entries(value ?? {})) {
+      await field(label).selectOption({ label: String(option) }, { timeout: stepTimeout });
     }
+  } else if (kind === 'marcar') {
+    await page.getByLabel(String(value)).first().check({ timeout: stepTimeout });
+  } else if (kind === 'pressionar') {
+    await page.keyboard.press(String(value));
   } else if (kind === 'conferir') {
     await page.getByText(String(value)).first().waitFor({ state: 'visible', timeout: stepTimeout });
   } else {
@@ -248,7 +308,7 @@ async function runJourneys(browser, journeys, report, capturas) {
   for (const [journeyIndex, journey] of journeys.entries()) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
-    watchConsole(page, report.console, `jornada "${journey.nome}"`);
+    watchConsole(page, report, `jornada "${journey.nome}"`);
     const result = { nome: journey.nome, passos: [], ok: true };
     for (const [stepIndex, step] of journey.passos.entries()) {
       const label = JSON.stringify(step);
@@ -280,15 +340,19 @@ function grade(report, hadJourneys) {
   const weak = [];
   const finish = [];
   const serious = report.acessibilidade.filter((item) => ['serious', 'critical'].includes(item.impacto));
-  const other = report.acessibilidade.filter((item) => !['serious', 'critical'].includes(item.impacto));
+  const moderate = report.acessibilidade.filter((item) => item.impacto === 'moderate');
+  // Failed resources while the page loads are defects; during journeys they may be expected (a 422).
+  const pageLoad = report.rede.filter((item) => item.onde.some((where) => where.startsWith('página inicial')));
   const failed = report.jornadas.filter((journey) => !journey.ok);
   const broken = report.links.filter((link) => link.status === 0 || link.status >= 400);
+  if (report.statusInicial >= 400) weak.push(`a URL respondeu ${report.statusInicial}`);
   if (failed.length) weak.push(`${failed.length} jornada(s) falharam: ${failed.map((journey) => journey.nome).join(', ')}`);
   if (serious.length) weak.push(`violações de acessibilidade sérias ou críticas: ${serious.map((item) => item.id).join(', ')}`);
   if (report.console.length) weak.push(`${report.console.length} erro(s) de console ou de página`);
   if (broken.length) weak.push(`links internos quebrados: ${broken.map((link) => link.href).join(', ')}`);
+  if (pageLoad.length) weak.push(`${pageLoad.length} recurso(s) da página inicial com erro HTTP`);
   if (!report.pagina.titulo) weak.push('a página não tem título');
-  if (other.length) finish.push(`violações de acessibilidade moderadas ou menores: ${other.map((item) => item.id).join(', ')}`);
+  if (moderate.length) finish.push(`violações de acessibilidade moderadas: ${moderate.map((item) => item.id).join(', ')}`);
   if (report.transbordo.length) finish.push(`rolagem horizontal em ${report.transbordo.join(', ')} px`);
   if (!report.pagina.favicon) finish.push('sem favicon');
   if (!report.pagina.descricao) finish.push('sem meta description');
@@ -336,13 +400,20 @@ function markdown(report) {
     lines.push('Nenhuma violação encontrada pelo axe-core.');
   }
   lines.push('', '## Console', '');
-  lines.push(...(report.console.length ? report.console.map((item) => `- ${inline(item.mensagem)} (${item.onde.join('; ')})`) : ['Nenhum erro de console ou de página.']));
+  lines.push(...(report.console.length ? report.console.map((item) => `- ${inline(item.mensagem)} (${inline(item.onde.join('; '))})`) : ['Nenhum erro de console ou de página.']));
+  lines.push('', '## Respostas de rede com erro', '');
+  lines.push('Erros HTTP de recursos (imagens, scripts, chamadas de API). Na página inicial contam para a nota;');
+  lines.push('nas jornadas podem ser esperados, como o 422 de uma validação, e ficam para o validador avaliar.', '');
+  lines.push(...(report.rede.length ? report.rede.map((item) => `- ${inline(item.mensagem)} (${inline(item.onde.join('; '))})`) : ['Nenhuma.']));
   lines.push('', '## Links internos', '');
-  lines.push(...(report.links.length ? report.links.map((link) => `- ${link.href} → ${link.status || 'sem resposta'}`) : ['Nenhum link interno na página inicial.']));
+  lines.push(...(report.links.length ? report.links.map((link) => `- ${inline(link.href)} → ${link.status || 'sem resposta'}`) : ['Nenhum link interno na página inicial.']));
+  if (report.linksIgnorados?.length) lines.push(`- Não requisitados, por parecerem mudar estado: ${report.linksIgnorados.map(inline).join(', ')}`);
+  if (report.linksNaoConferidos) lines.push(`- Não conferidos, além do limite de ${maxLinks}: ${report.linksNaoConferidos}`);
   lines.push('', '## Página', '');
   lines.push(
+    `- Status da URL: ${report.statusInicial || 'sem resposta'}`,
     `- Título: ${inline(report.pagina.titulo) || '(ausente)'}`,
-    `- Idioma (lang): ${report.pagina.lang || '(ausente)'}`,
+    `- Idioma (lang): ${inline(report.pagina.lang) || '(ausente)'}`,
     `- Meta description: ${yes(report.pagina.descricao)}`,
     `- Favicon: ${yes(report.pagina.favicon)}`,
     `- Rota inexistente: status ${report.pagina404.status}, ${report.pagina404.caracteres} caracteres de texto`,
@@ -351,10 +422,12 @@ function markdown(report) {
   lines.push('', '## Jornadas', '');
   if (!report.jornadas.length) lines.push('Nenhuma jornada informada (use --jornadas).');
   for (const journey of report.jornadas) {
-    lines.push(`### ${journey.nome}: ${journey.ok ? 'aprovada' : 'reprovada'}`, '');
+    lines.push(`### ${inline(journey.nome)}: ${journey.ok ? 'aprovada' : 'reprovada'}`, '');
     for (const step of journey.passos) {
       const shot = step.captura ? ` ([captura](${step.captura}))` : '';
-      lines.push(`- ${step.ok ? 'ok' : 'falhou'}: \`${step.passo}\`${step.ok ? shot : ` — ${step.erro}${shot}`}`);
+      // Backticks inside the step would end the code span.
+      const code = `\`${step.passo.replace(/`/g, "'")}\``;
+      lines.push(`- ${step.ok ? 'ok' : 'falhou'}: ${code}${step.ok ? shot : ` — ${inline(step.erro)}${shot}`}`);
     }
     lines.push('');
   }
@@ -373,15 +446,24 @@ async function main() {
   const output = path.resolve(options.output);
   const capturas = path.join(output, 'interface', 'capturas');
   mkdirSync(capturas, { recursive: true });
+  // Pictures from an earlier run would be read as if they were from this one.
+  for (const name of readdirSync(capturas)) {
+    if (/^(inicio|jornada)-[\w-]+\.png$/.test(name)) rmSync(path.join(capturas, name), { force: true });
+  }
   const report = {
-    url: options.url, data: new Date().toISOString(), nota: null, motivos: [], capturas: [], acessibilidade: [],
-    console: [], links: [], pagina: {}, pagina404: {}, transbordo: [], jornadas: [],
+    url: options.url, data: new Date().toISOString(), nota: null, motivos: [], statusInicial: 0, capturas: [],
+    acessibilidade: [], console: [], rede: [], links: [], linksIgnorados: [], linksNaoConferidos: 0, pagina: {},
+    pagina404: {}, transbordo: [], jornadas: [],
   };
   let browser;
   try {
     browser = await chromium.launch();
   } catch (error) {
-    throw new UsageError(`Não consegui abrir o Chromium: ${firstLine(error.message)}`);
+    // On Linux without the browser's system libraries, Playwright's own hint is the fix.
+    const hint = /install-deps/.test(error.message)
+      ? ` Faltam bibliotecas do sistema: rode "node ${path.join(process.env.PLAYWRIGHT_BROWSERS_PATH, '..')}/playwright-${PLAYWRIGHT_VERSION}-axe-${AXE_VERSION}/node_modules/playwright/cli.js install-deps chromium" com permissão de administrador.`
+      : '';
+    throw new UsageError(`Não consegui abrir o Chromium: ${firstLine(error.message)}.${hint}`);
   }
   try {
     await scanWidths(browser, AxeBuilder, report, capturas);

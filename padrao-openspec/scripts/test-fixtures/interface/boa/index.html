@@ -33,16 +33,36 @@
       <p id="mensagem" role="status" aria-live="polite"></p>
       <button type="submit">Enviar</button>
     </form>
+    <section aria-labelledby="novidades-titulo">
+      <h2 id="novidades-titulo">Novidades</h2>
+      <p id="novidades-carregando">Carregando novidades...</p>
+      <div id="novidades"></div>
+    </section>
   </main>
   <footer><p>Exemplo do padrão OpenSpec.</p></footer>
   <script>
-    document.getElementById('cadastro').addEventListener('submit', (event) => {
+    // O cadastro vai ao servidor, que responde 422 sem nome: a jornada de erro gera uma resposta 4xx esperada.
+    document.getElementById('cadastro').addEventListener('submit', async (event) => {
       event.preventDefault();
       const nome = document.getElementById('nome').value.trim();
       const mensagem = document.getElementById('mensagem');
-      mensagem.className = nome ? 'sucesso' : 'erro';
-      mensagem.textContent = nome ? `Obrigado, ${nome}!` : 'Informe o seu nome.';
+      mensagem.className = '';
+      mensagem.textContent = 'Enviando...';
+      const resposta = await fetch('/api/cadastro', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nome }) });
+      mensagem.className = resposta.ok ? 'sucesso' : 'erro';
+      mensagem.textContent = resposta.ok ? `Obrigado, ${nome}!` : 'Informe o seu nome.';
     });
+    // Conteúdo que aparece depois de um atraso, sem rede: a jornada tem de esperar por ele.
+    setTimeout(() => {
+      document.getElementById('novidades-carregando').hidden = true;
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.textContent = 'Ver novidades';
+      botao.addEventListener('click', () => {
+        document.getElementById('novidades').textContent = 'Nenhuma novidade esta semana.';
+      });
+      document.getElementById('novidades').append(botao);
+    }, 1500);
   </script>
 </body>
 </html>
