@@ -189,6 +189,9 @@ jobs:
             check "$f" "verificacao"
             check "$f" "Check concurrent changes"
             check "$f" "Interface brief"
+            check "$f" "Impacto medido"
+            check "$f" "Falhas aceitas:"
+            check "$f" "seen failing"
           done
           for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md; do
             check "$f" "Check the approval record"
@@ -230,6 +233,10 @@ jobs:
             check "$f" "Verification layers"
             check "$f" "Engineering principles"
             check "$f" "   - Camadas: <layer (command)"
+            check "$f" "ADR check seen failing"
+            check "$f" "nada a varrer"
+            check "$f" "Accepted failures"
+            check "$f" "Exit conditions"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
@@ -243,6 +250,7 @@ jobs:
             check "$f" "Approval content seal"
             check "$f" "Commit the archive"
             check "$f" "Run the gate"
+            check "$f" "Falhas aceitas:"
           done
           for f in .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
             check "$f" "Scope change resets approval"
@@ -275,6 +283,13 @@ jobs:
           for g in .claude/commands/opsx/explore.md .claude/skills/openspec-explore/SKILL.md; do
             check "$g" "Related debts"
           done
+          # Imposição e catraca (imposicao-e-catraca): Falhas aceitas e "Sai quando" conferível no Arquivo 6, modelo de ADR e config.
+          check "$f" "## Falhas aceitas"
+          check "$f" "Uma data sozinha não é condição"
+          check openspec/adrs/template.md "imposicao:"
+          check openspec/adrs/template.md "## Limite"
+          check openspec/adrs/README.md '`imposicao` (opcional)'
+          check openspec/config.yaml "Impacto medido"
           # Contratos de interface (contratos-de-interface): template do project.md e regra global.
           check openspec/project.md "### Contratos de interface"
           check openspec/project.md "| Teste de contrato |"

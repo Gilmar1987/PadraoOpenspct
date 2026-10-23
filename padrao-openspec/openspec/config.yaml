@@ -47,6 +47,7 @@ rules:
     - Citar as ADRs Accepted que se aplicam; se o design contrariar uma delas ou tomar uma decisão transversal nova, indicar a ADR a criar ou substituir
     - "Para cada risco marcado como aplicável na proposal, descrever a mitigação (ex.: mascaramento em log, índice, migração, plano de rollback, criação prévia da configuração)"
     - "Listar o raio de impacto: arquivos-alvo (que serão alterados) e dependentes afetados (arquivos, rotas ou componentes que usam os alvos e podem quebrar)"
+    - "Ao criar ou endurecer a verificação de uma ADR, trazer a seção Impacto medido: o comando, o código de saída, as violações que o código tem hoje e o destino de cada uma (tarefa, lacuna ou falha aceita)"
   tasks:
     - Dividir o trabalho em tarefas pequenas e ordenadas por dependência
     - Cada tarefa deve informar um critério objetivo de conclusão ou validação
@@ -55,6 +56,7 @@ rules:
     - Toda dependência citada no Impact do proposal precisa aparecer numa tarefa
     - Em cada grupo, a tarefa que cria ou atualiza os testes dos cenários vem antes da tarefa que implementa o comportamento
     - O teste de cada cenário cita o requisito e o cenário no nome ou num comentário
+    - "A tarefa que cria ou muda a verificação de uma ADR registra a execução com a violação injetada (falha) e no caso limpo (passa), com os dois códigos de saída"
     - Tarefas que dependem de push, PR ou CI remoto só entram quando o project.md registra um remoto; sem ele, a tarefa usa a verificação local equivalente e diz qual é
 
 operations:

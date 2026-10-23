@@ -6,6 +6,7 @@ supersedes:
 superseded_by:
 related_changes: []
 verificacao: []
+imposicao: # controle | consultivo | externo | norma (sem o campo: controle com verificacao, norma sem)
 ---
 
 # ADR-NNNN: Título da decisão
@@ -27,3 +28,10 @@ verificacao: []
 ## Consequências
 
 <!-- O que fica mais fácil, o que fica mais difícil, riscos aceitos e o que precisa ser feito em decorrência. -->
+
+## Limite
+
+<!-- Separe o que o mecanismo confere do que fica sob palavra, nomeando o campo ou o comportamento exato, e não a área. -->
+
+- **Garante:** <!-- o que a verificação confere, por exemplo "importações declaradas entre as pastas da tabela" -->
+- **Fica sob palavra:** <!-- o que nenhum mecanismo confere, por exemplo "acoplamento por outro meio que não importação" -->
