@@ -23,6 +23,8 @@
 
 ## 4. Regras, versão e documentação
 
-- [ ] 4.1 Aplicar o D7 em `padrao-openspec/openspec/rules.md` (item na seção 3). Verificar com `grep -n "contrato de interface"` no arquivo e com o smoke dos blocos de agentes passando.
-- [ ] 4.2 Aplicar o D8 em `padrao-openspec/VERSION`, `CHANGELOG.md` e na tabela de trechos customizados do `README.md`. Verificar com o passo "Versão e changelog" passando.
+- [x] 4.1 Aplicar o D7 em `padrao-openspec/openspec/rules.md` (item na seção 3). Verificar com `grep -n "contrato de interface"` no arquivo e com o smoke dos blocos de agentes passando.
+  - Evidência: item novo na seção 3 do `rules.md` (contrato antes do código e no mesmo commit); `grep -n "contrato de interface"` → linha 104 (e a 26, da precedência); espelho da raiz sincronizado; "Smoke test dos blocos de agentes" → PASS (exit 0)
+- [x] 4.2 Aplicar o D8 em `padrao-openspec/VERSION`, `CHANGELOG.md` e na tabela de trechos customizados do `README.md`. Verificar com o passo "Versão e changelog" passando.
+  - Evidência: pelo modelo de versão acumulada, `VERSION` continua 1.12.0; item "Contratos de interface" em "O que mudou" e ação recomendada em "Ações no projeto" da seção 1.12.0; README com os três trechos e a 2.6 na tabela de trechos customizados; "Versão e changelog", "Lint de Markdown da raiz" e "Guia de primeiros passos" → PASS (exit 0)
 - [ ] 4.3 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão para não rodarem juntas. Verificar que todos saem com código 0.

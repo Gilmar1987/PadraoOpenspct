@@ -47,6 +47,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   contrato → specs → arquitetura → ADRs → código; divergência entre contrato e specs vai ao
   responsável.
 
+- **Contratos de interface:** o `/opsx:init` pergunta, na 2.6, se o sistema expõe ou consome uma API
+  e onde está o contrato (OpenAPI, GraphQL SDL, Protocol Buffers ou AsyncAPI), e o `project.md` ganha a
+  tabela "Contratos de interface" e a linha "Teste de contrato". O propose põe o contrato no Impact e
+  a tarefa de atualizá-lo antes do código; o apply commita contrato e código juntos; o verify confere
+  as duas direções pelo teste de contrato e o SHA-256 das cópias de terceiros contra o `ORIGEM.md`.
+
 ### Ações no projeto
 
 - Nenhuma obrigatória. Projetos com front-end: nas próximas changes com telas, o verify exige o
@@ -67,6 +73,9 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - Se o projeto já convive com divergências conhecidas entre o código e uma spec, ADR ou documento de
   referência, registre-as em `openspec/lacunas.md`, com motivo e data.
 - Nas ADRs `Accepted` cuja decisão se confere por código, preencha `verificacao` com o teste.
+- Recomendado (contratos): no store, acrescente ao `project.md` a tabela "Contratos de interface"
+  (em Architecture) e a linha "Teste de contrato" nos Comandos de verificação, ou "Não aplicável" quando
+  o sistema não tiver API para outros sistemas.
 
 ## 1.11.0 — 2026-10-22
 
