@@ -25,5 +25,6 @@
 
 ## 4. Versão, documentação e integração
 
-- [ ] 4.1 Aplicar o D7 ao `padrao-openspec/VERSION` e ao `CHANGELOG.md` com a versão combinada na 1.1 e as ações no projeto. Verificar com o passo "Versão e changelog" passando localmente.
+- [x] 4.1 Aplicar o D7 ao `padrao-openspec/VERSION` e ao `CHANGELOG.md` com a versão combinada na 1.1 e as ações no projeto. Verificar com o passo "Versão e changelog" passando localmente.
+  - Evidência: pelo modelo de versão acumulada, `VERSION` continua 1.12.0; item "Débitos e camadas de verificação" em "O que mudou" e ação recomendada em "Ações no projeto" da seção 1.12.0; README com os trechos novos na tabela (inclusive uma linha para o explore); "Versão e changelog", lint nos dois lugares, "Raiz em dia" e "Guia" → PASS (exit 0)
 - [ ] 4.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente, depois de combinar com a outra sessão que a suíte dela não está rodando. Verificar que todos saem com código 0.
