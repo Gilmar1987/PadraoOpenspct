@@ -20,6 +20,22 @@ separado, é o store; `openspec context --json` mostra a raiz):
 Se esses arquivos não existirem, pergunte ao usuário se o projeto usa OpenSpec e
 qual store deve ser referenciado antes de prosseguir.
 
+**Precedência entre documentos.** Num conflito, vale esta ordem, a menos que a seção
+"Precedência dos documentos" do `project.md` registre outra:
+
+1. contrato de interface (OpenAPI, GraphQL, protobuf ou equivalente);
+2. specs principais (`openspec/specs/`);
+3. arquitetura (`openspec/arquitetura.md` e `openspec/project.md`);
+4. ADRs `Accepted`;
+5. código.
+
+- O código que diverge de um documento converge para ele, salvo quando a divergência está
+  declarada em `openspec/lacunas.md`, com motivo e data.
+- Uma divergência entre o contrato e as specs vai ao responsável: você MUST NOT escolher
+  sozinho qual dos dois seguir.
+- Outras divergências são reportadas ao responsável, e o trabalho em curso segue o
+  documento de maior precedência.
+
 ---
 
 ## 2. Nenhuma implementação sem change ativa aprovada

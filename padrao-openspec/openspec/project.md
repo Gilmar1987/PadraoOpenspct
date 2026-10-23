@@ -53,6 +53,18 @@
 
 - <!-- Regras de negócio, segurança, privacidade, desempenho, disponibilidade ou compliance -->
 
+## Precedência dos documentos
+
+<!-- Ordem usada num conflito entre documentos. Ajuste se o projeto precisar; o padrão é: -->
+
+1. Contrato de interface: <!-- caminho do contrato, ou "não aplicável" -->
+2. Specs principais (`openspec/specs/`)
+3. Arquitetura (`openspec/arquitetura.md` e este `project.md`)
+4. ADRs `Accepted` (`openspec/adrs/`)
+5. Código
+
+Divergências declaradas ficam em `openspec/lacunas.md`.
+
 ## Stack Summary
 
 | Área | Escolha do projeto | Observações |
@@ -79,6 +91,7 @@
 | Migrações | <!-- A definir ou não aplicável --> | |
 | Auditoria de dependências | <!-- A definir ou não aplicável --> | |
 | Varredura de secrets | <!-- A definir ou não aplicável --> | |
+| Conferência de lacunas | <!-- Não aplicável enquanto openspec/lacunas.md estiver vazio; depois, o teste do projeto que confere as fontes, se houver --> | |
 
 ## Development Conventions
 

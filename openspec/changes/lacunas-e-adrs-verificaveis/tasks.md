@@ -27,9 +27,12 @@
 
 ## 4. Precedência e modelo de project.md
 
-- [ ] 4.1 Aplicar o D5 em `padrao-openspec/openspec/rules.md` (parágrafo "Precedência entre documentos" na seção 1). Verificar com `grep -n "Precedência entre documentos"` e com o smoke test dos blocos de agentes passando (o `docs/openspec-regras.md` gerado traz o parágrafo).
-- [ ] 4.2 Aplicar o D5 ao modelo `padrao-openspec/openspec/project.md` (seção "Precedência dos documentos" depois de "Key Constraints" e linha "Conferência de lacunas" em "Comandos de verificação"). Verificar com `grep` das duas e com o markdownlint.
-- [ ] 4.3 Atualizar o `README.md` (trechos customizados novos e o `lacunas.mjs` na lista de scripts) conforme o D6. Verificar com o lint da raiz.
+- [x] 4.1 Aplicar o D5 em `padrao-openspec/openspec/rules.md` (parágrafo "Precedência entre documentos" na seção 1). Verificar com `grep -n "Precedência entre documentos"` e com o smoke test dos blocos de agentes passando (o `docs/openspec-regras.md` gerado traz o parágrafo).
+  - Evidência: parágrafo "Precedência entre documentos" na seção 1 do `rules.md` (ordem contrato → specs → arquitetura → ADRs → código, lacuna declarada, contrato × specs ao responsável); `grep` → linha 23 no padrão e no espelho da raiz; "Smoke test dos blocos de agentes" → PASS (exit 0); instalação num repositório temporário → o `docs/openspec-regras.md` traz o parágrafo (1 ocorrência)
+- [x] 4.2 Aplicar o D5 ao modelo `padrao-openspec/openspec/project.md` (seção "Precedência dos documentos" depois de "Key Constraints" e linha "Conferência de lacunas" em "Comandos de verificação"). Verificar com `grep` das duas e com o markdownlint.
+  - Evidência: modelo de `project.md` com a seção "Precedência dos documentos" (linha 56, entre "Key Constraints" e "Stack Summary") e a linha "Conferência de lacunas" em "Comandos de verificação" (linha 94); "Lint de Markdown" e "Config base carrega sem avisos" → PASS (exit 0)
+- [x] 4.3 Atualizar o `README.md` (trechos customizados novos e o `lacunas.mjs` na lista de scripts) conforme o D6. Verificar com o lint da raiz.
+  - Evidência: README: trechos "Declared gaps", "ADR verification" e o item `verificacao` na tabela de trechos customizados; `lacunas` na árvore de scripts; e, por decisão do responsável em 2026-10-22 (modelo de versão acumulada), o passo 1 de "Como publicar uma release" descreve a versão que acumula changes; "Lint de Markdown da raiz" e "Guia de primeiros passos" → PASS (exit 0)
 
 ## 5. Versão e integração
 
