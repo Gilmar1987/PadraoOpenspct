@@ -114,7 +114,7 @@ Check 'Skills de workflow em .claude/skills/'          {
     $skills | ForEach-Object { Test-Path (Join-Path $base "$_\SKILL.md") } | Where-Object { -not $_ } | Measure-Object | Select-Object -ExpandProperty Count | ForEach-Object { $_ -eq 0 }
 }
 Check 'Slash commands em .claude/commands/opsx/'       {
-    $cmds = @('init','ingest','explore','propose','apply','verify','archive','sync','update')
+    $cmds = @('init','ingest','discover','explore','propose','apply','verify','archive','sync','update')
     $base = Join-Path $storeDir '.claude\commands\opsx'
     $cmds | ForEach-Object { Test-Path (Join-Path $base "$_.md") } | Where-Object { -not $_ } | Measure-Object | Select-Object -ExpandProperty Count | ForEach-Object { $_ -eq 0 }
 }

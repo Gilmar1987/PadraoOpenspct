@@ -168,6 +168,12 @@ só os carrega quando é aberto nessa pasta. Nessa janela, abra o Claude Code e 
 /opsx:init
 ```
 
+Antes da entrevista, o init faz duas perguntas de sim ou não: se você tem documentos (atas,
+requisitos, e-mails) para ele analisar e se quer explorar a ideia do produto (`/opsx:discover`).
+Na exploração, o agente conduz a conversa, questiona e traz opções até a ideia ficar concreta, e
+grava o resultado em `openspec/descoberta.md`. Com documentos ou exploração, cada pergunta da
+entrevista mostra uma recomendação justificada; com "não" nas duas, a entrevista é a de sempre.
+
 A entrevista registra no store a visão do produto, a arquitetura, a stack, os **comandos de
 verificação** (instalar, executar, testar, lint, build, migrar, auditar dependências, procurar
 secrets), as ADRs fundacionais e o `arquitetura.md`, com o diagrama dos componentes. Antes de confirmar, ela aponta combinações de respostas
