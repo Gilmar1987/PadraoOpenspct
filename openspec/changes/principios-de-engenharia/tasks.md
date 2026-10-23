@@ -21,9 +21,11 @@
 
 ## 4. Init e project.md
 
-- [ ] 4.1 Aplicar o D5 em `padrao-openspec/.claude/commands/opsx/init.md` (pergunta 7.4, a 7.2 ajustada, o resumo do bloco 7 e a tabela do `project-setup.md`) e em `padrao-openspec/openspec/project.md` (linha "Princípios de engenharia"). Verificar com o marcador da 7.4 passando e com `grep -n "Princípios de engenharia" padrao-openspec/openspec/project.md`.
+- [x] 4.1 Aplicar o D5 em `padrao-openspec/.claude/commands/opsx/init.md` (pergunta 7.4, a 7.2 ajustada, o resumo do bloco 7 e a tabela do `project-setup.md`) e em `padrao-openspec/openspec/project.md` (linha "Princípios de engenharia"). Verificar com o marcador da 7.4 passando e com `grep -n "Princípios de engenharia" padrao-openspec/openspec/project.md`.
+  - Evidência: pergunta 7.4 depois da 7.3 (linha 711), mapeamento na 7.2 e registro no Arquivo 2; o init não tem tabela de bloco 7 no `project-setup.md` nem para a 7.3, então a 7.4 entra pelo resumo genérico do bloco; linha "Princípios de engenharia" em Development Conventions do modelo de `project.md` (linha 133); `git diff` sem mudança na checagem de coerência; "Trechos customizados" → PASS
 
 ## 5. Documentação, versão e integração
 
-- [ ] 5.1 Atualizar o `README.md` (trechos customizados novos), `padrao-openspec/VERSION` e `CHANGELOG.md`, com a seção `## 1.14.0` (VERSION 1.14.0), ou os itens na seção aberta por outra change, e as ações no projeto (acrescentar a linha "Princípios de engenharia" ao `project.md` do store). Verificar com o lint e com o passo "Versão e changelog" passando.
+- [x] 5.1 Atualizar o `README.md` (trechos customizados novos), `padrao-openspec/VERSION` e `CHANGELOG.md`, com a seção `## 1.14.0` (VERSION 1.14.0), ou os itens na seção aberta por outra change, e as ações no projeto (acrescentar a linha "Princípios de engenharia" ao `project.md` do store). Verificar com o lint e com o passo "Versão e changelog" passando.
+  - Evidência: README com "Engineering principles" e a 7.4 na tabela de trechos customizados; pelo modelo de versão acumulada, primeira change depois da v1.13.0: `VERSION` 1.14.0 e seção `## 1.14.0` com "O que mudou" e a ação recomendada; "Versão e changelog", "Smoke test do changelog-range", lint nos dois lugares, "Raiz em dia" e "Guia" → PASS (exit 0)
 - [ ] 5.2 Rodar o `sync-root.mjs` e o `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.

@@ -4,6 +4,24 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.14.0 — 2026-10-23
+
+### O que mudou
+
+- **Princípios de engenharia:** os três pilares de engenharia entram no fluxo, de forma independente de
+  stack. O `rules.md` ganha o bloco "Princípios de engenharia" (responsabilidade única, extensão sem
+  modificação, padrões existentes primeiro, contrato de entrada tipado e teste que cita o cenário) e, na
+  seção 5, a validação de toda entrada externa, o log de três estados (iniciado, sucesso e falha) e o
+  erro sem detalhe interno. O `config.yaml` liga o Why ao objetivo do produto e pede o padrão de projeto
+  no design. A revisão de código e o verify ("Engineering principles") conferem esses pontos, e o init
+  registra a convenção e as exceções na pergunta 7.4.
+
+### Ações no projeto
+
+- Recomendado: no store, acrescente ao `project.md` a linha "Princípios de engenharia" em Development
+  Conventions, com as exceções que o projeto quiser (por exemplo, "Log de três estados: Não aplicável
+  (script de uso único)"). Sem a linha, o verify aplica os três itens.
+
 ## 1.13.0 — 2026-10-23
 
 ### O que mudou

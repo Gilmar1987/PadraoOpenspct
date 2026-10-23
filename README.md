@@ -365,11 +365,11 @@ sumir):
 | "Update the project overview", "Update the open debts", "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
 | "Standard version check" e "offer to update now" | `propose`, `apply`, `verify` e `archive` (comandos e skills) |
 | "Unrequested fixes are scope", "Check the library API", "Revalidate requirements after a version change", "Tool generators outside the repository", "Simulate CI on a clean copy" e "Production-mode check" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
-| "Review before verify", "Dependencies in Impact", "Agent-run browser scripts", "Declared gaps", "ADR verification", "Interface contract check" e "Verification layers" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
+| "Review before verify", "Dependencies in Impact", "Agent-run browser scripts", "Declared gaps", "ADR verification", "Interface contract check", "Verification layers" e "Engineering principles" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Scope change resets approval" | `commands/opsx/update.md` e `skills/openspec-update-change/SKILL.md` |
 | "Run the gate" | `apply` e `archive` (comandos e skills) |
 | "Check concurrent changes" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
-| "Commit the init", "### Arquivo 5", 7.3, fila por banco, E2E acrescentado e 2.6 (contratos de interface) | `commands/opsx/init.md` |
+| "Commit the init", "### Arquivo 5", 7.3, 7.4 (princípios de engenharia), fila por banco, E2E acrescentado e 2.6 (contratos de interface) | `commands/opsx/init.md` |
 | "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md` e `commands/opsx/ingest.md` |
 
