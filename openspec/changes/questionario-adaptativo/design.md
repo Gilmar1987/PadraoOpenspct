@@ -64,12 +64,13 @@ Seção "Filtros de opções", com a tabela:
 | 3.2 | 3.1 ≠ 2 (.NET) | esconde 4 (Blazor) |
 | 3.5 | 3.1 | 1 → 0, 1, 6; 2 → 0, 2, 6; 3 → 0, 3, 4, 6; 4 → 0, 5, 6; 5 → 0, 6; 6 → todas |
 | 3.6 | nem 3.1 = 1 nem 3.2 = 1 | esconde 4 (Auth.js / NextAuth) |
-| 3.7 | 3.1 | 1 → 1, 5, 6; 2 → 2, 5, 6; 3 → 3, 5, 6; 4 → 4, 5, 6; 5 → 5, 6; 6 → todas |
+| 3.7 | 3.1 e 3.2 | 1 → 1, 5, 6; 2 → 2, 5, 6; 3 → 3, 5, 6; 4 → 4, 5, 6; 5 → 5, 6; 6 → todas; com a 3.2 em 1 ou 2 (front-end em JS/TS), mantém também a 1 |
 | 4.5 | 4.1 ≠ 1 (Vercel/Netlify) | esconde 3 (Vercel Edge Network) |
-| 5.4 | 3.1 | 1 → 1, 6; 2 → 3, 6; 3 → 2, 6; 4 → 4, 6; 5 → 5, 6; 6 → todas |
+| 5.4 | 3.1 e 3.2 | 1 → 1, 6; 2 → 3, 6; 3 → 2, 6; 4 → 4, 6; 5 → 5, 6; 6 → todas; com a 3.2 em 1 ou 2 (front-end em JS/TS), mantém também a 1 |
 | 5.5 | 3.2 = 0 | 0, 5, 6 |
 
-- Uma pergunta pulada ou respondida com "Outro" não filtra nada.
+- O filtro usa o valor registrado da pergunta da qual depende, inclusive o valor que uma regra de salto registrou (a 3.2 pulada com "0" filtra a 3.6 e a 5.5). Com "Não aplicável" ou "Outro", não filtra nada.
+- Se o brief sustentar uma opção oculta, a pergunta mostra a lista inteira e recomenda a opção, dizendo que ela não combina com a resposta que a ocultaria.
 - A pergunta mostra as opções com os números originais e, abaixo delas, a linha `(N opções ocultas porque a 3.1 é Python; digite "todas" para ver)`.
 - `todas` mostra a lista completa, e qualquer número dela vale.
 - Uma opção oculta nunca recebe a linha de recomendação.
@@ -84,6 +85,7 @@ Na "Checagem de coerência", um parágrafo novo diz que cada combinação é ava
 - A checagem final lista todas as combinações encontradas. Pergunta só as que ainda não foram decididas e mostra as decididas como "Ajustada" ou "Mantida".
 - Uma resposta ajustada que desfaz a combinação a tira da lista.
 - Com arquivo de respostas, tudo fica para o fim, como hoje.
+- "Ajustar" pode voltar a um bloco já confirmado: refaz só essa pergunta, reavalia os saltos e filtros que dependem dela e retoma de onde parou.
 
 ### D5. Combinação nova
 
@@ -91,7 +93,8 @@ Linha na tabela de coerência:
 
 | Combinação | Consequência | Proposta |
 |---|---|---|
-| 2.1 é "Microsserviços" e 1.4 é "Pequeno" ou "Ainda não sei", ou 5.9 é "Uma pessoa" | Vários serviços para implantar, monitorar e versionar, sem volume ou time que justifique | Monólito modular, com módulos que possam virar serviços depois |
+| 2.1 é "Microsserviços" e 1.4 é "Pequeno" ou "Ainda não sei" | Vários serviços para implantar, monitorar e versionar, sem volume que justifique | Monólito modular, com módulos que possam virar serviços depois |
+| 2.1 é "Microsserviços" e 5.9 é "Uma pessoa" | Vários serviços para implantar, monitorar e versionar, sem time que justifique | Monólito modular, com módulos que possam virar serviços depois |
 
 A 1.4 vem antes da 2.1, então a combinação costuma aparecer logo depois da 2.1. Com a 5.9, aparece no Bloco 5.
 
