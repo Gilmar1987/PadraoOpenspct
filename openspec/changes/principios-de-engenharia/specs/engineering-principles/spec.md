@@ -31,7 +31,7 @@ O design de uma change que cria um fluxo SHALL indicar o contrato tipado de entr
 
 ### Requirement: Log de três estados
 
-Quando o `project.md` não marcar o item como "Não aplicável", o código que a change escreve para mutações e fronteiras críticas SHALL registrar os estados iniciado, sucesso e falha com a ferramenta de log registrada no `project.md`. O verify SHALL apontar como warning a mutação ou fronteira sem os três estados.
+Quando o `project.md` não marcar o log de três estados como "Não aplicável", o código que a change escreve para mutações e fronteiras críticas SHALL registrar os estados iniciado, sucesso e falha com a ferramenta de log registrada no `project.md`. O verify SHALL apontar como warning a mutação ou fronteira sem os três estados.
 
 #### Scenario: Mutação sem log
 
@@ -86,7 +86,7 @@ O "Why" de uma proposal SHALL citar o objetivo do produto ou a capability do `pr
 
 ### Requirement: Convenção registrada no init
 
-O `/opsx:init` SHALL preencher a linha "Princípios de engenharia" da seção "Development Conventions" do `project.md` com o log de três estados, a validação na fronteira e o erro sem detalhe interno, e SHALL aceitar que o responsável marque um item como "Não aplicável", com justificativa.
+O `/opsx:init` SHALL preencher a linha "Princípios de engenharia" da seção "Development Conventions" do `project.md` com o log de três estados, a validação na fronteira e o erro sem detalhe interno, e SHALL aceitar que o responsável marque o log de três estados como "Não aplicável", com justificativa; a validação na fronteira e o erro sem detalhe interno não aceitam exceção.
 
 #### Scenario: Projeto pequeno sem log de três estados
 
