@@ -35,6 +35,18 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   warning "Screens without visual brief" quando a change cita telas sem brief e, com a confirmação do
   responsável de que há tela, um crítico.
 
+- **Lacunas declaradas:** modelo `openspec/lacunas.md` no store e o script
+  `padrao-openspec/scripts/lacunas.mjs`, que confere campos, datas, fontes e o SHA-256 de cada fonte;
+  quando a fonte muda, a declaração tem de ser relida. O `/opsx:verify` cobra as lacunas nas duas
+  direções: divergência nova sem declaração e lacuna fechada que ficou no registro
+  ([ADR-0007](openspec/adrs/0007-lacunas-declaradas-e-precedencia-entre-documentos.md)).
+- **ADR verificável:** o modelo de ADR ganha o campo opcional `verificacao`, com o teste que confere a
+  decisão no código; o `/opsx:propose` o preenche quando a decisão se confere por código, e o
+  `/opsx:verify` roda esse teste nas changes que tocam a ADR.
+- **Precedência entre documentos:** o `rules.md` e o modelo de `project.md` definem a ordem
+  contrato → specs → arquitetura → ADRs → código; divergência entre contrato e specs vai ao
+  responsável.
+
 ### Ações no projeto
 
 - Nenhuma obrigatória. Projetos com front-end: nas próximas changes com telas, o verify exige o
@@ -50,6 +62,11 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   internos da página inicial, menos os que parecem mudar estado (sair, excluir, remover).
 - Aprovações registradas antes do selo seguem valendo, com um aviso do portão; as próximas gravam o
   selo. Nenhuma ação obrigatória.
+- Recomendado (lacunas e precedência): no store, acrescente ao `project.md` a seção "Precedência dos documentos" e a linha "Conferência de
+  lacunas" em "Comandos de verificação" (veja o modelo em `padrao-openspec/openspec/project.md`).
+- Se o projeto já convive com divergências conhecidas entre o código e uma spec, ADR ou documento de
+  referência, registre-as em `openspec/lacunas.md`, com motivo e data.
+- Nas ADRs `Accepted` cuja decisão se confere por código, preencha `verificacao` com o teste.
 
 ## 1.11.0 — 2026-10-22
 

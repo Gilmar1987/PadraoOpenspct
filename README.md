@@ -271,7 +271,7 @@ padrao-openspec/
 │   ├── hooks/            # Hooks do Claude Code (openspec-padrao/)
 │   └── skills/           # Skills instaladas no repositório de código
 ├── .github/agents/       # Subagentes VS Code/Copilot
-└── scripts/              # setup-project, install-skills, sync-root
+└── scripts/              # setup-project, install-skills, sync-root, lacunas (conferência do registro de lacunas)
 ```
 
 ---
@@ -305,9 +305,11 @@ Sem um dos dois, o instalador para sem alterar nada. Os comandos `/opsx:propose`
 
 Publicar é ação do responsável, feita só com pedido explícito:
 
-1. No PR da mudança, atualize `padrao-openspec/VERSION` e acrescente a seção da versão no topo do
-   `CHANGELOG.md`, com "O que mudou" e "Ações no projeto" ("Nenhuma" quando não houver). A CI
-   falha se os dois não baterem.
+1. Enquanto nenhum projeto real usa o padrão, a versão acumula changes: a primeira change depois de
+   uma release atualiza `padrao-openspec/VERSION` e abre a seção da versão no topo do
+   `CHANGELOG.md`, com "O que mudou" e "Ações no projeto" ("Nenhuma" quando não houver); as changes
+   seguintes não mexem no `VERSION` e só acrescentam itens nessa seção. A release sai quando o
+   responsável pedir. A CI falha se o `VERSION` e a primeira seção do CHANGELOG não baterem.
 2. Depois do merge na `main`, crie a tag e a release com as notas da seção e o script de entrada
    anexado:
 
@@ -350,14 +352,14 @@ sumir):
 
 | Trecho | Arquivos |
 |---|---|
-| "Architectural Decision Check" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
+| "Architectural Decision Check" e o item `verificacao` | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Approval record", "Prior authorization exception" e "Commit the planning" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Check the approval record", trailer "OpenSpec-Change:", "Record task evidence", "Push only on explicit request", "Security checks" e "Request code review" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Write the verification record", "Evidence reuse", "Cobertura fora da suíte", "Project validation commands" e "Code review record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Update the project overview", "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
 | "Standard version check" e "offer to update now" | `propose`, `apply`, `verify` e `archive` (comandos e skills) |
 | "Unrequested fixes are scope", "Check the library API", "Revalidate requirements after a version change", "Tool generators outside the repository", "Simulate CI on a clean copy" e "Production-mode check" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
-| "Review before verify", "Dependencies in Impact" e "Agent-run browser scripts" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
+| "Review before verify", "Dependencies in Impact", "Agent-run browser scripts", "Declared gaps" e "ADR verification" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Scope change resets approval" | `commands/opsx/update.md` e `skills/openspec-update-change/SKILL.md` |
 | "Run the gate" | `apply` e `archive` (comandos e skills) |
 | "Check concurrent changes" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
