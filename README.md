@@ -263,7 +263,8 @@ padrao-openspec/
 ├── openspec/
 │   ├── config.yaml       # Stack, convenções e regras injetadas no agente
 │   ├── project.md        # Visão do produto, arquitetura, stack e comandos de verificação
-│   ├── arquitetura.md    # Componentes, comunicação, diagrama e deploy (gerado pelo /opsx:init)
+│   ├── arquitetura.md    # Componentes, comunicação, diagrama e deploy (gerado pelo /opsx:init; normativo)
+│   ├── estado-atual.md   # Estado atual e débitos "Fora do ciclo atual" (gerado pelo /opsx:init)
 │   ├── specs/            # Fonte da verdade (preenchida após /opsx:archive)
 │   ├── changes/          # Changes ativas e arquivadas
 │   └── adrs/             # Decisões de arquitetura duradouras

@@ -103,13 +103,13 @@ O init preenche a matriz no Arquivo 2, só com respostas existentes:
 | Camada | Fonte |
 |---|---|
 | Unitário | 5.4 e o comando de testes da 7.1; "Onde roda" ganha "CI" quando a 5.3 inclui testes |
-| Contrato | "Não aplicável" quando a 2.4 não expõe API (nenhuma comunicação por HTTP, gRPC ou mensageria); senão "Adiado" |
-| Arquitetura | "Adiado" (nenhuma resposta define teste de arquitetura) |
-| E2E | 5.5 e o comando de E2E (ou o de testes, se for o mesmo); "Não aplicável" quando a 5.5 é 0 |
-| Roteiro manual | presente quando a 5.5 é 0 e há front-end (3.2), com a orientação do config; senão "Não aplicável" |
+| Contrato | "Teste de contrato" da 7.1; "Não aplicável" quando a 2.6 é 0; "Adiado" quando há contrato sem comando (a 2.6 e o "Teste de contrato" vêm da `contratos-de-interface`, mergeada antes desta change) |
+| Arquitetura | "Não aplicável até uma ADR pedir teste de arquitetura (campo `verificacao`)" |
+| E2E | 5.5 quando é framework de interface; comando de testes da 7.1 se cobrir o E2E, senão "Adiado: definir o comando de E2E"; "Onde roda" com CI quando a 5.3 inclui testes E2E; "Não aplicável" quando a 5.5 é 0 ou 5 (Testcontainers) |
+| Roteiro manual | presente quando a 5.5 não tem framework de interface (0 ou 5) e há front-end (3.2), com a orientação do config; senão "Não aplicável" |
 | Produção | "Não aplicável" quando o bloco 4 não tem produção; senão "Adiado" |
 
-Uma camada "Adiado" na matriz também vira débito no `estado-atual.md` (D1), porque é um item adiado como os outros.
+Uma camada "Adiado" só vira débito no `estado-atual.md` (D1) quando vem de uma resposta "Adiado" da entrevista, numa linha só; as outras ficam na matriz, e o verify as aponta como não verificadas quando se aplicam. Assim o cenário "Nada adiado" da spec vale (revisão de código de 2026-10-23).
 
 Alternativa considerada: perguntar a camada no bloco 7. Foi rejeitada, porque o escopo combinado não acrescenta perguntas, e as respostas atuais bastam para a primeira versão da matriz.
 

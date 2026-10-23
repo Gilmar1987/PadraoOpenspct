@@ -228,12 +228,14 @@ jobs:
             check "$f" "ADR verification"
             check "$f" "Interface contract check"
             check "$f" "Verification layers"
+            check "$f" "   - Camadas: <layer (command)"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"
           for f in .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$f" "Update the project overview"
             check "$f" "Update the open debts"
+            check "$f" "add it to both pathspecs"
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Check the archive authorization"
@@ -261,7 +263,8 @@ jobs:
           check "$f" "**2.6 — O sistema expõe ou consome uma API"
           # Débitos e camadas (debitos-e-camadas-de-verificacao): Arquivo 6 e matriz no init; trecho no explore.
           check "$f" '### Arquivo 6: `<root>/openspec/estado-atual.md`'
-          check "$f" "Camadas de verificação"
+          check "$f" 'Preencha a seção "Camadas de verificação"'
+          check openspec/project.md "## Camadas de verificação"
           for g in .claude/commands/opsx/explore.md .claude/skills/openspec-explore/SKILL.md; do
             check "$g" "Related debts"
           done

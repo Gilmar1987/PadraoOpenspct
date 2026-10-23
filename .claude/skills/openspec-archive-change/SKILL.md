@@ -193,7 +193,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    mv "<changeRoot>" "<planningHome.changesDir>/archive/<target-name>"
    ```
 
-5a. **Commit the archive**: when the planning root is in a git repository, stage and commit the archive move, the main specs and the project overview: `git -C "<planningHome.root>" add -A -- openspec/changes openspec/specs openspec/project.md`, then `git -C "<planningHome.root>" commit -m "chore: archive <change-name>" -m "OpenSpec-Change: <change-name>" -- openspec/changes openspec/specs openspec/project.md`; when `openspec/estado-atual.md` exists, add it to both pathspecs. Otherwise say the archive was not committed. Never push.
+5a. **Commit the archive**: when the planning root is in a git repository, stage and commit the archive move, the main specs and the project overview: `git -C "<planningHome.root>" add -A -- openspec/changes openspec/specs openspec/project.md`, then `git -C "<planningHome.root>" commit -m "chore: archive <change-name>" -m "OpenSpec-Change: <change-name>" -- openspec/changes openspec/specs openspec/project.md`; when `openspec/estado-atual.md` exists, update it first (**Update the open debts**) and add it to both pathspecs. Otherwise say the archive was not committed. Never push.
 
 6. **Display summary**
 
@@ -206,7 +206,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 **Update the project overview**: If the archived change created or modified capabilities and `<planningHome.root>/openspec/project.md` has a capabilities table, update it: add each new capability with its state and the archived change, and update the state of the modified ones. Mention the update in the summary. If the file has no such table, skip this step and say so.
 
-**Update the open debts**: when `<planningHome.root>/openspec/estado-atual.md` exists, update its "Fora do ciclo atual" table from the archived proposal's `Débitos:` line: remove the rows the change closed and add the ones it opened, with the archive date and the change as origin. A row leaves for any other reason only when an Accepted ADR discards it; cite that ADR in the summary. Mention the update in the summary; without the file, skip this step and say so.
+**Update the open debts**: when `<planningHome.root>/openspec/estado-atual.md` exists, update its "Fora do ciclo atual" table from the archived proposal's `Débitos:` line: remove the rows the change closed and add the ones it opened, with the reason and exit condition from that line, the archive date and the change as origin. A `fecha` item with no matching row is reported to the user, not guessed. A row leaves for any other reason only when an Accepted ADR discards it; cite that ADR in the summary. Mention the update in the summary; without the file, skip this step and say so.
 
 **Output On Success**
 
