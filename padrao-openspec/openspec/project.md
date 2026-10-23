@@ -130,7 +130,7 @@ a que se aplica à change e não rodou vira "não verificado". Uma camada "Adiad
 - **Git e revisão:** <!-- A definir -->
 - **Testes e critérios de qualidade:** <!-- A definir -->
 - **Segurança e tratamento de dados:** <!-- A definir -->
-- **Princípios de engenharia:** <!-- A definir: validação na fronteira, log de três estados e erro sem detalhe interno, com as exceções justificadas -->
+- **Princípios de engenharia:** <!-- A definir: validação na fronteira, log de três estados e erro sem detalhe interno, com a exceção do log justificada, se houver -->
 
 ## Open Questions
 

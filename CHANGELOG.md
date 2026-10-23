@@ -14,13 +14,13 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   seção 5, a validação de toda entrada externa, o log de três estados (iniciado, sucesso e falha) e o
   erro sem detalhe interno. O `config.yaml` liga o Why ao objetivo do produto e pede o padrão de projeto
   no design. A revisão de código e o verify ("Engineering principles") conferem esses pontos, e o init
-  registra a convenção e as exceções na pergunta 7.4.
+  registra a convenção na pergunta 7.4; só o log de três estados aceita "Não aplicável", com justificativa.
 
 ### Ações no projeto
 
 - Recomendado: no store, acrescente ao `project.md` a linha "Princípios de engenharia" em Development
-  Conventions, com as exceções que o projeto quiser (por exemplo, "Log de três estados: Não aplicável
-  (script de uso único)"). Sem a linha, o verify aplica os três itens.
+  Conventions e, se o log de três estados não se aplicar, a exceção com justificativa (por exemplo, "Log
+  de três estados: Não aplicável (script de uso único)"). Sem a linha, o verify aplica os três itens.
 
 ## 1.13.0 — 2026-10-23
 
