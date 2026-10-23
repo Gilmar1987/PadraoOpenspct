@@ -60,7 +60,7 @@
 
 Texto igual no comando e na skill, depois de "External report triage":
 
-> **Declared gaps**: when the store has `openspec/lacunas.md`, run `node padrao-openspec/scripts/lacunas.mjs` (adding `--codigo <code repository>` when a row cites `codigo:`) and record the result under `Comandos:`; a failure is a CRITICAL issue. When `project.md` records a "Conferência de lacunas" command under "Comandos de verificação", run it too. For each reference source the change touches (main specs it affects, ADRs it cites, documents named in the proposal or design), add a CRITICAL issue for (a) a divergence the change introduced or revealed that is neither fixed nor declared in the registry, and (b) a declared gap the change closed while its row is still in the registry. Without the registry, skip this check without an issue.
+> **Declared gaps**: when the store has `openspec/lacunas.md`, run `node <root>/scripts/lacunas.mjs --raiz <root>`, where `<root>` is the `root.path` that `openspec list --json` reports (with the selected `--store <id>`), adding `--codigo <code repository root>` when a row cites `codigo:`; a missing `openspec/` under `--raiz` exits 2, so a wrong root never passes and record the result under `Comandos:`; a failure is a CRITICAL issue. When `project.md` records a "Conferência de lacunas" command under "Comandos de verificação", run it too. For each reference source the change touches (main specs it affects, ADRs it cites, documents named in the proposal or design), add a CRITICAL issue for (a) a divergence the change introduced or revealed that is neither fixed nor declared in the registry, and (b) a declared gap the change closed while its row is still in the registry. Without the registry, skip this check without an issue.
 
 ### D4. Campo `verificacao` nas ADRs e heurística "ADR verification"
 
@@ -68,7 +68,7 @@ Texto igual no comando e na skill, depois de "External report triage":
 - Propose, passo 5 da "Architectural Decision Check", item novo: "If the decision can be checked by code (layer dependencies, forbidden imports, schema conformance), fill `verificacao` with the test that checks it and add a task to write that test."
 - Verify, heurística nova depois de "Declared gaps":
 
-> **ADR verification**: for each Accepted ADR with a non-empty `verificacao` that the change touches (cited in `design.md` or tied to the affected capabilities), run each listed command or test, or reuse its evidence as **Evidence reuse** allows, and record it under `Comandos:`. A missing or failing test is a CRITICAL issue naming the ADR.
+> **ADR verification**: for each Accepted ADR with a non-empty `verificacao` that the change touches (cited in `design.md` or tied to the affected capabilities), run each listed command or test, or reuse its evidence as **Evidence reuse** allows, and record it under `Comandos:`. A missing or failing test is a CRITICAL issue naming the ADR and the cited command or path.
 
 - **Alternativa:** exigir `verificacao` em toda ADR. Rejeitada: decisões de hospedagem ou de processo não se conferem por código.
 

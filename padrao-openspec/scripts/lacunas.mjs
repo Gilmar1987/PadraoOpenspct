@@ -6,7 +6,7 @@
 // new version, not just get a new hash. No dependencies besides Node.js.
 
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -59,13 +59,25 @@ function stripCode(value) {
   return value.replace(/^`(.*)`$/, '$1').trim();
 }
 
-// The data rows of the register's table, skipping the header, the separator and HTML comments.
+// The data rows of the register's first table, skipping the header, the separator, HTML comments
+// and fenced code blocks. Comments keep their line breaks, so reported line numbers match the file.
 function readRows(text) {
-  const withoutComments = text.replace(/<!--[\s\S]*?-->/g, '');
+  const withoutComments = text.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, ''));
   const rows = [];
   let header = null;
+  let inFence = false;
+  let done = false;
   withoutComments.split(/\r?\n/).forEach((line, index) => {
-    if (!line.trim().startsWith('|')) return;
+    if (done) return;
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      return;
+    }
+    if (inFence) return;
+    if (!line.trim().startsWith('|')) {
+      if (header !== null && line.trim() !== '') done = true;
+      return;
+    }
     const values = cells(line);
     if (header === null) {
       header = values;
@@ -75,6 +87,23 @@ function readRows(text) {
     rows.push({ line: index + 1, values });
   });
   return { header, rows };
+}
+
+// A real calendar date: 2026-02-30 is rejected, not rolled over to March.
+function validDate(value) {
+  if (!datePattern.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+// Sources are relative and stay inside their base, written with "/" so the register works on any OS.
+function resolveSource(base, written) {
+  const normalized = written.replace(/\\/g, '/');
+  if (path.isAbsolute(normalized) || /^[a-z]:/i.test(normalized)) return { error: 'use um caminho relativo' };
+  const file = path.resolve(base, normalized);
+  const relative = path.relative(base, file);
+  if (relative === '' || relative.startsWith('..') || path.isAbsolute(relative)) return { error: 'o caminho sai da pasta base' };
+  return { file, key: normalized };
 }
 
 // SHA-256 of the content with CRLF normalized to LF, so Windows and Linux checkouts agree.
@@ -89,6 +118,10 @@ function main() {
     usage();
     return 0;
   }
+  if (!existsSync(path.join(options.root, 'openspec'))) {
+    throw new Error(`raiz sem openspec/: ${options.root} (use a pasta padrao-openspec do store, a "root" de openspec list --json)`);
+  }
+  if (options.code && !existsSync(options.code)) throw new Error(`--codigo aponta para uma pasta que não existe: ${options.code}`);
   const register = path.join(options.root, ...registerPath);
   if (!existsSync(register)) {
     console.log('sem registro de lacunas');
@@ -108,12 +141,16 @@ function main() {
   for (const { line, values } of rows) {
     const [id = '', sourceCell = '', hash = '', item = '', reason = '', since = ''] = values;
     const where = `linha ${line}${id ? ` (${id})` : ''}`;
+    if (values.length !== columns.length) {
+      problems.push(`${where}: a linha tem ${values.length} colunas; o modelo tem ${columns.length}`);
+      continue;
+    }
     if (!id) problems.push(`${where}: falta o ID`);
     else if (ids.has(id)) problems.push(`${where}: ID repetido (já usado na linha ${ids.get(id)})`);
     else ids.set(id, line);
     if (!item) problems.push(`${where}: falta o item não cumprido`);
     if (!reason) problems.push(`${where}: falta o motivo`);
-    if (!datePattern.test(since) || Number.isNaN(Date.parse(`${since}T00:00:00Z`))) {
+    if (!validDate(since)) {
       problems.push(`${where}: "Desde" precisa de uma data AAAA-MM-DD válida`);
     }
     const source = stripCode(sourceCell);
@@ -121,22 +158,29 @@ function main() {
       problems.push(`${where}: falta a fonte`);
       continue;
     }
-    let file;
-    if (source.startsWith(codePrefix)) {
-      if (!options.code) {
-        problems.push(`${where}: a fonte ${source} é do repositório de código; informe --codigo <dir>`);
-        continue;
-      }
-      file = path.resolve(options.code, source.slice(codePrefix.length));
-    } else {
-      file = path.resolve(options.root, source);
-    }
-    if (!existsSync(file)) {
-      problems.push(`${where}: fonte ausente: ${source}`);
+    const fromCode = source.startsWith(codePrefix);
+    if (fromCode && !options.code) {
+      problems.push(`${where}: a fonte ${source} é do repositório de código; informe --codigo <dir>`);
       continue;
     }
-    if (!bySource.has(source)) bySource.set(source, { file, rows: [] });
-    bySource.get(source).rows.push({ where, id, hash: stripCode(hash) });
+    const resolved = fromCode
+      ? resolveSource(options.code, source.slice(codePrefix.length))
+      : resolveSource(options.root, source);
+    if (resolved.error) {
+      problems.push(`${where}: fonte inválida (${resolved.error}): ${source}`);
+      continue;
+    }
+    const key = fromCode ? `${codePrefix}${resolved.key}` : resolved.key;
+    if (!existsSync(resolved.file)) {
+      problems.push(`${where}: fonte ausente: ${key}`);
+      continue;
+    }
+    if (!statSync(resolved.file).isFile()) {
+      problems.push(`${where}: a fonte não é um arquivo: ${key}`);
+      continue;
+    }
+    if (!bySource.has(key)) bySource.set(key, { file: resolved.file, rows: [] });
+    bySource.get(key).rows.push({ where, id, hash: stripCode(hash) });
   }
   for (const [source, entry] of bySource) {
     const current = contentHash(entry.file);
@@ -157,7 +201,8 @@ function main() {
     for (const problem of problems) console.log(problem);
     return 1;
   }
-  console.log(`ok: ${rows.length} lacunas, ${bySource.size} fontes`);
+  const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`;
+  console.log(`ok: ${plural(rows.length, 'lacuna', 'lacunas')}, ${plural(bySource.size, 'fonte', 'fontes')}`);
   return 0;
 }
 

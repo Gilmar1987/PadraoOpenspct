@@ -124,8 +124,6 @@ jobs:
           test -z "$(node scripts/changelog-range.mjs --file "$f" --from 1.2.0 --to 1.2.0)"
           if node scripts/changelog-range.mjs --file "$f" --from 1.0.0 --to 9.9.9; then exit 1; fi
 
-      # Skills e comandos gerados pelo OpenSpec CLI levam trechos customizados do padrão;
-      # regenerá-los apaga esses trechos. A checagem falha se algum deles sumir.
       - name: Smoke test do registro de lacunas
         run: |
           # ADR-0007: registro em dia passa; linha sem motivo, fonte alterada e fonte ausente falham;
@@ -137,7 +135,10 @@ jobs:
           reg() { cp openspec/lacunas.md "$w/openspec/lacunas.md"; printf '%s\n' "$1" >> "$w/openspec/lacunas.md"; }
           node scripts/lacunas.mjs --raiz . | grep -qF 'ok: 0 lacunas'
           reg "| L-001 | openspec/specs/a/spec.md | $h | Item | Motivo | 2026-10-22 | change x |"
-          node scripts/lacunas.mjs --raiz "$w" | grep -qF 'ok: 1 lacunas, 1 fontes'
+          node scripts/lacunas.mjs --raiz "$w" | grep -qF 'ok: 1 lacuna, 1 fonte'
+          reg "| L-001 | openspec/specs/a/spec.md | $h | Item | Motivo | 2026-02-30 | change x |"
+          if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas0.txt"; then exit 1; fi
+          grep -qF 'data AAAA-MM-DD válida' "$RUNNER_TEMP/lacunas0.txt"
           reg "| L-001 | openspec/specs/a/spec.md | $h | Item |  | 2026-10-22 | change x |"
           if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas1.txt"; then exit 1; fi
           grep -qF 'falta o motivo' "$RUNNER_TEMP/lacunas1.txt"
@@ -151,10 +152,18 @@ jobs:
           reg "| L-001 | codigo:src/a.txt | $h | Item | Motivo | 2026-10-22 | change x |"
           if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas4.txt"; then exit 1; fi
           grep -qF 'informe --codigo' "$RUNNER_TEMP/lacunas4.txt"
+          mkdir -p "$w/code/src"
+          printf 'regra A\n' > "$w/code/src/a.txt"
+          node scripts/lacunas.mjs --raiz "$w" --codigo "$w/code" | grep -qF 'ok: 1 lacuna, 1 fonte'
+          set +e; node scripts/lacunas.mjs --raiz "$w/code" > "$RUNNER_TEMP/lacunas5.txt" 2>&1; status=$?; set -e
+          test "$status" -eq 2
+          grep -qF 'raiz sem openspec/' "$RUNNER_TEMP/lacunas5.txt"
           rm "$w/openspec/lacunas.md"
           node scripts/lacunas.mjs --raiz "$w" | grep -qF 'sem registro de lacunas'
           rm -rf "$w"
 
+      # Skills e comandos gerados pelo OpenSpec CLI levam trechos customizados do padrão;
+      # regenerá-los apaga esses trechos. A checagem falha se algum deles sumir.
       - name: Trechos customizados das skills
         run: |
           missing=0

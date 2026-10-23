@@ -55,9 +55,9 @@
 
 ## Precedência dos documentos
 
-<!-- Ordem usada num conflito entre documentos. Ajuste se o projeto precisar; o padrão é: -->
+Ordem usada num conflito entre documentos (ajuste se o projeto precisar):
 
-1. Contrato de interface: <!-- caminho do contrato, ou "não aplicável" -->
+1. Contrato de interface (não aplicável enquanto o projeto não tiver contrato de API)
 2. Specs principais (`openspec/specs/`)
 3. Arquitetura (`openspec/arquitetura.md` e este `project.md`)
 4. ADRs `Accepted` (`openspec/adrs/`)
@@ -91,7 +91,7 @@ Divergências declaradas ficam em `openspec/lacunas.md`.
 | Migrações | <!-- A definir ou não aplicável --> | |
 | Auditoria de dependências | <!-- A definir ou não aplicável --> | |
 | Varredura de secrets | <!-- A definir ou não aplicável --> | |
-| Conferência de lacunas | <!-- Não aplicável enquanto openspec/lacunas.md estiver vazio; depois, o teste do projeto que confere as fontes, se houver --> | |
+| Conferência de lacunas | Não aplicável | Opcional: teste próprio do projeto que compara as fontes com o código. A conferência do registro `openspec/lacunas.md` roda pelo `/opsx:verify` |
 
 ## Development Conventions
 
