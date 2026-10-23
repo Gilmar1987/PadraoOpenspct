@@ -112,10 +112,16 @@ function readApproval(changeRoot) {
   const fields = {};
   for (const line of end < 0 ? rest : rest.slice(0, end)) {
     const match = line.match(/^-\s+([^:]+):\s*(.*)$/);
-    if (match) fields[clean(match[1]).toLowerCase()] = clean(match[2]);
-    // The seal in force is the last one: the approval's own "Conteúdo:" or one inside a "Reconfirmação:".
-    const seal = line.match(/Conteúdo:\s*`?(sha256:[0-9a-f]{64})/i);
-    if (seal) fields.selo = seal[1].toLowerCase();
+    if (!match) continue;
+    const key = clean(match[1]).toLowerCase();
+    fields[key] = clean(match[2]);
+    // The seal in force is the last one written by an approval: its own "Conteúdo:" item, or the one inside
+    // a "Reconfirmação:" or "Archive:" item. "Aprovação anterior" keeps a superseded seal and never counts.
+    if (!['conteúdo', 'conteudo', 'reconfirmação', 'reconfirmacao', 'archive'].includes(key)) continue;
+    const text = key.startsWith('conte') ? `Conteúdo: ${match[2]}` : match[2];
+    if (!/Conte[úu]do:/i.test(text)) continue;
+    const seal = text.match(/Conte[úu]do:\s*`?(sha256:[0-9a-f]{64})`?\s*(;|$)/i);
+    fields.selo = seal ? seal[1].toLowerCase() : 'ilegível';
   }
   return fields;
 }
@@ -128,6 +134,8 @@ function planningFiles(changeRoot) {
   const files = [];
   const walk = (dir, prefix) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      // Hidden entries (the ingest's .inputs/, ignored by git) differ between machines.
+      if (entry.name.startsWith('.')) continue;
       const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
         if (!skipDirs.has(entry.name)) walk(path.join(dir, entry.name), relative);
@@ -154,7 +162,11 @@ function normalizeForSeal(relative, text) {
       body = body.slice(0, start) + (next < 0 ? '' : after.slice(next).join('\n'));
     }
   }
-  return body.replace(/^(\s*[-*] )\[[xX]\]/gm, '$1[ ]').split('\n').filter((line) => !/^\s+[-*] Evidência:/.test(line)).join('\n');
+  return body
+    .replace(/^(\s*[-*] )\[[xX]\]/gm, '$1[ ]')
+    // Confirming an inference removes its marker; the statement itself stays sealed.
+    .replace(/[ \t]?\[INFERIDO:[^\]\n]*\]/gi, '')
+    .split('\n').filter((line) => !/^\s+[-*] Evidência:/.test(line)).join('\n');
 }
 
 function sealOf(changeRoot) {
@@ -170,14 +182,17 @@ function sealOf(changeRoot) {
 function inferenceReasons(changeRoot) {
   const reasons = [];
   for (const relative of planningFiles(changeRoot)) {
-    let fenced = false;
+    // A fence closes only with the same character, at least as long as the one that opened it.
+    let fence = null;
     readText(path.join(changeRoot, relative)).split('\n').forEach((line, index) => {
-      if (/^\s*(```|~~~)/.test(line)) {
-        fenced = !fenced;
+      const marker = line.match(/^\s*(`{3,}|~{3,})/);
+      if (marker) {
+        if (!fence) fence = marker[1];
+        else if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !line.trim().slice(marker[1].length)) fence = null;
         return;
       }
-      if (fenced) return;
-      const prose = line.replace(/`+[^`]*`+/g, '');
+      if (fence) return;
+      const prose = line.replace(/(`+)[\s\S]*?\1/g, '');
       if (/\[INFERIDO:/i.test(prose)) {
         reasons.push(`Inferência não confirmada em ${relative}:${index + 1} ("${line.trim().slice(0, 120)}"). Confirme com o responsável e tire a marca, ou corrija o texto.`);
       }
@@ -229,11 +244,13 @@ function check(action, change, store) {
   const reasons = approvalReasons(fields);
   const warnings = [];
   if (fields && filled(fields['responsável'])) {
-    const current = sealOf(changeRoot).conteudo;
+    const seal = sealOf(changeRoot);
     if (!fields.selo) {
       warnings.push('Aprovação sem selo de conteúdo (registrada antes do selo): o portão não confere se o planejamento mudou depois dela.');
-    } else if (fields.selo !== current) {
-      reasons.push(`A aprovação venceu: o planejamento mudou depois dela (selo registrado ${fields.selo}, atual ${current}). Mostre ao responsável o que mudou e registre a reconfirmação com o /opsx:update, ou peça uma nova aprovação se o escopo mudou.`);
+    } else if (fields.selo === 'ilegível') {
+      reasons.push('O selo da aprovação está ilegível: o item "Conteúdo:" precisa de sha256: seguido de 64 dígitos hexadecimais, como sai de "node docs/openspec-portao.mjs selo <change>".');
+    } else if (fields.selo !== seal.conteudo) {
+      reasons.push(`A aprovação venceu: o planejamento mudou depois dela (selo registrado ${fields.selo}, atual ${seal.conteudo}; arquivos selados: ${seal.arquivos.join(', ')}). Mostre ao responsável o que mudou e registre a reconfirmação com o /opsx:update, ou peça uma nova aprovação se o escopo mudou.`);
     }
   }
   reasons.push(...inferenceReasons(changeRoot));

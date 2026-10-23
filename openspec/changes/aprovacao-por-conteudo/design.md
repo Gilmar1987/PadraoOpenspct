@@ -55,7 +55,8 @@ Não há ADR nova. A change reforça o registro de aprovação já decidido (rul
 
 Trecho novo **"Approval content seal"** em propose, apply, update e archive (comando e skill):
 
-- **Apply 4a, propose (autorização prévia) e archive 4a**, ao registrar uma aprovação ou o item `Archive:`: quando o portão existe, rodar `selo` e gravar `- Conteúdo: sha256:...` antes de `Origem`.
+- **Apply 4a e propose (autorização prévia)**, ao registrar uma aprovação: quando o portão existe, resolver as marcas `[INFERIDO`, rodar `selo` e gravar `- Conteúdo: sha256:...` antes de `Origem`.
+- **Archive 4a**, ao registrar o item `Archive:` de uma change com escopo apply: rodar `selo`; se ele divergir do último `Conteúdo:`, mostrar o que mudou e acrescentar `; Conteúdo: <novo>` ao item `Archive:` só quando a confirmação do responsável cobrir essas mudanças.
 - **Update:** depois de uma revisão confirmada que não muda o escopo de uma change aprovada:
   1. rodar `selo`;
   2. se o selo mudou, mostrar o resumo do que mudou e perguntar ao responsável;

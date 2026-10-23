@@ -948,6 +948,27 @@ jobs:
           printf '# Design\r\n\r\nUse a marca `[INFERIDO: base]` no propose.\r\n' > "$ch/design.md"
           test "$(gate selo ci-change)" = "$lf"
           rm "$ch/design.md"
+          # Depois de uma mudança de escopo, a linha "Aprovação anterior" guarda o selo velho e não conta.
+          velho="$(gate selo ci-change)"
+          printf '# Tasks\n\n## 1. A\n\n- [x] 1.1 a\n- [x] 1.2 b\n- [ ] 1.4 escopo novo\n' > "$ch/tasks.md"
+          sealed "$(gate selo ci-change)"
+          printf -- '- Aprovação anterior: ci, 2026-10-21, apply; Origem: "antes"; Conteúdo: %s\n' "$velho" >> "$ch/proposal.md"
+          gate apply ci-change
+          # .inputs/ (originais do ingest, fora do git) e relatórios gravados depois não mudam o selo.
+          antes="$(gate selo ci-change)"
+          mkdir -p "$ch/.inputs" && printf '# Ata\n' > "$ch/.inputs/ata.md"
+          printf '# Revisão 2\n' >> "$ch/review.md"
+          test "$(gate selo ci-change)" = "$antes"
+          # Confirmar uma inferência (apagar a marca) não muda o selo; selo malformado bloqueia.
+          printf '# Design\n\nPrazo de 30 dias [INFERIDO: mercado].\n' > "$ch/design.md"
+          com="$(gate selo ci-change)"
+          printf '# Design\n\nPrazo de 30 dias.\n' > "$ch/design.md"
+          test "$(gate selo ci-change)" = "$com"
+          rm "$ch/design.md"
+          proposal ci 2026-10-22 apply '"Aprovo"'
+          printf -- '- Conteudo: sha256:deadbeef\n' >> "$ch/proposal.md"
+          if gate apply ci-change > "$RUNNER_TEMP/selo3.txt"; then exit 1; fi
+          grep -qF 'ilegível' "$RUNNER_TEMP/selo3.txt"
           # Change inexistente, nome inválido e store não resolvido: erro de uso ou de ambiente (2).
           set +e; gate apply nao-existe; status=$?; set -e
           test "$status" -eq 2
