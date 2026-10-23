@@ -80,6 +80,7 @@ jobs:
           node --check scripts/comecar.mjs
           node --check scripts/portao.mjs
           node --check scripts/validar-interface.mjs
+          node --check scripts/lacunas.mjs
           node --check scripts/test-fixtures/interface/servidor.mjs
           # No Windows o Python se chama python e pode não ter o PyYAML.
           py="$(command -v python3 || command -v python)"
@@ -125,6 +126,35 @@ jobs:
 
       # Skills e comandos gerados pelo OpenSpec CLI levam trechos customizados do padrão;
       # regenerá-los apaga esses trechos. A checagem falha se algum deles sumir.
+      - name: Smoke test do registro de lacunas
+        run: |
+          # ADR-0007: registro em dia passa; linha sem motivo, fonte alterada e fonte ausente falham;
+          # sem registro passa. O hash normaliza CRLF para LF.
+          w="$(mktemp -d)"
+          mkdir -p "$w/openspec/specs/a"
+          printf 'regra A\r\n' > "$w/openspec/specs/a/spec.md"
+          h="$(node -e 'const c = require("crypto"); const t = require("fs").readFileSync(process.argv[1], "utf8").replace(/\r\n/g, "\n"); console.log(c.createHash("sha256").update(t).digest("hex"))' "$w/openspec/specs/a/spec.md")"
+          reg() { cp openspec/lacunas.md "$w/openspec/lacunas.md"; printf '%s\n' "$1" >> "$w/openspec/lacunas.md"; }
+          node scripts/lacunas.mjs --raiz . | grep -qF 'ok: 0 lacunas'
+          reg "| L-001 | openspec/specs/a/spec.md | $h | Item | Motivo | 2026-10-22 | change x |"
+          node scripts/lacunas.mjs --raiz "$w" | grep -qF 'ok: 1 lacunas, 1 fontes'
+          reg "| L-001 | openspec/specs/a/spec.md | $h | Item |  | 2026-10-22 | change x |"
+          if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas1.txt"; then exit 1; fi
+          grep -qF 'falta o motivo' "$RUNNER_TEMP/lacunas1.txt"
+          reg "| L-001 | openspec/specs/a/spec.md | $h | Item | Motivo | 2026-10-22 | change x |"
+          printf 'regra A mudou\n' > "$w/openspec/specs/a/spec.md"
+          if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas2.txt"; then exit 1; fi
+          grep -qF 'releia a declaração inteira' "$RUNNER_TEMP/lacunas2.txt"
+          reg "| L-001 | openspec/specs/b/spec.md | $h | Item | Motivo | 2026-10-22 | change x |"
+          if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas3.txt"; then exit 1; fi
+          grep -qF 'fonte ausente' "$RUNNER_TEMP/lacunas3.txt"
+          reg "| L-001 | codigo:src/a.txt | $h | Item | Motivo | 2026-10-22 | change x |"
+          if node scripts/lacunas.mjs --raiz "$w" > "$RUNNER_TEMP/lacunas4.txt"; then exit 1; fi
+          grep -qF 'informe --codigo' "$RUNNER_TEMP/lacunas4.txt"
+          rm "$w/openspec/lacunas.md"
+          node scripts/lacunas.mjs --raiz "$w" | grep -qF 'sem registro de lacunas'
+          rm -rf "$w"
+
       - name: Trechos customizados das skills
         run: |
           missing=0
@@ -142,6 +172,7 @@ jobs:
             check "$f" "Standard version check"
             check "$f" "offer to update now"
             check "$f" "Commit the planning"
+            check "$f" "verificacao"
             check "$f" "Check concurrent changes"
             check "$f" "Interface brief"
           done
@@ -178,6 +209,8 @@ jobs:
             check "$f" "Agent-run browser scripts"
             check "$f" "Interface quality gate"
             check "$f" "Screens without visual brief"
+            check "$f" "Declared gaps"
+            check "$f" "ADR verification"
           done
           # Subagentes do Claude Code (subagentes-e-ganchos): a revisão de código usa o revisor somente leitura.
           check .claude/skills/requesting-code-review/SKILL.md "openspec-code-reviewer"

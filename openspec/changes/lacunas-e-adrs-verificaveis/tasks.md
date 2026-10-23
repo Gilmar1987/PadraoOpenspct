@@ -4,13 +4,17 @@
 
 - [x] 1.1 Rebasear a branch na `main` atual e combinar com a outra sessão o número da próxima minor livre (usado no grupo 5). Verificar com `git log --oneline HEAD..origin/main` vazio e o número registrado na evidência.
   - Evidência: rebase em `origin/main` fe31307 (PR #34) sem conflito; `git log --oneline HEAD..origin/main` vazio (exit 0); versão: pelo modelo decidido em 2026-10-22, a change acrescenta itens à seção `## 1.12.0` aberta no CHANGELOG, sem mexer no `VERSION` (já em 1.12.0, sem tag `v1.12.0`); outra sessão avisada
-- [ ] 1.2 Acrescentar os marcadores do D6 ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` ("Declared gaps" e "ADR verification" no laço do verify; "verificacao" no laço do propose). Verificar rodando só esse passo localmente: deve falhar nos quatro arquivos que ainda não têm os trechos.
+- [x] 1.2 Acrescentar os marcadores do D6 ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` ("Declared gaps" e "ADR verification" no laço do verify; "verificacao" no laço do propose). Verificar rodando só esse passo localmente: deve falhar nos quatro arquivos que ainda não têm os trechos.
+  - Evidência: marcadores "Declared gaps" e "ADR verification" no laço do verify e "verificacao" no do propose; `run-ci-steps.py ... "Trechos customizados"` antes da implementação → FAIL (exit 1) só nos seis pontos esperados (verify e propose, comando e skill)
 
 ## 2. Registro de lacunas e script
 
-- [ ] 2.1 Criar `padrao-openspec/openspec/lacunas.md` conforme o D1 (introdução, tabela vazia e linha de exemplo comentada). Verificar com o markdownlint nos dois lugares.
-- [ ] 2.2 Criar `padrao-openspec/scripts/lacunas.mjs` conforme o D2 (Node.js sem dependências, `--raiz` e `--codigo`, normalização de fim de linha) e acrescentar `node --check scripts/lacunas.mjs` ao passo "Sintaxe dos scripts". Verificar com `node --check` e com os cinco casos do D6 rodados à mão num diretório temporário (códigos de saída 0, 1, 1, 1 e 0).
-- [ ] 2.3 Acrescentar ao `validate.yml` o passo "Smoke test do registro de lacunas" com os cinco casos do D6 e a mensagem "releia a declaração inteira". Verificar rodando só esse passo localmente, depois de avisar a outra sessão (suítes locais não rodam em paralelo).
+- [x] 2.1 Criar `padrao-openspec/openspec/lacunas.md` conforme o D1 (introdução, tabela vazia e linha de exemplo comentada). Verificar com o markdownlint nos dois lugares.
+  - Evidência: `padrao-openspec/openspec/lacunas.md` com introdução, como manter, comando de conferência, tabela vazia com as sete colunas e linha de exemplo num comentário; `npx markdownlint-cli2@0.23.2` em `padrao-openspec/` → 0 issues (exit 0); na raiz o arquivo fica fora do lint pela configuração (ignora `padrao-openspec/**`)
+- [x] 2.2 Criar `padrao-openspec/scripts/lacunas.mjs` conforme o D2 (Node.js sem dependências, `--raiz` e `--codigo`, normalização de fim de linha) e acrescentar `node --check scripts/lacunas.mjs` ao passo "Sintaxe dos scripts". Verificar com `node --check` e com os cinco casos do D6 rodados à mão num diretório temporário (códigos de saída 0, 1, 1, 1 e 0).
+  - Evidência: `node --check scripts/lacunas.mjs` → ok; cinco casos do D6 à mão num diretório temporário: em dia → "ok: 1 lacunas, 1 fontes" (exit 0, fonte com CRLF), sem motivo → "falta o motivo" (exit 1), fonte alterada → "releia a declaração inteira" com o hash atual (exit 1), fonte ausente (exit 1), sem registro (exit 0); o modelo vazio do padrão → "ok: 0 lacunas" (exit 0); `node --check` acrescentado ao passo "Sintaxe dos scripts" → PASS. As mensagens de hash ausente ou divergente mostram o hash atual, porque o hash normaliza o fim de linha e não pode ser obtido com sha256sum
+- [x] 2.3 Acrescentar ao `validate.yml` o passo "Smoke test do registro de lacunas" com os cinco casos do D6 e a mensagem "releia a declaração inteira". Verificar rodando só esse passo localmente, depois de avisar a outra sessão (suítes locais não rodam em paralelo).
+  - Evidência: passo "Smoke test do registro de lacunas" (modelo vazio, em dia, sem motivo, fonte alterada com "releia a declaração inteira", fonte ausente, fonte codigo: sem --codigo, sem registro) → PASS (exit 0); o passo usa só uma pasta temporária, sem registro de stores, portas nem o CLI global, por isso não exigiu aviso à outra sessão
 
 ## 3. Verify e propose
 
