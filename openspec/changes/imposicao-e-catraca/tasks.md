@@ -26,8 +26,10 @@
 
 ## 4. Verify
 
-- [ ] 4.1 Aplicar o D2 ao item "ADR verification" de `padrao-openspec/.claude/commands/opsx/verify.md` e de `skills/openspec-verify-change/SKILL.md` (severidade pela imposição, `externo` e verificador ausente). Verificar com `diff` vazio entre os dois itens.
-- [ ] 4.2 Aplicar o D3 (heurística "ADR check seen failing" e "nada a varrer"), o D5 ("Accepted failures" em "Project validation commands") e o D6 (heurística "Exit conditions") no `verify.md` e na skill, com o mesmo texto. Verificar com `diff` vazio entre os trechos, com os marcadores do D7 passando e com o "Smoke test das métricas de fluxo" passando, o que mostra que as linhas de contagem não mudaram.
+- [x] 4.1 Aplicar o D2 ao item "ADR verification" de `padrao-openspec/.claude/commands/opsx/verify.md` e de `skills/openspec-verify-change/SKILL.md` (severidade pela imposição, `externo` e verificador ausente). Verificar com `diff` vazio entre os dois itens.
+  - Evidência: item "ADR verification" do `verify.md` e da skill: lê `imposicao` (padrão sem o campo), teste ausente CRITICAL, falha CRITICAL em `controle` e WARNING em `consultivo`, `externo` com regra presente e não desligada (formato ilegível vai a Não verificado), `norma` sem execução, verificador ausente CRITICAL; `diff` dos itens → iguais
+- [x] 4.2 Aplicar o D3 (heurística "ADR check seen failing" e "nada a varrer"), o D5 ("Accepted failures" em "Project validation commands") e o D6 (heurística "Exit conditions") no `verify.md` e na skill, com o mesmo texto. Verificar com `diff` vazio entre os trechos, com os marcadores do D7 passando e com o "Smoke test das métricas de fluxo" passando, o que mostra que as linhas de contagem não mudaram.
+  - Evidência: "nada a varrer" no item de ADR, heurísticas "ADR check seen failing" e "Exit conditions" e o parágrafo "Accepted failures" em "Project validation commands", no `verify.md` e na skill; `diff` dos quatro trechos → iguais; "Trechos customizados das skills", "Lint de Markdown" e "Smoke test das métricas de fluxo" → PASS (exit 0)
 
 ## 5. Documentação, versão e integração
 
