@@ -13,7 +13,7 @@ O instalador SHALL copiar todos os arquivos de comando de `padrao-openspec/.clau
 #### Scenario: Instalação em projeto vazio
 
 - **WHEN** o instalador roda em um repositório Git vazio sem opções
-- **THEN** `.claude/commands/opsx/` do consumidor contém `apply.md`, `archive.md`, `explore.md`, `ingest.md`, `init.md`, `propose.md`, `sync.md`, `update.md` e `verify.md`, idênticos à fonte
+- **THEN** `.claude/commands/opsx/` do consumidor contém `apply.md`, `archive.md`, `discover.md`, `explore.md`, `ingest.md`, `init.md`, `propose.md`, `sync.md`, `update.md` e `verify.md`, idênticos à fonte
 
 #### Scenario: Comando customizado no consumidor
 
