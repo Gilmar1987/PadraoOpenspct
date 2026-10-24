@@ -3,7 +3,7 @@
 ## Context
 
 - Os seis fluxos que selecionam uma change (`propose`, `apply`, `verify`, `archive`, `update` e `sync`) existem como comando (`commands/opsx/*.md`) e como skill (`skills/openspec-*/SKILL.md`), gerados pelo OpenSpec CLI 1.14.2 e com trechos próprios do padrão conferidos pela CI.
-- Cinco deles têm, no passo 1, o anúncio "Always announce: \"Using change: <name>\" and how to override". Apply e archive têm modelos de saída com `**Change:** <change-name>`, e o propose lista "Change name and location" no resumo.
+- Cinco deles têm, no passo 1, o anúncio `Always announce: "Using change: <name>" and how to override`. Apply e archive têm modelos de saída com `**Change:** <change-name>`, e o propose lista "Change name and location" no resumo.
 - O passo 1 de cada fluxo já infere a change pelo contexto, seleciona a única ativa ou pergunta quando há ambiguidade. Por isso o comando sem argumento funciona.
 - As regras chegam aos projetos pelo `rules.md` (fonte em `padrao-openspec/openspec/rules.md`) e pelos blocos gerenciados (ADR-0005).
 
@@ -37,7 +37,7 @@ Item novo no fim da lista da seção 3:
 
 ### D2. Trecho "Describe the delivery" nos seis fluxos
 
-**Anúncio.** Nos cinco fluxos que o têm, a frase "Always announce: \"Using change: <name>\" and how to override (e.g., `/opsx:<fluxo> <other>`)." passa a ser:
+**Anúncio.** Nos cinco fluxos que o têm, a frase `Always announce: "Using change: <name>" and how to override (e.g., /opsx:<fluxo> <other>).` passa a ser:
 
 ```text
 **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it.

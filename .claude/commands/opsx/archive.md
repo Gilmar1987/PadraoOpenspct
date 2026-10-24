@@ -39,7 +39,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    When prompting, show only active changes (not already archived).
    Include the schema used for each change if available.
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:archive <other>`).
+   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
    **Load current archive inputs before the existing archive checks:**
 
@@ -209,7 +209,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 ```markdown
 ## Archive Complete
 
-**Change:** <change-name>
+**Entrega:** <one line on what the change delivers>
 **Schema:** <schema-name>
 **Archived to:** the archive path derived from `planningHome.changesDir`/<target-name>/
 **Specs:** ✓ Synced to main specs
@@ -222,7 +222,7 @@ All artifacts complete. All tasks complete.
 ```markdown
 ## Archive Complete
 
-**Change:** <change-name>
+**Entrega:** <one line on what the change delivers>
 **Schema:** <schema-name>
 **Archived to:** the archive path derived from `planningHome.changesDir`/<target-name>/
 **Specs:** No delta specs
@@ -235,7 +235,7 @@ All artifacts complete. All tasks complete.
 ```markdown
 ## Archive Complete (with warnings)
 
-**Change:** <change-name>
+**Entrega:** <one line on what the change delivers>
 **Schema:** <schema-name>
 **Archived to:** the archive path derived from `planningHome.changesDir`/<target-name>/
 **Specs:** Sync skipped (user chose to skip)
@@ -253,7 +253,7 @@ Review the archive if this was not intentional.
 ```markdown
 ## Archive Failed
 
-**Change:** <change-name>
+**Entrega:** <one line on what the change delivers>
 **Target:** the archive path derived from `planningHome.changesDir`/<target-name>/
 
 Target archive directory already exists.

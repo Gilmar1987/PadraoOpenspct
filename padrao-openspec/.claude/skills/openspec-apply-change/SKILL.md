@@ -38,7 +38,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Auto-select if only one active change exists
    - If ambiguous, run `openspec list --json` to get available changes and ask the user to select one
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
+   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
 2. **Check status to understand the schema**
    ```bash
@@ -192,7 +192,7 @@ Working on task 4/7: <task description>
 ```
 ## Implementation Complete
 
-**Change:** <change-name>
+**Entrega:** <one line on what the change delivers>
 **Schema:** <schema-name>
 **Progress:** 7/7 tasks complete ✓
 
@@ -210,7 +210,7 @@ before archiving. You can archive this change with `/opsx:archive`.
 ```
 ## Implementation Paused
 
-**Change:** <change-name>
+**Entrega:** <one line on what the change delivers>
 **Schema:** <schema-name>
 **Progress:** 4/7 tasks complete
 

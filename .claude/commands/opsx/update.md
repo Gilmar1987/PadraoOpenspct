@@ -41,7 +41,7 @@ This workflow revises artifacts that already exist; it never creates missing one
 
    Mark the most recently modified change as "(Recommended)" since it's likely what the user wants to update.
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:update <other>`).
+   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
 2. **Get the change's artifacts**
    ```bash

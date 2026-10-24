@@ -173,10 +173,12 @@ In both branches, never create the root as a side effect: do not run `openspec i
 **Output**
 
 After completing all artifacts, summarize:
-- Change name and location
+- What the change delivers, in one line, and where its files are
 - List of artifacts created with brief descriptions, plus any conditional artifact you skipped and why
 - What's ready: "All artifacts needed for implementation are ready."
 - Prompt: "The artifacts are ready for review. When you are ready, run `/opsx:apply` or ask me to apply this change."
+
+**Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
 **Artifact Creation Guidelines**
 

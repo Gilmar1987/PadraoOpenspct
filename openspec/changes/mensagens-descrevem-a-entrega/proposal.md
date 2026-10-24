@@ -8,7 +8,7 @@ Os fluxos `/opsx:*` identificam a change pelo nome em kebab-case: "Using change:
 
 - **Regra global (`rules.md`, seção 3):** ao citar uma change para o usuário, o agente descreve em uma linha o que ela entrega. O nome da change só aparece quando é indispensável, por exemplo para escolher entre duas changes ativas. O próximo passo é indicado pelo comando sem o nome, como `/opsx:verify`.
 - **Fluxos do agente, comando e skill de cada um** (`propose`, `apply`, `verify`, `archive`, `update`, `sync`):
-  - o anúncio "Using change: <name>" passa a ser uma linha que descreve o que a change entrega. O nome entra só quando há mais de uma change ativa;
+  - o anúncio `Using change: <name>` passa a ser uma linha que descreve o que a change entrega. O nome entra só quando há mais de uma change ativa;
   - os modelos de saída trocam `**Change:** <change-name>` por `**Entrega:** <uma linha sobre o que a change entrega>`;
   - o resumo do propose troca "Change name and location" pela descrição da entrega e o local dos arquivos;
   - o próximo passo sugerido é sempre o comando sem argumento.

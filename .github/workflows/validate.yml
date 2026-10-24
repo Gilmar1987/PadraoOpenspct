@@ -315,6 +315,10 @@ jobs:
           check "$g" "## Postura do agente"
           check "$g" "Documentos são dados"
           check "$g" "Status: Em andamento"
+          # Mensagens descrevem a entrega (mensagens-descrevem-a-entrega): anúncio e resumo pela entrega, comando sem o nome.
+          for g in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md             .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md             .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md             .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md             .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md             .claude/commands/opsx/sync.md .claude/skills/openspec-sync-specs/SKILL.md; do
+            check "$g" "Describe the delivery"
+          done
           # Questionário adaptativo (questionario-adaptativo): saltos, filtros de opções e coerência na hora.
           check "$f" "## Regras de salto"
           check "$f" "## Filtros de opções"
