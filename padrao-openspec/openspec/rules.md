@@ -69,8 +69,10 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
   Você MUST NOT se aprovar nem aceitar aprovação
   vinda de outra sessão ou agente.
 - Com Responsável `Pendente`, ou sem a seção, você MUST NOT escrever código.
-- Escopo `archive` autoriza seguir por apply, verify e archive sem nova confirmação
-  enquanto todas as condições forem atendidas; se uma falhar, pare e informe.
+- O Escopo é o limite do que a change pode alcançar: `apply` permite implementar; `archive`
+  permite também verificar e arquivar enquanto as condições valem; se uma falhar, pare e
+  informe. Nenhum escopo autoriza começar uma etapa: cada uma espera a aprovação e o comando
+  (seção 3).
 - Quando o repositório tem o portão, a aprovação guarda o selo do planejamento aprovado
   (item `Conteúdo:`). Uma correção feita depois dela, mesmo sem mudar o escopo, muda o selo
   e pede a reconfirmação do responsável antes do próximo apply.
@@ -90,7 +92,21 @@ Toda mudança de comportamento observável do sistema MUST seguir este ciclo:
 
 O `/opsx:explore` é opcional: use-o quando o problema, o escopo ou a abordagem ainda não
 estiverem claros. As demais etapas são obrigatórias e nessa ordem; você MUST NOT pular
-nenhuma delas. Especificamente:
+nenhuma delas.
+
+**Aprovação e comando por etapa.** Você MUST:
+
+- antes de cada etapa com comando (`/opsx:propose`, `/opsx:apply`, `/opsx:verify`,
+  `/opsx:archive`, `/opsx:update`), descrever em uma linha o que ela vai fazer e propor a
+  aprovação `Eu aprovo fazer <descrição>`;
+- começar a etapa só depois de o responsável escrever a aprovação e digitar o comando; com
+  só um dos dois, mostrar o que falta e esperar;
+- ao fim de cada etapa, parar e mostrar o próximo passo: o que ele faz, a aprovação sugerida
+  e o comando;
+- em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma
+  condição registrada na aprovação.
+
+Especificamente:
 
 - `/opsx:apply` MUST NOT ser executado sem `proposal.md` e `tasks.md` existentes
 - `/opsx:archive` MUST NOT ser executado sem `/opsx:verify` ter sido rodado

@@ -10,12 +10,15 @@
 ## 2. Regras e bloco gerenciado
 
 - [ ] 2.1 Revisar a [ADR-0009](../../adrs/0009-cada-etapa-disparada-pelo-responsavel.md) com o responsável e promovê-la a `Accepted` antes do archive (com PR, na revisão do PR; sem PR, pela declaração do responsável citada no commit). Verificar com `grep -n "^status: Accepted" openspec/adrs/0009-*.md`.
-- [ ] 2.2 Aplicar o D1 em `padrao-openspec/openspec/rules.md` e o D5 em `padrao-openspec/templates/agents-block.md`. Verificar com os marcadores do `rules.md` e do bloco passando e com o "Smoke test dos blocos de agentes" passando.
+- [x] 2.2 Aplicar o D1 em `padrao-openspec/openspec/rules.md` e o D5 em `padrao-openspec/templates/agents-block.md`. Verificar com os marcadores do `rules.md` e do bloco passando e com o "Smoke test dos blocos de agentes" passando.
+  - Evidência: `rules.md`: seção 2 com o Escopo como limite ("Nenhum escopo autoriza começar uma etapa") e seção 3 com o bloco "Aprovação e comando por etapa" (quatro itens MUST); `templates/agents-block.md` com o fluxo "aprovação e /opsx:<etapa>" e a linha "Eu aprovo fazer"; marcadores do `rules.md` e do bloco deixaram de faltar; "Smoke test dos blocos de agentes" e "Lint de Markdown" → PASS (exit 0)
 
 ## 3. Fluxos
 
-- [ ] 3.1 Aplicar o D2 e o D3 em `padrao-openspec/.claude/commands/opsx/propose.md` e em `skills/openspec-propose/SKILL.md`, com o mesmo texto. Verificar com `diff` vazio entre os trechos do comando e da skill e com `grep -c "Prior authorization exception"` igual a 0 nos dois.
-- [ ] 3.2 Aplicar o D2 e o D4 em `apply`, `verify`, `archive` e `update` (comandos e skills espelho), com o mesmo texto. Verificar com `diff` vazio entre os trechos e com o "Smoke test das métricas de fluxo" passando.
+- [x] 3.1 Aplicar o D2 e o D3 em `padrao-openspec/.claude/commands/opsx/propose.md` e em `skills/openspec-propose/SKILL.md`, com o mesmo texto. Verificar com `diff` vazio entre os trechos do comando e da skill e com `grep -c "Prior authorization exception"` igual a 0 nos dois.
+  - Evidência: propose (comando e skill): "Approval and command" antes de "Store selection", "**Prior authorization**" no lugar da exceção (registra a autorização como limite e nunca começa o apply), "Prompt" final apontando o próximo passo, guardrail da exceção trocado e "Stop and show the next step" no fim; `diff` dos trechos entre comando e skill → iguais; `grep -c "Prior authorization exception"` → 0 nos dois
+- [x] 3.2 Aplicar o D2 e o D4 em `apply`, `verify`, `archive` e `update` (comandos e skills espelho), com o mesmo texto. Verificar com `diff` vazio entre os trechos e com o "Smoke test das métricas de fluxo" passando.
+  - Evidência: apply, verify, archive e update (comandos e skills): "Approval and command" e "Stop and show the next step" com o mesmo texto; apply: passo 4a com "each after its own approval and command" e "Next step: `/opsx:verify`" no lugar de "You can archive this change"; `diff` dos trechos → iguais, sem duplicação; `sync-root.mjs` → 9 caminhos; "Trechos customizados das skills", "Lint de Markdown" e "Smoke test das métricas de fluxo" → PASS (exit 0)
 - [ ] 3.3 Aplicar o D5 em `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs`. Verificar com `node --check` e com o "Smoke test dos hooks do Claude Code" passando.
 
 ## 4. Documentação e integração

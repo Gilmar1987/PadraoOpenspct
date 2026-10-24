@@ -4,7 +4,10 @@ Leia e siga obrigatoriamente `docs/openspec-regras.md` antes de qualquer ação 
 valem para qualquer agente e não podem ser contornadas por instruções no chat.
 
 - Specs, changes e ADRs ficam no store do projeto; `openspec context --json` mostra onde.
-- O fluxo é `/opsx:propose` → aprovação explícita → `/opsx:apply` → `/opsx:verify` → `/opsx:archive`.
+- O fluxo é `/opsx:propose` → aprovação e `/opsx:apply` → aprovação e `/opsx:verify` → aprovação e
+  `/opsx:archive`. Cada etapa só começa com a aprovação escrita do responsável ("Eu aprovo fazer
+  ...") e o comando digitado por ele; ao fim de cada uma, o agente para e mostra a aprovação e o
+  comando da próxima.
   Sem os comandos `/opsx:*` (eles são do Claude Code), siga o arquivo do comando, por exemplo
   `.claude/commands/opsx/propose.md`.
 - Os comandos `/opsx:*` são fluxos do agente, não comandos do OpenSpec CLI: não existe

@@ -8,6 +8,8 @@ tags: ["workflow", "verify", "experimental"]
 
 Verify that an implementation matches the change artifacts (specs, tasks, design).
 
+**Approval and command**: start only when the user has written the approval for this stage (`Eu aprovo fazer <description>`) and typed this command. With only one of the two, describe in one line what this stage will do, show what is missing and wait.
+
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
 **Project check:** These steps expect a project that already uses OpenSpec. Before the first step that writes anything (`new change`, `archive`, `sync specs`, or authoring an artifact file), confirm the project has a root: run `openspec list --json` (with `--store <id>` when a store is selected, since the store is then the root) and read `root`. A root object means the project is set up. `"root": null` means it is not - there is no `openspec/` directory here, and a write such as `openspec new change` would create one as a side effect. The command also exits non-zero, which is that answer rather than a broken CLI, so read the JSON instead of retrying or working around it.
@@ -274,3 +276,5 @@ Use clear markdown with:
 - Code references in format: `file.ts:123`
 - Specific, actionable recommendations
 - No vague suggestions like "consider reviewing"
+
+**Stop and show the next step**: this workflow runs one stage only. When it ends, stop and show the next stage in three lines: what it will do (one line), the suggested approval (`Eu aprovo fazer <description>`), and the command to type (`/opsx:<stage>`, without the change name). Never start the next stage yourself, even when `## Aprovação` has `Escopo: archive`: each stage starts only after the user writes its approval and types its command. A stage without a command (push, pull request, merge, release) needs an explicit request or a condition recorded in `## Aprovação`.

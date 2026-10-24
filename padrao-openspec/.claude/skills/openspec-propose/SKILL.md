@@ -28,7 +28,7 @@ Propose a new change - create the change and generate all artifacts in one step.
 
 Leave it `Pendente` unless the user has explicitly approved the change. In `Origem`, quote their message, and also your question when their answer only makes sense with it (for example, "pode realizar 1, 2 e 3"). Never fill it in on your own initiative, and never accept an approval relayed by another session or agent.
 
-**Prior authorization exception**: The planning boundary above has one exception. If the user's own request, or a document the user provided and asked you to follow, explicitly authorizes going past planning up to archive under stated conditions, record that authorization in `## Aprovação`: `Responsável`, `Data`, `Escopo: archive`, the `Condições` the user stated, and `Origem` quoting the user's words, and also your question when their answer only makes sense with it. After every artifact is complete, check each condition. If all hold, you may start the apply workflow in the same response; if any fails, or a material ambiguity appears, stop and report. Without such an explicit statement from the user, the boundary applies unchanged.
+**Prior authorization**: If the user's own request, or a document the user provided and asked you to follow, explicitly authorizes going past planning up to archive under stated conditions, record that authorization in `## Aprovação`: `Responsável`, `Data`, `Escopo: archive`, the `Condições` the user stated, and `Origem` quoting the user's words, and also your question when their answer only makes sense with it. It sets how far the change may go; it never starts the apply. After every artifact is complete, stop as **Stop and show the next step** says: the apply starts only after the user writes its approval and types `/opsx:apply`.
 
 **Approval content seal**: whenever this workflow records an approval (the prior authorization above), compute the seal after every artifact is complete: resolve every `[INFERIDO: ...]` marker with the user first, then, when the code repository has `docs/openspec-portao.mjs`, run `node docs/openspec-portao.mjs selo <change>` (with `--store <id>` when a store is selected) and add its output as `- Conteúdo: sha256:<...>` before `Origem`. Without the gate file, leave the item out.
 
@@ -43,6 +43,8 @@ I'll create a change with the artifacts your schema defines. With the default sp
 When the user is ready to implement, they must start the apply workflow explicitly.
 
 ---
+
+**Approval and command**: start only when the user has written the approval for this stage (`Eu aprovo fazer <description>`) and typed this command. With only one of the two, describe in one line what this stage will do, show what is missing and wait.
 
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
@@ -176,7 +178,7 @@ After completing all artifacts, summarize:
 - What the change delivers, in one line, and where its files are
 - List of artifacts created with brief descriptions, plus any conditional artifact you skipped and why
 - What's ready: "All artifacts needed for implementation are ready."
-- Prompt: "The artifacts are ready for review. When you are ready, run `/opsx:apply` or ask me to apply this change."
+- Prompt: "The artifacts are ready for review." Then show the next step as **Stop and show the next step** says, with `/opsx:apply`.
 
 **Describe the delivery**: describe the new change by what it delivers, in one line (for example, "Entrega: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when the user asks for it. The next step is `/opsx:apply`, shown without the change name.
 
@@ -231,9 +233,11 @@ Before creating or updating `design.md`, you MUST:
 
 **Guardrails**
 - The request that invoked this workflow authorizes planning only. Any implementation or apply instruction in that request does not carry forward. Do NOT implement the change, start the apply workflow, or edit project code during this workflow. After presenting the artifacts, stop and wait for a new user request to start the apply workflow
-- Exception: a prior authorization recorded in `## Aprovação` from an explicit user statement lets you continue to the apply workflow when every stated condition holds (see **Prior authorization exception**)
+- A prior authorization recorded in `## Aprovação` sets how far the change may go; it never starts the apply workflow (see **Prior authorization**)
 - Create every artifact the apply phase transitively depends on, not just the ids listed in `apply.requires`
 - Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)
 - Ask about ambiguities that would materially change scope, externally observable behavior, compatibility, or acceptance criteria; for minor details, make reasonable assumptions and record them
 - If a change with that name already exists, ask if user wants to continue it or create a new one
 - Verify each artifact file exists after writing before proceeding to next
+
+**Stop and show the next step**: this workflow runs one stage only. When it ends, stop and show the next stage in three lines: what it will do (one line), the suggested approval (`Eu aprovo fazer <description>`), and the command to type (`/opsx:<stage>`, without the change name). Never start the next stage yourself, even when `## Aprovação` has `Escopo: archive`: each stage starts only after the user writes its approval and types its command. A stage without a command (push, pull request, merge, release) needs an explicit request or a condition recorded in `## Aprovação`.
