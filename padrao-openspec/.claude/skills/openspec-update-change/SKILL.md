@@ -12,7 +12,7 @@ metadata:
 
 Revise a change's existing planning artifacts and keep them coherent. Never edit code.
 
-**Approval and command**: start only when the user has written the approval for this stage (`Eu aprovo fazer <description>`) and typed this command. With only one of the two, describe in one line what this stage will do, show what is missing and wait.
+**Approval and command**: start only when the user has written the approval for this stage (`Eu aprovo fazer <description>`) and typed `/opsx:update` (in an agent without the `/opsx:*` commands, asked for this stage by name). You activating this skill on your own is not the command. With only one of the two, describe in one line what this stage will do, show what is missing and wait. The written approval, quoted, is the confirmation this workflow asks for at this stage (the approval record, the `Archive:` item, the seal reconfirmation).
 
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
@@ -94,8 +94,8 @@ This workflow revises artifacts that already exist; it never creates missing one
 
 6. **Point to the next step (guidance only - NEVER act on it)**
    - Artifacts with empty `existingOutputPaths` and status `ready` or `blocked` -> run `openspec status --change "<name>" --json` for the next artifact and point the user to `openspec instructions "<artifact-id>" --change "<name>" --json` for how to create it.
-   - Change already implemented (tasks checked off / already applied) -> the code may no longer match the revised plan; suggest `/opsx:apply` to carry the delta into code.
-   - Everything done and implemented -> suggest `/opsx:archive`.
+   - Change already implemented (tasks checked off / already applied) -> the code may no longer match the revised plan; show `/opsx:apply` as the next step, as **Stop and show the next step** says, to carry the delta into code.
+   - Everything done and implemented -> show `/opsx:verify` or `/opsx:archive`, whichever comes next, as **Stop and show the next step** says.
 
 **Output**
 

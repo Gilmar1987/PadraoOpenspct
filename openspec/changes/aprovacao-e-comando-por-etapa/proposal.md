@@ -78,9 +78,10 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; o apply roda sobre a `main` atual, e quem entrar por último na `main` faz o rebase; cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável
+- Conteúdo: sha256:8b8559bbd2543b14bc791da7a356b28522783ce21ecc70db3f85c9067ff4de17
+- Origem: "Eu aprovo fazer o apply da aprovacao-e-comando-por-etapa revisada, até o archive, com PR; o merge fica comigo"
 - Aprovação anterior: Gilmar Campelo, 2026-10-23, archive; Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; o apply começa depois do merge da `mensagens-descrevem-a-entrega`, com rebase (alterada: o apply começa sobre a `main` 881c390, sem esperar, "Eu aprovo fazer o apply agora, sem esperar a mensagens-descrevem-a-entrega"); cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável; Origem: "Eu aprovo fazer o apply da aprovacao-e-comando-por-etapa, até o archive, com PR; o merge fica comigo"; Conteúdo: sha256:29898a85743d1ddc6d03d13304ea4f693a5dae71e4ad936ce95446f1f098bf22

@@ -104,7 +104,13 @@ nenhuma delas.
 - ao fim de cada etapa, parar e mostrar o próximo passo: o que ele faz, a aprovação sugerida
   e o comando;
 - em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma
-  condição registrada na aprovação.
+  condição registrada na aprovação;
+- tratar a aprovação escrita da etapa, citada, como a confirmação que o fluxo pede (o item
+  `Archive:`, a aprovação de uma change Pendente, a reconfirmação do selo); o verify roda com
+  qualquer escopo;
+- num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome (por
+  exemplo, "rode o apply") e seguir o arquivo `.claude/commands/opsx/<etapa>.md`; a ativação de
+  uma skill pelo próprio modelo não é o comando.
 
 Especificamente:
 

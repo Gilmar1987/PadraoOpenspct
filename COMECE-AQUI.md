@@ -218,9 +218,11 @@ Toda mudança de comportamento passa pelo ciclo abaixo, no Claude Code, dentro d
 
 1. `/opsx:explore` (opcional): para pensar o problema antes de planejar.
 2. `/opsx:propose <nome-da-change>`: cria proposta, specs, design e tarefas. Revise os artefatos.
-3. **Aprove no chat, com uma frase explícita**, por exemplo: `Aprovo a change <nome> para apply`.
-   Sem essa frase, o agente não escreve código. Para seguir até o archive sem parar, aprove
-   `para archive` e diga as condições.
+3. **Cada etapa começa com a sua aprovação e o seu comando.** Escreva a aprovação que o agente
+   sugere, por exemplo `Eu aprovo fazer o apply da change <nome>`, e digite o comando, por exemplo
+   `/opsx:apply`. Sem os dois, o agente não começa a etapa; ao fim de cada uma, ele para e mostra a
+   aprovação e o comando da próxima. Uma aprovação "até o archive" diz até onde a change pode ir,
+   mas não encadeia as etapas.
 4. `/opsx:apply`: implementa as tarefas, registra a evidência de cada uma e pede a revisão de
    código no fim.
 5. `/opsx:verify`: confere tarefas, requisitos e cenários e grava o `verification.md`.

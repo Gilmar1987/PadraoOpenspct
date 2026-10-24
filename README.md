@@ -126,7 +126,7 @@ declarar quando você quiser ligar os dois repositórios. Use `--target agents` 
 Todo projeto que usa este padrão segue o mesmo ciclo:
 
 ```text
-[/opsx:explore]   →   /opsx:propose   →   /opsx:apply   →   /opsx:verify   →   /opsx:archive
+[/opsx:explore] → (aprovação) /opsx:propose → (aprovação) /opsx:apply → (aprovação) /opsx:verify → (aprovação) /opsx:archive
 ```
 
 | Comando | O que faz |

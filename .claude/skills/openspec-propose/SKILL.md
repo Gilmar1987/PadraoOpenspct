@@ -12,7 +12,7 @@ metadata:
 
 Propose a new change - create the change and generate all artifacts in one step.
 
-**Planning boundary**: This workflow creates planning artifacts only. The user request that selected or triggered this workflow authorizes planning only, even if it asks to build or fix something. Do not edit project code. After the planning artifacts are complete, stop. Do not start implementation in the same response, even if the initial request asks for it. Wait for a new user request after the artifacts are presented; then start the apply workflow.
+**Planning boundary**: This workflow creates planning artifacts only. The user request that selected or triggered this workflow authorizes planning only, even if it asks to build or fix something. Do not edit project code. After the planning artifacts are complete, stop. Do not start implementation in the same response, even if the initial request asks for it. Wait until the user writes the apply approval and types `/opsx:apply`; then start the apply workflow.
 
 **Approval record**: End `proposal.md` with the approval record required by `openspec/rules.md`, as plain list items with no checkboxes:
 
@@ -44,7 +44,7 @@ When the user is ready to implement, they must start the apply workflow explicit
 
 ---
 
-**Approval and command**: start only when the user has written the approval for this stage (`Eu aprovo fazer <description>`) and typed this command. With only one of the two, describe in one line what this stage will do, show what is missing and wait.
+**Approval and command**: start only when the user has written the approval for this stage (`Eu aprovo fazer <description>`) and typed `/opsx:propose` (in an agent without the `/opsx:*` commands, asked for this stage by name). You activating this skill on your own is not the command. With only one of the two, describe in one line what this stage will do, show what is missing and wait. The written approval, quoted, is the confirmation this workflow asks for at this stage (the approval record, the `Archive:` item, the seal reconfirmation).
 
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
@@ -232,7 +232,7 @@ Before creating or updating `design.md`, you MUST:
 6. **Impacto medido**: when the change creates an ADR with `verificacao`, adds `verificacao` to an Accepted ADR or hardens it (stricter rule, or `consultivo` → `controle`), add a `## Impacto medido` section to `design.md`: the command, its exit code, the number of violations in the current code and the list (or the first 20 and the total), and a destination for each violation: a task of this change, a row in `openspec/lacunas.md`, or an accepted failure (the `Falhas aceitas:` line). An estimate does not replace the measurement. When the check does not exist yet, write "medido no apply": the task that writes the check measures the violations before fixing any and records them in its evidence. The task that writes or changes the check, here as in step 5, also runs it **seen failing**, and a promotion to `controle` needs that evidence too
 
 **Guardrails**
-- The request that invoked this workflow authorizes planning only. Any implementation or apply instruction in that request does not carry forward. Do NOT implement the change, start the apply workflow, or edit project code during this workflow. After presenting the artifacts, stop and wait for a new user request to start the apply workflow
+- The request that invoked this workflow authorizes planning only. Any implementation or apply instruction in that request does not carry forward. Do NOT implement the change, start the apply workflow, or edit project code during this workflow. After presenting the artifacts, stop and wait until the user writes the apply approval and types `/opsx:apply`
 - A prior authorization recorded in `## Aprovação` sets how far the change may go; it never starts the apply workflow (see **Prior authorization**)
 - Create every artifact the apply phase transitively depends on, not just the ids listed in `apply.requires`
 - Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)
