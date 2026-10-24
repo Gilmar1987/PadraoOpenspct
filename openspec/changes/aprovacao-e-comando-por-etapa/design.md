@@ -74,7 +74,7 @@ E, no início de cada fluxo, uma frase curta:
 ### D5. Bloco gerenciado e hook
 
 - **`templates/agents-block.md`:** o fluxo passa a "`/opsx:propose` → aprovação e `/opsx:apply` → aprovação e `/opsx:verify` → aprovação e `/opsx:archive`", com uma linha: "cada etapa só começa com a aprovação escrita do responsável ('Eu aprovo fazer ...') e o comando digitado por ele".
-- **`contexto-de-sessao.mjs`:** depois da lista de changes, uma linha: "Cada etapa começa com a aprovação escrita do responsável e o comando /opsx:<etapa> digitado por ele."
+- **`contexto-de-sessao.mjs`:** depois da lista de changes, uma linha: `Cada etapa começa com a aprovação escrita do responsável e o comando /opsx:<etapa> digitado por ele.`
 
 ### D6. CI, README e CHANGELOG
 
