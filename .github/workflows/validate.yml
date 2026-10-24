@@ -280,6 +280,15 @@ jobs:
               fi
             done
           done
+          # O texto antigo também não volta às regras nem ao guia de entrada.
+          if grep -qF -- "sem nova confirmação" openspec/rules.md; then
+            echo "::error file=padrao-openspec/openspec/rules.md::Trecho antigo de volta: sem nova confirmação"
+            missing=1
+          fi
+          if grep -qF -- "sem parar" ../COMECE-AQUI.md; then
+            echo "::error file=COMECE-AQUI.md::Trecho antigo de volta: sem parar"
+            missing=1
+          fi
           check .claude/commands/opsx/archive.md "After archive, the next step is the pull request"
           check .claude/skills/openspec-archive-change/SKILL.md "After archive, the next step is the pull request"
           check templates/agents-block.md "Eu aprovo fazer"

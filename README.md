@@ -152,7 +152,7 @@ deduziu sem fonte ficam marcados `[INFERIDO: <base>]` e também bloqueiam o appl
 No início de um projeto, o `/opsx:init` pergunta, antes da entrevista, se há documentos para analisar (ingest) e se o dev quer explorar a ideia do produto (discover). Com qualquer um dos dois, as perguntas de arquitetura mostram uma recomendação justificada a partir do brief; com "não" nos dois, a entrevista é a de sempre:
 
 ```text
-/opsx:init → [ingest] → [discover] → entrevista → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+/opsx:init → [ingest] → [discover] → entrevista → (aprovação) /opsx:propose → (aprovação) /opsx:apply → (aprovação) /opsx:verify → (aprovação) /opsx:archive
 ```
 
 ---

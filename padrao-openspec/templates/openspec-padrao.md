@@ -30,7 +30,7 @@ O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira c
    (os listados em `managedFiles` e `managedBlocks` do `.openspec-padrao.json`, o próprio
    `.openspec-padrao.json`, o `.gitignore`, o `openspec/config.yaml`, o `.claude/settings.json` e, quando
    o padrão o criou, o `.gitattributes`).
-3. **Faça cada mudança pelo ciclo** `/opsx:propose` → aprovação e `/opsx:apply` → aprovação e
+3. **Faça cada mudança pelo ciclo** aprovação e `/opsx:propose` → aprovação e `/opsx:apply` → aprovação e
    `/opsx:verify` → aprovação e `/opsx:archive`. Cada etapa só começa com a aprovação escrita
    (`Eu aprovo fazer ...`) e o comando digitado por você; ao fim de cada uma, o agente para e
    mostra a aprovação e o comando da próxima. O agente só faz push, abre PR ou faz deploy quando

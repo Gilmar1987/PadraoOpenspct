@@ -87,7 +87,7 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
 Toda mudança de comportamento observável do sistema MUST seguir este ciclo:
 
 ```text
-[/opsx:explore] → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+[/opsx:explore] → (aprovação) /opsx:propose → (aprovação) /opsx:apply → (aprovação) /opsx:verify → (aprovação) /opsx:archive
 ```
 
 O `/opsx:explore` é opcional: use-o quando o problema, o escopo ou a abordagem ainda não
@@ -105,9 +105,10 @@ nenhuma delas.
   e o comando;
 - em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma
   condição registrada na aprovação;
-- tratar a aprovação escrita da etapa, citada, como a confirmação que o fluxo pede (o item
-  `Archive:`, a aprovação de uma change Pendente, a reconfirmação do selo); o verify roda com
-  qualquer escopo;
+- tratar a aprovação escrita da etapa, citada, como a confirmação que o fluxo pede: no apply, a
+  aprovação de uma change Pendente; no archive, o item `Archive:`. A aprovação do propose autoriza
+  só o planejamento e não preenche `## Aprovação`, e a reconfirmação do selo continua pedindo a
+  confirmação do responsável depois de você mostrar o que mudou. O verify roda com qualquer escopo;
 - num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome (por
   exemplo, "rode o apply") e seguir o arquivo `.claude/commands/opsx/<etapa>.md`; a ativação de
   uma skill pelo próprio modelo não é o comando.

@@ -217,7 +217,9 @@ Se precisar, veja [Problemas comuns](#6-problemas-comuns).
 Toda mudança de comportamento passa pelo ciclo abaixo, no Claude Code, dentro do repositório de código:
 
 1. `/opsx:explore` (opcional): para pensar o problema antes de planejar.
-2. `/opsx:propose <nome-da-change>`: cria proposta, specs, design e tarefas. Revise os artefatos.
+2. `/opsx:propose <nome-da-change>`: o agente descreve a proposta e pede a sua aprovação (por
+   exemplo, `Eu aprovo fazer a proposta da change <nome>`); com ela, cria proposta, specs, design e
+   tarefas. Revise os artefatos.
 3. **Cada etapa começa com a sua aprovação e o seu comando.** Escreva a aprovação que o agente
    sugere, por exemplo `Eu aprovo fazer o apply da change <nome>`, e digite o comando, por exemplo
    `/opsx:apply`. Sem os dois, o agente não começa a etapa; ao fim de cada uma, ele para e mostra a
