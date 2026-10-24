@@ -18,19 +18,23 @@ Ele quer o mesmo comportamento para todo dev que usa o padrão. A change preserv
   - antes, o agente descreve em uma linha o que a etapa vai fazer e propõe o texto da aprovação;
   - ao fim de cada etapa, o agente para e mostra a aprovação sugerida e o comando da próxima;
   - o `Escopo` da aprovação passa a ser o limite do que a change pode alcançar (`apply` ou `archive`), e não uma autorização para encadear etapas;
-  - ações sem comando (push, PR, merge, release) continuam exigindo pedido explícito ou uma condição registrada na aprovação.
+  - ações sem comando (push, PR, merge, release) continuam exigindo pedido explícito ou uma condição registrada na aprovação;
+  - a aprovação escrita da etapa, citada, vale como a confirmação que o fluxo pede (o item `Archive:`, a aprovação de uma change Pendente, a reconfirmação do selo), e o verify roda com qualquer escopo;
+  - num agente sem os comandos `/opsx:*`, o equivalente ao comando é o dev pedir a etapa pelo nome (por exemplo, "rode o apply"), e o agente segue o arquivo `.claude/commands/opsx/<etapa>.md`; a ativação de uma skill pelo próprio modelo não vale como o comando.
 - **Propose:**
   - sai a "exceção de autorização prévia": o propose nunca começa o apply no mesmo turno;
   - uma autorização até o archive dada no pedido continua registrada em `## Aprovação`, como limite;
   - o resumo final mostra a aprovação sugerida e o comando da próxima etapa.
 - **Apply, verify, archive e update:**
   - o trecho do apply que deixa o verify e o archive rodarem "sem nova confirmação" com `Escopo: archive` passa a dizer que cada etapa espera a aprovação e o comando;
-  - cada fluxo termina mostrando a aprovação sugerida e o comando da próxima etapa.
+  - cada fluxo cita o seu comando exato ("typed `/opsx:apply`") e termina mostrando a aprovação sugerida e o comando da próxima etapa;
+  - no fim do archive, o próximo passo é o PR, com o que ele vai incluir, quando a aprovação o inclui; senão, não há próximo passo. O update mostra o próximo passo no formato novo.
+- **Guias:** o `COMECE-AQUI.md` e o `templates/openspec-padrao.md` (que vira `docs/openspec-padrao.md` nos projetos) passam a mostrar a aprovação antes de cada comando; sai o "aprove `para archive` [...] sem parar".
 - **Bloco gerenciado dos agentes (`templates/agents-block.md`):** o fluxo passa a mostrar a aprovação antes de cada comando.
 - **Hook de contexto da sessão:** lembra que cada etapa começa com a aprovação escrita e o comando.
 - **ADR:** a [ADR-0009](../../adrs/0009-cada-etapa-disparada-pelo-responsavel.md) (Proposed) registra a decisão.
 - **Versão:** pelo modelo de versão acumulada, acrescenta itens à seção `## 1.15.0` aberta, sem mexer no `VERSION`. A release sai só quando o responsável pedir.
-- **CI:** o marcador "Prior authorization exception" é trocado pelos marcadores dos trechos novos.
+- **CI:** o marcador "Prior authorization exception" é trocado por marcadores que só existem nos trechos novos, e marcadores negativos falham se "Prior authorization exception", "without a new confirmation" ou "in the same response" voltarem aos fluxos.
 
 ### Fora do escopo
 
@@ -61,7 +65,7 @@ Nenhuma.
   - `skills/openspec-{propose,apply-change,verify-change,archive-change,update-change}/SKILL.md`.
 - **Hook:** `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs`.
 - **ADR:** `openspec/adrs/0009-cada-etapa-disparada-pelo-responsavel.md`.
-- **CI e documentação:** `.github/workflows/validate.yml`, `README.md` e `CHANGELOG.md`.
+- **CI e documentação:** `.github/workflows/validate.yml`, `README.md`, `CHANGELOG.md`, `COMECE-AQUI.md` e `padrao-openspec/templates/openspec-padrao.md`.
 - **Dependências:** nenhuma nova.
 - **Riscos:**
   - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam.
@@ -74,10 +78,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Gilmar Campelo
-- Data: 2026-10-23
-- Escopo: archive
-- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; o apply começa depois do merge da `mensagens-descrevem-a-entrega`, com rebase; cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável
-- Conteúdo: sha256:29898a85743d1ddc6d03d13304ea4f693a5dae71e4ad936ce95446f1f098bf22
-- Origem: "Eu aprovo fazer o apply da aprovacao-e-comando-por-etapa, até o archive, com PR; o merge fica comigo"
-- Condição alterada: 2026-10-23; o apply começa agora, sobre a `main` 881c390, sem esperar o merge da `mensagens-descrevem-a-entrega`; quem entrar por último na `main` faz o rebase; Origem: "Eu aprovo fazer o apply agora, sem esperar a mensagens-descrevem-a-entrega", em resposta a "2. Implementar agora, sobre a main atual, e resolver os conflitos no rebase depois"
+- Responsável: Pendente
+- Data: —
+- Escopo: —
+- Condições: —
+- Origem: —
+- Aprovação anterior: Gilmar Campelo, 2026-10-23, archive; Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; o apply começa depois do merge da `mensagens-descrevem-a-entrega`, com rebase (alterada: o apply começa sobre a `main` 881c390, sem esperar, "Eu aprovo fazer o apply agora, sem esperar a mensagens-descrevem-a-entrega"); cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável; Origem: "Eu aprovo fazer o apply da aprovacao-e-comando-por-etapa, até o archive, com PR; o merge fica comigo"; Conteúdo: sha256:29898a85743d1ddc6d03d13304ea4f693a5dae71e4ad936ce95446f1f098bf22

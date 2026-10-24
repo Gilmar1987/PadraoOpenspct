@@ -45,7 +45,9 @@
   - antes de cada etapa com comando (`/opsx:propose`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:update`), descrever em uma linha o que ela vai fazer e propor a aprovação "Eu aprovo fazer <descrição>";
   - começar a etapa só depois de o responsável escrever a aprovação e digitar o comando; com só um dos dois, mostrar o que falta e esperar;
   - ao fim de cada etapa, parar e mostrar o próximo passo: o que faz, a aprovação sugerida e o comando;
-  - em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma condição registrada na aprovação.
+  - em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma condição registrada na aprovação;
+  - tratar a aprovação escrita da etapa, citada, como a confirmação que o fluxo pede (o item `Archive:`, a aprovação de uma change Pendente, a reconfirmação do selo); o verify roda com qualquer escopo;
+  - num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome e seguir o arquivo `.claude/commands/opsx/<etapa>.md`; a ativação de uma skill pelo próprio modelo não é o comando.
 
 ### D2. Trecho comum "Stop and show the next step"
 
@@ -56,6 +58,11 @@ O mesmo parágrafo, em inglês como o resto dos fluxos, vai no fim do propose, d
 E, no início de cada fluxo, uma frase curta:
 
 > **Approval and command**: start only when the user has written the approval for this stage and typed this command. With only one of the two, show what is missing and wait.
+
+Revisão (update de 2026-10-23, pela revisão de código):
+
+- o "Approval and command" de cada fluxo cita o comando exato (por exemplo, "typed `/opsx:apply`", ou, num agente sem `/opsx:*`, "asked for this stage by name") e diz que a ativação da skill pelo próprio modelo não vale como o comando;
+- o marcador comum da CI passa a "start only when the user has written the approval for this stage", e o do fim, a "this workflow runs one stage only", que só existem nos parágrafos novos.
 
 ### D3. Propose
 
@@ -70,6 +77,13 @@ E, no início de cada fluxo, uma frase curta:
 - **Apply:** o "Output On Completion" troca "You can archive this change with `/opsx:archive`" pelo próximo passo do D2, que é o verify.
 - **Update:** o passo 6 mostra o próximo passo no formato do D2.
 - **Verify e archive:** recebem o trecho do D2. No archive, o próximo passo é o PR quando a aprovação o inclui; senão, nenhum.
+
+Revisão (update de 2026-10-23, pela revisão de código):
+
+- **Archive:** depois do trecho do D2, a frase "After archive, the next step is the pull request when `## Aprovação` includes it: show what it will include; otherwise there is no next step." Os passos 3a e 4a aceitam a aprovação escrita do archive, citada, como a confirmação do item `Archive:`.
+- **Apply, 4a:** a aprovação escrita do apply, citada, vale como a aprovação de uma change `Pendente`; depois de um `/opsx:update` no meio do apply, o apply espera a nova aprovação e o `/opsx:apply`.
+- **Update, passo 6:** o próximo passo segue o formato do D2; o ramo de artefato que ainda não existe aponta o `openspec instructions`, sem o formato de três linhas.
+- **Restos do modelo antigo:** o verify diz "before the archive is approved" em vez de "do not continue to archive"; o propose diz "until the user writes the apply approval and types `/opsx:apply`" em vez de "a new user request".
 
 ### D5. Bloco gerenciado e hook
 
@@ -87,6 +101,13 @@ E, no início de cada fluxo, uma frase curta:
 - **README:** os trechos novos na tabela de trechos customizados.
 - **CHANGELOG:** um item na seção 1.15.0 aberta. A ação no projeto é nenhuma; o comportamento chega com a atualização do padrão.
 
+Revisão (update de 2026-10-23, pela revisão de código): marcadores negativos (`! grep -qF`) de "Prior authorization exception", "without a new confirmation" e "in the same response" nos dez arquivos de fluxo; o README mostra o ciclo com as aprovações.
+
+### D7. Guias do dev
+
+- **`COMECE-AQUI.md`:** o passo do ciclo mostra a aprovação antes de cada comando, e sai o "Para seguir até o archive sem parar, aprove `para archive`": o Escopo `archive` é o limite, e cada etapa começa com `Eu aprovo fazer ...` e o comando.
+- **`padrao-openspec/templates/openspec-padrao.md`** (vira `docs/openspec-padrao.md` nos projetos): o ciclo fica igual ao do bloco gerenciado.
+
 ## Raio de impacto
 
 | Arquivo-alvo | Mudança | Dependentes afetados |
@@ -96,6 +117,7 @@ E, no início de cada fluxo, uma frase curta:
 | `padrao-openspec/templates/agents-block.md` | D5 | bloco gerenciado no `AGENTS.md`, `CLAUDE.md` e afins dos projetos |
 | `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs` | D5 | smoke test dos hooks |
 | `.github/workflows/validate.yml`, `README.md`, `CHANGELOG.md` | D6 | nenhum |
+| `COMECE-AQUI.md`, `padrao-openspec/templates/openspec-padrao.md` | D7 | o `docs/openspec-padrao.md` dos projetos |
 
 ## Risks / Trade-offs
 

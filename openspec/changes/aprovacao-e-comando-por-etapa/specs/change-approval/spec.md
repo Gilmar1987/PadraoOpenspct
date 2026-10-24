@@ -45,3 +45,31 @@ Ao fim de cada etapa, o fluxo SHALL parar e mostrar o próximo passo em três pa
 
 - **WHEN** o archive termina e a aprovação tem a condição "com PR"
 - **THEN** o agente mostra o que o PR vai incluir e abre o PR só depois de um pedido explícito ou da confirmação de que a condição registrada vale
+
+### Requirement: Aprovação da etapa como confirmação
+
+A aprovação escrita de uma etapa, citada em `## Aprovação`, SHALL valer como a confirmação que o fluxo pede nela: o item `Archive:` com Escopo `apply`, a aprovação de uma change Pendente e a reconfirmação do selo. O verify SHALL rodar com qualquer escopo.
+
+#### Scenario: Archive com escopo apply
+
+- **WHEN** a change tem Escopo `apply` e o responsável escreve "Eu aprovo fazer o archive" e digita `/opsx:archive`
+- **THEN** o archive registra o item `Archive:` citando essa aprovação, sem pedir outra confirmação
+
+#### Scenario: Verify com escopo apply
+
+- **WHEN** a change tem Escopo `apply` e o responsável aprova e digita `/opsx:verify`
+- **THEN** o verify roda
+
+### Requirement: Etapa pedida pelo nome fora do Claude Code
+
+Num agente sem os comandos `/opsx:*`, o equivalente ao comando SHALL ser o dev pedir a etapa pelo nome, e o agente SHALL seguir o arquivo `.claude/commands/opsx/<etapa>.md`. A ativação de uma skill ou de um fluxo pelo próprio agente MUST NOT valer como o comando.
+
+#### Scenario: Agente sem comandos
+
+- **WHEN** o dev escreve a aprovação do verify e "rode o verify" num agente sem `/opsx:*`
+- **THEN** o agente segue o `verify.md` e, ao fim, mostra a aprovação e o pedido da próxima etapa
+
+#### Scenario: Skill ativada pelo modelo
+
+- **WHEN** o dev escreve só a aprovação do apply e o modelo ativa a skill do apply por conta própria
+- **THEN** o agente não começa o apply e mostra o comando a digitar

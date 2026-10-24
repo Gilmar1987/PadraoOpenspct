@@ -6,12 +6,14 @@
   - Evidência: critério trocado por decisão do responsável ("Eu aprovo fazer o apply agora, sem esperar a mensagens-descrevem-a-entrega", registrada em `## Aprovação` como "Condição alterada"): o apply roda sobre a `origin/main` 881c390, sem esperar o merge dela; `git log --oneline HEAD..origin/main` → vazio; a outra sessão (projetoopenspct-57) confirmou que não usa ADR (a 0009 é desta change) e que não mexe no `agents-block.md` nem no `contexto-de-sessao.mjs`; a sobreposição dela é no `rules.md` (seção 3), nos seis fluxos, no `validate.yml`, no README e no CHANGELOG; quem entrar por último rebaseia
 - [x] 1.2 Atualizar o passo "Trechos customizados das skills" de `.github/workflows/validate.yml` com os marcadores do D6 e o "Smoke test dos hooks do Claude Code" com a linha nova do hook, citando o requisito "Aprovação e comando em cada etapa" num comentário. Verificar rodando os dois passos antes da implementação: os dois devem falhar só nos pontos novos.
   - Evidência: marcadores do D6 no passo "Trechos customizados das skills" ("**Prior authorization**", "Stop and show the next step" e "Approval and command" no propose; os dois últimos no apply, verify, archive e update; "each after its own approval and command" no apply; "Aprovação e comando por etapa" no `rules.md`; "Eu aprovo fazer" no `agents-block.md`) e duas asserções no "Smoke test dos hooks do Claude Code" (com e sem changes), com o requisito citado nos comentários; antes da implementação: os dois passos → FAIL (exit 1), só nos pontos novos
+- [ ] 1.3 Trocar os marcadores "Stop and show the next step" e "Approval and command" do passo "Trechos customizados das skills" pelos marcadores únicos do D2 revisado e acrescentar os marcadores negativos do D6. Verificar que reprovam: com o parágrafo final retirado de uma cópia de um fluxo, e com "Prior authorization exception" reinserida numa cópia.
 
 ## 2. Regras e bloco gerenciado
 
 - [ ] 2.1 Revisar a [ADR-0009](../../adrs/0009-cada-etapa-disparada-pelo-responsavel.md) com o responsável e promovê-la a `Accepted` antes do archive (com PR, na revisão do PR; sem PR, pela declaração do responsável citada no commit). Verificar com `grep -n "^status: Accepted" openspec/adrs/0009-*.md`.
 - [x] 2.2 Aplicar o D1 em `padrao-openspec/openspec/rules.md` e o D5 em `padrao-openspec/templates/agents-block.md`. Verificar com os marcadores do `rules.md` e do bloco passando e com o "Smoke test dos blocos de agentes" passando.
   - Evidência: `rules.md`: seção 2 com o Escopo como limite ("Nenhum escopo autoriza começar uma etapa") e seção 3 com o bloco "Aprovação e comando por etapa" (quatro itens MUST); `templates/agents-block.md` com o fluxo "aprovação e `/opsx:<etapa>`" e a linha "Eu aprovo fazer"; marcadores do `rules.md` e do bloco deixaram de faltar; "Smoke test dos blocos de agentes" e "Lint de Markdown" → PASS (exit 0)
+- [ ] 2.3 Aplicar as revisões do D1 no `padrao-openspec/openspec/rules.md` e o D7 no `COMECE-AQUI.md` e no `padrao-openspec/templates/openspec-padrao.md`. Verificar com os marcadores e o lint nos dois lugares passando.
 
 ## 3. Fluxos
 
@@ -21,6 +23,7 @@
   - Evidência: apply, verify, archive e update (comandos e skills): "Approval and command" e "Stop and show the next step" com o mesmo texto; apply: passo 4a com "each after its own approval and command" e "Next step: `/opsx:verify`" no lugar de "You can archive this change"; `diff` dos trechos → iguais, sem duplicação; `sync-root.mjs` → 9 caminhos; "Trechos customizados das skills", "Lint de Markdown" e "Smoke test das métricas de fluxo" → PASS (exit 0)
 - [x] 3.3 Aplicar o D5 em `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs`. Verificar com `node --check` e com o "Smoke test dos hooks do Claude Code" passando.
   - Evidência: linha nova no `contexto-de-sessao.mjs`, com e sem changes ativas: "Cada etapa começa com a aprovação escrita do responsável (\"Eu aprovo fazer ...\") e o comando `/opsx:<etapa>` digitado por ele; ao fim dela, pare e mostre a aprovação e o comando da próxima."; `node --check` → ok; "Smoke test dos hooks do Claude Code" (com as duas asserções novas) e "Sintaxe dos scripts" → PASS (exit 0)
+- [ ] 3.4 Aplicar as revisões do D2 e do D4 nos dez arquivos de fluxo (comando exato, próximo passo do archive e do update, aprovação da etapa como confirmação no archive e no apply, restos do modelo antigo) e o ciclo com as aprovações no README. Verificar com `diff` vazio entre comando e skill, com o "Smoke test das métricas de fluxo" e com os marcadores passando.
 
 ## 4. Documentação e integração
 
