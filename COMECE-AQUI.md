@@ -311,6 +311,7 @@ O registro vale para esta máquina: cada dev faz o passo 3 uma vez.
 |---|---|
 | `curl.exe` não existe (Windows antigo) | Baixe o `comecar.mjs` pelo navegador, na página [Releases](https://github.com/Gilmar1987/PadraoOpenspct/releases), ou siga a [seção 5](#5-sem-o-script) |
 | `openspec: command not found` depois de instalar o CLI | Abra um terminal novo e rode o script de novo |
+| O fim do `/opsx:init` lista uma ferramenta ausente que você acabou de instalar por `winget` (Windows) | Abra um terminal novo: os terminais abertos antes da instalação não enxergam a ferramenta |
 | O script diz que a pasta já existe | Ele não altera nada. Escolha outro id ou outra pasta base, ou apague a pasta se ela sobrou de uma tentativa anterior |
 | O script avisa que a pasta é sincronizada (OneDrive, Dropbox, Google Drive) | Prefira uma pasta fora da sincronização: ela pode travar arquivos do Git e deixar o npm lento |
 | O script parou no meio | Ele lista o que já fez e as pastas que criou. Apague essas pastas e rode de novo |

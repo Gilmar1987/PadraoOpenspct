@@ -340,6 +340,11 @@ jobs:
             .claude/skills/openspec-sync-specs/SKILL.md; do
             check "$g" "**Entrega:** <one line on what the change delivers>"
           done
+          # Coerência e ferramentas no init (init-coerencia-e-ferramentas): linhas novas, 6.4, auditoria de produção e ferramentas.
+          check "$f" "## Ferramentas da máquina"
+          check "$f" "A opção 0 exclui as demais: uma resposta com o 0"
+          check "$f" "--omit=dev"
+          check "$f" "O sistema de arquivos do deploy é efêmero"
           # Questionário adaptativo (questionario-adaptativo): saltos, filtros de opções e coerência na hora.
           check "$f" "## Regras de salto"
           check "$f" "## Filtros de opções"

@@ -32,6 +32,11 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   entrega, em vez de usar o nome técnico como rótulo; o nome só aparece para escolher entre duas changes ativas,
   e o próximo passo vem como o comando sem argumento (por exemplo, `/opsx:verify`). Regra no `rules.md` e trecho
   "Describe the delivery" em propose, apply, verify, archive, update e sync.
+- **Coerência e ferramentas no init:** a checagem de coerência aponta banco local com deploy serverless, chave de
+  criptografia só no `.env`, cobertura mínima com um comando que não a mede e contrato sem teste de contrato; a
+  "0) Nenhuma no MVP" da 6.4 exclui as demais; a 7.1 sugere a auditoria só das dependências de produção (por
+  exemplo, `npm audit --omit=dev`), com a completa como informativa; e o fim do init confere se as ferramentas dos
+  comandos de verificação respondem na máquina, listando as que faltam, sem instalar nada.
 
 ### Ações no projeto
 
