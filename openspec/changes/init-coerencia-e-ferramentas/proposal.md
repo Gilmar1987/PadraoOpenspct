@@ -62,8 +62,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-24
+- Escopo: apply
+- Condições: os itens do propose (versões fixas e ADR no commit) ficam para uma change própria; cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável
+- Conteúdo: sha256:55815ab8f7a13730dda3aaf3474545717a0040938338f2aeac47f04d56900b86
+- Origem: "Eu aprovo fazer a checagem de incoerências e a conferência de ferramentas do init"
