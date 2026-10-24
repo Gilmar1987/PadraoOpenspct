@@ -48,8 +48,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: apply
+- Condições: cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável
+- Conteúdo: sha256:a16e46631ea88407819d60ef6fb65f7197e59107e6a134fd433e210214034c3e
+- Origem: "aprovo para apply", em resposta a "Para seguir, aprove por escrito, por exemplo \"aprovo para apply\", e depois digite `/opsx:apply`."
