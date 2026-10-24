@@ -6,7 +6,7 @@ Hoje uma aprovação com `Escopo: archive` autoriza o agente a seguir por apply,
 
 Em 2026-10-23, nesta sessão, o agente começou o apply de três changes só com a aprovação escrita, sem o `/opsx:apply`, e seguiu os passos de memória. Ficaram de fora a checagem de versão e a confirmação do progresso por grupo. O responsável decidiu que cada etapa só começa com duas ações dele:
 
-1. a aprovação escrita, no formato "Eu aprovo fazer <o que o agente descreveu>";
+1. a aprovação escrita, no formato `Eu aprovo fazer <o que o agente descreveu>`;
 2. o comando `/opsx:<etapa>` digitado por ele.
 
 Ele quer o mesmo comportamento para todo dev que usa o padrão. A change preserva o controle do responsável sobre cada etapa e garante que o fluxo completo de cada comando seja carregado.
