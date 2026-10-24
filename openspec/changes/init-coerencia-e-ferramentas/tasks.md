@@ -22,13 +22,14 @@
 
 ## 4. Verificação de comportamento
 
-- [ ] 4.1 Roteiro numa cópia temporária do store, fora do repositório: um subagente segue o `init.md` com um arquivo de respostas montado para disparar as quatro combinações novas e com a 6.4 = `0,1`. A transcrição registra:
+- [x] 4.1 Roteiro numa cópia temporária do store, fora do repositório: um subagente segue o `init.md` com um arquivo de respostas montado para disparar as quatro combinações novas e com a 6.4 = `0,1`. A transcrição registra:
   - (a) as quatro combinações apontadas na checagem final;
   - (b) a 6.4 recusada com a explicação;
   - (c) a auditoria registrada com `--omit=dev` e a completa nas Observações;
   - (d) a seção "Ferramentas da máquina" listando uma ferramenta ausente de propósito (por exemplo, `gitleaks-inexistente`) com a sugestão de instalação.
 
   Verificar que os quatro itens se comportam como os cenários da spec.
+  - Evidência: roteiro numa cópia temporária do store (scratchpad), com um subagente seguindo o `init.md` e um arquivo de respostas (Python, SQLite local, Vercel, `.env`, criptografia de campos, cobertura de 80% com `pytest`, contrato OpenAPI sem teste de contrato, 6.4 = `0,1`, varredura `gitleaks-inexistente`); nada gravado. (a) as quatro combinações novas apontadas na checagem, com consequência e proposta; (b) a 6.4 `0,1` recusada com a explicação e perguntada no chat; (c) auditoria registrada como `pip-audit -r requirements.txt`, com a completa em Observações; (d) "Ferramentas da máquina" rodou `--version` de verdade e listou pytest, ruff, mypy, pip-audit e gitleaks-inexistente como ausentes, com sugestões (`pipx`, `winget`) e o aviso do Windows. Ambiguidades corrigidas no texto: a recusa da 6.4 vale com arquivo de respostas; a conferência vale também quando não houve commit; as linhas acrescentadas pelo init (como "Validação de interface") entram na conferência. As ambiguidades anteriores a esta change (combinações além da tabela, "aceitar a sugestão" no arquivo) ficaram fora do escopo
 
 ## Workflow follow-up
 

@@ -747,7 +747,7 @@ _(Múltipla escolha — separe os números por vírgula)_
 6) Outro (digitar livremente)
 ```
 
-A opção 0 exclui as demais: uma resposta com o 0 e outra opção é recusada, com essa explicação, e a pergunta é feita de novo.
+A opção 0 exclui as demais: uma resposta com o 0 e outra opção é recusada, com essa explicação, e a pergunta é feita de novo. Vale também para um arquivo de respostas: a 6.4 recusada é perguntada no chat.
 
 ---
 
@@ -1165,9 +1165,9 @@ O pathspec mantém fora do commit qualquer outra coisa que o responsável tenha 
 
 ## Ferramentas da máquina
 
-Depois do commit, confira se as ferramentas dos comandos de verificação respondem nesta máquina. Não instale nada.
+Depois do commit (ou da geração dos arquivos, quando não houve commit), confira se as ferramentas dos comandos de verificação respondem nesta máquina. Não instale nada.
 
-1. Para cada linha de "Comandos de verificação" do `project.md` com comando (nem "Não aplicável" nem "Adiado"), identifique a ferramenta: a primeira palavra do comando, depois de prefixos como `npx`, `npx --yes`, `docker compose run --rm <serviço>` ou `uv run`. Com `npx`, a ferramenta é o próprio `npx`. Em caso de dúvida, mostre o comando ao dev e pergunte qual é a ferramenta, sem adivinhar.
+1. Para cada linha de "Comandos de verificação" do `project.md` com comando (nem "Não aplicável" nem "Adiado"), inclusive as que o próprio init acrescenta, como "Validação de interface", identifique a ferramenta: a primeira palavra do comando, depois de prefixos como `npx`, `npx --yes`, `docker compose run --rm <serviço>` ou `uv run`. Com `npx`, a ferramenta é o próprio `npx`. Em caso de dúvida, mostre o comando ao dev e pergunte qual é a ferramenta, sem adivinhar.
 2. Rode só a ferramenta, com `--version` (ou `version`, `-v` ou `--help` quando ela não aceita `--version`), nunca o comando inteiro. Uma falha, ou nenhuma resposta, conta como "ausente ou sem resposta".
 3. Se todas responderem, diga "Ferramentas dos comandos de verificação disponíveis". Senão, mostre a tabela abaixo, com uma sugestão de instalação para o sistema da máquina (por exemplo, `winget install`, `brew install`, `apt install`, `npm i -g` ou `pipx install`):
 
