@@ -19,7 +19,8 @@
   - Evidência: propose (comando e skill): "Approval and command" antes de "Store selection", "**Prior authorization**" no lugar da exceção (registra a autorização como limite e nunca começa o apply), "Prompt" final apontando o próximo passo, guardrail da exceção trocado e "Stop and show the next step" no fim; `diff` dos trechos entre comando e skill → iguais; `grep -c "Prior authorization exception"` → 0 nos dois
 - [x] 3.2 Aplicar o D2 e o D4 em `apply`, `verify`, `archive` e `update` (comandos e skills espelho), com o mesmo texto. Verificar com `diff` vazio entre os trechos e com o "Smoke test das métricas de fluxo" passando.
   - Evidência: apply, verify, archive e update (comandos e skills): "Approval and command" e "Stop and show the next step" com o mesmo texto; apply: passo 4a com "each after its own approval and command" e "Next step: `/opsx:verify`" no lugar de "You can archive this change"; `diff` dos trechos → iguais, sem duplicação; `sync-root.mjs` → 9 caminhos; "Trechos customizados das skills", "Lint de Markdown" e "Smoke test das métricas de fluxo" → PASS (exit 0)
-- [ ] 3.3 Aplicar o D5 em `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs`. Verificar com `node --check` e com o "Smoke test dos hooks do Claude Code" passando.
+- [x] 3.3 Aplicar o D5 em `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs`. Verificar com `node --check` e com o "Smoke test dos hooks do Claude Code" passando.
+  - Evidência: linha nova no `contexto-de-sessao.mjs`, com e sem changes ativas: "Cada etapa começa com a aprovação escrita do responsável (\"Eu aprovo fazer ...\") e o comando /opsx:<etapa> digitado por ele; ao fim dela, pare e mostre a aprovação e o comando da próxima."; `node --check` → ok; "Smoke test dos hooks do Claude Code" (com as duas asserções novas) e "Sintaxe dos scripts" → PASS (exit 0)
 
 ## 4. Documentação e integração
 
