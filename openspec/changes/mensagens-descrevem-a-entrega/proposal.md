@@ -54,3 +54,4 @@ Nenhuma.
 - Condições: cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável
 - Conteúdo: sha256:a16e46631ea88407819d60ef6fb65f7197e59107e6a134fd433e210214034c3e
 - Origem: "aprovo para apply", em resposta a "Para seguir, aprove por escrito, por exemplo \"aprovo para apply\", e depois digite `/opsx:apply`."
+- Reconfirmação: 2026-10-23; Origem: "sim", em resposta a "Confirma a correção de formatação?" (crases em `<name>` no proposal, no design e nas tasks, sem mudar o texto); Conteúdo: sha256:93db05d433956a024400eac224c106b8bf67a7950537308bf0aa1cf1fb648aaa
