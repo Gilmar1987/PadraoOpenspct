@@ -48,7 +48,7 @@ Ao fim de cada etapa, o fluxo SHALL parar e mostrar o próximo passo em três pa
 
 ### Requirement: Aprovação da etapa como confirmação
 
-A aprovação escrita de uma etapa, citada em `## Aprovação`, SHALL valer como a confirmação que o fluxo pede nela: o item `Archive:` com Escopo `apply`, a aprovação de uma change Pendente e a reconfirmação do selo. O verify SHALL rodar com qualquer escopo.
+A aprovação escrita de uma etapa, citada, SHALL valer como a confirmação que o fluxo pede nela: no apply, a aprovação de uma change Pendente; no archive com Escopo `apply`, o item `Archive:`. A aprovação do propose autoriza só o planejamento e MUST NOT preencher `## Aprovação`. A reconfirmação do selo MUST continuar pedindo a confirmação depois de o agente mostrar o que mudou. O verify SHALL rodar com qualquer escopo.
 
 #### Scenario: Archive com escopo apply
 
@@ -59,6 +59,11 @@ A aprovação escrita de uma etapa, citada em `## Aprovação`, SHALL valer como
 
 - **WHEN** a change tem Escopo `apply` e o responsável aprova e digita `/opsx:verify`
 - **THEN** o verify roda
+
+#### Scenario: Selo vencido
+
+- **WHEN** o portão diz que a aprovação venceu e o responsável escreveu "Eu aprovo fazer o apply"
+- **THEN** o agente mostra o que mudou no planejamento e pede a confirmação antes de registrar a reconfirmação
 
 ### Requirement: Etapa pedida pelo nome fora do Claude Code
 

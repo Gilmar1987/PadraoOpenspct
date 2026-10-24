@@ -108,6 +108,14 @@ Revisão (update de 2026-10-23, pela revisão de código): marcadores negativos 
 - **`COMECE-AQUI.md`:** o passo do ciclo mostra a aprovação antes de cada comando, e sai o "Para seguir até o archive sem parar, aprove `para archive`": o Escopo `archive` é o limite, e cada etapa começa com `Eu aprovo fazer ...` e o comando.
 - **`padrao-openspec/templates/openspec-padrao.md`** (vira `docs/openspec-padrao.md` nos projetos): o ciclo fica igual ao do bloco gerenciado.
 
+Revisão (segunda revisão de código, update de 2026-10-23):
+
+- **D1 e D2, aprovação como confirmação (I1 e I2):** a última frase do "Approval and command" é própria de cada etapa. No propose: "this approval authorizes planning only; it never fills `## Aprovação`". No apply: "counts as the approval of a `Pendente` change". No archive: "counts as the `Archive:` item". No verify e no update, a frase sai; o update mantém o passo próprio de reconfirmação (mostrar o que mudou e pedir confirmação). O `rules.md` diz o mesmo: a reconfirmação do selo não é coberta pela aprovação da etapa.
+- **D4, portão no apply (I3):** no "Run the gate" do apply, "when the only reason is a `Pendente` approval and the user wrote this apply's approval, record it as step 4a says (with the seal) and run the gate again". O 4a fica "if the user wrote the apply approval, record it quoted and continue; otherwise stop and ask".
+- **Correções do texto do design (M1):** o marcador negativo é "you may start the apply workflow in the same response", porque "in the same response" sozinho tem uso legítimo no "Planning boundary"; o verify diz "do not suggest the archive until".
+- **D6 (M4):** marcadores negativos também para "sem nova confirmação" no `rules.md` e "sem parar" no `COMECE-AQUI.md`.
+- **D7 (M2 e M3):** aprovação antes do `/opsx:propose` no `COMECE-AQUI.md`, no `templates/agents-block.md` e no `templates/openspec-padrao.md`; o ciclo com as aprovações na linha do `/opsx:init` do README e na linha do ciclo do `rules.md`.
+
 ## Raio de impacto
 
 | Arquivo-alvo | Mudança | Dependentes afetados |
