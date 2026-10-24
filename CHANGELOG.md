@@ -37,6 +37,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   "0) Nenhuma no MVP" da 6.4 exclui as demais; a 7.1 sugere a auditoria só das dependências de produção (por
   exemplo, `npm audit --omit=dev`), com a completa como informativa; e o fim do init confere se as ferramentas dos
   comandos de verificação respondem na máquina, listando as que faltam, sem instalar nada.
+- **Aprovação e comando em cada etapa** ([ADR-0009](openspec/adrs/0009-cada-etapa-disparada-pelo-responsavel.md)):
+  cada etapa com comando (`/opsx:propose`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive` e `/opsx:update`)
+  só começa quando o responsável escreve a aprovação ("Eu aprovo fazer ...") e digita o comando. Ao fim
+  de cada etapa, o agente para e mostra o que a próxima faz, a aprovação sugerida e o comando. O
+  `Escopo: archive` passa a ser o limite da change, e não autoriza mais encadear etapas; sai a exceção
+  que deixava o propose começar o apply no mesmo turno.
 
 ### Ações no projeto
 

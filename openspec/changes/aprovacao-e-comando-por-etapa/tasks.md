@@ -11,7 +11,7 @@
 
 - [ ] 2.1 Revisar a [ADR-0009](../../adrs/0009-cada-etapa-disparada-pelo-responsavel.md) com o responsável e promovê-la a `Accepted` antes do archive (com PR, na revisão do PR; sem PR, pela declaração do responsável citada no commit). Verificar com `grep -n "^status: Accepted" openspec/adrs/0009-*.md`.
 - [x] 2.2 Aplicar o D1 em `padrao-openspec/openspec/rules.md` e o D5 em `padrao-openspec/templates/agents-block.md`. Verificar com os marcadores do `rules.md` e do bloco passando e com o "Smoke test dos blocos de agentes" passando.
-  - Evidência: `rules.md`: seção 2 com o Escopo como limite ("Nenhum escopo autoriza começar uma etapa") e seção 3 com o bloco "Aprovação e comando por etapa" (quatro itens MUST); `templates/agents-block.md` com o fluxo "aprovação e /opsx:<etapa>" e a linha "Eu aprovo fazer"; marcadores do `rules.md` e do bloco deixaram de faltar; "Smoke test dos blocos de agentes" e "Lint de Markdown" → PASS (exit 0)
+  - Evidência: `rules.md`: seção 2 com o Escopo como limite ("Nenhum escopo autoriza começar uma etapa") e seção 3 com o bloco "Aprovação e comando por etapa" (quatro itens MUST); `templates/agents-block.md` com o fluxo "aprovação e `/opsx:<etapa>`" e a linha "Eu aprovo fazer"; marcadores do `rules.md` e do bloco deixaram de faltar; "Smoke test dos blocos de agentes" e "Lint de Markdown" → PASS (exit 0)
 
 ## 3. Fluxos
 
@@ -20,9 +20,10 @@
 - [x] 3.2 Aplicar o D2 e o D4 em `apply`, `verify`, `archive` e `update` (comandos e skills espelho), com o mesmo texto. Verificar com `diff` vazio entre os trechos e com o "Smoke test das métricas de fluxo" passando.
   - Evidência: apply, verify, archive e update (comandos e skills): "Approval and command" e "Stop and show the next step" com o mesmo texto; apply: passo 4a com "each after its own approval and command" e "Next step: `/opsx:verify`" no lugar de "You can archive this change"; `diff` dos trechos → iguais, sem duplicação; `sync-root.mjs` → 9 caminhos; "Trechos customizados das skills", "Lint de Markdown" e "Smoke test das métricas de fluxo" → PASS (exit 0)
 - [x] 3.3 Aplicar o D5 em `padrao-openspec/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs`. Verificar com `node --check` e com o "Smoke test dos hooks do Claude Code" passando.
-  - Evidência: linha nova no `contexto-de-sessao.mjs`, com e sem changes ativas: "Cada etapa começa com a aprovação escrita do responsável (\"Eu aprovo fazer ...\") e o comando /opsx:<etapa> digitado por ele; ao fim dela, pare e mostre a aprovação e o comando da próxima."; `node --check` → ok; "Smoke test dos hooks do Claude Code" (com as duas asserções novas) e "Sintaxe dos scripts" → PASS (exit 0)
+  - Evidência: linha nova no `contexto-de-sessao.mjs`, com e sem changes ativas: "Cada etapa começa com a aprovação escrita do responsável (\"Eu aprovo fazer ...\") e o comando `/opsx:<etapa>` digitado por ele; ao fim dela, pare e mostre a aprovação e o comando da próxima."; `node --check` → ok; "Smoke test dos hooks do Claude Code" (com as duas asserções novas) e "Sintaxe dos scripts" → PASS (exit 0)
 
 ## 4. Documentação e integração
 
-- [ ] 4.1 Atualizar o `README.md` (trechos customizados) e o `CHANGELOG.md` (item na seção 1.15.0 aberta, sem mexer no `VERSION`). Verificar com o lint e com o passo "Versão e changelog" passando.
+- [x] 4.1 Atualizar o `README.md` (trechos customizados) e o `CHANGELOG.md` (item na seção 1.15.0 aberta, sem mexer no `VERSION`). Verificar com o lint e com o passo "Versão e changelog" passando.
+  - Evidência: CHANGELOG: item "Aprovação e comando em cada etapa" na seção 1.15.0 aberta, sem mexer no `VERSION`; README: "Prior authorization" no lugar da exceção e duas linhas novas na tabela de trechos customizados; "Versão e changelog", lint nos dois lugares e "Raiz em dia" → PASS (exit 0)
 - [ ] 4.2 Rodar o `sync-root.mjs` e o `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.
