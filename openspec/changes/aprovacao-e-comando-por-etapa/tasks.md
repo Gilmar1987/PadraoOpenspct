@@ -2,8 +2,10 @@
 
 ## 1. Preparação e testes primeiro
 
-- [ ] 1.1 Esperar o merge da `mensagens-descrevem-a-entrega` (outra sessão) e rebasear a branch na `main`; confirmar com a outra sessão que ela não tem outra change nos mesmos arquivos. Verificar com `git log --oneline HEAD..origin/main` vazio e a resposta citada na evidência.
-- [ ] 1.2 Atualizar o passo "Trechos customizados das skills" de `.github/workflows/validate.yml` com os marcadores do D6 e o "Smoke test dos hooks do Claude Code" com a linha nova do hook, citando o requisito "Aprovação e comando em cada etapa" num comentário. Verificar rodando os dois passos antes da implementação: os dois devem falhar só nos pontos novos.
+- [x] 1.1 Esperar o merge da `mensagens-descrevem-a-entrega` (outra sessão) e rebasear a branch na `main`; confirmar com a outra sessão que ela não tem outra change nos mesmos arquivos. Verificar com `git log --oneline HEAD..origin/main` vazio e a resposta citada na evidência.
+  - Evidência: critério trocado por decisão do responsável ("Eu aprovo fazer o apply agora, sem esperar a mensagens-descrevem-a-entrega", registrada em `## Aprovação` como "Condição alterada"): o apply roda sobre a `origin/main` 881c390, sem esperar o merge dela; `git log --oneline HEAD..origin/main` → vazio; a outra sessão (projetoopenspct-57) confirmou que não usa ADR (a 0009 é desta change) e que não mexe no `agents-block.md` nem no `contexto-de-sessao.mjs`; a sobreposição dela é no `rules.md` (seção 3), nos seis fluxos, no `validate.yml`, no README e no CHANGELOG; quem entrar por último rebaseia
+- [x] 1.2 Atualizar o passo "Trechos customizados das skills" de `.github/workflows/validate.yml` com os marcadores do D6 e o "Smoke test dos hooks do Claude Code" com a linha nova do hook, citando o requisito "Aprovação e comando em cada etapa" num comentário. Verificar rodando os dois passos antes da implementação: os dois devem falhar só nos pontos novos.
+  - Evidência: marcadores do D6 no passo "Trechos customizados das skills" ("**Prior authorization**", "Stop and show the next step" e "Approval and command" no propose; os dois últimos no apply, verify, archive e update; "each after its own approval and command" no apply; "Aprovação e comando por etapa" no `rules.md`; "Eu aprovo fazer" no `agents-block.md`) e duas asserções no "Smoke test dos hooks do Claude Code" (com e sem changes), com o requisito citado nos comentários; antes da implementação: os dois passos → FAIL (exit 1), só nos pontos novos
 
 ## 2. Regras e bloco gerenciado
 

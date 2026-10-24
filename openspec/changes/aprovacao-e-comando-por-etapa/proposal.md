@@ -80,3 +80,4 @@ Nenhuma.
 - Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; o apply começa depois do merge da `mensagens-descrevem-a-entrega`, com rebase; cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável
 - Conteúdo: sha256:29898a85743d1ddc6d03d13304ea4f693a5dae71e4ad936ce95446f1f098bf22
 - Origem: "Eu aprovo fazer o apply da aprovacao-e-comando-por-etapa, até o archive, com PR; o merge fica comigo"
+- Condição alterada: 2026-10-23; o apply começa agora, sobre a `main` 881c390, sem esperar o merge da `mensagens-descrevem-a-entrega`; quem entrar por último na `main` faz o rebase; Origem: "Eu aprovo fazer o apply agora, sem esperar a mensagens-descrevem-a-entrega", em resposta a "2. Implementar agora, sobre a main atual, e resolver os conflitos no rebase depois"
