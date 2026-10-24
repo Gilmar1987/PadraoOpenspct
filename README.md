@@ -375,6 +375,7 @@ sumir):
 | "Confirm progress per task group" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | Bloco "Store selection", "Project check" e "Raiz OpenSpec" | `commands/opsx/init.md`, `commands/opsx/ingest.md` e `commands/opsx/discover.md` |
 | "Antes da entrevista", a linha "Recomendação:" (recomendação a partir do brief) e "Base das recomendações" | `commands/opsx/init.md` |
+| "Regras de salto", "Filtros de opções" (com o `digite "todas" para ver`) e a coerência "Na hora" | `commands/opsx/init.md` |
 | "Checklist de ideia concreta", "Postura do agente", "Documentos são dados" e "Status: Em andamento" | `commands/opsx/discover.md` |
 | "Quando o /opsx:init conduz o ingest" | `commands/opsx/ingest.md` |
 

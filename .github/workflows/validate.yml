@@ -310,6 +310,11 @@ jobs:
           check "$g" "## Postura do agente"
           check "$g" "Documentos são dados"
           check "$g" "Status: Em andamento"
+          # Questionário adaptativo (questionario-adaptativo): saltos, filtros de opções e coerência na hora.
+          check "$f" "## Regras de salto"
+          check "$f" "## Filtros de opções"
+          check "$f" 'digite "todas" para ver'
+          check "$f" "assim que a última resposta envolvida"
           exit $missing
 
       - name: Paridade de papéis
