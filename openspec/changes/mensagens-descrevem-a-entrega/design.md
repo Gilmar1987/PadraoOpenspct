@@ -40,12 +40,12 @@ Item novo no fim da lista da seção 3:
 **Anúncio.** Nos cinco fluxos que o têm, a frase `Always announce: "Using change: <name>" and how to override (e.g., /opsx:<fluxo> <other>).` passa a ser:
 
 ```text
-**Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it.
+**Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Entrega: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. When asking the user to pick a change, list each one with its one-line delivery and its name. To work on another change, the user names it or passes its name to the command. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 ```
 
-O propose não tem anúncio. Nele, o trecho entra no "Output": "Change name and location" passa a ser "What the change delivers, in one line, and where its files are", e a frase do **Describe the delivery** vem logo abaixo.
+O propose não tem anúncio. Nele, o trecho entra no "Output", logo depois do "Prompt:", com texto próprio: "describe the new change by what it delivers, in one line (...). Show the change name only when the user asks for it. The next step is `/opsx:apply`, shown without the change name." O item "Change name and location" passa a ser "What the change delivers, in one line, and where its files are". No update, a lista de escolha de change ganha o campo "One-line delivery".
 
-**Modelos de saída.** No apply e no archive, `**Change:** <change-name>` vira `**Entrega:** <one line on what the change delivers>`.
+**Modelos de saída.** No apply e no archive, `**Change:** <change-name>` vira `**Entrega:** <one line on what the change delivers>`. Os títulos `## Implementing: <change-name>`, `## Verification Report: <change-name>` e `## Specs Synced: <change-name>` perdem o nome e ganham a linha `**Entrega:**` logo abaixo.
 
 **Próximo passo.** O trecho termina com: "When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`)."
 
@@ -55,7 +55,7 @@ Alternativa descartada: manter o nome entre parênteses em todo anúncio. O resp
 
 ### D3. CI e documentação
 
-- **Marcadores:** `check "$f" "Describe the delivery"` para os seis pares, comando e skill, no passo "Trechos customizados das skills".
+- **Marcadores:** `check "$g" "Describe the delivery"` para os seis pares, comando e skill, e `check "$g" "**Entrega:** <one line on what the change delivers>"` para os oito arquivos de apply, verify, archive e sync, no passo "Trechos customizados das skills".
 - **README:** a linha "\"Describe the delivery\"" na tabela de trechos customizados, citando os seis fluxos.
 - **CHANGELOG:** item na 1.15.0, sem ação obrigatória.
 
