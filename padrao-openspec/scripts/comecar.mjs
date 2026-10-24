@@ -4,7 +4,7 @@
 // latest release, it creates a new project (one clone of the standard, at the latest tag) or
 // joins a project in progress (clones its code and store and registers the store).
 
-import { existsSync, mkdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
@@ -254,10 +254,25 @@ function openWorkspaceSteps(codeDir, next) {
 // The paths the setup writes in the code repository, read from the manifest it just recorded.
 function standardPaths(codeDir) {
   const manifest = JSON.parse(readFileSync(path.join(codeDir, '.openspec-padrao.json'), 'utf8'));
+  // The .gitattributes is the project's file, outside the manifest; it goes in only with the standard's block.
+  const attributes = path.join(codeDir, '.gitattributes');
+  const managedAttributes = existsSync(attributes)
+    && /^# BEGIN openspec-padrao[ \t]*\r?$/m.test(readFileSync(attributes, 'utf8'));
   return [...new Set([
     ...(manifest.managedFiles ?? []), ...(manifest.managedBlocks ?? []),
     '.openspec-padrao.json', '.gitignore', 'openspec/config.yaml',
-  ])].filter((file) => existsSync(path.join(codeDir, ...file.split('/'))));
+    ...(managedAttributes ? ['.gitattributes'] : []),
+    // The standard's hooks and permissions live in .claude/settings.json; a link there is the project's.
+    ...(lstatSync(path.join(codeDir, '.claude', 'settings.json'), { throwIfNoEntry: false })?.isFile()
+      ? ['.claude/settings.json'] : []),
+  ])].filter((file) => existsSync(path.join(codeDir, ...file.split('/'))) && !ignoredByProject(codeDir, file));
+}
+
+// A path the project ignores and Git does not track was not written by the standard (the installer
+// skips it), and naming it in "git add" would make the whole commit fail.
+function ignoredByProject(codeDir, file) {
+  if (spawnSync('git', ['-C', codeDir, 'ls-files', '--error-unmatch', '--', file], { stdio: 'ignore' }).status === 0) return false;
+  return spawnSync('git', ['-C', codeDir, 'check-ignore', '-q', '--', file], { stdio: 'ignore' }).status === 0;
 }
 
 function commitRepository(dir, message, paths) {

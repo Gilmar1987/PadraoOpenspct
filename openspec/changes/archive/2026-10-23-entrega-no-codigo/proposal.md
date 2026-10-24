@@ -1,0 +1,84 @@
+# Proposal
+
+## Why
+
+O teste do padrão no projeto lava-jato (relatório `C:\TesteOpenSpct\response.md`, de 2026-10-22) achou cinco atritos na entrega do padrão ao repositório de código. Nenhum quebrou o fluxo, mas todos custaram retrabalho ou deixaram um risco:
+
+- **Item 26:** o repositório de código não tem `.gitattributes`. Cada `git add` no Windows avisa "LF will be replaced by CRLF", e a quebra de linha pode divergir nas comparações dos arquivos gerenciados pelo padrão.
+- **Item 23:** a skill `docker` não diz em que interface publicar as portas. O compose do projeto publicou o SQL Server em `0.0.0.0:1433`, com a senha conhecida do `.env.example`. A revisão pegou o problema como achado importante.
+- **Item 8:** no explore, o agente fez perguntas "isto ou aquilo" sem numerar as opções. As respostas "sim" ficaram ambíguas e precisaram de perguntas extras. A entrevista do init, com opções numeradas, não teve esse problema.
+- **Item 19:** no Git Bash, a conversão automática de caminhos trocou `http://.../fr` por `C:/Program Files/Git/fr`. O `MSYS_NO_PATHCONV=1`, usado para contornar, quebrou o caminho de saída do `curl`.
+- **Item 15:** o `.gitignore` gerado por uma ferramenta tinha `.env*` e ignorava também o `.env.example`.
+
+A change preserva a qualidade da entrega no código: menos ruído no Git, nenhum serviço de desenvolvimento exposto na rede e respostas sem ambiguidade no explore.
+
+## What Changes
+
+- **`.gitattributes` no repositório de código:**
+  - quando o repositório de código não tem `.gitattributes`, o instalador cria um, com o bloco gerenciado do padrão:
+    - `* text=auto eol=lf`;
+    - `*.bat` e `*.cmd` com `eol=crlf`, porque o `cmd.exe` exige CRLF.
+  - Quando o arquivo já existe sem o bloco do padrão, o instalador não o altera: ele diz que o arquivo já existe e sugere as linhas.
+  - No arquivo que tem o bloco, o instalador o mantém atualizado a cada execução, sem duplicá-lo.
+  - O commit inicial do `comecar.mjs` numa pasta de código que já tem histórico (a de um gerador de projeto) passa a incluir o `.gitattributes` com o bloco do padrão e o `.claude/settings.json` com as entradas do padrão. Este último ficava fora do commit, um defeito anterior achado pelo teste novo, e o próximo `--update` falhava com a árvore suja.
+- **Skill `docker`:**
+  - serviços de desenvolvimento (bancos, filas, caches) publicam portas só em `127.0.0.1`, por exemplo `"127.0.0.1:${DB_PORT:-5432}:5432"`;
+  - o exemplo de compose passa a usar isso;
+  - o `.env.example` traz marcadores (`<troque>`), e não senhas que funcionem.
+- **Explore:** uma pergunta com alternativas numera as opções e pede o número, como a entrevista do init. Um "sim" a uma pergunta "isto ou aquilo" é ambíguo, e o agente pergunta de novo.
+- **README do padrão, em "Desempenho e ambiente":**
+  - a conversão de caminhos do Git Bash e como contorná-la (PowerShell, ou `MSYS_NO_PATHCONV=1` só em comandos sem caminho de arquivo);
+  - o `.gitignore` com `.env*` precisa de `!.env.example`.
+- **Versão:** pelo modelo de versão acumulada, esta change acrescenta itens à seção `## 1.15.0`, aberta pela `descoberta-do-produto` (PR #45, já mergeado), sem mexer no `VERSION`. A release sai só quando o responsável pedir.
+- **CI:** marcadores dos trechos novos e o smoke test do instalador com o `.gitattributes`.
+
+### Fora do escopo
+
+- Os outros itens do relatório:
+  - commit inicial do padrão (item 14);
+  - checagem de coerência e ferramentas do init (itens 5, 9, 10, 13 e 24), que ficam na change `init-coerencia-e-ferramentas`.
+- Mexer num `.gitattributes` que já existe no repositório de código, ou renormalizar os arquivos já commitados (`git add --renormalize`). O projeto decide isso.
+- Proteger os serviços de produção: a regra é para o compose de desenvolvimento.
+
+## Capabilities
+
+### New Capabilities
+
+Nenhuma.
+
+### Modified Capabilities
+
+- `skill-installation`:
+  - o instalador entrega o `.gitattributes` ao repositório de código que não tem um;
+  - a skill `docker` distribuída orienta portas só no host local.
+- `workflow-governance`: o explore numera as alternativas das perguntas.
+- `project-onboarding`: o commit inicial do script de entrada numa pasta de código com histórico leva todos os arquivos que o padrão escreveu.
+
+## Impact
+
+- **Scripts:**
+  - `padrao-openspec/scripts/install-skills.mjs`, com a função nova para o `.gitattributes`, no padrão da `ensureConsumerGitignore`;
+  - `padrao-openspec/scripts/comecar.mjs`, na lista de arquivos do commit inicial.
+- **Skills e comandos, com as cópias da raiz espelhadas pelo `sync-root.mjs`:**
+  - `padrao-openspec/.claude/skills/docker/SKILL.md` e `docker-guidelines.md`;
+  - `padrao-openspec/.claude/commands/opsx/explore.md` e `skills/openspec-explore/SKILL.md`.
+- **Documentação:** `README.md` ("Desempenho e ambiente" e a lista do que o setup faz) e `padrao-openspec/templates/openspec-padrao.md` (os arquivos a commitar sem o script).
+- **Versão e CI:** `padrao-openspec/VERSION`, `CHANGELOG.md` e `.github/workflows/validate.yml` (marcadores e o smoke test do instalador).
+- **Riscos:**
+  - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam.
+  - Compatibilidade:
+    - projetos com `.gitattributes` não mudam;
+    - nos projetos sem o arquivo, o `.gitattributes` novo só vale para o que for adicionado ou alterado depois. Os arquivos já commitados mantêm a quebra de linha até o projeto renormalizar.
+- Changes concorrentes: nenhuma ativa nesta branch. A `descoberta-do-produto` (outra sessão) já entrou na `main` (045e18c), abriu a 1.15.0 e mexeu no `README.md` em outras seções; esta change rebaseia sobre ela antes de continuar o apply. A `questionario-adaptativo`, da outra sessão, está em andamento.
+- Contrato de interface: não se aplica.
+- Débitos: o repositório do padrão não tem `openspec/estado-atual.md`; nenhum.
+
+## Aprovação
+
+- Responsável: Gilmar Campelo
+- Data: 2026-10-23
+- Escopo: archive
+- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável
+- Origem: "Eu aprovo fazer o apply da entrega-no-codigo revisada, até o archive, com PR; o merge fica comigo"
+- Conteúdo: sha256:e48807b284193bbad531f7edb8746213e222965e36ee95dba1b3e4e2176b16ac
+- Aprovação anterior: Gilmar Campelo, 2026-10-23, archive; Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; rebase na main antes do PR se a `descoberta-do-produto` entrar antes, com a versão combinada com a outra sessão (1.15.0); Origem: "Aprovo a entrega-no-codigo até o archive, com PR"; Conteúdo: sha256:fc29d139aed08da6774f9f02d51969e67506af72e53a68313339e294de09920c

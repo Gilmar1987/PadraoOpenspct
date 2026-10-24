@@ -28,7 +28,8 @@ O projeto já está inicializado: não rode `/opsx:init`; comece pela primeira c
 2. **Confira os commits.** O `comecar.mjs` já faz o commit inicial deste repositório e do store, e o
    `/opsx:init` commita no store o que gerar. Sem o script, commite os arquivos que o padrão instalou
    (os listados em `managedFiles` e `managedBlocks` do `.openspec-padrao.json`, o próprio
-   `.openspec-padrao.json`, o `.gitignore` e o `openspec/config.yaml`).
+   `.openspec-padrao.json`, o `.gitignore`, o `openspec/config.yaml`, o `.claude/settings.json` e, quando
+   o padrão o criou, o `.gitattributes`).
 3. **Faça cada mudança pelo ciclo** `/opsx:propose` → aprovação explícita no chat (por exemplo,
    `Aprovo a change <nome> para apply`) → `/opsx:apply` → `/opsx:verify` → `/opsx:archive`. O
    agente só faz push, abre PR ou faz deploy quando você pede.

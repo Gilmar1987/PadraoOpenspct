@@ -348,6 +348,7 @@ function escapeRegExp(text) {
 function cleanStaleInstallerFiles(projectRoot, parents) {
   const stale = [
     { dir: projectRoot, pattern: new RegExp(`^\\.gitignore-${uuidPattern}\\.tmp$`, 'i') },
+    { dir: projectRoot, pattern: new RegExp(`^\\.gitattributes-${uuidPattern}\\.tmp$`, 'i') },
     ...parents.map((dir) => ({ dir, pattern: new RegExp(`^\\.(?:skill-tree|skill-file|openspec-block)-${uuidPattern}\\.tmp$`, 'i') })),
   ];
   const backupPattern = new RegExp(`^\\.skill-tree-${uuidPattern}\\.bak$`, 'i');
@@ -491,6 +492,72 @@ function ensureConsumerGitignore(projectRoot) {
       console.warn('Warning: could not check whether openspec/ already has Git-tracked files.');
     }
   }
+}
+
+// The code repository gets LF line endings for text files, so Git stops warning about CRLF on Windows
+// and the standard's managed files compare equal on every machine. A .gitattributes the project already
+// has is never edited: the installer only suggests the lines. A file the installer created keeps its
+// managed block current, and the file itself stays out of the manifest, so it is never removed.
+const gitattributesBegin = '# BEGIN openspec-padrao';
+const gitattributesEnd = '# END openspec-padrao';
+const gitattributesLines = ['* text=auto eol=lf', '*.bat text eol=crlf', '*.cmd text eol=crlf'];
+
+function ensureConsumerGitattributes(projectRoot) {
+  const relative = '.gitattributes';
+  const destination = path.join(projectRoot, relative);
+  const info = lstatIfPresent(destination);
+  const suggestion = gitattributesLines.join('\n  ');
+  if (info && !info.isFile()) {
+    console.warn(`Kept: ${relative} is not a regular file; consider adding:\n  ${suggestion}`);
+    return;
+  }
+  if (isIgnoredByProject(projectRoot, relative)) {
+    console.warn(`Skipped: ${relative} is ignored by the project (.gitignore).`);
+    return;
+  }
+  const original = info ? readFileSync(destination, 'utf8') : '';
+  const eol = original.includes('\r\n') ? '\r\n' : '\n';
+  const blockLines = [gitattributesBegin, ...gitattributesLines, gitattributesEnd];
+  let updated;
+  // An empty file carries no decision of the project, so it gets the block like a missing one.
+  if (original.trim() === '') {
+    updated = `${blockLines.join(eol)}${eol}`;
+  } else {
+    // Markers are whole lines, so a comment that only mentions them is never taken for the block.
+    const lines = original.split(/\r?\n/);
+    const trimmed = lines.map((line) => line.replace(/[ \t]+$/, ''));
+    const begins = trimmed.flatMap((line, index) => (line === gitattributesBegin ? [index] : []));
+    const ends = trimmed.flatMap((line, index) => (line === gitattributesEnd ? [index] : []));
+    if (begins.length === 0 && ends.length === 0) {
+      console.log(`Kept: ${relative} belongs to the project; consider adding:\n  ${suggestion}`);
+      return;
+    }
+    if (begins.length !== 1 || ends.length !== 1 || ends[0] < begins[0]) {
+      console.warn(`Kept: ${relative} has unbalanced openspec-padrao markers; review it by hand.`);
+      return;
+    }
+    updated = [...lines.slice(0, begins[0]), ...blockLines, ...lines.slice(ends[0] + 1)].join(eol);
+    if (updated === original) {
+      console.log(`Unchanged: ${relative} (openspec-padrao block)`);
+      return;
+    }
+  }
+  const stagedPath = path.join(projectRoot, `.gitattributes-${randomUUID()}.tmp`);
+  try {
+    writeFileSync(stagedPath, updated, { mode: info?.mode ?? 0o666 });
+    renameWithRetry(stagedPath, destination);
+  } finally {
+    if (existsSync(stagedPath)) rmSync(stagedPath, { force: true });
+  }
+  console.log(`${info ? 'Updated' : 'Created'}: ${relative} (openspec-padrao block: text files in LF, .bat and .cmd in CRLF)`);
+}
+
+// Whether .gitattributes carries the standard's block and Git can stage it, so --update commits it.
+// A project-owned file without the block is never part of the standard's commit.
+function hasManagedGitattributes(projectRoot) {
+  const destination = path.join(projectRoot, '.gitattributes');
+  if (!lstatIfPresent(destination)?.isFile() || isIgnoredByProject(projectRoot, '.gitattributes')) return false;
+  return readFileSync(destination, 'utf8').split(/\r?\n/).some((line) => line.replace(/[ \t]+$/, '') === gitattributesBegin);
 }
 
 function readVersion() {
@@ -949,6 +1016,7 @@ function main() {
       ...blocks.map(({ destination }) => path.dirname(destination)),
     ])]);
     ensureConsumerGitignore(projectRoot);
+    ensureConsumerGitattributes(projectRoot);
 
     let installed = 0;
     let unchanged = 0;
@@ -1033,6 +1101,7 @@ function main() {
     install();
     const paths = [...new Set([
       '.gitignore', manifestName,
+      ...(hasManagedGitattributes(projectRoot) ? ['.gitattributes'] : []),
       ...manifestPaths.map((file) => file.split('/').slice(0, 2).join('/')),
       ...blocks.filter((block) => !block.skip).map((block) => block.path),
       ...(settings.skip ? [] : [settingsPath]),
