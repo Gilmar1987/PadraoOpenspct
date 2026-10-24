@@ -42,7 +42,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    When prompting, show changes that have delta specs (under `specs/` directory).
 
-   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
+   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Entrega: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. When asking the user to pick a change, list each one with its one-line delivery and its name. To work on another change, the user names it or passes its name to the command. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
 2. **Resolve change context**
 
@@ -261,7 +261,9 @@ Unlike programmatic merging, you merge rather than overwrite:
 **Output On Success**
 
 ```markdown
-## Specs Synced: <change-name>
+## Specs Synced
+
+**Entrega:** <one line on what the change delivers>
 
 Updated main specs:
 

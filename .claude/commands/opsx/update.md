@@ -35,13 +35,14 @@ This workflow revises artifacts that already exist; it never creates missing one
    - If ambiguous, run `openspec list --json` to get available changes sorted by most recently modified, and ask the user to select one
 
    When prompting, present the top 3-4 most recently modified changes as options, showing:
+   - One-line delivery (what the change delivers)
    - Change name
    - Status (e.g., "0/5 tasks", "complete", "no tasks")
    - How recently it was modified (from `lastModified` field)
 
    Mark the most recently modified change as "(Recommended)" since it's likely what the user wants to update.
 
-   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Change: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. To work on another change, the user runs the command again and picks it. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
+   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Entrega: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. When asking the user to pick a change, list each one with its one-line delivery and its name. To work on another change, the user names it or passes its name to the command. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
 2. **Get the change's artifacts**
    ```bash
