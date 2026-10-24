@@ -28,6 +28,10 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   `127.0.0.1` e pede marcadores, e não senhas, no `.env.example`. O explore numera as alternativas das
   perguntas e trata um "sim" a "isto ou aquilo" como ambíguo. O README explica a conversão de caminhos
   do Git Bash e o `!.env.example` no `.gitignore`.
+- **Mensagens descrevem a entrega:** ao citar uma change, os fluxos `/opsx:*` dizem em uma linha o que ela
+  entrega, em vez de usar o nome técnico como rótulo; o nome só aparece para escolher entre duas changes ativas,
+  e o próximo passo vem como o comando sem argumento (por exemplo, `/opsx:verify`). Regra no `rules.md` e trecho
+  "Describe the delivery" em propose, apply, verify, archive, update e sync.
 
 ### Ações no projeto
 

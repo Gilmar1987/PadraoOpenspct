@@ -169,10 +169,12 @@ In both branches, never create the root as a side effect: do not run `openspec i
 **Output**
 
 After completing all artifacts, summarize:
-- Change name and location
+- What the change delivers, in one line, and where its files are
 - List of artifacts created with brief descriptions, plus any conditional artifact you skipped and why
 - What's ready: "All artifacts needed for implementation are ready."
 - Prompt: "The artifacts are ready for review. When you are ready, run `/opsx:apply`."
+
+**Describe the delivery**: describe the new change by what it delivers, in one line (for example, "Entrega: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when the user asks for it. The next step is `/opsx:apply`, shown without the change name.
 
 **Artifact Creation Guidelines**
 

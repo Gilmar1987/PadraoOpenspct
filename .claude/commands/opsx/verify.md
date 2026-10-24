@@ -38,7 +38,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    Include the schema used for each change if available.
    Mark changes with incomplete tasks as "(In Progress)".
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:verify <other>`).
+   **Describe the delivery**: always announce the selected change by what it delivers, in one line (for example, "Entrega: adds `.gitattributes` to the code repository and binds Docker ports to 127.0.0.1"). Show the change name only when it is needed to tell two active changes apart, or when the user asks for it. When asking the user to pick a change, list each one with its one-line delivery and its name. To work on another change, the user names it or passes its name to the command. When you point to the next step, show the command alone, without the change name (for example, `/opsx:verify`).
 
 2. **Check status to understand the schema**
    ```bash
@@ -173,7 +173,9 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    **Summary Scorecard**:
    ```markdown
-   ## Verification Report: <change-name>
+   ## Verification Report
+
+   **Entrega:** <one line on what the change delivers>
 
    ### Summary
    | Dimension    | Status           |

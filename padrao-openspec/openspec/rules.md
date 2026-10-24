@@ -114,6 +114,10 @@ nenhuma delas. Especificamente:
 - Fluxo novo começa num contrato de entrada tipado, e a entidade de domínio fica separada do
   esquema de persistência
 - O teste de cada cenário cita o requisito e o cenário que cobre, no nome ou num comentário
+- Ao citar uma change para o usuário, descreva em uma linha o que ela entrega. O nome da
+  change só aparece quando for indispensável (por exemplo, para escolher entre duas changes
+  ativas). O próximo passo é indicado pelo comando sem o nome, como `/opsx:verify`: o
+  comando descobre a change pelo contexto ou pergunta qual é.
 
 ---
 
