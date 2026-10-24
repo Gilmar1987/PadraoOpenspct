@@ -16,7 +16,8 @@
 
 - [x] 3.1 Atualizar a tabela de trechos customizados do `README.md` e acrescentar o item ao `CHANGELOG.md` na seção 1.15.0. Verificar com os passos "Versão e changelog" e "Lint de Markdown da raiz" passando.
   - Evidência: linha "Describe the delivery" na tabela de trechos customizados do README; item "Mensagens descrevem a entrega" na 1.15.0 do CHANGELOG; "Versão e changelog" → PASS; "Lint de Markdown da raiz" → FAIL primeiro, por `<name>` sem crase em proposal, design e tasks desta change, corrigido com crases (só formatação) → PASS (exit 0)
-- [ ] 3.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão. Verificar que todos saem com código 0.
+- [x] 3.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão. Verificar que todos saem com código 0.
+  - Evidência: outra sessão avisada antes e depois; `sync-root.mjs --check` → em dia; `openspec validate --all --strict` → 23 passed (exit 0); `run-ci-steps.py` dos jobs `store` e `root` → 30 PASS (exit 0); nenhum `ci-*` no registro
 
 ## Workflow follow-up
 
