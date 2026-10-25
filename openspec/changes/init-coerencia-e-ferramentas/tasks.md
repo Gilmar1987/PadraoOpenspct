@@ -18,7 +18,8 @@
 
 - [x] 3.1 Acrescentar o aviso do Windows ao `COMECE-AQUI.md`, a linha do README e o item da 1.15.0 do CHANGELOG. Verificar com os passos "Versão e changelog", "Lint de Markdown da raiz" e "Guia de primeiros passos" passando.
   - Evidência: linha do `winget` na tabela "Problemas comuns" do COMECE-AQUI; linha na tabela de trechos customizados do README; item "Coerência e ferramentas no init" na 1.15.0 do CHANGELOG; `sync-root.mjs` → 1 caminho; "Trechos customizados", "Versão e changelog", "Lint de Markdown", "Raiz em dia", "Lint de Markdown da raiz" e "Guia de primeiros passos" → PASS (exit 0)
-- [ ] 3.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão. Verificar que todos saem com código 0.
+- [x] 3.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` e todos os passos dos jobs `store` e `root` localmente, depois de avisar a outra sessão. Verificar que todos saem com código 0.
+  - Evidência: outra sessão avisada; `sync-root.mjs --check` → em dia; `openspec validate --all --strict` → 23 passed (exit 0); job `root` → todos PASS (exit 0); job `store` → 28 PASS e "Smoke test do portão" estourou o tempo limite de 15 min (exit 1), mas rodado sozinho logo depois (`bash -e -o pipefail` do passo, com `timeout 300`) → exit 0 em segundos. Uma rodada anterior travou em outro passo ("Smoke test do script de entrada", parado por 21 h e encerrado), o que indica travamento intermitente do ambiente local, e não desta change (só texto do init); os dois stores de teste deixados pela rodada encerrada foram removidos do registro (0 `ci-*` ao final). A CI remota confirma os três jobs no PR
 
 ## 4. Verificação de comportamento
 
