@@ -56,3 +56,4 @@ Nenhuma.
 - Origem: "Eu aprovo fazer a consulta de versões e a ADR no commit do propose"
 - Reconfirmação: 2026-10-25; Origem: "sim", em resposta a "Confirma as duas revisões do design e a reconfirmação?" (D1 com o texto implementado: dependências de par, estável pela lista completa, título `## Dependency versions`, marca em texto puro; D2 com "created or changed"); Conteúdo: sha256:0b075424f5fee99dff7bfa70d5b9a4eeab00ea3bdaca9d2ac4bdc06fa1909cf6
 - Reconfirmação: 2026-10-25; Origem: "sim", em resposta à proposta de passar a linha "Versão" do proposal para a 1.16.0 e voltar a tarefa 3.1 para pendente com a 1.16.0, depois da release v1.15.0 (4710c02); Conteúdo: sha256:ee15b88f81d523774083508e6eea8fcdcc14d54de64b3da1ce98a1ffbb3648dc
+- Archive: 2026-10-25; Origem: "Eu aprovo fazer o archive da consulta de versões no propose"; sem CI remota (push e PR não autorizados), com a suíte local; Conteúdo: sha256:ee15b88f81d523774083508e6eea8fcdcc14d54de64b3da1ce98a1ffbb3648dc
