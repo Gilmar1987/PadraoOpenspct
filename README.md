@@ -126,7 +126,7 @@ declarar quando você quiser ligar os dois repositórios. Use `--target agents` 
 Todo projeto que usa este padrão segue o mesmo ciclo:
 
 ```text
-[/opsx:explore]   →   /opsx:propose   →   /opsx:apply   →   /opsx:verify   →   /opsx:archive
+[/opsx:explore] → (aprovação) /opsx:propose → (aprovação) /opsx:apply → (aprovação) /opsx:verify → (aprovação) /opsx:archive
 ```
 
 | Comando | O que faz |
@@ -152,7 +152,7 @@ deduziu sem fonte ficam marcados `[INFERIDO: <base>]` e também bloqueiam o appl
 No início de um projeto, o `/opsx:init` pergunta, antes da entrevista, se há documentos para analisar (ingest) e se o dev quer explorar a ideia do produto (discover). Com qualquer um dos dois, as perguntas de arquitetura mostram uma recomendação justificada a partir do brief; com "não" nos dois, a entrevista é a de sempre:
 
 ```text
-/opsx:init → [ingest] → [discover] → entrevista → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+/opsx:init → [ingest] → [discover] → entrevista → (aprovação) /opsx:propose → (aprovação) /opsx:apply → (aprovação) /opsx:verify → (aprovação) /opsx:archive
 ```
 
 ---
@@ -361,7 +361,7 @@ sumir):
 |---|---|
 | "Architectural Decision Check", o item `verificacao` com a prova "seen failing", "Impacto medido", "Interface contract first", "Related debts" e "Accepted failures" (linha `Falhas aceitas:`) | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Related debts" | `commands/opsx/explore.md` e `skills/openspec-explore/SKILL.md` |
-| "Approval record", "Prior authorization exception" e "Commit the planning" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
+| "Approval record", "Prior authorization" e "Commit the planning" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Check the approval record", trailer "OpenSpec-Change:", "Record task evidence", "Push only on explicit request", "Security checks", "Request code review" e "Contract and code in the same commit" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Write the verification record", "Evidence reuse", "Cobertura fora da suíte", "Project validation commands" e "Code review record" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Update the project overview", "Update the open debts" (com a linha `Falhas aceitas:`), "Check the archive authorization" e "Commit the archive" | `commands/opsx/archive.md` e `skills/openspec-archive-change/SKILL.md` |
@@ -369,6 +369,8 @@ sumir):
 | "Unrequested fixes are scope", "Check the library API", "Revalidate requirements after a version change", "Tool generators outside the repository", "Simulate CI on a clean copy" e "Production-mode check" | `commands/opsx/apply.md` e `skills/openspec-apply-change/SKILL.md` |
 | "Review before verify", "Dependencies in Impact", "Agent-run browser scripts", "Declared gaps", "ADR verification", "Interface contract check", "Verification layers", "Engineering principles", "ADR check seen failing", "Exit conditions", "Accepted failures" e "nada a varrer" | `commands/opsx/verify.md` e `skills/openspec-verify-change/SKILL.md` |
 | "Scope change resets approval" | `commands/opsx/update.md` e `skills/openspec-update-change/SKILL.md` |
+| "Approval and command" e "Stop and show the next step" | `propose`, `apply`, `verify`, `archive` e `update` (comandos e skills) |
+| Bloco "Aprovação e comando por etapa" | `openspec/rules.md`; a linha "Eu aprovo fazer" em `templates/agents-block.md` |
 | "Run the gate" | `apply` e `archive` (comandos e skills) |
 | "Check concurrent changes" | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Commit the init", "### Arquivo 5", 7.3, 7.4 (princípios de engenharia), fila por banco, E2E acrescentado, 2.6 (contratos de interface) e, no Arquivo 6, "Falhas aceitas" e o "Sai quando" conferível | `commands/opsx/init.md` |

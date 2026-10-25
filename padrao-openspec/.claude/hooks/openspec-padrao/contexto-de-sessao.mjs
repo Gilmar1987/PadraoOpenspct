@@ -43,6 +43,7 @@ if (payload && existsSync(gate)) {
       if (state.changes.length > maxChanges) lines.push(`- +${state.changes.length - maxChanges} change(s) ativas`);
       lines.push('Use este estado em vez de deduzir a fase; rode "node docs/openspec-portao.mjs estado" para atualizar.');
     }
+    lines.push('Cada etapa começa com a aprovação escrita do responsável ("Eu aprovo fazer ...") e o comando /opsx:<etapa> digitado por ele; ao fim dela, pare e mostre a aprovação e o comando da próxima.');
     process.stdout.write(`${JSON.stringify({
       hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: lines.join('\n') },
     })}\n`);

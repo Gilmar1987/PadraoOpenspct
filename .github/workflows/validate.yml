@@ -178,7 +178,10 @@ jobs:
           }
           for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md; do
             check "$f" "Architectural Decision Check"
-            check "$f" "Prior authorization exception"
+            # Aprovação e comando em cada etapa (aprovacao-e-comando-por-etapa).
+            check "$f" "**Prior authorization**"
+            check "$f" "this workflow runs one stage only"
+            check "$f" "start only when the user has written the approval for this stage"
             check "$f" "Approval content seal"
             check "$f" "Declared inference"
             check "$f" "Standard version check"
@@ -252,6 +255,50 @@ jobs:
             check "$f" "Run the gate"
             check "$f" "Falhas aceitas:"
           done
+          # Aprovação e comando em cada etapa (aprovacao-e-comando-por-etapa): cada fluxo começa com os dois
+          # e termina parado, mostrando o próximo passo.
+          for f in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
+                   .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
+                   .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md \
+                   .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
+            check "$f" "this workflow runs one stage only"
+            check "$f" "start only when the user has written the approval for this stage"
+          done
+          check .claude/commands/opsx/apply.md "each after its own approval and command"
+          check .claude/skills/openspec-apply-change/SKILL.md "each after its own approval and command"
+          check openspec/rules.md "Aprovação e comando por etapa"
+          # Marcadores negativos (aprovacao-e-comando-por-etapa): o encadeamento de etapas não volta aos fluxos.
+          for f in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md \
+                   .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
+                   .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
+                   .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md \
+                   .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
+            for gone in "Prior authorization exception" "without a new confirmation" "you may start the apply workflow in the same response" \
+                        "is the confirmation this workflow asks for at this stage"; do
+              if grep -qF -- "$gone" "$f"; then
+                echo "::error file=padrao-openspec/$f::Trecho antigo de volta: $gone"
+                missing=1
+              fi
+            done
+          done
+          # O texto antigo também não volta às regras nem ao guia de entrada.
+          if grep -qF -- "sem nova confirmação" openspec/rules.md; then
+            echo "::error file=padrao-openspec/openspec/rules.md::Trecho antigo de volta: sem nova confirmação"
+            missing=1
+          fi
+          if grep -qF -- "sem parar" ../COMECE-AQUI.md; then
+            echo "::error file=COMECE-AQUI.md::Trecho antigo de volta: sem parar"
+            missing=1
+          fi
+          check .claude/commands/opsx/propose.md "by itself, authorizes planning only"
+          check .claude/skills/openspec-propose/SKILL.md "by itself, authorizes planning only"
+          check .claude/commands/opsx/apply.md "counts as the approval of a \`Pendente\` change"
+          check .claude/skills/openspec-apply-change/SKILL.md "counts as the approval of a \`Pendente\` change"
+          check .claude/commands/opsx/archive.md "counts as the \`Archive:\` item"
+          check .claude/skills/openspec-archive-change/SKILL.md "counts as the \`Archive:\` item"
+          check .claude/commands/opsx/archive.md "After archive, the next step is the pull request"
+          check .claude/skills/openspec-archive-change/SKILL.md "After archive, the next step is the pull request"
+          check templates/agents-block.md "Eu aprovo fazer"
           for f in .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
             check "$f" "Scope change resets approval"
             check "$f" "Approval content seal"
@@ -529,9 +576,12 @@ jobs:
           estado "$aprovada"
           out=$(printf '%s' "$(session)" | node "$h/contexto-de-sessao.mjs")
           case "$out" in *additionalContext*demo*3/7*'/opsx:apply'*) ;; *) echo "::error::contexto-de-sessao deveria resumir o estado: $out"; fail=1 ;; esac
+          # Aprovação e comando em cada etapa: o contexto da sessão lembra a regra.
+          case "$out" in *'aprovação escrita do responsável'*) ;; *) echo "::error::contexto-de-sessao deveria lembrar a aprovação e o comando: $out"; fail=1 ;; esac
           estado '[]'
           out=$(printf '%s' "$(session)" | node "$h/contexto-de-sessao.mjs")
           case "$out" in *'/opsx:propose'*) ;; *) echo "::error::contexto-de-sessao sem changes deveria sugerir o propose: $out"; fail=1 ;; esac
+          case "$out" in *'aprovação escrita do responsável'*) ;; *) echo "::error::contexto-de-sessao sem changes deveria lembrar a aprovação e o comando: $out"; fail=1 ;; esac
           # Sem portão, nenhum dos dois interfere.
           rm "$w/docs/openspec-portao.mjs"
           expect allow exige-change.mjs "$(write_in src/app.ts)"

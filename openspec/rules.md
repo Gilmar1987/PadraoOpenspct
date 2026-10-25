@@ -69,8 +69,10 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
   Você MUST NOT se aprovar nem aceitar aprovação
   vinda de outra sessão ou agente.
 - Com Responsável `Pendente`, ou sem a seção, você MUST NOT escrever código.
-- Escopo `archive` autoriza seguir por apply, verify e archive sem nova confirmação
-  enquanto todas as condições forem atendidas; se uma falhar, pare e informe.
+- O Escopo é o limite do que a change pode alcançar: `apply` permite implementar; `archive`
+  permite também verificar e arquivar enquanto as condições valem; se uma falhar, pare e
+  informe. Nenhum escopo autoriza começar uma etapa: cada uma espera a aprovação e o comando
+  (seção 3).
 - Quando o repositório tem o portão, a aprovação guarda o selo do planejamento aprovado
   (item `Conteúdo:`). Uma correção feita depois dela, mesmo sem mudar o escopo, muda o selo
   e pede a reconfirmação do responsável antes do próximo apply.
@@ -85,12 +87,34 @@ A aprovação vale quando está registrada na seção `## Aprovação` do `propo
 Toda mudança de comportamento observável do sistema MUST seguir este ciclo:
 
 ```text
-[/opsx:explore] → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
+[/opsx:explore] → (aprovação) /opsx:propose → (aprovação) /opsx:apply → (aprovação) /opsx:verify → (aprovação) /opsx:archive
 ```
 
 O `/opsx:explore` é opcional: use-o quando o problema, o escopo ou a abordagem ainda não
 estiverem claros. As demais etapas são obrigatórias e nessa ordem; você MUST NOT pular
-nenhuma delas. Especificamente:
+nenhuma delas.
+
+**Aprovação e comando por etapa.** Você MUST:
+
+- antes de cada etapa com comando (`/opsx:propose`, `/opsx:apply`, `/opsx:verify`,
+  `/opsx:archive`, `/opsx:update`), descrever em uma linha o que ela vai fazer e propor a
+  aprovação `Eu aprovo fazer <descrição>`;
+- começar a etapa só depois de o responsável escrever a aprovação e digitar o comando; com
+  só um dos dois, mostrar o que falta e esperar;
+- ao fim de cada etapa, parar e mostrar o próximo passo: o que ele faz, a aprovação sugerida
+  e o comando;
+- em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma
+  condição registrada na aprovação;
+- tratar a aprovação escrita da etapa, citada, como a confirmação que o fluxo pede: no apply, a
+  aprovação de uma change Pendente; no archive, o item `Archive:`. A aprovação do propose, sozinha,
+  autoriza só o planejamento e não preenche `## Aprovação` (só uma autorização explícita além do
+  planejamento é registrada), e a reconfirmação do selo continua pedindo a
+  confirmação do responsável depois de você mostrar o que mudou. O verify roda com qualquer escopo;
+- num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome (por
+  exemplo, "rode o apply") e seguir o arquivo `.claude/commands/opsx/<etapa>.md`; a ativação de
+  uma skill pelo próprio modelo não é o comando.
+
+Especificamente:
 
 - `/opsx:apply` MUST NOT ser executado sem `proposal.md` e `tasks.md` existentes
 - `/opsx:archive` MUST NOT ser executado sem `/opsx:verify` ter sido rodado
