@@ -9,7 +9,8 @@
 
 ## 2. Script de entrada
 
-- [ ] 2.1 Aplicar o D1, o D2 e o D3 em `padrao-openspec/scripts/comecar.mjs` (conjunto dos caminhos com edições antes do setup, divisão da lista do commit, mensagem final e linha do plano). Verificar com `node --check`, com o "Smoke test do script de entrada" passando (cenário novo e os anteriores, inclusive "Pasta de gerador com um commit" com a árvore limpa) e com o "Sintaxe dos scripts" passando.
+- [x] 2.1 Aplicar o D1, o D2 e o D3 em `padrao-openspec/scripts/comecar.mjs` (conjunto dos caminhos com edições antes do setup, divisão da lista do commit, mensagem final e linha do plano). Verificar com `node --check`, com o "Smoke test do script de entrada" passando (cenário novo e os anteriores, inclusive "Pasta de gerador com um commit" com a árvore limpa) e com o "Sintaxe dos scripts" passando.
+  - Evidência: `comecar.mjs`: `uncommittedPaths` (git status `--porcelain=v1 -z --untracked-files=all`, com o nome antigo das renomeações) antes do setup, `editedBefore` (o caminho ou um arquivo dentro dele), divisão da lista do commit em dentro e fora, aviso final com os arquivos e o comando (`console.warn`, como os outros avisos), commit pulado quando tudo fica de fora e linha do plano; com o `git status` falhando, nenhum arquivo do padrão entra (mais conservador que o D1, porque sem o Git não há como saber quais já existiam); o teste passou a guardar também a saída de erro (`2>&1`), onde vai o aviso; `node --check` → ok; "Smoke test do script de entrada" (cenário novo e os anteriores, inclusive a pasta de gerador com a árvore limpa) e "Sintaxe dos scripts" → PASS (exit 0); nenhum `ci-*` no registro
 
 ## 3. Documentação e integração
 

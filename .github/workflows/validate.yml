@@ -1075,7 +1075,7 @@ jobs:
           git -C "$work/k/gerado" add -A
           commit "$work/k/gerado" -m gerador
           printf 'linha do dev\n' >> "$work/k/gerado/CLAUDE.md"
-          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/k" --nome "CI Edicao" --id ci-edicao-$sfx --codigo "$work/k/gerado" --yes > "$RUNNER_TEMP/edicao.txt"
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/k" --nome "CI Edicao" --id ci-edicao-$sfx --codigo "$work/k/gerado" --yes > "$RUNNER_TEMP/edicao.txt" 2>&1
           test "$(git -C "$work/k/gerado" rev-list --count HEAD)" -eq 2
           if git -C "$work/k/gerado" show --name-only --format= HEAD | grep -qx 'CLAUDE.md'; then exit 1; fi
           git -C "$work/k/gerado" show --name-only --format= HEAD | grep -qx 'AGENTS.md'
