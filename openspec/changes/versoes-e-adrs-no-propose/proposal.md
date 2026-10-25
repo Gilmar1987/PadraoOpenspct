@@ -44,7 +44,7 @@ Nenhuma.
 - **Débitos:** o repositório não tem `openspec/estado-atual.md`.
 - **Falhas aceitas:** o repositório não tem `openspec/estado-atual.md`, então a seção não existe.
 - **Changes concorrentes:** nenhuma ativa nesta branch. A change da outra sessão que leva ao padrão a aprovação escrita e o comando por etapa (branch `feat/aprovacao-e-comando-por-etapa`) mexe no fim do propose (o Output) e nas mesmas skills. Esta mexe nas "Artifact Creation Guidelines" e no passo 8, então o conflito é textual. Quem entrar por último faz o rebase.
-- **Versão:** acrescenta um item à seção aberta do `CHANGELOG.md` (1.15.0, ainda sem release), sem mexer no `VERSION`.
+- **Versão:** primeira change depois da release v1.15.0: sobe `padrao-openspec/VERSION` para 1.16.0 e abre a seção `## 1.16.0` do `CHANGELOG.md`, com o item desta change; as changes seguintes acrescentam itens a ela.
 
 ## Aprovação
 
@@ -55,3 +55,4 @@ Nenhuma.
 - Conteúdo: sha256:a69d3a14ce8f82d9dacb790bc2ce8c0aadece98a0acbf2bdf8b071b0fd117dd9
 - Origem: "Eu aprovo fazer a consulta de versões e a ADR no commit do propose"
 - Reconfirmação: 2026-10-25; Origem: "sim", em resposta a "Confirma as duas revisões do design e a reconfirmação?" (D1 com o texto implementado: dependências de par, estável pela lista completa, título `## Dependency versions`, marca em texto puro; D2 com "created or changed"); Conteúdo: sha256:0b075424f5fee99dff7bfa70d5b9a4eeab00ea3bdaca9d2ac4bdc06fa1909cf6
+- Reconfirmação: 2026-10-25; Origem: "sim", em resposta à proposta de passar a linha "Versão" do proposal para a 1.16.0 e voltar a tarefa 3.1 para pendente com a 1.16.0, depois da release v1.15.0 (4710c02); Conteúdo: sha256:ee15b88f81d523774083508e6eea8fcdcc14d54de64b3da1ce98a1ffbb3648dc

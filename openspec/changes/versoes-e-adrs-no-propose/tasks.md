@@ -12,8 +12,7 @@
 
 ## 3. Documentação e suíte
 
-- [x] 3.1 Acrescentar a linha do README e o item da 1.15.0 do CHANGELOG. Verificar com os passos "Versão e changelog" e "Lint de Markdown da raiz" passando.
-  - Evidência: linha "Consulted dependency versions" e "the ADRs this workflow created" na tabela de trechos customizados do README; item "Versões e ADRs no propose" na 1.15.0 do CHANGELOG; "Versão e changelog" e "Lint de Markdown da raiz" → PASS (exit 0)
+- [ ] 3.1 Acrescentar a linha do README e o item desta change na seção 1.16.0 do CHANGELOG, aberta por esta change, com `padrao-openspec/VERSION` em 1.16.0. Verificar com os passos "Versão e changelog" e "Lint de Markdown da raiz" passando.
 - [x] 3.2 Rodar `sync-root.mjs` e `--check`, `openspec validate --all --strict` e todos os passos dos jobs `store` e `root` localmente, com tempo limite por passo, depois de avisar a outra sessão. Verificar que todos saem com código 0.
   - Evidência: outra sessão avisada; `sync-root.mjs --check` → em dia; `openspec validate --all --strict` → 23 passed (exit 0); `run-ci-steps-t.py` (tempo limite de 15 min) do job `store` → 14 PASS e 2 TIMEOUT ("camada do Claude Code no instalador" e "drive minúsculo", travamento intermitente da máquina); suíte interrompida com a concordância do responsável e cada passo restante rodado sozinho → os 2 que travaram e os 6 que faltavam (validação de interface, portão, blocos de agentes, métricas de fluxo, consumo de IA; "Cache do navegador" não tem `run:`) PASS, e o job `root` inteiro PASS (exit 0); o store de teste `ci-portao` deixado pela interrupção foi removido; 0 `ci-*` ao final; depois do rebase sobre 60cddba (#50), "Trechos customizados" (com os marcadores negativos do #50), "Lint de Markdown", "Versão e changelog", "Validar specs", "Paridade de papéis", hooks, blocos de agentes e o job `root` inteiro → PASS (exit 0)
 
