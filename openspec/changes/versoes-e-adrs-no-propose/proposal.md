@@ -48,8 +48,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-25
+- Escopo: apply
+- Condições: cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável
+- Conteúdo: sha256:a69d3a14ce8f82d9dacb790bc2ce8c0aadece98a0acbf2bdf8b071b0fd117dd9
+- Origem: "Eu aprovo fazer a consulta de versões e a ADR no commit do propose"
