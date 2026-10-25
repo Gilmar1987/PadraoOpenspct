@@ -50,8 +50,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
-- Condições: —
-- Origem: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-25
+- Escopo: archive
+- Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável
+- Conteúdo: sha256:dda6af707167d1b4188b6763e4136153502cf126f21d56ead55b5240e3672841
+- Origem: "Eu aprovo fazer o apply da change do commit inicial sem edições do projeto, até o archive, com PR; o merge fica comigo"
