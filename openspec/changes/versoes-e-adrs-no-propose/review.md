@@ -17,3 +17,9 @@ Achados:
 - [menor] Sem rede, a regra não dizia de onde sai a versão — corrigido em 2e28ec4 ("the version you expect")
 - [menor] A tabela sem título fixo — corrigido em 2e28ec4 (`## Dependency versions`)
 - Rebase sobre a main com o #50 (aprovação e comando por etapa): só o CHANGELOG conflitou; os trechos do #50 no propose ficaram intactos e os marcadores negativos da CI passam
+
+## 2026-10-25 (1.16.0)
+
+- Intervalo: 2825f56..HEAD
+- Revisor: pessoa: não aplicável
+- Revisão: não aplicável (o commit só move o item da change no CHANGELOG para a seção 1.16.0 e sobe o `VERSION`, sem lógica nova; o rebase sobre a release v1.15.0 em 4710c02 passou sem conflitos)
