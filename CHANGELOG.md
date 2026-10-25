@@ -13,10 +13,14 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   as restrições de runtime; pré-releases são recusadas mesmo quando a `latest` aponta para elas, e sem rede a
   versão fica como inferida até o responsável confirmar. O commit do planejamento passa a levar também a ADR
   criada no propose.
+- **Commit inicial sem edições do projeto:** numa pasta de código que já tem trabalho, o `comecar.mjs` deixa
+  de fora do commit inicial os arquivos do padrão (`CLAUDE.md`, `.gitignore`, `.claude/settings.json` e afins)
+  que já tinham edições suas sem commit, porque o Git levaria o arquivo inteiro. No fim, ele lista esses
+  arquivos e mostra o comando para commitá-los depois da revisão.
 
 ### Ações no projeto
 
-- Nenhuma. O propose atualizado chega com a atualização do padrão.
+- Nenhuma. O propose atualizado e o novo `comecar.mjs` chegam com a atualização do padrão.
 
 ## 1.15.0 — 2026-10-25
 

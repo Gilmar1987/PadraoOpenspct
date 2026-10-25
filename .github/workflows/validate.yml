@@ -999,7 +999,7 @@ jobs:
       - name: Smoke test do script de entrada
         run: |
           sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
-          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx ci-gerador-$sfx ci-ignora-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
+          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx ci-gerador-$sfx ci-ignora-$sfx ci-edicao-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
           # O script faz o commit inicial; o runner não tem identidade Git configurada.
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
@@ -1067,6 +1067,22 @@ jobs:
           test "$(git -C "$work/h/gerado" rev-list --count HEAD)" -eq 2
           if git -C "$work/h/gerado" ls-files --error-unmatch .claude/settings.json > /dev/null 2>&1; then exit 1; fi
           openspec store unregister ci-ignora-$sfx
+          # Edições do projeto fora do commit inicial, cenário "CLAUDE.md com edição do dev": o CLAUDE.md com
+          # uma linha do dev ainda não commitada fica de fora; os outros arquivos do padrão entram.
+          mkdir -p "$work/k/gerado"
+          git -C "$work/k/gerado" init -q
+          printf '# Projeto\n' > "$work/k/gerado/CLAUDE.md"
+          git -C "$work/k/gerado" add -A
+          commit "$work/k/gerado" -m gerador
+          printf 'linha do dev\n' >> "$work/k/gerado/CLAUDE.md"
+          node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/k" --nome "CI Edicao" --id ci-edicao-$sfx --codigo "$work/k/gerado" --yes > "$RUNNER_TEMP/edicao.txt" 2>&1
+          test "$(git -C "$work/k/gerado" rev-list --count HEAD)" -eq 2
+          if git -C "$work/k/gerado" show --name-only --format= HEAD | grep -qx 'CLAUDE.md'; then exit 1; fi
+          git -C "$work/k/gerado" show --name-only --format= HEAD | grep -qx 'AGENTS.md'
+          git -C "$work/k/gerado" diff -- CLAUDE.md | grep -q '^+linha do dev'
+          grep -qF 'Ficaram fora do commit inicial' "$RUNNER_TEMP/edicao.txt"
+          grep -qF -- 'add -- "CLAUDE.md"' "$RUNNER_TEMP/edicao.txt"
+          openspec store unregister ci-edicao-$sfx
           # Com --sem-commit, o código fica sem histórico e a mensagem mostra como commitar.
           node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/f" --nome "CI Sem Commit" --id ci-semcommit-$sfx --yes --sem-commit > "$RUNNER_TEMP/semcommit.txt"
           if git -C "$work/f/ci-semcommit-$sfx" rev-parse -q --verify HEAD; then exit 1; fi

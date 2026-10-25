@@ -283,21 +283,89 @@ function commitRepository(dir, message, paths) {
   return true;
 }
 
-async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork }) {
+// The paths with uncommitted work before the setup (modified, staged, deleted or untracked), so a
+// standard file the developer had already edited never enters the initial commit with those edits.
+// ok is false when Git could not answer; then no standard file is trusted. An untracked folder comes
+// as "dir/" (untracked files "normal"), so a large node_modules does not flood the output.
+function uncommittedPaths(codeDir) {
+  const result = spawnSync('git', ['-C', codeDir, 'status', '--porcelain=v1', '-z', '--untracked-files=normal'], {
+    encoding: 'utf8', maxBuffer: 256 * 1024 * 1024,
+  });
+  if (result.error || result.status !== 0) return { ok: false, paths: new Set(), ignoreCase: false };
+  const ignoreCase = spawnSync('git', ['-C', codeDir, 'config', '--get', 'core.ignorecase'], { encoding: 'utf8' })
+    .stdout?.trim() === 'true';
+  const paths = new Set();
+  const entries = result.stdout.split('\0');
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (entry.length < 4) continue;
+    paths.add(entry.slice(3));
+    // A rename or copy is followed by its original path.
+    if (/[RC]/.test(entry.slice(0, 2))) paths.add(entries[(index += 1)]);
+  }
+  return { ok: true, paths: ignoreCase ? new Set([...paths].map((item) => item.toLowerCase())) : paths, ignoreCase };
+}
+
+// A standard path stays out when it, a file inside it, or an untracked folder around it had
+// uncommitted work before the setup.
+function editedBefore(file, before) {
+  if (!before.ok) return true;
+  const name = before.ignoreCase ? file.toLowerCase() : file;
+  for (const edited of before.paths) {
+    if (edited === name || edited.startsWith(`${name}/`)) return true;
+    if (edited.endsWith('/') && name.startsWith(edited)) return true;
+  }
+  return false;
+}
+
+// Standard paths known before the setup, so the plan can name the ones the developer already edited.
+const knownStandardFiles = ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', '.gitignore', '.gitattributes', '.claude/settings.json',
+  'openspec/config.yaml', '.github/copilot-instructions.md', '.amazonq/rules/openspec-padrao.md'];
+const knownStandardFolders = ['.claude/', '.agents/', '.github/agents/', 'docs/openspec-'];
+
+function editedStandardBefore(before) {
+  return [...before.paths].filter((edited) => knownStandardFiles.some((file) => edited === (before.ignoreCase ? file.toLowerCase() : file))
+    || knownStandardFolders.some((folder) => edited.startsWith(before.ignoreCase ? folder.toLowerCase() : folder)));
+}
+
+const quoted = (file) => `"${file}"`;
+
+async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, dirtyBefore }) {
   const version = readFileSync(path.join(storeDir, 'padrao-openspec', 'VERSION'), 'utf8').trim();
   // A code folder that already had commits or uncommitted work gets only the standard's files,
   // so the developer's own changes (and secrets such as .env.local) never land in this commit.
-  const codePaths = codeHadWork ? standardPaths(codeDir) : null;
+  // A standard file the developer had already edited stays out too: Git commits the whole file.
+  const allPaths = codeHadWork ? standardPaths(codeDir) : null;
+  const keptOut = allPaths ? allPaths.filter((file) => editedBefore(file, dirtyBefore)) : [];
+  const codePaths = allPaths ? allPaths.filter((file) => !keptOut.includes(file)) : null;
+  const reviewMessage = 'chore: inclui o padrão OpenSpec nos arquivos já editados';
+  const skipCode = codePaths?.length === 0;
   const repos = [
-    { label: 'código', dir: codeDir, message: `chore: instala o padrão OpenSpec v${version}`, paths: codePaths },
+    { label: 'código', dir: codeDir, message: skipCode ? reviewMessage : `chore: instala o padrão OpenSpec v${version}`, paths: skipCode ? allPaths : codePaths, skip: skipCode },
     { label: 'store', dir: storeDir, message: `chore: configura o store do projeto ${id}`, paths: null },
   ];
   const manualFor = (repo) => {
-    const files = repo.paths ? ` -- ${repo.paths.join(' ')}` : '';
+    const files = repo.paths ? ` -- ${repo.paths.map(quoted).join(' ')}` : '';
     return [`git -C "${repo.dir}" add${repo.paths ? files : ' -A'}`, `git -C "${repo.dir}" commit -m "${repo.message}"${files}`];
   };
   const pending = () => repos.filter((repo) => !repo.done);
-  const result = () => ({ done: pending().length === 0, manual: pending().flatMap(manualFor) });
+  const reason = dirtyBefore?.ok === false
+    ? 'porque não consegui conferir, com o git status, quais já tinham edições suas'
+    : 'porque já tinham edições suas antes do setup';
+  // Whatever happened to the commit, the developer learns which standard files were left out and why.
+  const result = () => {
+    if (keptOut.length) {
+      const files = keptOut.map(quoted).join(' ');
+      console.warn(`\n  ! Ficaram fora do commit inicial, ${reason}:`);
+      for (const file of keptOut) console.warn(`      ${file}`);
+      console.warn('    Eles têm as suas edições junto das do padrão. Revise e commite:');
+      console.warn(`      git -C "${codeDir}" add -- ${files}`);
+      console.warn(`      git -C "${codeDir}" commit -m "${reviewMessage}" -- ${files}`);
+      if (!repos[0].done && !skipCode) console.warn('    Os comandos do commit inicial mostrados no fim não incluem esses arquivos.');
+      console.warn('    Até lá, o install-skills --update pede a árvore limpa.');
+    }
+    return { done: pending().length === 0, manual: pending().flatMap(manualFor) };
+  };
 
   if (options.semCommit) return result();
   if (rl && !options.yes) {
@@ -310,6 +378,10 @@ async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork }
     if (!accepted) return result();
   }
   for (const repo of repos) {
+    if (repo.skip) {
+      console.warn(`\n  Aviso: não fiz o commit inicial do ${repo.label}: todos os arquivos do padrão ficaram de fora, ${reason}.`);
+      continue;
+    }
     try {
       commitRepository(repo.dir, repo.message, repo.paths);
       repo.done = true;
@@ -352,13 +424,18 @@ async function newProject(rl, options) {
   const codeHadWork = Boolean(generated) && existsSync(path.join(codeDir, '.git')) && (
     spawnSync('git', ['-C', codeDir, 'rev-parse', '-q', '--verify', 'HEAD']).status === 0 ||
     spawnSync('git', ['-C', codeDir, 'status', '--porcelain'], { encoding: 'utf8' }).stdout.trim() !== '');
+  const dirtyBefore = codeHadWork ? uncommittedPaths(codeDir) : { ok: true, paths: new Set(), ignoreCase: false };
+  const editedStandard = editedStandardBefore(dirtyBefore);
+  let keptOutNote = '';
+  if (!dirtyBefore.ok) keptOutNote = '; não consegui conferir as edições sem commit, então os arquivos do padrão ficam de fora';
+  else if (editedStandard.length) keptOutNote = `; ficam de fora os arquivos do padrão com edições suas sem commit (${editedStandard.join(', ')})`;
   plan.push(
     `Store: ${storeDir} (clone da release ${tag} de ${options.origem}, branch main)`,
     generated ? `Código: ${codeDir} (pasta existente)` : `Código: ${codeDir} (repositório novo, branch main)`,
     `Setup: comandos /opsx:*, skills e agentes no código; store registrado como "${id}"`,
     options.semCommit
       ? 'Commit inicial: não (--sem-commit)'
-      : `Commit inicial: perguntado no fim${codeHadWork ? '; no código, só os arquivos do padrão, porque a pasta já tinha trabalho' : ''}`,
+      : `Commit inicial: perguntado no fim${codeHadWork ? '; no código, só os arquivos do padrão, porque a pasta já tinha trabalho' : ''}${keptOutNote}`,
   );
   await confirmPlan(rl, plan, options);
 
@@ -391,7 +468,7 @@ async function newProject(rl, options) {
     if (result.status !== 0) throw new Error(`O setup falhou:\n${`${result.stdout ?? ''}${result.stderr ?? ''}`.trim()}`);
   });
 
-  const commit = await initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork });
+  const commit = await initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, dirtyBefore });
   const commitNote = commit.done
     ? 'Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.'
     : `Falta o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
