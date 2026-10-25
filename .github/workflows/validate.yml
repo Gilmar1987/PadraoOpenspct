@@ -273,7 +273,8 @@ jobs:
                    .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
                    .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md \
                    .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
-            for gone in "Prior authorization exception" "without a new confirmation" "you may start the apply workflow in the same response"; do
+            for gone in "Prior authorization exception" "without a new confirmation" "you may start the apply workflow in the same response" \
+                        "is the confirmation this workflow asks for at this stage"; do
               if grep -qF -- "$gone" "$f"; then
                 echo "::error file=padrao-openspec/$f::Trecho antigo de volta: $gone"
                 missing=1
@@ -289,6 +290,12 @@ jobs:
             echo "::error file=COMECE-AQUI.md::Trecho antigo de volta: sem parar"
             missing=1
           fi
+          check .claude/commands/opsx/propose.md "by itself, authorizes planning only"
+          check .claude/skills/openspec-propose/SKILL.md "by itself, authorizes planning only"
+          check .claude/commands/opsx/apply.md "counts as the approval of a \`Pendente\` change"
+          check .claude/skills/openspec-apply-change/SKILL.md "counts as the approval of a \`Pendente\` change"
+          check .claude/commands/opsx/archive.md "counts as the \`Archive:\` item"
+          check .claude/skills/openspec-archive-change/SKILL.md "counts as the \`Archive:\` item"
           check .claude/commands/opsx/archive.md "After archive, the next step is the pull request"
           check .claude/skills/openspec-archive-change/SKILL.md "After archive, the next step is the pull request"
           check templates/agents-block.md "Eu aprovo fazer"

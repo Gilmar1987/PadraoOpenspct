@@ -106,8 +106,9 @@ nenhuma delas.
 - em ações sem comando (push, PR, merge, release), seguir só com um pedido explícito ou uma
   condição registrada na aprovação;
 - tratar a aprovação escrita da etapa, citada, como a confirmação que o fluxo pede: no apply, a
-  aprovação de uma change Pendente; no archive, o item `Archive:`. A aprovação do propose autoriza
-  só o planejamento e não preenche `## Aprovação`, e a reconfirmação do selo continua pedindo a
+  aprovação de uma change Pendente; no archive, o item `Archive:`. A aprovação do propose, sozinha,
+  autoriza só o planejamento e não preenche `## Aprovação` (só uma autorização explícita além do
+  planejamento é registrada), e a reconfirmação do selo continua pedindo a
   confirmação do responsável depois de você mostrar o que mudou. O verify roda com qualquer escopo;
 - num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome (por
   exemplo, "rode o apply") e seguir o arquivo `.claude/commands/opsx/<etapa>.md`; a ativação de
