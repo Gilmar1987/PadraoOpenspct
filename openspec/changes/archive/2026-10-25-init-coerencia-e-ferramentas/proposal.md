@@ -68,3 +68,4 @@ Nenhuma.
 - Condições: os itens do propose (versões fixas e ADR no commit) ficam para uma change própria; cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável
 - Conteúdo: sha256:55815ab8f7a13730dda3aaf3474545717a0040938338f2aeac47f04d56900b86
 - Origem: "Eu aprovo fazer a checagem de incoerências e a conferência de ferramentas do init"
+- Archive: 2026-10-25; Origem: "Eu aprovo arquivar a change da checagem de incoerências e da conferência de ferramentas do init"; sem CI remota (push e PR não autorizados), com a suíte local (passo do portão não verificado na suíte, passou sozinho); design e o requisito da chave em `.env` mantidos mais amplos que a implementação por decisão do responsável ("manter como estava"); Conteúdo: sha256:55815ab8f7a13730dda3aaf3474545717a0040938338f2aeac47f04d56900b86
