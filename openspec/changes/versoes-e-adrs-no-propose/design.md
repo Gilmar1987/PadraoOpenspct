@@ -29,7 +29,7 @@ Não há ADR nova: é uma regra do fluxo de propose. A change segue a [ADR-0003]
 Item novo nas "Artifact Creation Guidelines", depois de "Interface contract first":
 
 ```text
-- **Consulted dependency versions**: for each new dependency the design adds (library, package or tool), query its registry now, not from memory: for example `npm view <pkg> dist-tags engines peerDependencies`, `pip index versions <pkg>` (or the PyPI JSON API), `dotnet package search <pkg> --exact-match`, or the registry page for ecosystems without a CLI query. Pick an exact, stable version: never a pre-release (`rc`, `beta`, `alpha`, `preview`, `next`, `canary`, `dev`), even when the `latest` tag points to one; then take the newest stable and say why the pre-release was refused. Record in `design.md` a "Dependency versions" table: package, exact version, source and date of the query, and the runtime and peer constraints the registry reports. The task that installs the dependency names that exact version. When the registry cannot be reached, mark the version `[INFERIDO: sem consulta ao registro]`; the apply gate then waits for the user to confirm it.
+- **Consulted dependency versions**: for each new dependency the design adds (library, package or tool), query its registry now, not from memory: for example `npm view <pkg> dist-tags engines peerDependencies`, `pip index versions <pkg>` (or the PyPI JSON API), `dotnet package search <pkg> --exact-match`, or the registry page for ecosystems without a CLI query. This includes the peer dependencies the project must add because of it. Pick an exact, stable version: never a pre-release (`rc`, `beta`, `alpha`, `preview`, `next`, `canary`, `dev`), even when the `latest` tag points to one; then take the newest stable (a version with no pre-release suffix, found in the full version list, for example `npm view <pkg> versions --json`) and say why the pre-release was refused. Record in `design.md`, under its own `## Dependency versions` heading, a table: package, exact version, source and date of the query, and the runtime and peer constraints the registry reports. The task that installs the dependency names that exact version. When the registry cannot be reached, write the version you expect followed by the marker as plain text in the table cell, outside backticks (for example, `| prisma | 7.10.1 [INFERIDO: sem consulta ao registro] |` written without the surrounding code quotes), because the apply gate does not see markers inside code; the gate then waits for the user to confirm it, and the install task points to that table row.
 ```
 
 ### D2. ADR no commit do planejamento
@@ -37,7 +37,7 @@ Item novo nas "Artifact Creation Guidelines", depois de "Interface contract firs
 O passo 8 passa a dizer:
 
 ```text
-... commit only the change folder and the ADRs this workflow created: `git -C "<planningHome.root>" add -- "<changeRoot>" <each new ADR path>`, then `git -C "<planningHome.root>" commit -m "docs: propõe <change-name>" -m "OpenSpec-Change: <change-name>" -- "<changeRoot>" <each new ADR path>`.
+... commit only the change folder and the ADRs this workflow created or changed: `git -C "<planningHome.root>" add -- "<changeRoot>" <each new ADR path>`, then `git -C "<planningHome.root>" commit -m "docs: propõe <change-name>" -m "OpenSpec-Change: <change-name>" -- "<changeRoot>" <each new ADR path>`.
 ```
 
 Cada ADR entra pelo caminho dela, sem `openspec/adrs/` inteiro, para não levar ADRs alheias em andamento.

@@ -54,3 +54,4 @@ Nenhuma.
 - Condições: cada etapa só começa com o comando `/opsx:<etapa>` digitado pelo responsável
 - Conteúdo: sha256:a69d3a14ce8f82d9dacb790bc2ce8c0aadece98a0acbf2bdf8b071b0fd117dd9
 - Origem: "Eu aprovo fazer a consulta de versões e a ADR no commit do propose"
+- Reconfirmação: 2026-10-25; Origem: "sim", em resposta a "Confirma as duas revisões do design e a reconfirmação?" (D1 com o texto implementado: dependências de par, estável pela lista completa, título `## Dependency versions`, marca em texto puro; D2 com "created or changed"); Conteúdo: sha256:0b075424f5fee99dff7bfa70d5b9a4eeab00ea3bdaca9d2ac4bdc06fa1909cf6
