@@ -43,6 +43,11 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   de cada etapa, o agente para e mostra o que a próxima faz, a aprovação sugerida e o comando. O
   `Escopo: archive` passa a ser o limite da change, e não autoriza mais encadear etapas; sai a exceção
   que deixava o propose começar o apply no mesmo turno.
+- **Versões e ADRs no propose:** para cada dependência nova, o propose consulta o registro do ecossistema (por
+  exemplo, `npm view <pkg> dist-tags`) e registra no design a versão exata e estável escolhida, a fonte e a data e
+  as restrições de runtime; pré-releases são recusadas mesmo quando a `latest` aponta para elas, e sem rede a
+  versão fica como inferida até o responsável confirmar. O commit do planejamento passa a levar também a ADR
+  criada no propose.
 
 ### Ações no projeto
 

@@ -380,6 +380,7 @@ sumir):
 | "Antes da entrevista", a linha "Recomendação:" (recomendação a partir do brief) e "Base das recomendações" | `commands/opsx/init.md` |
 | "Regras de salto", "Filtros de opções" (com o `digite "todas" para ver`) e a coerência "Na hora" | `commands/opsx/init.md` |
 | Combinações de coerência de infraestrutura e testes, o 0 exclusivo da 6.4, a auditoria `--omit=dev` e "## Ferramentas da máquina" | `commands/opsx/init.md` |
+| "Consulted dependency versions" e "the ADRs this workflow created" (passo "Commit the planning") | `commands/opsx/propose.md` e `skills/openspec-propose/SKILL.md` |
 | "Describe the delivery" (anúncio e resumo pela entrega, próximo passo pelo comando sem o nome) | `propose`, `apply`, `verify`, `archive`, `update` e `sync` (comandos e skills) |
 | "Checklist de ideia concreta", "Postura do agente", "Documentos são dados" e "Status: Em andamento" | `commands/opsx/discover.md` |
 | "Quando o /opsx:init conduz o ingest" | `commands/opsx/ingest.md` |
