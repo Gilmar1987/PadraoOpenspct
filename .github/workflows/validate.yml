@@ -1081,7 +1081,7 @@ jobs:
           git -C "$work/k/gerado" show --name-only --format= HEAD | grep -qx 'AGENTS.md'
           git -C "$work/k/gerado" diff -- CLAUDE.md | grep -q '^+linha do dev'
           grep -qF 'Ficaram fora do commit inicial' "$RUNNER_TEMP/edicao.txt"
-          grep -qF -- '-- CLAUDE.md' "$RUNNER_TEMP/edicao.txt"
+          grep -qF -- 'add -- "CLAUDE.md"' "$RUNNER_TEMP/edicao.txt"
           openspec store unregister ci-edicao-$sfx
           # Com --sem-commit, o código fica sem histórico e a mensagem mostra como commitar.
           node scripts/comecar.mjs --origem "$work/padrao" --modo novo --pasta "$work/f" --nome "CI Sem Commit" --id ci-semcommit-$sfx --yes --sem-commit > "$RUNNER_TEMP/semcommit.txt"
