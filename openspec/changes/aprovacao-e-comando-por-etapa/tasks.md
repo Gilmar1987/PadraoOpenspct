@@ -15,7 +15,8 @@
 
 ## 2. Regras e bloco gerenciado
 
-- [ ] 2.1 Revisar a [ADR-0009](../../adrs/0009-cada-etapa-disparada-pelo-responsavel.md) com o responsável e promovê-la a `Accepted` antes do archive (com PR, na revisão do PR; sem PR, pela declaração do responsável citada no commit). Verificar com `grep -n "^status: Accepted" openspec/adrs/0009-*.md`.
+- [x] 2.1 Revisar a [ADR-0009](../../adrs/0009-cada-etapa-disparada-pelo-responsavel.md) com o responsável e promovê-la a `Accepted` antes do archive (com PR, na revisão do PR; sem PR, pela declaração do responsável citada no commit). Verificar com `grep -n "^status: Accepted" openspec/adrs/0009-*.md`.
+  - Evidência: ADR-0009 promovida a `Accepted` por declaração do responsável ("Eu aprovo fazer a promoção da ADR-0009 a Accepted"), citada no commit da promoção; `grep -n "^status: Accepted" openspec/adrs/0009-*.md` → linha 3
 - [x] 2.2 Aplicar o D1 em `padrao-openspec/openspec/rules.md` e o D5 em `padrao-openspec/templates/agents-block.md`. Verificar com os marcadores do `rules.md` e do bloco passando e com o "Smoke test dos blocos de agentes" passando.
   - Evidência: `rules.md`: seção 2 com o Escopo como limite ("Nenhum escopo autoriza começar uma etapa") e seção 3 com o bloco "Aprovação e comando por etapa" (quatro itens MUST); `templates/agents-block.md` com o fluxo "aprovação e `/opsx:<etapa>`" e a linha "Eu aprovo fazer"; marcadores do `rules.md` e do bloco deixaram de faltar; "Smoke test dos blocos de agentes" e "Lint de Markdown" → PASS (exit 0)
 - [x] 2.3 Aplicar as revisões do D1 no `padrao-openspec/openspec/rules.md` e o D7 no `COMECE-AQUI.md` e no `padrao-openspec/templates/openspec-padrao.md`. Verificar com os marcadores e o lint nos dois lugares passando.
