@@ -387,6 +387,12 @@ jobs:
             .claude/skills/openspec-sync-specs/SKILL.md; do
             check "$g" "**Entrega:** <one line on what the change delivers>"
           done
+          # Versões e ADRs no propose (versoes-e-adrs-no-propose): versões consultadas e ADR no commit do planejamento.
+          for g in .claude/commands/opsx/propose.md \
+            .claude/skills/openspec-propose/SKILL.md; do
+            check "$g" "Consulted dependency versions"
+            check "$g" "the ADRs this workflow created"
+          done
           # Coerência e ferramentas no init (init-coerencia-e-ferramentas): linhas novas, 6.4, auditoria de produção e ferramentas.
           check "$f" "## Ferramentas da máquina"
           check "$f" "A opção 0 exclui as demais: uma resposta com o 0"

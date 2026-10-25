@@ -4,6 +4,20 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.16.0 — 2026-10-25
+
+### O que mudou
+
+- **Versões e ADRs no propose:** para cada dependência nova, o propose consulta o registro do ecossistema (por
+  exemplo, `npm view <pkg> dist-tags`) e registra no design a versão exata e estável escolhida, a fonte e a data e
+  as restrições de runtime; pré-releases são recusadas mesmo quando a `latest` aponta para elas, e sem rede a
+  versão fica como inferida até o responsável confirmar. O commit do planejamento passa a levar também a ADR
+  criada no propose.
+
+### Ações no projeto
+
+- Nenhuma. O propose atualizado chega com a atualização do padrão.
+
 ## 1.15.0 — 2026-10-25
 
 ### O que mudou
