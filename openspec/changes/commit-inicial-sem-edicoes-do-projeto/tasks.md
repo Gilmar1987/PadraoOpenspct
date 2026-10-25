@@ -14,5 +14,6 @@
 
 ## 3. Documentação e integração
 
-- [ ] 3.1 Atualizar o `CHANGELOG.md` (item na seção 1.16.0; se esta change abrir a versão, também o `padrao-openspec/VERSION`). Verificar com o lint e com o passo "Versão e changelog" passando.
+- [x] 3.1 Atualizar o `CHANGELOG.md` (item na seção 1.16.0; se esta change abrir a versão, também o `padrao-openspec/VERSION`). Verificar com o lint e com o passo "Versão e changelog" passando.
+  - Evidência: rebase sobre `origin/main` 1f19fce (merge do #52, que abriu a 1.16.0) sem conflito; item "Commit inicial sem edições do projeto" na seção 1.16.0 e a ação "Nenhuma" ajustada; `VERSION` igual ao da main (1.16.0); "Versão e changelog", "Smoke test do changelog-range", lint nos dois lugares e "Raiz em dia" → PASS (exit 0)
 - [ ] 3.2 Rodar o `sync-root.mjs` e o `--check`, `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente, com tempo limite por passo. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0.
