@@ -56,3 +56,4 @@ Nenhuma.
 - Condições: verify sem críticos; o fluxo vai até o PR, e o merge fica com o responsável; cada etapa só começa com a aprovação escrita e o comando `/opsx:<etapa>` digitado pelo responsável
 - Conteúdo: sha256:dda6af707167d1b4188b6763e4136153502cf126f21d56ead55b5240e3672841
 - Origem: "Eu aprovo fazer o apply da change do commit inicial sem edições do projeto, até o archive, com PR; o merge fica comigo"
+- Reconfirmação: 2026-10-25; Origem: "Eu aprovo fazer a reconfirmação do selo e o archive da change do commit inicial", depois de ver as revisões do D1, do D2 e do D3 do design; Conteúdo: sha256:7721f26c36acb1211cd3fd4883176474f1497887c8075f6d105ca010aed2821b
