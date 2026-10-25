@@ -747,6 +747,8 @@ _(Múltipla escolha — separe os números por vírgula)_
 6) Outro (digitar livremente)
 ```
 
+A opção 0 exclui as demais: uma resposta com o 0 e outra opção é recusada, com essa explicação, e a pergunta é feita de novo. Vale também para um arquivo de respostas: a 6.4 recusada é perguntada no chat.
+
 ---
 
 **6.5 — Quais controles de LGPD/GDPR serão implementados?** `[OPCIONAL]`
@@ -794,7 +796,7 @@ _(Múltipla escolha — separe os números por vírgula. Com o 1.5 = 4 (Não), e
 
 Pergunte o teste de contrato só quando a 2.6 registrou um contrato; senão, grave "Não aplicável". Sugira a ferramenta do formato escolhido, por exemplo `schemathesis run api/openapi.yaml` (OpenAPI), um teste do próprio projeto que compara as rotas registradas com o contrato (`pytest tests/test_contrato.py`), `buf breaking` (Protocol Buffers) ou `graphql-inspector diff` (SDL).
 
-Para a auditoria de dependências, sugira a ferramenta do ecossistema escolhido (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable` ou `osv-scanner`, que cobre vários). Para a varredura de secrets, sugira uma ferramenta que examine o conteúdo preparado para commit, e não o histórico: `gitleaks git --staged` (ou `gitleaks protect --staged` em versões anteriores à 8.19), `trufflehog filesystem .` ou `git secrets --scan`. O apply roda a varredura antes de cada commit e a auditoria quando a change mexe em dependências.
+Para a auditoria de dependências, sugira primeiro a variante que audita só as dependências de produção, que é a que bloqueia o apply: por exemplo, `npm audit --omit=dev --audit-level=high`, `pip-audit -r requirements.txt` (sem as dependências de desenvolvimento), `dotnet list package --vulnerable --include-transitive` (que considera os pacotes do projeto, sem as ferramentas de build) ou, num ecossistema sem variante de produção, a ferramenta dele com uma nota em "Observações". Registre a auditoria completa como informativa na coluna "Observações" da mesma linha, por exemplo "Completa (informativa): `npm audit`". Para a varredura de secrets, sugira uma ferramenta que examine o conteúdo preparado para commit, e não o histórico: `gitleaks git --staged` (ou `gitleaks protect --staged` em versões anteriores à 8.19), `trufflehog filesystem .` ou `git secrets --scan`. O apply roda a varredura antes de cada commit e a auditoria quando a change mexe em dependências.
 
 Se a 4.2 indicar Docker no desenvolvimento local, pergunte também se os comandos rodam dentro do contêiner (por exemplo, `docker compose run --rm app pytest`) e registre a forma escolhida.
 
@@ -843,12 +845,16 @@ Avalie ao menos estas combinações:
 | 2.4 é REST/HTTP, gRPC ou mensageria e 2.1 é um monólito | Chamadas de rede onde uma chamada direta bastaria | Confirmar o motivo, ou trocar por chamada direta entre módulos |
 | 2.1 é "Microsserviços" e 1.4 é "Pequeno" ou "Ainda não sei" | Vários serviços para implantar, monitorar e versionar, sem volume que justifique | Monólito modular, com módulos que possam virar serviços depois |
 | 2.1 é "Microsserviços" e 5.9 é "Uma pessoa" | Vários serviços para implantar, monitorar e versionar, sem time que justifique | Monólito modular, com módulos que possam virar serviços depois |
-| 4.4 usa variáveis ou cofre da plataforma e 4.1/4.3 não têm produção | Configuração para uma plataforma que não existe | Registrar só o `.env` local por enquanto |
+| 4.4 usa variáveis ou cofre da plataforma (1 a 4) e a 4.1 é "Outro" sem produção (por exemplo, "Sem deploy no MVP") | Configuração para uma plataforma que não existe | Registrar só o `.env` local por enquanto |
 | 5.5 tem framework de E2E e 5.3 não inclui E2E, ou o contrário | Testes que ninguém roda, ou exigência sem ferramenta | Alinhar as duas respostas |
 | 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis) e 6.5 é 0 | Dados pessoais sem nenhum controle de LGPD/GDPR | Registrar ao menos o consentimento com registro de aceite e o direito de exclusão (1,2), ou justificar |
 | 3.8 cita uma biblioteca presa a um banco (por exemplo, pg-boss) e 3.3 é outro banco | A fila exige um banco que o projeto não tem | Fila no banco da 3.3 (tabela de jobs, Hangfire etc.), ou registrar o banco extra na 3.3 e no deploy |
-| 3.8 é Redis ou broker dedicado e o bloco 4 não prevê esse serviço | Infraestrutura que o deploy não tem | Registrar o serviço no bloco 4 (desenvolvimento e produção), ou trocar por fila no próprio banco |
-| 7.1 "Auditoria de dependências" é "Não aplicável" e a stack (3.1, 3.2, 3.5) usa dependências de terceiros | Vulnerabilidades conhecidas nas dependências não serão detectadas por nenhuma etapa do fluxo | Registrar a ferramenta do ecossistema (por exemplo, `npm audit`, `pip-audit`, `dotnet list package --vulnerable`, `osv-scanner`) ou "Adiar"; se mantiver "Não aplicável" ou adiar, registrar a justificativa na coluna "Observações" da linha em "Comandos de verificação" do `project.md` |
+| 3.8 é Redis ou broker dedicado e o bloco 4 não prevê esse serviço | Infraestrutura que o deploy não tem | Registrar o serviço por "Outro" na 4.2 (contêiner no desenvolvimento e na produção) ou na 4.1 (serviço gerenciado), mantendo a escolha anterior no texto livre (por exemplo, "Docker em desenvolvimento e produção + Redis" ou "AWS + ElastiCache"), ou trocar por fila no banco da 3.3 |
+| 3.3 é SQLite e a 3.4 não é "Gerenciado na cloud" (por exemplo, Turso ou D1), ou 3.4 é "Local apenas"; e 4.1 é Vercel/Netlify ou 2.1 é Serverless | O sistema de arquivos do deploy é efêmero: os dados se perdem a cada deploy ou instância | Banco gerenciado (3.4 = 1), ou um deploy com disco persistente na 4.1 |
+| 4.4 é "Apenas .env", 6.6 é criptografia de campos na aplicação e a 4.1 tem produção (não é "Outro" sem produção) | A chave de criptografia fica num arquivo, sem cofre nem rotação em produção | Cofre (4.4 = 1, 3 ou 4); variáveis da plataforma (4.4 = 2) tiram a chave do arquivo, mas não dão rotação |
+| 5.6 exige cobertura mínima (1, 2, 3, 5 ou um "Outro" com meta) e o comando de "Testes" da 7.1 não mede cobertura, ou está "Adiado" (quando não for evidente, como em `npm test` ou `dotnet test`, pergunte ao dev se o comando mede cobertura) | A meta de cobertura não é conferida por nenhuma etapa | Um comando que meça cobertura (por exemplo, `vitest run --coverage`, `pytest --cov`, `dotnet test --collect:"XPlat Code Coverage"`), ou a 5.6 em "Sem cobertura mínima definida" |
+| 2.6 registra um contrato e o "Teste de contrato" da 7.1 é "Não aplicável" | O contrato e o código podem divergir sem que nada aponte | Registrar o comando, "Adiar" ou justificar em "Observações" |
+| 7.1 "Auditoria de dependências" é "Não aplicável" e a stack (3.1, 3.2, 3.5) usa dependências de terceiros | Vulnerabilidades conhecidas nas dependências não serão detectadas por nenhuma etapa do fluxo | Registrar a auditoria de produção do ecossistema (por exemplo, `npm audit --omit=dev --audit-level=high`, `pip-audit -r requirements.txt`, `dotnet list package --vulnerable --include-transitive`), com a completa em "Observações" como na 7.1, ou "Adiar"; se mantiver "Não aplicável" ou adiar, registrar a justificativa na coluna "Observações" da linha em "Comandos de verificação" do `project.md` |
 | 7.1 "Varredura de secrets" é "Não aplicável" e o projeto usa credenciais (4.4 com `.env` ou cofre, banco na 3.3, serviços externos na 3.9 ou 3.10) | Um secret commitado por engano não será detectado | Registrar uma ferramenta que examine o conteúdo a commitar (por exemplo, `gitleaks git --staged`, `trufflehog filesystem .`, `git secrets --scan`) ou "Adiar"; se mantiver "Não aplicável" ou adiar, registrar a justificativa na coluna "Observações" da linha em "Comandos de verificação" do `project.md` |
 | 1.5 é 1, 2 ou 3 (dados pessoais ou sensíveis), 3.6 é "0) Sem autenticação no MVP" (ou um "Outro" equivalente) e 6.4 é só "0) Nenhuma no MVP" | Qualquer pessoa com acesso à aplicação lê e altera dados pessoais, sem limite de requisições | Registrar em "Key Constraints" do `project.md` a restrição "uso só em ambiente local, com dados de teste, até existir autenticação", ou adotar autenticação (3.6) e limite de requisições (6.4) |
 
@@ -1154,6 +1160,22 @@ git -C "<root>" commit -m "chore: inicializa o projeto <Nome do Projeto>" -- ope
 ```
 
 O pathspec mantém fora do commit qualquer outra coisa que o responsável tenha preparado. Antes do commit, se `git -C "<root>" diff --cached --quiet -- openspec/` disser que não há nada novo (por exemplo, num init refeito sem mudanças), diga que não havia o que commitar. Se a raiz não estiver num repositório Git, diga que o init não foi commitado. Nunca faça push.
+
+---
+
+## Ferramentas da máquina
+
+Depois do commit (ou da geração dos arquivos, quando não houve commit), confira se as ferramentas dos comandos de verificação respondem nesta máquina. Não instale nada.
+
+1. Para cada linha de "Comandos de verificação" do `project.md` com comando (nem "Não aplicável" nem "Adiado"), inclusive as que o próprio init acrescenta, como "Validação de interface", identifique a ferramenta: a primeira palavra do comando, ignorando variáveis de ambiente no início (`FOO=1 cmd`) e prefixos como `npx --yes` ou `cross-env`. Com `npx`, `docker compose run` (ou `docker run`) e `uv run`, a ferramenta é o próprio `npx`, `docker` ou `uv`, porque a de dentro roda no pacote, no contêiner ou no ambiente que eles gerenciam. Num comando encadeado (`cd x && cmd`, `a; b`), considere cada parte. Em caso de dúvida, mostre o comando ao dev e pergunte qual é a ferramenta, sem adivinhar.
+2. Confira sem executar a ferramenta, primeiro: `command -v <ferramenta>` (POSIX) ou `Get-Command <ferramenta>` (PowerShell). Quando a ferramenta é um caminho (tem `/` ou `\`, ou termina em `.sh`, `.ps1`, `.py`, `.mjs`, `.js`, `.bat` ou `.cmd`), confira só que o arquivo existe e nunca o execute. Para um programa encontrado, você pode confirmar a versão com `<ferramenta> --version` (ou `<ferramenta> version`, para `docker`, `gitleaks` e similares), com tempo limite de 10 segundos. Nunca use `-v`, que em várias ferramentas não é versão (`pytest -v` roda a suíte, `python -v` abre o interpretador), nem rode o comando inteiro. Uma ferramenta não encontrada, ou que não responde no tempo limite, conta como "ausente ou sem resposta".
+3. Se todas responderem, diga "Ferramentas dos comandos de verificação disponíveis". Senão, mostre a tabela abaixo, com uma sugestão de instalação para o sistema da máquina (por exemplo, `winget install`, `brew install`, `apt install`, `npm i -g` ou `pipx install`):
+
+   | Ferramenta | Comando que a usa | Sugestão de instalação |
+   |---|---|---|
+   | {{ferramenta}} | {{finalidade e comando}} | {{sugestão}} |
+
+4. No Windows, acrescente: "Depois de instalar por `winget`, abra um terminal novo: os terminais abertos antes não enxergam a ferramenta."
 
 ---
 
