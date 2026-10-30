@@ -405,35 +405,54 @@ jobs:
           check "$f" "assim que a última resposta envolvida"
           # Guarda da pasta da sessão (guarda-da-pasta-da-sessao), requisitos "Guarda da pasta da sessão nos fluxos"
           # e "Guarda da pasta da sessão protegida pela CI": o bloco nos 10 comandos e nas 7 skills do fluxo, a
-          # conferência das proteções no apply, no verify e no archive, e a exceção restrita a agentes sem comandos.
+          # conferência das proteções no apply, no verify e no archive, e a exceção restrita a agentes que não são
+          # o Claude Code.
           for g in .claude/commands/opsx/*.md .claude/skills/openspec-*/SKILL.md; do
             check "$g" "**Session folder guard**"
+            check "$g" "or in an agent other than Claude Code."
+            if grep -qF -- 'in an agent without command support' "$g"; then
+              echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção para agentes sem suporte a comandos, em vez de agentes que não são o Claude Code"
+              missing=1
+            fi
           done
           for g in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
                    .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
                    .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
             check "$g" "**Session protections check**"
+            # Requisito "Conferência das proteções sem falso alarme": o subagente pula, o estado sai pelo mesmo
+            # comando do hook, e o hook com erro não manda reabrir a sessão.
+            check "$g" "A subagent dispatched to follow this workflow skips this check"
+            check "$g" '`node docs/openspec-portao.mjs estado --json`'
+            check "$g" "do not ask the user to reopen the session"
           done
-          check openspec/rules.md "num agente sem suporte a comandos"
+          # Requisito "Etapa pedida pelo nome fora do Claude Code": a exceção vale para agentes que não são o
+          # Claude Code, e um comando fora do início da mensagem pede o reenvio.
+          check openspec/rules.md "num agente que não é o Claude Code"
+          check openspec/rules.md "pedir para reenviar só o comando no início de uma mensagem nova"
           # O parêntese do "Approval and command" também restringe a exceção, e o texto antigo não volta.
           for g in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md \
                    .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
                    .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
                    .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md \
                    .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
-            check "$g" "in an agent without command support"
+            check "$g" "in an agent other than Claude Code, such as Copilot or Codex, asked for this stage by name"
+            check "$g" "send the command alone at the start of a new message"
             if grep -qF -- 'in an agent without the `/opsx:*` commands' "$g"; then
-              echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção sem a restrição a agentes sem suporte a comandos"
+              echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção sem a restrição a agentes que não são o Claude Code"
               missing=1
             fi
           done
-          check templates/agents-block.md "sem suporte a comandos"
+          check templates/agents-block.md "Num agente que não é o Claude Code"
+          check templates/agents-block.md "reenviar só o comando no início de uma mensagem nova"
           # A conferência das proteções procura esta frase, que o hook de início de sessão imprime.
           check .claude/hooks/openspec-padrao/contexto-de-sessao.mjs "Estado do fluxo OpenSpec"
-          if grep -qF -- 'num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome' openspec/rules.md; then
-            echo "::error file=padrao-openspec/openspec/rules.md::Trecho antigo de volta: exceção sem a restrição a agentes sem suporte a comandos"
-            missing=1
-          fi
+          for old in 'num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome' \
+                     'num agente sem suporte a comandos'; do
+            if grep -qF -- "$old" openspec/rules.md; then
+              echo "::error file=padrao-openspec/openspec/rules.md::Trecho antigo de volta: exceção sem a restrição a agentes que não são o Claude Code"
+              missing=1
+            fi
+          done
           exit $missing
 
       - name: Paridade de papéis

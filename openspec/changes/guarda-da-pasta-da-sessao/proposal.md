@@ -74,9 +74,10 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-10-30
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:baff7c18810a46eed81c19aa8abe07e3156664f3ddcc040ad91a37dff26ed308
+- Origem: "Eu aprovo fazer a implementação das correções da revisão da guarda da pasta da sessão", seguida do comando `/opsx:apply`
 - Aprovação anterior: Gilmar Campelo, 2026-10-30, apply; Condições: —; Origem: "Eu aprovo fazer a implementação da guarda da pasta da sessão", seguida do comando `/opsx:apply`; Conteúdo: sha256:e7cb95709dfc6e69c30d627009a8801fc9bca67a8c2f820dd80073623be98b57

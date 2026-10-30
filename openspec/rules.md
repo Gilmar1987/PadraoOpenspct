@@ -110,12 +110,12 @@ nenhuma delas.
   autoriza só o planejamento e não preenche `## Aprovação` (só uma autorização explícita além do
   planejamento é registrada), e a reconfirmação do selo continua pedindo a
   confirmação do responsável depois de você mostrar o que mudou. O verify roda com qualquer escopo;
-- num agente sem suporte a comandos (Copilot, Codex, Cursor, Gemini e afins), aceitar como comando
+- num agente que não é o Claude Code (Copilot, Codex, Cursor, Gemini e afins), aceitar como comando
   o pedido da etapa pelo nome (por exemplo, "rode o apply") e seguir o arquivo
   `.claude/commands/opsx/<etapa>.md`; a ativação de uma skill pelo próprio modelo não é o comando;
-- no Claude Code, um `/opsx:*` que chega como texto, sem ser expandido, quer dizer que a sessão foi
-  aberta fora da pasta do código: parar, sem seguir o arquivo do comando à mão, e pedir para abrir a
-  pasta que contém `.claude/commands/opsx/` numa janela nova, mostrando o caminho.
+- no Claude Code, um `/opsx:*` que chega como texto, fora do início da mensagem, não é o comando:
+  não começar a etapa e pedir para reenviar só o comando no início de uma mensagem nova. O arquivo
+  do comando lido à mão segue a guarda da pasta da sessão, no topo do próprio arquivo.
 
 Especificamente:
 

@@ -239,10 +239,11 @@ para você conferir.
 
 **Outros agentes:** os comandos `/opsx:*` são do Claude Code, mas as regras e o fluxo valem para
 qualquer agente. O setup põe as regras em `docs/openspec-regras.md` e um bloco
-`openspec-padrao` no arquivo que cada agente lê; num agente sem suporte a comandos, peça para ele
+`openspec-padrao` no arquivo que cada agente lê; num agente que não é o Claude Code, peça para ele
 seguir o arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx/init.md`". No
-Claude Code isso não vale: se o `/opsx` não aparece, a sessão foi aberta fora da pasta do código, e o
-agente para e pede para abri-la.
+Claude Code isso não vale: digite o comando sozinho, no início da mensagem (no meio do texto ele não é
+expandido, e o agente pede para reenviá-lo). Se o `/opsx` não aparece, a sessão foi aberta fora da
+pasta do código, e o agente para e pede para abri-la.
 
 | Agente | Arquivo que lê | Como rodar o fluxo |
 |---|---|---|
