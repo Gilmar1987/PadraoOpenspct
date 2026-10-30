@@ -1043,6 +1043,9 @@ jobs:
           grep -qx "store: ci-entrada-$sfx" "$code/openspec/config.yaml"
           grep -qF '/opsx:init' "$RUNNER_TEMP/novo.txt"
           grep -qF 'pasta do workspace' "$RUNNER_TEMP/novo.txt"
+          # Requisito "Mensagem final abre o projeto como workspace", cenário "Execução sem interação":
+          # com --yes, o script não pergunta se abre o VS Code.
+          if grep -qF 'Abrir o VS Code' "$RUNNER_TEMP/novo.txt"; then exit 1; fi
           # Commit inicial: um commit no código, o de configuração no store, as duas árvores limpas.
           test "$(git -C "$code" rev-list --count HEAD)" -eq 1
           git -C "$store" log -1 --format=%s | grep -qF 'configura o store'
@@ -1123,6 +1126,7 @@ jobs:
           git clone -q --bare "$store" "$work/remotos/ci-entrada-$sfx-openspec.git"
           openspec store unregister ci-entrada-$sfx
           node scripts/comecar.mjs --modo existente --pasta "$work/b" --url-codigo "$work/remotos/ci-entrada-$sfx.git" --url-store "$work/remotos/ci-entrada-$sfx-openspec.git" --yes > "$RUNNER_TEMP/existente.txt"
+          if grep -qF 'Abrir o VS Code' "$RUNNER_TEMP/existente.txt"; then exit 1; fi
           # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
           resolved="$(cd "$work/b/ci-entrada-$sfx" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
           expected="$(cd "$work/b/ci-entrada-$sfx-openspec/padrao-openspec" && node -p 'require("fs").realpathSync(process.cwd())')"

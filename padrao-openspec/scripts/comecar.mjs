@@ -236,16 +236,33 @@ function step(message, action) {
 
 // The /opsx:* commands live in <code>/.claude/commands, so Claude Code only loads them when the
 // code folder itself is the workspace, not a folder above it.
-function openWorkspaceSteps(codeDir, next) {
-  // A shim that blocks (for example, one waiting for a remote server) counts as no VS Code.
-  const hasCode = runTool('code', ['--version'], { capture: true, timeout: 5000 }).status === 0;
-  const quoted = process.platform === 'win32' ? `"${codeDir}"` : `'${codeDir.replace(/'/g, "'\\''")}'`;
+function openWorkspaceSteps(codeDir, next, hasCode) {
   return [
     '  1. Abra a pasta do projeto como pasta do workspace (não a pasta acima dela):',
-    ...(hasCode ? [`       code ${quoted}`, `     ou, no VS Code: File → Open Folder → ${codeDir}`] : [`       no VS Code: File → Open Folder → ${codeDir}`]),
+    ...(hasCode ? [`       code ${quotedPath(codeDir)}`, `     ou, no VS Code: File → Open Folder → ${codeDir}`] : [`       no VS Code: File → Open Folder → ${codeDir}`]),
     `  2. Nessa janela, abra o Claude Code e ${next}`,
     '     Se /opsx não aparecer, o Claude Code foi aberto em outra pasta.',
   ].join('\n');
+}
+
+// A shim that blocks (for example, one waiting for a remote server) counts as no VS Code.
+function hasVsCode() {
+  return runTool('code', ['--version'], { capture: true, timeout: 5000 }).status === 0;
+}
+
+function quotedPath(dir) {
+  return process.platform === 'win32' ? `"${dir}"` : `'${dir.replace(/'/g, "'\\''")}'`;
+}
+
+// Opening the code folder from here removes the manual step where the folder above it gets opened.
+// Only in an interactive console, without --yes; a failure is a warning, the project is already usable.
+async function offerToOpenVsCode(rl, options, codeDir, hasCode) {
+  if (!rl || options.yes || !hasCode) return;
+  if (!await askYesNo(rl, '\nAbrir o VS Code na pasta do código agora?', options)) return;
+  const result = runTool('code', [codeDir], { capture: true, timeout: 15000 });
+  if (result.status !== 0) {
+    console.warn(`Aviso: não foi possível abrir o VS Code. Abra à mão: code ${quotedPath(codeDir)}`);
+  }
 }
 
 // Commits what the setup produced, so the project starts with history: install-skills --update
@@ -472,13 +489,15 @@ async function newProject(rl, options) {
   const commitNote = commit.done
     ? 'Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.'
     : `Falta o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
+  const hasCode = hasVsCode();
   console.log(`
 Pronto. Próximo passo:
-${openWorkspaceSteps(codeDir, 'rode: /opsx:init')}
+${openWorkspaceSteps(codeDir, 'rode: /opsx:init', hasCode)}
 ${commitNote}
 Para publicar, crie os remotos e faça o push (veja o COMECE-AQUI.md, "Commitar e publicar").
 No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
 pull requests" para receber as atualizações do padrão por PR.`);
+  await offerToOpenVsCode(rl, options, codeDir, hasCode);
 }
 
 function repoName(url) {
@@ -590,9 +609,11 @@ async function joinProject(rl, options) {
     }
   });
 
+  const hasCode = hasVsCode();
   console.log(`
 Pronto. O projeto já está inicializado: não rode /opsx:init.
-${openWorkspaceSteps(codeDir, 'comece pela primeira change: /opsx:propose <nome-da-change>')}`);
+${openWorkspaceSteps(codeDir, 'comece pela primeira change: /opsx:propose <nome-da-change>', hasCode)}`);
+  await offerToOpenVsCode(rl, options, codeDir, hasCode);
 }
 
 async function main() {
