@@ -1,0 +1,23 @@
+# Tasks
+
+## 1. Preparação e testes primeiro
+
+- [ ] 1.1 Combinar a versão com a outra sessão (esta change abre a 1.17.0, salvo se outra change abrir antes) e rebasear a branch na `main`, se ela tiver andado. Verificar com `git log --oneline HEAD..origin/main` vazio e a versão citada na evidência.
+- [ ] 1.2 Acrescentar ao passo "Trechos customizados das skills" de `.github/workflows/validate.yml` as conferências do D5: guarda nos 10 comandos e nas 7 skills `openspec-*`, conferência das proteções no comando e na skill do apply, do verify e do archive, restrição no `rules.md` e no `templates/agents-block.md`, frase "Estado do fluxo OpenSpec" no hook e o marcador negativo do texto antigo. Citar num comentário os requisitos "Guarda da pasta da sessão protegida pela CI" e "Guarda da pasta da sessão nos fluxos". Verificar rodando o passo antes da implementação: ele deve falhar só nas conferências novas.
+
+## 2. Guarda e conferência nos fluxos
+
+- [ ] 2.1 Aplicar o D1: o bloco `**Session folder guard**` nos 10 `padrao-openspec/.claude/commands/opsx/*.md` e nas 7 `padrao-openspec/.claude/skills/openspec-*/SKILL.md`, depois da abertura de cada arquivo. Verificar com o passo "Trechos customizados das skills" passando nas conferências da guarda e com o lint de Markdown.
+- [ ] 2.2 Aplicar o D3: o parágrafo `**Session protections check**` no comando e na skill do apply, do verify e do archive, com a separação pelo `estado` do portão, a parada, a decisão do responsável e o registro na evidência da etapa. Verificar com o passo "Trechos customizados das skills" passando nas conferências da conferência e com o lint de Markdown.
+- [ ] 2.3 Aplicar o D2: a exceção restrita no `padrao-openspec/openspec/rules.md` §3, no `padrao-openspec/templates/agents-block.md` e na seção "Outros agentes" do `COMECE-AQUI.md`; rodar o `sync-root.mjs`. Verificar com o passo "Trechos customizados das skills" passando por inteiro, com o marcador negativo inclusive, com o `sync-root.mjs --check` em dia e com o "Smoke test dos blocos de agentes" passando.
+
+## 3. Script de entrada
+
+- [ ] 3.1 Aplicar o D4 em `padrao-openspec/scripts/comecar.mjs`: a pergunta "Abrir o VS Code na pasta do código agora? [S/n]" no fim dos dois modos, só com o `code`, num console interativo e sem `--yes`; a abertura pelo `runTool` com tempo limite; o aviso quando falhar. No "Smoke test do script de entrada", conferir que a saída com `--yes` não tem "Abrir o VS Code", citando o cenário "Execução sem interação" num comentário. Verificar com `node --check`, com esse passo e com o "Sintaxe dos scripts" passando.
+- [ ] 3.2 O responsável roda o `comecar.mjs` num PowerShell real do Windows, nos dois casos: aceitando a pergunta (o VS Code abre na pasta do código, e o `/opsx` aparece no Claude Code dessa janela) e recusando (nada abre, e a mensagem mostra o comando). Ele informa o resultado de cada caso. Verificar pelo registro da resposta dele, citada, na evidência e no `verification.md` como cobertura fora da suíte.
+
+## 4. Documentação e integração
+
+- [ ] 4.1 Atualizar o `CHANGELOG.md` (seção `## 1.17.0`, com "O que mudou" e "Ações no projeto: Nenhuma") e o `padrao-openspec/VERSION` (1.17.0), conforme a tarefa 1.1. Atualizar a linha de `/opsx` que não aparece na solução de problemas do `COMECE-AQUI.md`, citando a parada do agente. Verificar com os passos "Versão e changelog", "Smoke test do changelog-range" e o lint nos dois lugares passando.
+- [ ] 4.2 Rodar o `sync-root.mjs --check`, o `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente, com tempo limite por passo. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar que todos saem com código 0 e que nenhum `ci-*` fica no registro de stores.
+- [ ] 4.3 Pedir a revisão de código da change pela skill `requesting-code-review` e registrar o resultado no `review.md`, com as correções feitas ou as justificativas. Verificar pelo `review.md` sem achado crítico ou importante em aberto.
