@@ -13,8 +13,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   hooks, subagentes nem skills. Agora os 10 comandos e as skills do fluxo começam com uma guarda: o agente para
   e pede para abrir a pasta do código numa janela nova. A etapa pedida pelo nome, seguindo o arquivo do comando,
   passa a valer só em agentes que não são o Claude Code (Copilot, Codex, Cursor, Gemini e afins). No Claude Code,
-  um `/opsx:*` digitado depois de outro texto não é expandido: o agente não começa a etapa e pede para enviar só
-  o comando, no início de uma mensagem nova.
+  um `/opsx:*` digitado depois de outro texto não é expandido, e o pedido da etapa pelo nome não é o comando: nos
+  dois casos, o agente não começa a etapa e pede para enviar só o comando, no início de uma mensagem nova.
 - **Proteções conferidas no apply, no verify e no archive:** com o portão no código, a sessão principal do Claude
   Code confere se recebeu o "Estado do fluxo OpenSpec" do hook de início (os subagentes não conferem). Sem ele,
   o agente roda o mesmo comando do hook: se o portão responde, os hooks do padrão estão desligados, e o agente

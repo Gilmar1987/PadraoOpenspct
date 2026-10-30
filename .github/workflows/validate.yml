@@ -413,6 +413,11 @@ jobs:
             # Cenários "Pedido da etapa pelo nome no Claude Code" e "Comando na linha de baixo da aprovação":
             # na pasta certa, o arquivo aberto à mão leva ao reenvio do comando, e não à pasta errada.
             check "$g" "If instead the user asked for this stage by name"
+            check "$g" "at the start of a message (with or without arguments) and it arrived as plain text"
+            if grep -qF -- 'because the `/opsx:*` command or the skill did not load' "$g"; then
+              echo "::error file=padrao-openspec/$g::Trecho antigo de volta: guarda que trata todo arquivo aberto à mão como pasta errada"
+              missing=1
+            fi
             if grep -qF -- 'in an agent without command support' "$g"; then
               echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção para agentes sem suporte a comandos, em vez de agentes que não são o Claude Code"
               missing=1
@@ -435,6 +440,7 @@ jobs:
           check openspec/rules.md "num agente que não é o Claude Code"
           check openspec/rules.md "pedir para reenviar só o comando no início de uma mensagem nova"
           check openspec/rules.md "nem o pedido da etapa pelo nome"
+          check openspec/rules.md 'mostrando o `/opsx:<etapa>`'
           # O parêntese do "Approval and command" também restringe a exceção, e o texto antigo não volta.
           for g in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md \
                    .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
