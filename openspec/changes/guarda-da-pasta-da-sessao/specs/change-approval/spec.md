@@ -2,7 +2,7 @@
 
 ### Requirement: Etapa pedida pelo nome fora do Claude Code
 
-Num agente que não é o Claude Code (Copilot, Codex, Cursor, Gemini e afins), o equivalente ao comando SHALL ser o dev pedir a etapa pelo nome, e o agente SHALL seguir o arquivo `.claude/commands/opsx/<etapa>.md`. A ativação de uma skill ou de um fluxo pelo próprio agente MUST NOT valer como o comando. No Claude Code, essa exceção MUST NOT valer: um `/opsx:*` que chega como texto, fora do início da mensagem, não é o comando, e o agente MUST NOT começar a etapa; ele SHALL pedir para reenviar só o comando no início de uma mensagem nova.
+Num agente que não é o Claude Code (Copilot, Codex, Cursor, Gemini e afins), o equivalente ao comando SHALL ser o dev pedir a etapa pelo nome, e o agente SHALL seguir o arquivo `.claude/commands/opsx/<etapa>.md`. A ativação de uma skill ou de um fluxo pelo próprio agente MUST NOT valer como o comando. No Claude Code, essa exceção MUST NOT valer: o pedido da etapa pelo nome e um `/opsx:*` que chega como texto, fora do início da mensagem, não são o comando, e o agente MUST NOT começar a etapa; ele SHALL pedir para reenviar só o comando no início de uma mensagem nova, mostrando o `/opsx:<etapa>`.
 
 #### Scenario: Agente sem comandos
 

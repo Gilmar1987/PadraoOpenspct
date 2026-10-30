@@ -2,7 +2,7 @@
 
 ### Requirement: Guarda da pasta da sessão nos fluxos
 
-Cada arquivo de comando `.claude/commands/opsx/*.md` e cada skill `openspec-*` do padrão SHALL começar com uma guarda: quando o agente é o Claude Code e leu esse arquivo à mão porque o comando ou a skill não carregou (a sessão foi aberta fora da pasta que contém esse `.claude/`), ele MUST parar antes de qualquer passo do fluxo, MUST NOT seguir o arquivo à mão e SHALL pedir para abrir a pasta que contém o `.claude/` numa janela nova, mostrando o caminho.
+Cada arquivo de comando `.claude/commands/opsx/*.md` e cada skill `openspec-*` do padrão SHALL começar com uma guarda: quando o Claude Code leu esse arquivo à mão porque o comando digitado no início da mensagem (com ou sem argumentos) chegou como texto, ou porque a skill não estava disponível, ele MUST parar antes de qualquer passo, MUST NOT seguir o arquivo e SHALL pedir para abrir numa janela nova a pasta que contém o `.claude/`, mostrando o caminho.
 
 #### Scenario: Arquivo de comando lido à mão da subpasta
 
@@ -16,7 +16,7 @@ Cada arquivo de comando `.claude/commands/opsx/*.md` e cada skill `openspec-*` d
 
 ### Requirement: Guarda que não dispara fora da pasta errada
 
-A guarda da pasta da sessão MUST NOT mudar o fluxo quando o texto chegou pela expansão do comando ou da skill do Claude Code, quando o agente é um subagente que a sessão principal despachou para seguir o fluxo, quando o arquivo é só lido ou editado como arquivo (por exemplo, para mudar o padrão) ou num agente que não é o Claude Code.
+A guarda MUST NOT mudar o fluxo no texto expandido pelo Claude Code, num subagente despachado pela sessão principal, na leitura ou edição do arquivo como arquivo, nem num agente que não é o Claude Code. Com o pedido da etapa pelo nome ou pelo caminho do arquivo, ou com o comando depois de outro texto, ela MUST NOT acusar pasta errada e SHALL pedir o reenvio do comando no início de uma mensagem nova.
 
 #### Scenario: Sessão na pasta do código
 
