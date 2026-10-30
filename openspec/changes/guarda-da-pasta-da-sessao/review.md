@@ -46,3 +46,9 @@ Achados:
 - [menor] R2-M7: "send the command alone" pode levar a mandar o `/opsx:propose` sem descrição — mantido: "alone" ali quer dizer sem texto antes, e o propose pergunta o que falta
 - [menor] R2-M8: o `CHANGELOG.md` não citava o pedido pelo nome no Claude Code — corrigido em e2ac6e0
 - [menor] R2-M9: a CI pegava só a reversão total do texto da guarda — corrigido em e2ac6e0 (marcador negativo do gatilho antigo)
+
+## 2026-10-30 (fechamento)
+
+- Intervalo: 85030c8..9ce6b66
+- Revisão: não aplicável (só artefatos de planejamento: `design.md` e duas specs da change)
+- Situação: o achado R2-I3 da segunda revisão foi resolvido em 9ce6b66 pelo `/opsx:update` (D1, D2 e D5 e os requisitos "Etapa pedida pelo nome fora do Claude Code", "Guarda da pasta da sessão nos fluxos" e "Guarda que não dispara fora da pasta errada" alinhados ao texto implementado), com a reconfirmação do selo pelo responsável. Nenhum achado crítico ou importante fica em aberto.
