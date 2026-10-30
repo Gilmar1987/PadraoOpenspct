@@ -22,3 +22,27 @@ Achados:
 - [menor] M4: a guarda em inglês nos três comandos em português (`discover`, `init`, `ingest`) — adiado: funciona, e um texto único facilita a conferência da CI
 - [menor] M5: o aviso de falha ao abrir o VS Code descartava o erro — corrigido em 1600a30 (primeira linha do erro no aviso)
 - [menor] M6: editar os arquivos de comando no repositório do padrão disparava a guarda — corrigido em 1600a30 ("reading or editing this file as a file" não dispara)
+
+## 2026-10-30 (segunda revisão)
+
+- Intervalo: 49de00f..e2ac6e0 (revisão de 49de00f..eb7e300, conferência de be25f68)
+- Revisor: subagente requesting-code-review (general-purpose, só leitura), em duas passadas
+- Críticos: 0
+- Importantes: 3 (corrigidos 2, pendente 1 de `/opsx:update`)
+- Menores: 9 (corrigidos 6, mantidos 2, para o `/opsx:update` 1)
+- Segurança: varredura de secrets "Adiado" no `project.md` (não verificado); auditoria de dependências "Não aplicável" (sem dependências novas)
+
+Achados:
+
+- [importante] R2-I1: o parêntese do "Approval and command" mandava todo arquivo de comando aberto à mão para a guarda, e a guarda acusava pasta errada; nos cenários "Pedido da etapa pelo nome no Claude Code" e "Comando na linha de baixo da aprovação", na pasta certa, o falso alarme do I2 voltava pela guarda — corrigido em be25f68: só o comando digitado no início da mensagem, chegando como texto, indica pasta errada; o pedido pelo nome e o comando depois de outro texto levam ao reenvio; `check` das frases novas na CI
+- [importante] R2-I2: o "alone" do gatilho da guarda deixava de fora o caso real de pasta errada com o comando com argumentos (`/opsx:propose cadastro de pacientes`) — corrigido em e2ac6e0 ("with or without arguments"), com `check` do gatilho e marcador negativo do gatilho antigo na CI
+- [importante] R2-I3: o `design.md` (texto-base do D1, parêntese do D2, item do `rules.md`) e o corpo dos requisitos "Etapa pedida pelo nome fora do Claude Code" e "Guarda da pasta da sessão nos fluxos" não acompanham o texto implementado — pendente: são artefatos de planejamento, que mudam pelo `/opsx:update`
+- [menor] R2-M1: o `CHANGELOG.md` 1.17.0 citava "agentes sem suporte a comandos" e não falava do reenvio nem do subagente — corrigido em be25f68 e e2ac6e0
+- [menor] R2-M2: "go on without the hooks" descreve mal o caso em que o portão falhou — mantido: o requisito "Etapa sem os hooks só por decisão do responsável" usa essa decisão nos dois casos, e a mensagem já mostra o erro do portão
+- [menor] R2-M3: frases novas sem conferência na CI ("Claude Code's main session", "mostrando o `/opsx:<etapa>`") — corrigido em be25f68 e e2ac6e0
+- [menor] R2-M4: o cenário "Responsável não decide" pede para mostrar de novo as opções — corrigido em be25f68 ("stay stopped and show both options again")
+- [menor] R2-M5: o pedido pelo caminho do arquivo ("siga o `.claude/commands/opsx/propose.md`") não era citado como pedido pelo nome — corrigido em e2ac6e0 ("by name or by its file path")
+- [menor] R2-M6: a guarda não mandava mostrar o comando a digitar — corrigido em e2ac6e0 ("showing the `/opsx:<stage>` to type")
+- [menor] R2-M7: "send the command alone" pode levar a mandar o `/opsx:propose` sem descrição — mantido: "alone" ali quer dizer sem texto antes, e o propose pergunta o que falta
+- [menor] R2-M8: o `CHANGELOG.md` não citava o pedido pelo nome no Claude Code — corrigido em e2ac6e0
+- [menor] R2-M9: a CI pegava só a reversão total do texto da guarda — corrigido em e2ac6e0 (marcador negativo do gatilho antigo)
