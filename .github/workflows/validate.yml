@@ -415,6 +415,18 @@ jobs:
             check "$g" "**Session protections check**"
           done
           check openspec/rules.md "num agente sem suporte a comandos"
+          # O parêntese do "Approval and command" também restringe a exceção, e o texto antigo não volta.
+          for g in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md \
+                   .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
+                   .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
+                   .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md \
+                   .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
+            check "$g" "in an agent without command support"
+            if grep -qF -- 'in an agent without the `/opsx:*` commands' "$g"; then
+              echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção sem a restrição a agentes sem suporte a comandos"
+              missing=1
+            fi
+          done
           check templates/agents-block.md "sem suporte a comandos"
           # A conferência das proteções procura esta frase, que o hook de início de sessão imprime.
           check .claude/hooks/openspec-padrao/contexto-de-sessao.mjs "Estado do fluxo OpenSpec"
@@ -1024,6 +1036,14 @@ jobs:
           work="$(mktemp -d)"
           v="$(tr -d '\r\n' < VERSION)"
           commit() { git -C "$1" -c user.name=ci -c user.email=ci@example.invalid commit -q "${@:2}"; }
+          # Um `code` falso no PATH grava os argumentos: com --yes, o script só pode conferir a versão, nunca abrir a pasta
+          # (requisito "Mensagem final abre o projeto como workspace", cenário "Execução sem interação").
+          mkdir -p "$work/fakebin"
+          export CODE_LOG="$work/code.log"
+          printf '#!/bin/sh\necho "$*" >> "$CODE_LOG"\n' > "$work/fakebin/code"
+          printf '@echo %%*>> "%%CODE_LOG%%"\r\n' > "$work/fakebin/code.cmd"
+          chmod +x "$work/fakebin/code"
+          export PATH="$work/fakebin:$PATH"
           mkdir -p "$work/padrao"
           cp -r . "$work/padrao/padrao-openspec"
           git -C "$work/padrao" init -q
@@ -1044,8 +1064,10 @@ jobs:
           grep -qF '/opsx:init' "$RUNNER_TEMP/novo.txt"
           grep -qF 'pasta do workspace' "$RUNNER_TEMP/novo.txt"
           # Requisito "Mensagem final abre o projeto como workspace", cenário "Execução sem interação":
-          # com --yes, o script não pergunta se abre o VS Code.
+          # com --yes, o script não pergunta se abre o VS Code. No Windows, o argumento chega entre aspas e com CRLF.
           if grep -qF 'Abrir o VS Code' "$RUNNER_TEMP/novo.txt"; then exit 1; fi
+          tr -d '\r"' < "$CODE_LOG" | grep -qx -- '--version'
+          if tr -d '\r"' < "$CODE_LOG" | grep -vx -- '--version'; then exit 1; fi
           # Commit inicial: um commit no código, o de configuração no store, as duas árvores limpas.
           test "$(git -C "$code" rev-list --count HEAD)" -eq 1
           git -C "$store" log -1 --format=%s | grep -qF 'configura o store'
@@ -1127,6 +1149,7 @@ jobs:
           openspec store unregister ci-entrada-$sfx
           node scripts/comecar.mjs --modo existente --pasta "$work/b" --url-codigo "$work/remotos/ci-entrada-$sfx.git" --url-store "$work/remotos/ci-entrada-$sfx-openspec.git" --yes > "$RUNNER_TEMP/existente.txt"
           if grep -qF 'Abrir o VS Code' "$RUNNER_TEMP/existente.txt"; then exit 1; fi
+          if tr -d '\r"' < "$CODE_LOG" | grep -vx -- '--version'; then exit 1; fi
           # Os dois caminhos passam pelo Node para ficarem no mesmo formato também no Windows.
           resolved="$(cd "$work/b/ci-entrada-$sfx" && openspec context --json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(require("fs").realpathSync(JSON.parse(d).root.path)))')"
           expected="$(cd "$work/b/ci-entrada-$sfx-openspec/padrao-openspec" && node -p 'require("fs").realpathSync(process.cwd())')"

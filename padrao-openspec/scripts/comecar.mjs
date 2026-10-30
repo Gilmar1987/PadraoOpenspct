@@ -255,13 +255,21 @@ function quotedPath(dir) {
 }
 
 // Opening the code folder from here removes the manual step where the folder above it gets opened.
-// Only in an interactive console, without --yes; a failure is a warning, the project is already usable.
+// Only in an interactive console, without --yes. The project is already usable here, so an input that ends
+// (Ctrl+C, Ctrl+Z) counts as "no" and a failure to open is a warning, never an error that undoes the setup.
 async function offerToOpenVsCode(rl, options, codeDir, hasCode) {
   if (!rl || options.yes || !hasCode) return;
-  if (!await askYesNo(rl, '\nAbrir o VS Code na pasta do código agora?', options)) return;
+  let open = false;
+  try {
+    open = await askYesNo(rl, '\nAbrir o VS Code na pasta do código agora?', options);
+  } catch {
+    return;
+  }
+  if (!open) return;
   const result = runTool('code', [codeDir], { capture: true, timeout: 15000 });
   if (result.status !== 0) {
-    console.warn(`Aviso: não foi possível abrir o VS Code. Abra à mão: code ${quotedPath(codeDir)}`);
+    const detail = (result.error?.message ?? result.stderr ?? '').trim().split('\n')[0];
+    console.warn(`Aviso: não foi possível abrir o VS Code${detail ? ` (${detail})` : ''}. Abra à mão: code ${quotedPath(codeDir)}`);
   }
 }
 
