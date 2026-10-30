@@ -2,19 +2,33 @@
 
 ### Requirement: Guarda da pasta da sessão nos fluxos
 
-Cada arquivo de comando `.claude/commands/opsx/*.md` e cada skill `openspec-*` do padrão SHALL começar com uma guarda: quando o agente é o Claude Code e a pasta onde a sessão foi aberta não é a pasta que contém esse `.claude/`, ele MUST parar antes de qualquer passo do fluxo, MUST NOT seguir o arquivo à mão e SHALL pedir para abrir a pasta que contém o `.claude/` numa janela nova, mostrando o caminho. Na pasta certa, ou num agente sem suporte a comandos, a guarda MUST NOT mudar o fluxo.
+Cada arquivo de comando `.claude/commands/opsx/*.md` e cada skill `openspec-*` do padrão SHALL começar com uma guarda: quando o agente é o Claude Code e leu esse arquivo à mão porque o comando ou a skill não carregou (a sessão foi aberta fora da pasta que contém esse `.claude/`), ele MUST parar antes de qualquer passo do fluxo, MUST NOT seguir o arquivo à mão e SHALL pedir para abrir a pasta que contém o `.claude/` numa janela nova, mostrando o caminho.
 
 #### Scenario: Arquivo de comando lido à mão da subpasta
 
-- **WHEN** a sessão do Claude Code está em `C:\projetos\clinica` e o agente abre `C:\projetos\clinica\clinica-app\.claude\commands\opsx\propose.md`
+- **WHEN** a sessão do Claude Code está em `C:\projetos\clinica`, o `/opsx:propose` não carregou e o agente abre `C:\projetos\clinica\clinica-app\.claude\commands\opsx\propose.md`
 - **THEN** o agente para na guarda, não cria change nem artefato e pede para abrir `C:\projetos\clinica\clinica-app` numa janela nova
+
+#### Scenario: Claude Code aberto na pasta acima do código
+
+- **WHEN** o Claude Code foi aberto em `C:\projetos\clinica`, o dev digita `/opsx:init` e o comando chega como texto, porque `.claude/commands/opsx/` só existe em `C:\projetos\clinica\clinica-app`
+- **THEN** o agente não segue o `init.md` à mão, diz que a sessão está fora da pasta do código e pede para abrir `C:\projetos\clinica\clinica-app` numa janela nova
+
+### Requirement: Guarda que não dispara fora da pasta errada
+
+A guarda da pasta da sessão MUST NOT mudar o fluxo quando o texto chegou pela expansão do comando ou da skill do Claude Code, quando o agente é um subagente que a sessão principal despachou para seguir o fluxo, quando o arquivo é só lido ou editado como arquivo (por exemplo, para mudar o padrão) ou num agente que não é o Claude Code.
 
 #### Scenario: Sessão na pasta do código
 
 - **WHEN** a sessão do Claude Code está na pasta que contém o `.claude/` e o dev digita `/opsx:propose`
 - **THEN** a guarda não interfere e o propose segue normalmente
 
-#### Scenario: Agente sem comandos
+#### Scenario: Subagente segue o fluxo
+
+- **WHEN** a sessão principal, na pasta do código, despacha o subagente de implementação, que lê `openspec-apply-change/SKILL.md` à mão para seguir o apply
+- **THEN** a guarda não interfere e o subagente segue o fluxo
+
+#### Scenario: Agente que não é o Claude Code
 
 - **WHEN** o Copilot, aberto na pasta do código, segue `.claude/commands/opsx/verify.md` a pedido do dev
 - **THEN** a guarda não interfere
@@ -37,6 +51,20 @@ Quando o repositório de código tiver o portão (`docs/openspec-portao.mjs`), o
 
 - **WHEN** o código não tem `docs/openspec-portao.mjs` e o dev digita `/opsx:archive`
 - **THEN** a conferência não roda e o archive segue como hoje
+
+### Requirement: Conferência das proteções sem falso alarme
+
+Um subagente que a sessão principal despachou para a etapa MUST NOT rodar a conferência das proteções: a sessão principal já a fez, e o contexto do hook de início vai só para ela. Para separar os casos, o agente SHALL rodar `node docs/openspec-portao.mjs estado --json`, o mesmo comando do hook. Se ele sair com 0, os hooks não rodaram. Se ele falhar ou passar de 20 segundos, o agente SHALL mostrar o erro e dizer que o hook não conseguiu ler o estado, sem mandar reabrir a sessão.
+
+#### Scenario: Subagente de implementação
+
+- **WHEN** a sessão principal passou pela conferência e despacha o subagente de implementação, que lê o `SKILL.md` do apply
+- **THEN** o subagente não roda a conferência e segue as tarefas
+
+#### Scenario: Hook sem resposta
+
+- **WHEN** o contexto não traz "Estado do fluxo OpenSpec" e `node docs/openspec-portao.mjs estado --json` falha com erro de ambiente
+- **THEN** o agente para, mostra o erro do portão e não diz que a sessão está na pasta errada
 
 ### Requirement: Etapa sem os hooks só por decisão do responsável
 
