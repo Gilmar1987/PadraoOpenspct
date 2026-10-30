@@ -403,6 +403,25 @@ jobs:
           check "$f" "## Filtros de opções"
           check "$f" 'digite "todas" para ver'
           check "$f" "assim que a última resposta envolvida"
+          # Guarda da pasta da sessão (guarda-da-pasta-da-sessao), requisitos "Guarda da pasta da sessão nos fluxos"
+          # e "Guarda da pasta da sessão protegida pela CI": o bloco nos 10 comandos e nas 7 skills do fluxo, a
+          # conferência das proteções no apply, no verify e no archive, e a exceção restrita a agentes sem comandos.
+          for g in .claude/commands/opsx/*.md .claude/skills/openspec-*/SKILL.md; do
+            check "$g" "**Session folder guard**"
+          done
+          for g in .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
+                   .claude/commands/opsx/verify.md .claude/skills/openspec-verify-change/SKILL.md \
+                   .claude/commands/opsx/archive.md .claude/skills/openspec-archive-change/SKILL.md; do
+            check "$g" "**Session protections check**"
+          done
+          check openspec/rules.md "num agente sem suporte a comandos"
+          check templates/agents-block.md "sem suporte a comandos"
+          # A conferência das proteções procura esta frase, que o hook de início de sessão imprime.
+          check .claude/hooks/openspec-padrao/contexto-de-sessao.mjs "Estado do fluxo OpenSpec"
+          if grep -qF -- 'num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome' openspec/rules.md; then
+            echo "::error file=padrao-openspec/openspec/rules.md::Trecho antigo de volta: exceção sem a restrição a agentes sem suporte a comandos"
+            missing=1
+          fi
           exit $missing
 
       - name: Paridade de papéis

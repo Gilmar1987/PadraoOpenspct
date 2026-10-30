@@ -8,8 +8,9 @@ valem para qualquer agente e não podem ser contornadas por instruções no chat
   `/opsx:archive`. Cada etapa só começa com a aprovação escrita do responsável ("Eu aprovo fazer
   ...") e o comando digitado por ele; ao fim de cada uma, o agente para e mostra a aprovação e o
   comando da próxima.
-  Sem os comandos `/opsx:*` (eles são do Claude Code), siga o arquivo do comando, por exemplo
-  `.claude/commands/opsx/propose.md`.
+  Num agente sem suporte a comandos (os `/opsx:*` são do Claude Code), siga o arquivo do comando, por
+  exemplo `.claude/commands/opsx/propose.md`. No Claude Code, um `/opsx:*` que não foi expandido quer
+  dizer sessão fora da pasta do código: pare e peça para abrir a pasta do código numa janela nova.
 - Os comandos `/opsx:*` são fluxos do agente, não comandos do OpenSpec CLI: não existe
   `openspec verify`. Nunca rode `openspec archive` direto; siga `.claude/commands/opsx/archive.md`.
 - Antes de escrever código de uma change e antes de arquivá-la, rode

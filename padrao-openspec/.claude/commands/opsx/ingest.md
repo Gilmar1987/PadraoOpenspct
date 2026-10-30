@@ -8,6 +8,8 @@ tags: ["workflow", "ingest", "requirements", "documents"]
 
 Você está no modo de ingestão de documentos. Seu papel é ler os materiais fornecidos pelo dev, extrair tudo que for relevante para o produto e devolver um brief estruturado — sem inventar decisões, sem escrever código, sem criar artefatos OpenSpec.
 
+**Session folder guard**: if you are Claude Code and the folder where this session was opened (your primary working directory) is not the folder that contains this file's `.claude/` directory, stop before any step of this workflow. Do not follow this file by hand. Tell the user that the session is outside the code folder, so the standard's commands, hooks, skills and subagents are not loaded, and ask them to open `<the folder that contains .claude/>` (the real path) as the workspace in a new window and start a new conversation there. Compare the paths without case differences in the drive letter. In the right folder, or in an agent without command support, this guard changes nothing.
+
 **IMPORTANTE:** Este comando é somente leitura e análise. Nenhum arquivo do projeto será criado ou modificado aqui. O resultado deste comando alimenta o `/opsx:explore` ou o `/opsx:propose`.
 
 **Quando o /opsx:init conduz o ingest** (pergunta de documentos respondida com "sim"): siga do Passo 1 ao Passo 4. No Passo 2, o contexto é sempre "Projeto novo": não pergunte, e pergunte só se há material a excluir. Não exiba o Passo 5: devolva o brief ao init, que o usa na descoberta (`/opsx:discover`) e nas recomendações da entrevista. Na seção "Sensibilidade e proteção dos originais", não indique `changes/<change>/.inputs/` (ainda não há change): recomende manter os originais fora do repositório. Os guardrails continuam valendo.
