@@ -410,6 +410,9 @@ jobs:
           for g in .claude/commands/opsx/*.md .claude/skills/openspec-*/SKILL.md; do
             check "$g" "**Session folder guard**"
             check "$g" "or in an agent other than Claude Code."
+            # Cenários "Pedido da etapa pelo nome no Claude Code" e "Comando na linha de baixo da aprovação":
+            # na pasta certa, o arquivo aberto à mão leva ao reenvio do comando, e não à pasta errada.
+            check "$g" "If instead the user asked for this stage by name"
             if grep -qF -- 'in an agent without command support' "$g"; then
               echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção para agentes sem suporte a comandos, em vez de agentes que não são o Claude Code"
               missing=1
@@ -421,7 +424,9 @@ jobs:
             check "$g" "**Session protections check**"
             # Requisito "Conferência das proteções sem falso alarme": o subagente pula, o estado sai pelo mesmo
             # comando do hook, e o hook com erro não manda reabrir a sessão.
+            check "$g" "if you are Claude Code's main session"
             check "$g" "A subagent dispatched to follow this workflow skips this check"
+            check "$g" "stay stopped and show both options again"
             check "$g" '`node docs/openspec-portao.mjs estado --json`'
             check "$g" "do not ask the user to reopen the session"
           done
@@ -429,6 +434,7 @@ jobs:
           # Claude Code, e um comando fora do início da mensagem pede o reenvio.
           check openspec/rules.md "num agente que não é o Claude Code"
           check openspec/rules.md "pedir para reenviar só o comando no início de uma mensagem nova"
+          check openspec/rules.md "nem o pedido da etapa pelo nome"
           # O parêntese do "Approval and command" também restringe a exceção, e o texto antigo não volta.
           for g in .claude/commands/opsx/propose.md .claude/skills/openspec-propose/SKILL.md \
                    .claude/commands/opsx/apply.md .claude/skills/openspec-apply-change/SKILL.md \
@@ -437,6 +443,7 @@ jobs:
                    .claude/commands/opsx/update.md .claude/skills/openspec-update-change/SKILL.md; do
             check "$g" "in an agent other than Claude Code, such as Copilot or Codex, asked for this stage by name"
             check "$g" "send the command alone at the start of a new message"
+            check "$g" "nor is a request for this stage by name"
             if grep -qF -- 'in an agent without the `/opsx:*` commands' "$g"; then
               echo "::error file=padrao-openspec/$g::Trecho antigo de volta: exceção sem a restrição a agentes que não são o Claude Code"
               missing=1
@@ -444,6 +451,7 @@ jobs:
           done
           check templates/agents-block.md "Num agente que não é o Claude Code"
           check templates/agents-block.md "reenviar só o comando no início de uma mensagem nova"
+          check templates/agents-block.md "ou o pedido da etapa pelo nome"
           # A conferência das proteções procura esta frase, que o hook de início de sessão imprime.
           check .claude/hooks/openspec-padrao/contexto-de-sessao.mjs "Estado do fluxo OpenSpec"
           for old in 'num agente sem os comandos `/opsx:*`, aceitar como comando o pedido da etapa pelo nome' \

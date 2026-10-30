@@ -113,9 +113,11 @@ nenhuma delas.
 - num agente que não é o Claude Code (Copilot, Codex, Cursor, Gemini e afins), aceitar como comando
   o pedido da etapa pelo nome (por exemplo, "rode o apply") e seguir o arquivo
   `.claude/commands/opsx/<etapa>.md`; a ativação de uma skill pelo próprio modelo não é o comando;
-- no Claude Code, um `/opsx:*` que chega como texto, fora do início da mensagem, não é o comando:
-  não começar a etapa e pedir para reenviar só o comando no início de uma mensagem nova. O arquivo
-  do comando lido à mão segue a guarda da pasta da sessão, no topo do próprio arquivo.
+- no Claude Code, um `/opsx:*` que chega como texto, fora do início da mensagem, não é o comando,
+  nem o pedido da etapa pelo nome: não começar a etapa e
+  pedir para reenviar só o comando no início de uma mensagem nova, mostrando o `/opsx:<etapa>`.
+  O arquivo do comando lido à mão segue a guarda
+  da pasta da sessão, no topo do próprio arquivo.
 
 Especificamente:
 

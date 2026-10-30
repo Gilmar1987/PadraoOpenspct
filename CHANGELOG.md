@@ -12,10 +12,14 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   acima dela), os comandos `/opsx:*` não carregam. Antes, o agente podia seguir o arquivo do comando à mão, sem
   hooks, subagentes nem skills. Agora os 10 comandos e as skills do fluxo começam com uma guarda: o agente para
   e pede para abrir a pasta do código numa janela nova. A etapa pedida pelo nome, seguindo o arquivo do comando,
-  passa a valer só em agentes sem suporte a comandos (Copilot, Codex, Cursor, Gemini e afins).
-- **Proteções conferidas no apply, no verify e no archive:** com o portão no código, o Claude Code confere se a
-  sessão recebeu o "Estado do fluxo OpenSpec" do hook de início. Sem ele, os hooks do padrão estão desligados, e
-  o agente para; ele só segue se você decidir na conversa, e a sua frase fica na evidência da etapa.
+  passa a valer só em agentes que não são o Claude Code (Copilot, Codex, Cursor, Gemini e afins). No Claude Code,
+  um `/opsx:*` digitado depois de outro texto não é expandido: o agente não começa a etapa e pede para enviar só
+  o comando, no início de uma mensagem nova.
+- **Proteções conferidas no apply, no verify e no archive:** com o portão no código, a sessão principal do Claude
+  Code confere se recebeu o "Estado do fluxo OpenSpec" do hook de início (os subagentes não conferem). Sem ele,
+  o agente roda o mesmo comando do hook: se o portão responde, os hooks do padrão estão desligados, e o agente
+  mostra como reabrir a sessão; se o portão falha, ele mostra o erro. Nos dois casos, ele para e só segue se você
+  decidir na conversa, e a sua frase fica na evidência da etapa.
 - **Script de entrada abre a pasta certa:** no fim, num console interativo e com o comando `code` disponível, o
   `comecar.mjs` pergunta se abre o VS Code na pasta do código.
 
