@@ -686,7 +686,7 @@ function checkAdoptableCode(codeDir) {
     }
   }
   if (existsSync(path.join(codeDir, 'openspec'))) {
-    throw new Error(`Este projeto já usa o OpenSpec sem o padrão (pasta ${path.join(codeDir, 'openspec')} sem a linha "store:"). A migração desse caso não é coberta pela adoção.`);
+    throw new Error(`Este projeto já usa o OpenSpec sem o padrão (pasta ${path.join(codeDir, 'openspec')} sem a linha "store:"). A migração desse caso não é coberta pela adoção: fale com o tech lead sobre levar essas specs para um store do padrão (veja "Sem o script" no COMECE-AQUI.md).`);
   }
   if (!isRepo || !gitIn(codeDir, ['rev-parse', '-q', '--verify', 'HEAD']).ok) {
     const what = isRepo ? 'é um repositório Git sem nenhum commit' : 'não é um repositório Git';
@@ -700,8 +700,7 @@ function checkAdoptableCode(codeDir) {
 
 // The repository state: the adoption branch starts from a clean, named branch with nothing in progress.
 function checkRepository(codeDir, branch) {
-  const dirty = gitIn(codeDir, ['status', '--porcelain=v1', '--untracked-files=no']).out.split('\n').filter(Boolean)
-    .map((entry) => entry.slice(3));
+  const dirty = statusEntries(codeDir, 'no').map((entry) => entry.path);
   if (dirty.length) {
     const shown = dirty.slice(0, 10).join(', ') + (dirty.length > 10 ? ` e mais ${dirty.length - 10}` : '');
     throw new Error(`Há alterações sem commit em ${shown}. A adoção acontece numa branch própria e não leva esse trabalho junto. Faça commit ou stash e rode de novo.`);
@@ -720,9 +719,25 @@ function checkRepository(codeDir, branch) {
   }
 }
 
+// NUL-separated status, so paths with accents or spaces come out as they are (no core.quotePath escapes).
+function statusEntries(codeDir, untracked) {
+  const result = spawnSync('git', ['-C', codeDir, 'status', '--porcelain=v1', '-z', `--untracked-files=${untracked}`], {
+    encoding: 'utf8', maxBuffer: 256 * 1024 * 1024,
+  });
+  const entries = `${result.stdout ?? ''}`.split('\0');
+  const parsed = [];
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (entry.length < 4) continue;
+    parsed.push({ status: entry.slice(0, 2), path: entry.slice(3) });
+    // A rename or copy is followed by its original path.
+    if (/[RC]/.test(entry.slice(0, 2))) index += 1;
+  }
+  return parsed;
+}
+
 function untrackedPaths(codeDir) {
-  return gitIn(codeDir, ['status', '--porcelain=v1', '--untracked-files=normal']).out.split('\n')
-    .filter((entry) => entry.startsWith('?? ')).map((entry) => entry.slice(3));
+  return statusEntries(codeDir, 'normal').filter((entry) => entry.status === '??').map((entry) => entry.path);
 }
 
 function suggestedName(codeDir) {
@@ -774,6 +789,9 @@ async function adoptProject(rl, options) {
   if (untracked.length) {
     plan.push(`Arquivos não rastreados, que ficam fora do commit: ${untracked.slice(0, 10).join(', ')}` +
       `${untracked.length > 10 ? ` e mais ${untracked.length - 10} (${untracked.length} no total)` : ''}`);
+    // A standard path that is already untracked keeps the developer's content: it stays out of the commit too.
+    const editedStandard = editedStandardBefore(uncommittedPaths(codeDir));
+    if (editedStandard.length) plan.push(`Arquivos do padrão que já existem sem commit e ficam fora do commit: ${editedStandard.join(', ')}`);
   }
   plan.push(options.semCommit
     ? 'Commit: não (--sem-commit)'
@@ -794,12 +812,17 @@ async function adoptProject(rl, options) {
     checkRepository(codeDir, branch);
     current = gitIn(codeDir, ['symbolic-ref', '--short', 'HEAD']).out;
   }
-  step(`Branch ${branch} criada a partir de ${current} (para voltar: git -C "${codeDir}" switch ${current})`,
-    () => git(['-C', codeDir, 'switch', '-q', '-c', branch]));
+  step(`Branch ${branch} criada a partir de ${current}`, () => git(['-C', codeDir, 'switch', '-q', '-c', branch]));
   // Read before the setup: only untracked paths are possible here, and they stay out of the commit.
   const dirtyBefore = uncommittedPaths(codeDir);
-  cloneStore(options, tag, storeDir);
-  runSetup(storeDir, codeDir, name, id, ['--adoption']);
+  const untrackedBefore = new Set(untrackedPaths(codeDir));
+  try {
+    cloneStore(options, tag, storeDir);
+    runSetup(storeDir, codeDir, name, id, ['--adoption']);
+  } catch (error) {
+    error.message += undoAdoptionHint(codeDir, current, branch, untrackedBefore);
+    throw error;
+  }
 
   const commit = await initialCommit(rl, options, {
     codeDir, storeDir, id, codeHadWork: true, dirtyBefore, codeMessage: 'chore: adota o padrão OpenSpec',
@@ -810,8 +833,23 @@ async function adoptProject(rl, options) {
 Pronto. O código está na branch ${branch}, com os arquivos do padrão.
 ${openWorkspaceSteps(codeDir, 'rode: /opsx:init', hasCode)}
   3. Depois do /opsx:init, abra um PR da branch ${branch} para ${current}.
-${commitNoteFor(commit)}`);
+${commitNoteFor(commit)}
+No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
+pull requests" para receber as atualizações do padrão por PR.`);
   await offerToOpenVsCode(rl, options, codeDir, hasCode);
+}
+
+// The tree was clean before the adoption branch, so the setup's changes are the only tracked ones; the
+// new untracked paths are the files it created.
+function undoAdoptionHint(codeDir, current, branch, untrackedBefore) {
+  const created = untrackedPaths(codeDir).filter((file) => !untrackedBefore.has(file));
+  return [
+    '\n\nPara voltar o código ao estado de antes da adoção:',
+    `  git -C "${codeDir}" reset -q --hard`,
+    `  git -C "${codeDir}" switch ${current}`,
+    `  git -C "${codeDir}" branch -D ${branch}`,
+    ...(created.length ? [`e apague o que o setup criou: ${created.join(', ')}`] : []),
+  ].join('\n');
 }
 
 async function main() {
@@ -834,6 +872,7 @@ async function main() {
       const answer = await rl.question('\nO que você vai fazer?\n  1) Criar um projeto novo\n  2) Entrar num projeto que já usa o padrão\n  3) Adotar o padrão num projeto que já existe\n> ');
       modo = { 1: 'novo', 2: 'existente', 3: 'adotar' }[answer] ?? null;
     }
+    if (options.branch !== null && modo !== 'adotar') console.warn('Aviso: --branch só tem efeito no modo adotar.');
     if (modo === 'novo') await newProject(rl, options);
     else if (modo === 'adotar') await adoptProject(rl, options);
     else await joinProject(rl, options);

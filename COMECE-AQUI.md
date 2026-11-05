@@ -186,11 +186,13 @@ e eles ficam fora do commit. O script para sem alterar nada quando:
 | Situação | O que fazer |
 |---|---|
 | O código já declara um store (`store:` no `openspec/config.yaml`) | Use a opção 2 |
-| O código usa o OpenSpec sem o padrão (`openspec/` sem `store:`) | Esse caso não é coberto pela adoção |
+| O código usa o OpenSpec sem o padrão (`openspec/` sem `store:`) | Esse caso não é coberto pela adoção: fale com o tech lead sobre levar as specs para um store do padrão |
 | A pasta não é um repositório Git, ou não tem commits | Faça o primeiro commit do código e rode de novo |
 | Há arquivos rastreados com alterações sem commit | Faça commit ou stash e rode de novo |
 | HEAD destacado, ou rebase, merge, cherry-pick ou revert em andamento | Volte para uma branch e termine ou cancele a operação |
 | A branch de adoção já existe | Apague-a ou use `--branch` |
+| A pasta informada é uma subpasta do repositório | Informe a raiz do repositório de código |
+| A pasta do store (`<id>-openspec`) já existe, ou o id já está registrado | Escolha outro id ou outra pasta base |
 
 ### Sem perguntas
 

@@ -1185,7 +1185,7 @@ jobs:
           test "$(git -C "$work/adota/loja" rev-list --count HEAD)" -eq 2
           grep -qx "store: ci-adota-$sfx" "$work/adota/loja/openspec/config.yaml"
           test "$(git -C "$work/adota/ci-adota-$sfx-openspec" describe --tags --abbrev=0)" = "v$v"
-          grep -qF 'tmp/' "$RUNNER_TEMP/adota.txt"
+          grep -qF 'Arquivos não rastreados, que ficam fora do commit: tmp/' "$RUNNER_TEMP/adota.txt"
           test -f "$work/adota/loja/tmp/solto.txt"
           if git -C "$work/adota/loja" ls-files | grep -q '^tmp/'; then exit 1; fi
           # Requisito "Commit da adoção só com os arquivos do padrão": a mensagem e só caminhos do manifesto.
@@ -1201,7 +1201,7 @@ jobs:
           node -e 'process.exit(require(process.argv[1]).adoption === true ? 0 : 1)' "$work/adota/loja/.openspec-padrao.json"
           grep -qF '/opsx:init' "$RUNNER_TEMP/adota.txt"
           grep -qF 'chore/adota-padrao-openspec' "$RUNNER_TEMP/adota.txt"
-          grep -qF 'PR' "$RUNNER_TEMP/adota.txt"
+          grep -qF 'abra um PR da branch chore/adota-padrao-openspec para main' "$RUNNER_TEMP/adota.txt"
           if grep -qF 'Abrir o VS Code' "$RUNNER_TEMP/adota.txt"; then exit 1; fi
           # Cenário "Atualização de um projeto adotado": o --update de uma versão nova mantém a marca.
           rm -rf "$work/adota/loja/tmp"
@@ -1248,7 +1248,11 @@ jobs:
           mkdir -p "$work/rec/vazio"
           git -C "$work/rec/vazio" init -q -b main
           echo app > "$work/rec/vazio/app.txt"
-          recusa "$work/rec/vazio" 'primeiro commit'
+          recusa "$work/rec/vazio" 'sem nenhum commit'
+          # Pasta que não é um repositório Git.
+          mkdir -p "$work/rec/solta"
+          echo app > "$work/rec/solta/app.txt"
+          recusa "$work/rec/solta" 'não é um repositório Git'
           # Cenário "Árvore suja".
           novo_repo "$work/rec/suja"
           echo mudou >> "$work/rec/suja/app.txt"
@@ -1258,6 +1262,12 @@ jobs:
           novo_repo "$work/rec/destacado"
           git -C "$work/rec/destacado" checkout -q --detach
           recusa "$work/rec/destacado" 'HEAD destacado'
+          if git -C "$work/rec/destacado" show-ref -q --verify refs/heads/chore/adota-padrao-openspec; then exit 1; fi
+          # Merge em andamento (MERGE_HEAD presente).
+          novo_repo "$work/rec/merge"
+          git -C "$work/rec/merge" rev-parse HEAD > "$(git -C "$work/rec/merge" rev-parse --absolute-git-dir)/MERGE_HEAD"
+          recusa "$work/rec/merge" 'no meio de um merge'
+          if git -C "$work/rec/merge" show-ref -q --verify refs/heads/chore/adota-padrao-openspec; then exit 1; fi
           # Cenário "Branch de adoção já existe".
           novo_repo "$work/rec/branch"
           git -C "$work/rec/branch" branch chore/adota-padrao-openspec
