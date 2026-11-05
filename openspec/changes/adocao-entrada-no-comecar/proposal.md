@@ -14,10 +14,12 @@ O script de entrada (`comecar.mjs`) tem dois caminhos: criar um projeto novo ou 
   - arquivos rastreados com alterações sem commit;
   - HEAD destacado, ou rebase, merge, cherry-pick ou revert em andamento;
   - branch de adoção que já existe;
-  - pasta do store que já existe e id já registrado.
+  - pasta do store que já existe e id já registrado;
+  - pasta do store dentro da pasta do código (por exemplo, a pasta base igual à do código).
 
   Os arquivos não rastreados não bloqueiam: o script avisa e lista até 10.
 - **Branch de adoção:** o script cria `chore/adota-padrao-openspec` (ou o nome do `--branch`) a partir da branch atual, clona a última release do padrão em `<base>/<id>-openspec`, roda o setup e oferece o commit. No código, o commit leva só os arquivos do padrão, com a mensagem `chore: adota o padrão OpenSpec`. O script não faz push nem abre PR.
+- **Pasta base sugerida:** na adoção, o script pergunta primeiro pelo código e depois pela pasta base, e sugere a pasta que contém o código. Por URL, sugere a pasta atual.
 - **Marca de adoção:** o setup ganha `--adoption` e repassa a opção ao instalador, que grava `"adoption": true` no `.openspec-padrao.json` e a mantém nas reinstalações e atualizações. O `/opsx:init` ainda não lê a marca: isso é da change 2.
 - A mensagem final cita a branch de adoção, manda rodar o `/opsx:init` e abrir o PR depois dele, e oferece abrir o VS Code, como os outros modos.
 - O `COMECE-AQUI.md` ganha a seção "Projeto que nunca usou o padrão", o `README.md` cita o modo adoção e o `CHANGELOG.md` e o `padrao-openspec/VERSION` abrem a 1.19.0, porque a v1.18.0 saiu sem a adoção.
@@ -56,10 +58,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Gilmar Campelo
-- Data: 2026-11-05
-- Escopo: apply
+- Responsável: Pendente
+- Data: —
+- Escopo: —
 - Condições: —
-- Conteúdo: sha256:2d8f198163451388a4f525252bdb7db1291741e4eb16412de2855b63448a27ad
-- Origem: "Eu aprovo fazer a implementação da entrada pelo comecar.mjs para adotar o padrão num projeto existente", seguida do comando `/opsx:apply`
-- Reconfirmação: 2026-11-05; Origem: "Confirma as 4 revisões e a reconfirmação do selo?" (adoção na 1.19.0, depois da v1.18.0; tarefa 1.1 reaberta) — "sim"; Conteúdo: sha256:385e8adcb077ac99c69ce4054ba64af63f43f9cfbdad83447f4a07407a43bdb4
+- Origem: —
+- Aprovação anterior: Gilmar Campelo, 2026-11-05, apply; Condições: —; Origem: "Eu aprovo fazer a implementação da entrada pelo comecar.mjs para adotar o padrão num projeto existente", seguida do comando `/opsx:apply`; Reconfirmação: 2026-11-05, "sim" a "Confirma as 4 revisões e a reconfirmação do selo?" (adoção na 1.19.0); Conteúdo: sha256:385e8adcb077ac99c69ce4054ba64af63f43f9cfbdad83447f4a07407a43bdb4

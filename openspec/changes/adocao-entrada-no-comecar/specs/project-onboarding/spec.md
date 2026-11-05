@@ -78,3 +78,17 @@ O `COMECE-AQUI.md` SHALL ter a seção "Projeto que nunca usou o padrão", com o
 
 - **WHEN** um tech lead com um repositório existente abre o `COMECE-AQUI.md`
 - **THEN** ele encontra a seção "Projeto que nunca usou o padrão" com o comando da opção 3
+
+### Requirement: Store fora do código na adoção
+
+No modo adoção, a pasta do store MUST NOT ficar dentro da pasta do código. Nesse caso, o script SHALL terminar com erro antes do resumo, sem alterar nada, e pedir uma pasta base fora do código. Com o código informado por caminho, a pasta base sugerida SHALL ser a pasta que contém o código.
+
+#### Scenario: Pasta base igual à do código
+
+- **WHEN** o dev informa o código `C:\repos\loja` e a pasta base `C:\repos\loja`
+- **THEN** o script termina com erro, diz que o store ficaria dentro do código e pede uma pasta fora dele, sem criar branch nem store
+
+#### Scenario: Pasta base sugerida
+
+- **WHEN** o dev informa o código `C:\repos\loja` e tecla Enter na pergunta da pasta base
+- **THEN** o store fica em `C:\repos\<id>-openspec`, ao lado do código

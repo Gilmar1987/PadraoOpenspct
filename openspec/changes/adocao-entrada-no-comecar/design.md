@@ -27,8 +27,8 @@ Motivação: veja proposal.md, "Why".
 
 O menu ganha a opção 3, e o `--modo` aceita `adotar`. Uma função nova, `adoptProject`, segue a ordem das outras:
 
-1. pasta base;
-2. código (caminho ou URL);
+1. código (caminho ou URL);
+2. pasta base, com a sugestão da pasta que contém o código local, ou da pasta atual quando o código vem por URL;
 3. recusas;
 4. nome e id;
 5. resumo;
@@ -65,6 +65,7 @@ Todas rodam antes do resumo, com caminho local, ou logo depois do clone, com URL
 | Operação em andamento | Existe algum dos caminhos `git rev-parse --git-path` de `rebase-merge`, `rebase-apply`, `MERGE_HEAD`, `CHERRY_PICK_HEAD` ou `REVERT_HEAD` |
 | Branch já existe ou nome inválido | `git show-ref --verify -q refs/heads/<branch>` e `git check-ref-format --branch <branch>` |
 | Pasta do store ou id já registrado | `refuseExisting` e `refuseRegisteredId`, como nos outros modos |
+| Store dentro do código | `path.relative(<código>, <store>)` não começa com `..` nem é absoluto, comparado depois de `realpathSync.native` na parte que já existe (achado I2 da revisão) |
 
 A pasta do código é a raiz do repositório (`git rev-parse --show-toplevel` igual ao caminho informado, comparado com `realpathSync.native`). Uma subpasta de um repositório é recusada, porque o setup gravaria os arquivos do padrão fora da raiz.
 
@@ -98,6 +99,7 @@ O passo "Smoke test do script de entrada" ganha um bloco do modo adoção, com r
   - confere `"adoption": true`, a branch principal intacta e o arquivo não rastreado fora do commit.
 - **Recusas:** árvore suja, `store:` presente, `openspec/` sem `store:`, repositório sem commits, HEAD destacado e branch existente. Cada uma sai com código diferente de zero, e nenhuma pasta de store é criada.
 - **`--branch`:** com outro nome, a adoção acontece nessa branch.
+- **Store dentro do código:** com a pasta base igual à do código, o script recusa sem criar a pasta do store nem a branch.
 - **Atualização:** um `install-skills.mjs --update` no código adotado mantém `"adoption": true`.
 
 Cada conferência negativa é vista falhando no apply: com o script alterado para não recusar, o passo tem de sair com 1.
