@@ -56,7 +56,7 @@ seção "Trabalho em paralelo" das regras: os testes usam o registro de stores d
 
 | Finalidade | Comando | Observações |
 |---|---|---|
-| Instalar dependências | `npm install -g @fission-ai/openspec@1.14.2` | Node.js 18+; o repositório não tem `package.json` |
+| Instalar dependências | `npm install -g @fission-ai/openspec@1.15.0` | Node.js 18+; o repositório não tem `package.json` |
 | Executar localmente | Não aplicável | Os scripts de `padrao-openspec/scripts/` rodam sob demanda, contra um projeto |
 | Testes | Passos `run:` dos jobs `store` (em `padrao-openspec/`) e `root` do `validate.yml` | Smoke tests do instalador, do setup, do script de entrada, das métricas e do guia; o job `store` roda em Ubuntu e em Windows |
 | Lint | `npx markdownlint-cli2@0.23.2 "**/*.md"` | Na raiz e em `padrao-openspec/` |

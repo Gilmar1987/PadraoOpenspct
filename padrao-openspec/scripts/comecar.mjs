@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
 const defaultSource = 'https://github.com/Gilmar1987/PadraoOpenspct';
-const cliVersion = '1.14.2';
+const cliVersion = '1.15.0';
 const cliPackage = `@fission-ai/openspec@${cliVersion}`;
 const idPattern = /^[a-z0-9][a-z0-9-]*$/;
 const storeDeclarationPattern = /^store:[ \t]*["']?([^"'\s#]*)["']?[ \t]*(?:#.*)?$/m;

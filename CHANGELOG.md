@@ -4,6 +4,23 @@ Versões do padrão OpenSpec (PadraoOpenspct). Cada versão traz o que mudou e a
 projeto precisa fazer ao atualizar. A versão vigente está em `padrao-openspec/VERSION`, e cada
 versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](openspec/adrs/0004-distribuicao-versionada-do-padrao.md)).
 
+## 1.17.0 — 2026-11-04
+
+### O que mudou
+
+- **OpenSpec CLI 1.15.0:** o padrão passa do CLI 1.14.2 para o 1.15.0. As skills e os comandos `/opsx:*`
+  recebem o texto novo do upstream sem perder os trechos do padrão: o propose e o explore escolhem e
+  conferem, antes de gravar, o caminho de um artefato definido por glob, que precisa ficar dentro da pasta da
+  change; o verify casa um requisito REMOVED pelo nome exato, sem confundi-lo com um substituto de nome
+  parecido. O script de entrada oferece instalar o 1.15.0, e uma checagem nova da CI falha quando a versão do
+  CLI não é a mesma no script de entrada, no portão, na CI, nas skills e nos comandos de instalação da
+  documentação.
+
+### Ações no projeto
+
+- Atualize o OpenSpec CLI: `npm install -g @fission-ai/openspec@1.15.0`. Com o 1.14.2, os comandos continuam
+  funcionando, e o script de entrada mostra `ok (o padrão usa 1.15.0)`.
+
 ## 1.16.0 — 2026-10-25
 
 ### O que mudou
