@@ -2,7 +2,7 @@
 
 ### Requirement: Mensagem final abre o projeto como workspace
 
-Ao terminar, nos dois modos, o script SHALL dizer para abrir a pasta do código como pasta do workspace, e não a pasta acima dela, e para abrir o Claude Code nessa janela. Quando o comando `code` existir na máquina, SHALL mostrar `code "<pasta do código>"`. SHALL dizer também que, se `/opsx` não aparecer, o Claude Code foi aberto em outra pasta. Quando o comando `code` existir e o script rodar num console interativo, sem `--yes`, ele SHALL perguntar se abre o VS Code na pasta do código agora, com "sim" como padrão; com a resposta sim, SHALL rodar `code "<pasta do código>"` sem esperar a janela fechar. Uma falha ao abrir MUST NOT falhar o script: ele SHALL avisar e manter a mensagem com o comando. Com `--yes`, sem o `code` ou com a resposta não, o script MUST NOT abrir o VS Code.
+Ao terminar, nos dois modos, o script SHALL mandar abrir a pasta do código (não a de cima) como workspace e o Claude Code nessa janela, mostrar `code "<pasta do código>"` se houver o `code` e avisar que, sem `/opsx`, o Claude Code está em outra pasta. Com o `code`, num console interativo e sem `--yes`, SHALL perguntar se abre o VS Code (padrão sim) e, com sim, rodar esse comando sem esperar; uma falha MUST NOT falhar o script, que SHALL avisar. Nos outros casos, MUST NOT abrir o VS Code.
 
 #### Scenario: Projeto novo concluído
 
