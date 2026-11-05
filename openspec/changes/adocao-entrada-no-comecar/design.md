@@ -35,6 +35,7 @@ O menu ganha a opção 3, e o `--modo` aceita `adotar`. Uma função nova, `adop
 6. execução.
 
 Os passos que o `newProject` já faz e a adoção repete saem dele para funções compartilhadas, sem mudar o comportamento do modo 1:
+
 - o clone do store na tag e a criação da `main`;
 - a chamada do setup;
 - a mensagem final com o `offerToOpenVsCode`.
@@ -85,7 +86,7 @@ O setup ganha `--adoption` e o repassa ao `install-skills.mjs`, que também ganh
 
 - **Nome sugerido:** o `name` do `package.json` da raiz do código, quando existir; senão, o nome da pasta do código.
 - **Id sugerido:** `slugify(nome)`, com as mesmas regras e recusas do modo 1.
-- **Mensagem final:** troca o passo 3 do modo 1 pelo PR: "Depois do /opsx:init, abra um PR da branch <branch> para <branch-original>". Mantém os passos do workspace (`openWorkspaceSteps`) e a oferta de abrir o VS Code (`offerToOpenVsCode`), com as mesmas regras de `--yes`.
+- **Mensagem final:** troca o passo 3 do modo 1 pelo PR: `Depois do /opsx:init, abra um PR da branch <branch> para <branch-original>`. Mantém os passos do workspace (`openWorkspaceSteps`) e a oferta de abrir o VS Code (`offerToOpenVsCode`), com as mesmas regras de `--yes`.
 
 ### D7. Testes na CI
 
