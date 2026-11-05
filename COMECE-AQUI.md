@@ -161,8 +161,8 @@ O que você vai fazer?
   2) Entrar num projeto que já usa o padrão
   3) Adotar o padrão num projeto que já existe
 > 3
-Pasta onde os repositórios vão ficar [C:\repos]: (Enter)
 Código existente: caminho local ou URL do repositório: C:\repos\loja
+Pasta onde os repositórios vão ficar [C:\repos]: (Enter)
 Nome do projeto, como as pessoas o chamam [loja]: Loja
 Id do projeto, usado nas pastas e no store [loja]: (Enter)
 
@@ -179,7 +179,8 @@ Confirmar? [S/n]: (Enter)
 No fim, abra a pasta do código como workspace, rode o `/opsx:init` e, depois dele, abra um PR da
 branch de adoção para a branch principal. O script não faz push nem abre o PR.
 
-Com uma URL no lugar do caminho, o script clona o código na pasta base. Para usar outro nome de
+A pasta base sugerida é a que contém o código, e o store fica ao lado dele. Com uma URL no lugar do
+caminho, o script clona o código na pasta base. Para usar outro nome de
 branch, passe `--branch <nome>`. Arquivos não rastreados não impedem a adoção: o resumo os lista,
 e eles ficam fora do commit. O script para sem alterar nada quando:
 
@@ -192,6 +193,7 @@ e eles ficam fora do commit. O script para sem alterar nada quando:
 | HEAD destacado, ou rebase, merge, cherry-pick ou revert em andamento | Volte para uma branch e termine ou cancele a operação |
 | A branch de adoção já existe | Apague-a ou use `--branch` |
 | A pasta informada é uma subpasta do repositório | Informe a raiz do repositório de código |
+| A pasta base fica dentro do código (o store ficaria dentro do repositório) | Escolha uma pasta fora do código, por exemplo a que o contém |
 | A pasta do store (`<id>-openspec`) já existe, ou o id já está registrado | Escolha outro id ou outra pasta base |
 
 ### Sem perguntas

@@ -1179,7 +1179,9 @@ jobs:
           mkdir "$work/adota/loja/tmp"
           echo solto > "$work/adota/loja/tmp/solto.txt"
           main_before="$(git -C "$work/adota/loja" rev-parse main)"
-          node scripts/comecar.mjs --origem "$work/padrao" --modo adotar --pasta "$work/adota" --codigo "$work/adota/loja" --nome "CI Adota" --id ci-adota-$sfx --yes > "$RUNNER_TEMP/adota.txt"
+          # Requisito "Store fora do código na adoção", cenário "Pasta base sugerida": sem --pasta, a pasta base é a que
+          # contém o código, e o store fica ao lado dele.
+          node scripts/comecar.mjs --origem "$work/padrao" --modo adotar --codigo "$work/adota/loja" --nome "CI Adota" --id ci-adota-$sfx --yes > "$RUNNER_TEMP/adota.txt"
           test "$(git -C "$work/adota/loja" branch --show-current)" = chore/adota-padrao-openspec
           test "$(git -C "$work/adota/loja" rev-parse main)" = "$main_before"
           test "$(git -C "$work/adota/loja" rev-list --count HEAD)" -eq 2
@@ -1268,6 +1270,12 @@ jobs:
           git -C "$work/rec/merge" rev-parse HEAD > "$(git -C "$work/rec/merge" rev-parse --absolute-git-dir)/MERGE_HEAD"
           recusa "$work/rec/merge" 'no meio de um merge'
           if git -C "$work/rec/merge" show-ref -q --verify refs/heads/chore/adota-padrao-openspec; then exit 1; fi
+          # Requisito "Store fora do código na adoção", cenário "Pasta base igual à do código".
+          novo_repo "$work/rec/dentro"
+          if node scripts/comecar.mjs --origem "$work/padrao" --modo adotar --pasta "$work/rec/dentro" --codigo "$work/rec/dentro" --nome "CI Recusa" --id ci-adotar-$sfx --yes > /dev/null 2> "$RUNNER_TEMP/recusa.txt"; then exit 1; fi
+          grep -qF 'o store ficaria dentro do repositório de código' "$RUNNER_TEMP/recusa.txt"
+          test ! -e "$work/rec/dentro/ci-adotar-$sfx-openspec"
+          if git -C "$work/rec/dentro" show-ref -q --verify refs/heads/chore/adota-padrao-openspec; then exit 1; fi
           # Cenário "Branch de adoção já existe".
           novo_repo "$work/rec/branch"
           git -C "$work/rec/branch" branch chore/adota-padrao-openspec

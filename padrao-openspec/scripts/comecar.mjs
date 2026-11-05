@@ -194,8 +194,8 @@ function isSyncedFolder(dir) {
   });
 }
 
-async function askBaseFolder(rl, options) {
-  const base = path.resolve(options.pasta ?? await ask(rl, 'Pasta onde os repositórios vão ficar', '--pasta', process.cwd()));
+async function askBaseFolder(rl, options, suggestion = process.cwd()) {
+  const base = path.resolve(options.pasta ?? await ask(rl, 'Pasta onde os repositórios vão ficar', '--pasta', suggestion));
   const plan = [];
   if (existsSync(base)) {
     if (!statSync(base).isDirectory()) throw new Error(`${base} existe e não é uma pasta.`);
@@ -750,11 +750,33 @@ function suggestedName(codeDir) {
   return path.basename(codeDir);
 }
 
+// A path that may not exist yet, with its existing part resolved (case and links), so two spellings of
+// the same folder compare equal on Windows.
+function resolvedPath(dir) {
+  const rest = [];
+  let current = path.resolve(dir);
+  while (!existsSync(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    rest.unshift(path.basename(current));
+    current = parent;
+  }
+  return path.join(existsSync(current) ? realpathSync.native(current) : current, ...rest);
+}
+
+function insideFolder(parent, child) {
+  const relative = path.relative(resolvedPath(parent), resolvedPath(child));
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
 async function adoptProject(rl, options) {
-  const { base, plan } = await askBaseFolder(rl, options);
+  // The code comes first, so the base folder can default to the folder that holds it: a store inside
+  // the code would be a nested repository that blocks the standard's updates.
   const source = options.codigo ?? await ask(rl, 'Código existente: caminho local ou URL do repositório', '--codigo');
   const fromUrl = urlPattern.test(source);
-  const codeDir = fromUrl ? path.join(base, repoName(source)) : path.resolve(base, source);
+  const localCode = fromUrl ? null : path.resolve(options.pasta ?? process.cwd(), source);
+  const { base, plan } = await askBaseFolder(rl, options, localCode ? path.dirname(localCode) : process.cwd());
+  const codeDir = fromUrl ? path.join(base, repoName(source)) : localCode;
   const branch = options.branch ?? adoptionBranch;
   checkBranchName(branch);
   if (fromUrl) {
@@ -762,6 +784,10 @@ async function adoptProject(rl, options) {
   } else {
     checkAdoptableCode(codeDir);
     checkRepository(codeDir, branch);
+    if (insideFolder(codeDir, base)) {
+      throw new Error(`A pasta base ${base} fica dentro do código ${codeDir}, e o store ficaria dentro do repositório de código. ` +
+        `Escolha uma pasta fora do código, por exemplo ${path.dirname(codeDir)} (--pasta).`);
+    }
   }
   const name = options.nome ?? await ask(rl, 'Nome do projeto, como as pessoas o chamam', '--nome',
     fromUrl ? repoName(source) : suggestedName(codeDir));

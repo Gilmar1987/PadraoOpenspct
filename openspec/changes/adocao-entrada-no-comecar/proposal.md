@@ -58,9 +58,10 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-05
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:7b4c36474a6fe8e2d28503d5714ca368cfe037e3576fc8410ca6f9cd38aa6448
+- Origem: "Eu aprovo fazer a implementação da recusa do store dentro do código e das tarefas finais da adoção pelo comecar.mjs", seguida do comando `/opsx:apply`
 - Aprovação anterior: Gilmar Campelo, 2026-11-05, apply; Condições: —; Origem: "Eu aprovo fazer a implementação da entrada pelo comecar.mjs para adotar o padrão num projeto existente", seguida do comando `/opsx:apply`; Reconfirmação: 2026-11-05, "sim" a "Confirma as 4 revisões e a reconfirmação do selo?" (adoção na 1.19.0); Conteúdo: sha256:385e8adcb077ac99c69ce4054ba64af63f43f9cfbdad83447f4a07407a43bdb4
