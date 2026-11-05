@@ -20,7 +20,7 @@ O script de entrada (`comecar.mjs`) tem dois caminhos: criar um projeto novo ou 
 - **Branch de adoção:** o script cria `chore/adota-padrao-openspec` (ou o nome do `--branch`) a partir da branch atual, clona a última release do padrão em `<base>/<id>-openspec`, roda o setup e oferece o commit. No código, o commit leva só os arquivos do padrão, com a mensagem `chore: adota o padrão OpenSpec`. O script não faz push nem abre PR.
 - **Marca de adoção:** o setup ganha `--adoption` e repassa a opção ao instalador, que grava `"adoption": true` no `.openspec-padrao.json` e a mantém nas reinstalações e atualizações. O `/opsx:init` ainda não lê a marca: isso é da change 2.
 - A mensagem final cita a branch de adoção, manda rodar o `/opsx:init` e abrir o PR depois dele, e oferece abrir o VS Code, como os outros modos.
-- O `COMECE-AQUI.md` ganha a seção "Projeto que nunca usou o padrão", o `README.md` cita o modo adoção e o `CHANGELOG.md` ganha o item na seção 1.18.0, que está aberta.
+- O `COMECE-AQUI.md` ganha a seção "Projeto que nunca usou o padrão", o `README.md` cita o modo adoção e o `CHANGELOG.md` e o `padrao-openspec/VERSION` abrem a 1.19.0, porque a v1.18.0 saiu sem a adoção.
 - O passo "Smoke test do script de entrada" da CI confere o modo adoção em repositórios temporários.
 
 ### Fora do escopo
@@ -46,10 +46,10 @@ Nenhuma.
 
 - **Código:** `padrao-openspec/scripts/comecar.mjs` (menu, `--modo adotar`, `--branch`, `adoptProject`), `padrao-openspec/scripts/setup-project.mjs` (`--adoption`), `padrao-openspec/scripts/install-skills.mjs` (`--adoption`, campo `adoption` no manifesto).
 - **CI:** `.github/workflows/validate.yml`, passo "Smoke test do script de entrada", com os casos do modo adoção.
-- **Documentação:** `COMECE-AQUI.md`, `README.md`, `CHANGELOG.md` (item na 1.18.0, sem mexer no `VERSION`).
+- **Documentação:** `COMECE-AQUI.md`, `README.md`, `CHANGELOG.md` (seção nova `## 1.19.0` no topo) e `padrao-openspec/VERSION` (1.19.0).
 - **Dependências:** nenhuma nova.
 - **Contratos de interface:** não se aplica; a change não toca interface com outros sistemas.
-- **Versão:** combinada com a outra sessão (projetoopenspct-df), que não tem change em andamento e não vai tocar nesses arquivos enquanto esta estiver aberta. As ADRs 0010 e 0011 ficam reservadas para as changes 2 e 3.
+- **Versão:** combinada com a outra sessão (projetoopenspct-df). A v1.18.0 saiu sem esta change, que abre a 1.19.0. A outra sessão não tem change em andamento e não vai tocar nesses arquivos enquanto esta estiver aberta. As ADRs 0010 e 0011 ficam reservadas para as changes 2 e 3.
 - Changes concorrentes: nenhuma.
 - Débitos: o `openspec/estado-atual.md` não existe neste repositório.
 - Falhas aceitas: o `openspec/estado-atual.md` não existe; sem a seção "Falhas aceitas".
@@ -62,3 +62,4 @@ Nenhuma.
 - Condições: —
 - Conteúdo: sha256:2d8f198163451388a4f525252bdb7db1291741e4eb16412de2855b63448a27ad
 - Origem: "Eu aprovo fazer a implementação da entrada pelo comecar.mjs para adotar o padrão num projeto existente", seguida do comando `/opsx:apply`
+- Reconfirmação: 2026-11-05; Origem: "Confirma as 4 revisões e a reconfirmação do selo?" (adoção na 1.19.0, depois da v1.18.0; tarefa 1.1 reaberta) — "sim"; Conteúdo: sha256:385e8adcb077ac99c69ce4054ba64af63f43f9cfbdad83447f4a07407a43bdb4
