@@ -66,8 +66,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-04
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:6ec54310e9b10f8c3d5252440be78453e94a1e284e1ca0ba382de7e5c36a6d92
+- Origem: "Eu aprovo fazer a implementação do upgrade do OpenSpec CLI para a 1.15.0", seguida do comando `/opsx:apply`

@@ -1535,6 +1535,54 @@ jobs:
       - name: Raiz em dia com padrao-openspec
         run: node padrao-openspec/scripts/sync-root.mjs --check
 
+      # Requisito "Versão do OpenSpec CLI coerente" (continuous-validation), cenários "Versões iguais",
+      # "Skill gerada por outra versão", "Passo de instalação esquecido" e "Documento com o comando
+      # antigo". A referência é a cliVersion do script de entrada; o CHANGELOG e as changes arquivadas
+      # ficam de fora, porque registram versões antigas de propósito.
+      - name: Versão do OpenSpec CLI coerente
+        run: |
+          ref=$(sed -n "s/^const cliVersion = '\([0-9.]*\)'.*/\1/p" padrao-openspec/scripts/comecar.mjs)
+          if [ -z "$ref" ]; then
+            echo "::error file=padrao-openspec/scripts/comecar.mjs::cliVersion não encontrada"
+            exit 1
+          fi
+          bad=0
+          confere() {
+            if [ "$2" != "$ref" ]; then
+              echo "::error file=$1::OpenSpec CLI $2, diferente da cliVersion $ref do comecar.mjs"
+              bad=1
+            fi
+          }
+          # Cada @fission-ai/openspec@<versão> do arquivo; o arquivo precisa citar ao menos um.
+          pacote() {
+            found=$(grep -oE '@fission-ai/openspec@[0-9]+\.[0-9]+\.[0-9]+' "$1" | sed 's/.*@//' | sort -u)
+            if [ -z "$found" ]; then
+              echo "::error file=$1::Nenhum @fission-ai/openspec@<versão> encontrado"
+              bad=1
+            fi
+            for v in $found; do confere "$1" "$v"; done
+          }
+          for f in padrao-openspec/scripts/portao.mjs .github/workflows/validate.yml README.md \
+            padrao-openspec/README.md COMECE-AQUI.md openspec/project.md; do
+            pacote "$f"
+          done
+          # A comparação e o eco dos passos "Instalar OpenSpec CLI".
+          for v in $(grep -oE 'openspec --version 2>/dev/null\)" = "[0-9]+\.[0-9]+\.[0-9]+"|OpenSpec CLI [0-9]+\.[0-9]+\.[0-9]+ já instalado' \
+            .github/workflows/validate.yml | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -u); do
+            confere .github/workflows/validate.yml "$v"
+          done
+          for f in padrao-openspec/.claude/skills/openspec-*/SKILL.md .claude/skills/openspec-*/SKILL.md; do
+            v=$(sed -n 's/^ *generatedBy: "\([0-9.]*\)".*/\1/p' "$f")
+            if [ -z "$v" ]; then
+              echo "::error file=$f::generatedBy não encontrado"
+              bad=1
+            else
+              confere "$f" "$v"
+            fi
+          done
+          if [ "$bad" -ne 0 ]; then exit 1; fi
+          echo "OpenSpec CLI $ref em todos os lugares"
+
       # Nunca reinstala por cima: numa máquina com outra suíte rodando, a reinstalação tira o CLI do ar.
       - name: Instalar OpenSpec CLI
         run: |
