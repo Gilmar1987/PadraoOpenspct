@@ -22,6 +22,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   decidir na conversa, e a sua frase fica na evidência da etapa.
 - **Script de entrada abre a pasta certa:** no fim, num console interativo e com o comando `code` disponível, o
   `comecar.mjs` pergunta se abre o VS Code na pasta do código.
+- **Adoção do padrão num projeto que já existe:** o `comecar.mjs` ganha a opção 3 (`--modo adotar`) para um
+  código com histórico que nunca usou o padrão, informado por caminho ou URL. Ele recusa, sem alterar nada, um
+  projeto que já usa o padrão ou o OpenSpec, um repositório sem commits, arquivos rastreados com alterações sem
+  commit, HEAD destacado ou operação em andamento. Depois, cria a branch `chore/adota-padrao-openspec` (ou a do
+  `--branch`), clona o store, roda o setup e commita nela só os arquivos do padrão, para revisão por PR. O
+  manifesto `.openspec-padrao.json` ganha a marca `"adoption": true`, mantida nas atualizações.
 
 ### Ações no projeto
 
