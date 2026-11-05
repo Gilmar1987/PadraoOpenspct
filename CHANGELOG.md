@@ -9,8 +9,8 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 ### O que mudou
 
 - **OpenSpec CLI 1.15.0:** o padrão passa do CLI 1.14.2 para o 1.15.0. As skills e os comandos `/opsx:*`
-  recebem o texto novo do upstream sem perder os trechos do padrão: o propose, o explore e o update escolhem
-  e conferem, antes de gravar, o caminho de um artefato definido por glob, que precisa ficar dentro da pasta da
+  recebem o texto novo do upstream sem perder os trechos do padrão: o propose e o explore escolhem e
+  conferem, antes de gravar, o caminho de um artefato definido por glob, que precisa ficar dentro da pasta da
   change; o verify casa um requisito REMOVED pelo nome exato, sem confundi-lo com um substituto de nome
   parecido. O script de entrada oferece instalar o 1.15.0, e uma checagem nova da CI falha quando a versão do
   CLI não é a mesma no script de entrada, no portão, na CI, nas skills e nos comandos de instalação da

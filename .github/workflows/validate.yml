@@ -1555,7 +1555,7 @@ jobs:
           }
           # Cada @fission-ai/openspec@<versão> do arquivo; o arquivo precisa citar ao menos um.
           pacote() {
-            found=$(grep -oE '@fission-ai/openspec@[0-9]+\.[0-9]+\.[0-9]+' "$1" | sed 's/.*@//' | sort -u)
+            found=$({ grep -oE '@fission-ai/openspec@[0-9]+\.[0-9]+\.[0-9]+' "$1" || true; } | sed 's/.*@//' | sort -u)
             if [ -z "$found" ]; then
               echo "::error file=$1::Nenhum @fission-ai/openspec@<versão> encontrado"
               bad=1
@@ -1566,12 +1566,23 @@ jobs:
             padrao-openspec/README.md COMECE-AQUI.md openspec/project.md; do
             pacote "$f"
           done
-          # A comparação e o eco dos passos "Instalar OpenSpec CLI".
-          for v in $(grep -oE 'openspec --version 2>/dev/null\)" = "[0-9]+\.[0-9]+\.[0-9]+"|OpenSpec CLI [0-9]+\.[0-9]+\.[0-9]+ já instalado' \
-            .github/workflows/validate.yml | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -u); do
-            confere .github/workflows/validate.yml "$v"
+          # A comparação e o eco de cada passo "Instalar OpenSpec CLI": um de cada por passo, para que
+          # uma comparação reescrita em outro formato não saia da checagem sem aviso.
+          n=$(grep -cE '^ +- name: Instalar OpenSpec CLI' .github/workflows/validate.yml || true)
+          for padrao in 'openspec --version 2>/dev/null\)" = "[0-9]+\.[0-9]+\.[0-9]+"' 'OpenSpec CLI [0-9]+\.[0-9]+\.[0-9]+ já instalado'; do
+            achados=$({ grep -oE "$padrao" .github/workflows/validate.yml || true; } | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
+            if [ "$(printf '%s\n' $achados | grep -c . || true)" -ne "$n" ]; then
+              echo "::error file=.github/workflows/validate.yml::Os $n passos \"Instalar OpenSpec CLI\" precisam de uma versão no formato $padrao cada"
+              bad=1
+            fi
+            for v in $(printf '%s\n' $achados | sort -u); do confere .github/workflows/validate.yml "$v"; done
           done
           for f in padrao-openspec/.claude/skills/openspec-*/SKILL.md .claude/skills/openspec-*/SKILL.md; do
+            if [ ! -f "$f" ]; then
+              echo "::error file=$f::Nenhuma skill openspec-* encontrada"
+              bad=1
+              continue
+            fi
             v=$(sed -n 's/^ *generatedBy: "\([0-9.]*\)".*/\1/p' "$f")
             if [ -z "$v" ]; then
               echo "::error file=$f::generatedBy não encontrado"
