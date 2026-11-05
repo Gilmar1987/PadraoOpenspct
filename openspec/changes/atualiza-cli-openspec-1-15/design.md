@@ -5,7 +5,7 @@
 - As skills `openspec-*` e os comandos `/opsx:*` de `padrao-openspec/.claude/` são a saída do `openspec init --tools claude` no CLI 1.14.2, com o perfil `custom` e os workflows `propose`, `explore`, `apply`, `verify`, `update`, `sync` e `archive`. Por cima dessa saída, o padrão acrescentou os trechos da tabela "Manutenção do padrão" do `README.md`. As cópias da raiz (`.claude/`) saem do `sync-root.mjs`.
 - O `README.md` manda regenerar e reaplicar os trechos à mão. Hoje a tabela tem 25 linhas; 14 dos arquivos que ela cita são gerados pelo CLI (as sete skills e os sete comandos correspondentes).
 - A saída pura das duas versões, gerada numa pasta temporária em 2026-11-04, difere em 175 linhas de diff, em 10 arquivos:
-  - 1.14.3: a escolha e a checagem do caminho de um artefato por glob dentro da `changeRoot` antes de gravar (`propose`, `explore`, `update`, em comando e skill);
+  - 1.14.3: a escolha e a checagem do caminho de um artefato por glob dentro da `changeRoot` antes de gravar (`propose` e `explore`, em comando e skill; o `update` já tinha esse texto na 1.14.2 e só muda o `generatedBy`);
   - 1.15.0: o casamento exato do nome de um requisito REMOVED no `verify` (comando e skill);
   - o campo `generatedBy` nas sete skills.
 - Esse diff, aplicado com `git apply --check` sobre `padrao-openspec/.claude/`, entra em todos os arquivos menos um trecho, nas "Artifact Creation Guidelines" do `propose` (comando e skill): o padrão inseriu cinco bullets antes da linha que o upstream altera, e o contexto do patch não casa.

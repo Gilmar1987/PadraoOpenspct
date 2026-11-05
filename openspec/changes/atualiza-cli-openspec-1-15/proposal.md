@@ -14,7 +14,7 @@ Sem a atualização, o padrão distribui skills com o texto antigo dessas duas c
   - nos dois passos "Instalar OpenSpec CLI" do `validate.yml`;
   - nos comandos de instalação e validação citados no `README.md`, no `padrao-openspec/README.md`, no `COMECE-AQUI.md` e no `openspec/project.md`.
 - **Skills e comandos `/opsx:*`:** recebem as mudanças de texto do upstream entre a 1.14.2 e a 1.15.0, sem perder os trechos do padrão:
-  - a escolha e a checagem do caminho de um artefato por glob antes de gravar, em `propose`, `explore` e `update`;
+  - a escolha e a checagem do caminho de um artefato por glob antes de gravar, em `propose` e `explore`;
   - o casamento exato do nome de um requisito REMOVED no `verify`;
   - o campo `generatedBy` passa a `1.15.0` nas sete skills.
   O texto novo é aplicado como diferença entre a saída pura das duas versões, e não por regeneração. Assim os trechos customizados continuam no lugar, e a CI confere que nenhum sumiu.
@@ -72,3 +72,4 @@ Nenhuma.
 - Condições: —
 - Conteúdo: sha256:6ec54310e9b10f8c3d5252440be78453e94a1e284e1ca0ba382de7e5c36a6d92
 - Origem: "Eu aprovo fazer a implementação do upgrade do OpenSpec CLI para a 1.15.0", seguida do comando `/opsx:apply`
+- Reconfirmação: 2026-11-04; Origem: "confirmo as duas revisões e a reconfirmação do selo", depois de ver a correção do texto sobre o `update` no proposal e no design (warning do verify); Conteúdo: sha256:f79050c5fc1eada6994a4e343b614411f6c2e41470370babe51953a9d8cb7b3a
