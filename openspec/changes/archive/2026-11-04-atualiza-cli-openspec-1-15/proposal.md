@@ -73,3 +73,4 @@ Nenhuma.
 - Conteúdo: sha256:6ec54310e9b10f8c3d5252440be78453e94a1e284e1ca0ba382de7e5c36a6d92
 - Origem: "Eu aprovo fazer a implementação do upgrade do OpenSpec CLI para a 1.15.0", seguida do comando `/opsx:apply`
 - Reconfirmação: 2026-11-04; Origem: "confirmo as duas revisões e a reconfirmação do selo", depois de ver a correção do texto sobre o `update` no proposal e no design (warning do verify); Conteúdo: sha256:f79050c5fc1eada6994a4e343b614411f6c2e41470370babe51953a9d8cb7b3a
+- Archive: 2026-11-04; Origem: "Eu aprovo fazer o archive do upgrade do OpenSpec CLI para a 1.15.0, com PR; o merge fica comigo", seguida do comando `/opsx:archive`
