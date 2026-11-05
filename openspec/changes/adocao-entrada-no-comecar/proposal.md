@@ -56,8 +56,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-05
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:2d8f198163451388a4f525252bdb7db1291741e4eb16412de2855b63448a27ad
+- Origem: "Eu aprovo fazer a implementação da entrada pelo comecar.mjs para adotar o padrão num projeto existente", seguida do comando `/opsx:apply`

@@ -1063,7 +1063,7 @@ jobs:
       - name: Smoke test do script de entrada
         run: |
           sfx="${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-0}-$$-$RANDOM"
-          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx ci-gerador-$sfx ci-ignora-$sfx ci-edicao-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
+          trap 'for id in ci-entrada-$sfx ci-semcommit-$sfx ci-semident-$sfx ci-falta-$sfx ci-gerador-$sfx ci-ignora-$sfx ci-edicao-$sfx ci-adota-$sfx ci-adotab-$sfx ci-adotar-$sfx; do openspec store unregister "$id" >/dev/null 2>&1 || true; done' EXIT
           # O script faz o commit inicial; o runner não tem identidade Git configurada.
           export GIT_AUTHOR_NAME=ci GIT_AUTHOR_EMAIL=ci@example.invalid GIT_COMMITTER_NAME=ci GIT_COMMITTER_EMAIL=ci@example.invalid
           work="$(mktemp -d)"
@@ -1171,6 +1171,98 @@ jobs:
           grep -qF 'não consegui fazer o commit inicial' "$RUNNER_TEMP/semident.txt"
           if git -C "$work/g/ci-semident-$sfx" rev-parse -q --verify HEAD; then exit 1; fi
           openspec store unregister ci-semident-$sfx
+          # Modo adoção (requisito "Adoção do padrão num projeto existente pelo script", cenários "Adoção de um
+          # código local" e "Adoção sem interação"): código com histórico vira a branch de adoção, e a principal fica intacta.
+          novo_repo() { mkdir -p "$1"; git -C "$1" init -q -b main; echo app > "$1/app.txt"; git -C "$1" add -A; commit "$1" -m app; }
+          novo_repo "$work/adota/loja"
+          # Requisito "Arquivos não rastreados na adoção": a pasta solta não bloqueia, é avisada e fica fora do commit.
+          mkdir "$work/adota/loja/tmp"
+          echo solto > "$work/adota/loja/tmp/solto.txt"
+          main_before="$(git -C "$work/adota/loja" rev-parse main)"
+          node scripts/comecar.mjs --origem "$work/padrao" --modo adotar --pasta "$work/adota" --codigo "$work/adota/loja" --nome "CI Adota" --id ci-adota-$sfx --yes > "$RUNNER_TEMP/adota.txt"
+          test "$(git -C "$work/adota/loja" branch --show-current)" = chore/adota-padrao-openspec
+          test "$(git -C "$work/adota/loja" rev-parse main)" = "$main_before"
+          test "$(git -C "$work/adota/loja" rev-list --count HEAD)" -eq 2
+          grep -qx "store: ci-adota-$sfx" "$work/adota/loja/openspec/config.yaml"
+          test "$(git -C "$work/adota/ci-adota-$sfx-openspec" describe --tags --abbrev=0)" = "v$v"
+          grep -qF 'tmp/' "$RUNNER_TEMP/adota.txt"
+          test -f "$work/adota/loja/tmp/solto.txt"
+          if git -C "$work/adota/loja" ls-files | grep -q '^tmp/'; then exit 1; fi
+          # Requisito "Commit da adoção só com os arquivos do padrão": a mensagem e só caminhos do manifesto.
+          test "$(git -C "$work/adota/loja" log -1 --format=%s)" = 'chore: adota o padrão OpenSpec'
+          git -C "$work/adota/loja" show --name-only --format= HEAD | node -e '
+            const m = require(process.argv[1]);
+            const fixed = [".openspec-padrao.json", ".gitignore", "openspec/config.yaml", ".gitattributes", ".claude/settings.json"];
+            const ok = new Set([...(m.managedFiles ?? []), ...(m.managedBlocks ?? []), ...fixed]);
+            const files = require("fs").readFileSync(0, "utf8").split("\n").filter(Boolean);
+            const extra = files.filter((f) => !ok.has(f));
+            if (files.length === 0 || extra.length) { console.error("Fora do manifesto:", extra); process.exit(1); }' "$work/adota/loja/.openspec-padrao.json"
+          # Requisito "Marca de adoção no manifesto", cenário "Setup de adoção".
+          node -e 'process.exit(require(process.argv[1]).adoption === true ? 0 : 1)' "$work/adota/loja/.openspec-padrao.json"
+          grep -qF '/opsx:init' "$RUNNER_TEMP/adota.txt"
+          grep -qF 'chore/adota-padrao-openspec' "$RUNNER_TEMP/adota.txt"
+          grep -qF 'PR' "$RUNNER_TEMP/adota.txt"
+          if grep -qF 'Abrir o VS Code' "$RUNNER_TEMP/adota.txt"; then exit 1; fi
+          # Cenário "Atualização de um projeto adotado": o --update de uma versão nova mantém a marca.
+          rm -rf "$work/adota/loja/tmp"
+          cp -r . "$work/padrao9"
+          echo 9.9.9 > "$work/padrao9/VERSION"
+          node "$work/padrao9/scripts/install-skills.mjs" "$work/adota/loja" --update > "$RUNNER_TEMP/adota-update.txt"
+          test "$(git -C "$work/adota/loja" branch --show-current)" = chore/padrao-v9.9.9
+          node -e 'const m = require(process.argv[1]); process.exit(m.adoption === true && m.version === "9.9.9" ? 0 : 1)' "$work/adota/loja/.openspec-padrao.json"
+          # Cenário "Projeto novo": sem a marca de adoção, o manifesto não tem o campo.
+          node -e 'process.exit("adoption" in require(process.argv[1]) ? 1 : 0)' "$code/.openspec-padrao.json"
+          openspec store unregister ci-adota-$sfx
+          # Cenários "Adoção por URL" e "Outro nome de branch": a URL é clonada na pasta base, e --branch troca o nome.
+          novo_repo "$work/origem/loja-url"
+          mkdir -p "$work/remotos-adota"
+          git clone -q --bare "$work/origem/loja-url" "$work/remotos-adota/loja-url.git"
+          node scripts/comecar.mjs --origem "$work/padrao" --modo adotar --pasta "$work/adota-url" --codigo "$work/remotos-adota/loja-url.git" --nome "CI Adota URL" --id ci-adotab-$sfx --branch adota-openspec --yes > "$RUNNER_TEMP/adota-url.txt"
+          test "$(git -C "$work/adota-url/loja-url" branch --show-current)" = adota-openspec
+          grep -qx "store: ci-adotab-$sfx" "$work/adota-url/loja-url/openspec/config.yaml"
+          openspec store unregister ci-adotab-$sfx
+          # Requisitos "Recusas antes da adoção" e "Branch de adoção com nome trocável": cada caso termina com
+          # erro, diz o motivo e não cria a pasta do store nem a branch de adoção.
+          recusa() {
+            if node scripts/comecar.mjs --origem "$work/padrao" --modo adotar --pasta "$work/rec" --codigo "$1" --nome "CI Recusa" --id ci-adotar-$sfx --yes > /dev/null 2> "$RUNNER_TEMP/recusa.txt"; then
+              echo "::error::A adoção não recusou $1"; exit 1
+            fi
+            grep -qF -- "$2" "$RUNNER_TEMP/recusa.txt" || { cat "$RUNNER_TEMP/recusa.txt"; echo "::error::Faltou \"$2\" na recusa de $1"; exit 1; }
+            test ! -e "$work/rec/ci-adotar-$sfx-openspec"
+          }
+          # Cenário "Projeto que já usa o padrão".
+          novo_repo "$work/rec/com-store"
+          mkdir "$work/rec/com-store/openspec"
+          printf 'store: loja\n' > "$work/rec/com-store/openspec/config.yaml"
+          git -C "$work/rec/com-store" add -A
+          commit "$work/rec/com-store" -m store
+          recusa "$work/rec/com-store" 'opção 2'
+          # OpenSpec sem o padrão: pasta openspec/ sem a linha store:.
+          novo_repo "$work/rec/puro"
+          mkdir "$work/rec/puro/openspec"
+          printf 'schema: spec-driven\n' > "$work/rec/puro/openspec/config.yaml"
+          git -C "$work/rec/puro" add -A
+          commit "$work/rec/puro" -m openspec
+          recusa "$work/rec/puro" 'sem o padrão'
+          # Cenário "Repositório sem commits".
+          mkdir -p "$work/rec/vazio"
+          git -C "$work/rec/vazio" init -q -b main
+          echo app > "$work/rec/vazio/app.txt"
+          recusa "$work/rec/vazio" 'primeiro commit'
+          # Cenário "Árvore suja".
+          novo_repo "$work/rec/suja"
+          echo mudou >> "$work/rec/suja/app.txt"
+          recusa "$work/rec/suja" 'app.txt'
+          if git -C "$work/rec/suja" show-ref -q --verify refs/heads/chore/adota-padrao-openspec; then exit 1; fi
+          # HEAD destacado.
+          novo_repo "$work/rec/destacado"
+          git -C "$work/rec/destacado" checkout -q --detach
+          recusa "$work/rec/destacado" 'HEAD destacado'
+          # Cenário "Branch de adoção já existe".
+          novo_repo "$work/rec/branch"
+          git -C "$work/rec/branch" branch chore/adota-padrao-openspec
+          recusa "$work/rec/branch" '--branch'
+          test "$(git -C "$work/rec/branch" branch --show-current)" = main
           # Projeto em andamento: publica os dois repositórios e entra por outra pasta.
           git -C "$code" add -A
           git -C "$code" diff --cached --quiet || commit "$code" -m setup
