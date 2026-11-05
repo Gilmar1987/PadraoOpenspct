@@ -70,11 +70,13 @@ Options:
                                  .claude/commands/opsx and VS Code agents to .github/agents
   --update                       Install on a new branch chore/padrao-vX.Y.Z and commit (recommended)
   --in-place                     Overwrite installed files on the current branch, without committing
+  --adoption                     Mark the project as adopted (existing code that never used the standard);
+                                 the mark is kept by later installs and updates
   -h, --help                      Show this help`);
 }
 
 function parseArgs(args) {
-  const options = { project: null, target: 'both', force: false, update: false, inPlace: false };
+  const options = { project: null, target: 'both', force: false, update: false, inPlace: false, adoption: false };
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -95,6 +97,8 @@ function parseArgs(args) {
       options.update = true;
     } else if (arg === '--in-place') {
       options.inPlace = true;
+    } else if (arg === '--adoption') {
+      options.adoption = true;
     } else if (arg.startsWith('-')) {
       throw new Error(`Unknown option: ${arg}`);
     } else if (options.project === null) {
@@ -982,6 +986,8 @@ function main() {
     managedFiles: manifestPaths,
     managedBlocks: instructionFiles.map((file) => file.path),
     managedSettings: settings.skip ? (previous?.managedSettings ?? {}) : settings.managedSettings,
+    // The adoption mark tells /opsx:init to inspect the existing code; updates keep it.
+    ...(options.adoption || previous?.adoption === true ? { adoption: true } : {}),
   };
   const manifestChanged = previous !== null && comparableManifest(previous) !== comparableManifest(manifest);
   const retired = retiredClaudeFiles(projectRoot, previous, manifestPaths);

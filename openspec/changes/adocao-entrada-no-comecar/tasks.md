@@ -9,8 +9,10 @@
 
 ## 2. Marca de adoção no manifesto
 
-- [ ] 2.1 Aplicar o D5 no `padrao-openspec/scripts/install-skills.mjs`: opção `--adoption` na ajuda e no `parseArgs`, e o campo `adoption: true` no manifesto quando a opção vem ou quando o manifesto anterior já o tem, sem o campo nos outros casos. Verificar com `node --check` e com uma instalação num repositório temporário com e sem a opção, e depois um `--update`, citando o manifesto de cada um na evidência.
-- [ ] 2.2 Aplicar o D5 no `padrao-openspec/scripts/setup-project.mjs`: opção `--adoption` na ajuda e no `parseArgs`, repassada ao instalador, e citada no plano do setup. Verificar com `node --check` e com o setup num repositório temporário com `--adoption --yes`, que grava a marca.
+- [x] 2.1 Aplicar o D5 no `padrao-openspec/scripts/install-skills.mjs`: opção `--adoption` na ajuda e no `parseArgs`, e o campo `adoption: true` no manifesto quando a opção vem ou quando o manifesto anterior já o tem, sem o campo nos outros casos. Verificar com `node --check` e com uma instalação num repositório temporário com e sem a opção, e depois um `--update`, citando o manifesto de cada um na evidência.
+  - Evidência: `install-skills.mjs`: `--adoption` na ajuda e no `parseArgs`, e `adoption: true` no manifesto quando a opção vem ou o manifesto anterior já tem a marca (spread condicional, sem o campo nos outros casos); `node --check` → ok; em repositórios temporários: instalação com `--adoption` → `adoption: true`, sem a opção → sem o campo (`"adoption" in manifesto` = false); cópia do padrão com `VERSION` 9.9.9 e `install-skills.mjs --update` no repositório marcado → branch `chore/padrao-v9.9.9`, manifesto com `version: 9.9.9` e `adoption: true` (exit 0)
+- [x] 2.2 Aplicar o D5 no `padrao-openspec/scripts/setup-project.mjs`: opção `--adoption` na ajuda e no `parseArgs`, repassada ao instalador, e citada no plano do setup. Verificar com `node --check` e com o setup num repositório temporário com `--adoption --yes`, que grava a marca.
+  - Evidência: `setup-project.mjs`: `--adoption` na ajuda e no `parseArgs`, repassado ao instalador (`installArgs`) e citado no plano ("Marcar o código como adotado (existente, sem o padrão) no .openspec-padrao.json"); `node --check` → ok; setup de uma cópia do padrão num repositório temporário com `--name Teste --no-register --adoption --yes` → plano com a linha da marca, "Done. 37 installed", manifesto com `adoption: true` (exit 0)
 
 ## 3. Modo adoção no script de entrada
 

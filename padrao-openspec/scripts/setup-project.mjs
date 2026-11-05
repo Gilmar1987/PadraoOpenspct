@@ -39,6 +39,7 @@ Options:
   --force                       Replace a different store declaration in the code repository
   --keep-origin                 Keep the store's "origin" remote even when it points to PadraoOpenspct
                                 (by default it is renamed to "padrao")
+  --adoption                    Mark the code as adopted (existing code that never used the standard)
   --yes                         Do not ask for the final confirmation
   -h, --help                    Show this help`);
 }
@@ -46,7 +47,7 @@ Options:
 function parseArgs(args) {
   const options = {
     code: null, name: null, target: 'both', registerId: null, register: null, force: false, yes: false,
-    keepOrigin: false, detachRemote: null,
+    keepOrigin: false, detachRemote: null, adoption: false,
   };
   const valueOf = (index, flag) => {
     const value = args[index + 1];
@@ -64,6 +65,7 @@ function parseArgs(args) {
     else if (arg === '--no-register') options.register = false;
     else if (arg === '--force') options.force = true;
     else if (arg === '--keep-origin') options.keepOrigin = true;
+    else if (arg === '--adoption') options.adoption = true;
     else if (arg === '--yes') options.yes = true;
     else if (arg.startsWith('-')) throw new Error(`Unknown option: ${arg}`);
     else if (options.code === null) options.code = arg;
@@ -296,7 +298,7 @@ async function setup(rl, options) {
 
   if (options.register) checkStoreDeclaration(codeRoot, options.registerId, options.force);
 
-  const installArgs = [installScript, codeRoot, '--target', options.target];
+  const installArgs = [installScript, codeRoot, '--target', options.target, ...(options.adoption ? ['--adoption'] : [])];
 
   const plan = [
     `Repositório de código: ${codeRoot} (skills e agentes em --target ${options.target})`,
@@ -306,6 +308,7 @@ async function setup(rl, options) {
       ? `Registrar o store nesta máquina como "${options.registerId}" e declará-lo em ${codeConfigPath(codeRoot)}`
       : 'Não registrar o store',
   ];
+  if (options.adoption) plan.push('Marcar o código como adotado (existente, sem o padrão) no .openspec-padrao.json');
   if (options.detachRemote) plan.push('Renomear o remote origin do store (repositório do padrão) para "padrao"');
   if (!(await confirm(rl, plan, options))) {
     console.log('Cancelado; nada foi alterado.');
