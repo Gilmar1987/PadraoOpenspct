@@ -1,0 +1,25 @@
+# Tasks
+
+## 1. Preparação e testes primeiro
+
+- [ ] 1.1 Conferir com a outra sessão que a versão continua 1.18.0 aberta e que nenhuma change dela toca os arquivos desta, e rebasear a branch na `main` se ela tiver andado. Verificar com `git log --oneline HEAD..origin/main` vazio e a resposta da outra sessão citada na evidência.
+- [ ] 1.2 Acrescentar ao passo "Smoke test do script de entrada" de `.github/workflows/validate.yml` o bloco do modo adoção do D7: adoção com sucesso (branch, mensagem e arquivos do commit, `"adoption": true`, branch principal intacta, arquivo não rastreado fora do commit), as seis recusas sem pasta de store criada, `--branch` e a marca mantida pelo `install-skills.mjs --update`, com os ids `ci-adota-*-$sfx` no `trap`. Citar nos comentários os requisitos e cenários de `project-onboarding` e `skill-installation`. Verificar rodando o passo antes da implementação: ele deve falhar no primeiro uso de `--modo adotar`, e os blocos anteriores continuam passando.
+
+## 2. Marca de adoção no manifesto
+
+- [ ] 2.1 Aplicar o D5 no `padrao-openspec/scripts/install-skills.mjs`: opção `--adoption` na ajuda e no `parseArgs`, e o campo `adoption: true` no manifesto quando a opção vem ou quando o manifesto anterior já o tem, sem o campo nos outros casos. Verificar com `node --check` e com uma instalação num repositório temporário com e sem a opção, e depois um `--update`, citando o manifesto de cada um na evidência.
+- [ ] 2.2 Aplicar o D5 no `padrao-openspec/scripts/setup-project.mjs`: opção `--adoption` na ajuda e no `parseArgs`, repassada ao instalador, e citada no plano do setup. Verificar com `node --check` e com o setup num repositório temporário com `--adoption --yes`, que grava a marca.
+
+## 3. Modo adoção no script de entrada
+
+- [ ] 3.1 Aplicar o D1 no `padrao-openspec/scripts/comecar.mjs`: extrair do `newProject` o clone do store, a chamada do setup e a mensagem final para funções compartilhadas, sem mudar o comportamento do modo 1, e dar ao `initialCommit` a mensagem do commit do código como parâmetro. Verificar com os blocos atuais do "Smoke test do script de entrada" (projeto novo, gerador, edições do dev, sem commit, sem identidade) passando sem alteração.
+- [ ] 3.2 Aplicar o D2, o D3 e o D4: opção 3 no menu, `--modo adotar`, `--branch`, a ajuda (`usage`), a função `adoptProject` com o código por caminho ou URL, as recusas da tabela do D3 antes da confirmação (ou logo depois do clone, para URL), o aviso dos não rastreados no resumo e a criação da branch de adoção depois da confirmação. Verificar com `node --check` e com as recusas e a branch do bloco da tarefa 1.2.
+- [ ] 3.3 Aplicar o D6 e o commit: nome sugerido pelo `package.json` ou pela pasta, setup com `--adoption`, commit com a mensagem `chore: adota o padrão OpenSpec` só com os arquivos do manifesto, e a mensagem final com a branch, o `/opsx:init`, o PR e a oferta do VS Code. Verificar com o "Smoke test do script de entrada" inteiro passando, com o "Sintaxe dos scripts" passando e com cada conferência negativa nova vista falhando com a recusa removida (exit 1) e passando limpa (exit 0), com os dois códigos na evidência.
+
+## 4. Documentação e integração
+
+- [ ] 4.1 Escrever a seção "Projeto que nunca usou o padrão" no `COMECE-AQUI.md`, com o comando da opção 3 no Windows e no macOS/Linux, as recusas, a branch de adoção e o próximo passo (`/opsx:init` e PR). Citar o modo adoção no `README.md`, na parte do script de entrada, e acrescentar o item à seção `## 1.18.0` do `CHANGELOG.md` ("O que mudou" e "Ações no projeto: Nenhuma"), sem mexer no `VERSION`. Rodar o `sync-root.mjs`. Verificar com o lint de Markdown nos dois lugares, o `sync-root.mjs --check` e os passos "Guia de primeiros passos" e "Versão e changelog".
+- [ ] 4.2 Corrigir o rascunho da change 2 (`adocao-2-inspecao-e-confirmacao.md`, fora do repositório) para usar a marca `"adoption": true` em vez de `"adocao": true`, como decidido no D5. Verificar com `grep` no arquivo.
+- [ ] 4.3 Rodar o `sync-root.mjs --check`, o `openspec validate --all --strict`, o lint nos dois lugares e todos os passos dos jobs `store` e `root` localmente, com tempo limite por passo e o CLI do PATH conferido (`openspec --version` igual ao que o padrão fixa, sem `npm install --global`). Antes, avisar a outra sessão e esperar a resposta. Verificar que todos saem com código 0 e que nenhum `ci-*` fica no registro de stores.
+- [ ] 4.4 Pedir a revisão de código da change pela skill `requesting-code-review` e registrar o resultado no `review.md`, com as correções feitas ou as justificativas. Verificar pelo `review.md` sem achado crítico ou importante em aberto.
+- [ ] 4.5 O responsável roda o `comecar.mjs` da branch num PowerShell real do Windows, na opção 3, contra uma cópia de um repositório próprio: aceitando a adoção (a branch de adoção é criada, o commit só tem os arquivos do padrão e o `/opsx` aparece no Claude Code) e com uma alteração sem commit (o script recusa sem criar nada). Ele informa o resultado de cada caso. Verificar pelo registro da resposta dele, citada, na evidência e no `verification.md` como cobertura fora da suíte.
