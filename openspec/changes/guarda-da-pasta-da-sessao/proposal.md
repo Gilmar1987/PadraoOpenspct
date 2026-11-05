@@ -25,7 +25,7 @@ Assim, o init, o explore e o propose da primeira change rodaram sem hooks, sem s
   - se a resposta for sim, ele roda `code "<pasta do código>"`;
   - com `--yes`, ou sem o `code`, a mensagem continua como hoje.
 - **CI:** o passo "Trechos customizados das skills" confere o bloco de guarda nos 10 comandos e nas 7 skills, a conferência das proteções e a exceção restrita, e barra a volta do texto antigo da exceção; o "Smoke test do script de entrada" usa um `code` falso para provar que, com `--yes`, o VS Code não é aberto.
-- **Versão:** é a primeira change depois da v1.16.0. Pelo modelo de versão acumulada, ela abre a 1.17.0 (`VERSION` e seção do `CHANGELOG.md`), salvo se outra change abrir a versão antes. A release sai só quando o responsável pedir.
+- **Versão:** é a primeira change depois da v1.17.0, que saiu só com a atualização do OpenSpec CLI para a 1.15.0. Pelo modelo de versão acumulada, ela abre a 1.18.0 (`VERSION` e seção do `CHANGELOG.md`), salvo se outra change abrir a versão antes. A release sai só quando o responsável pedir.
 
 ### Fora do escopo
 
@@ -82,3 +82,4 @@ Nenhuma.
 - Origem: "Eu aprovo fazer a implementação das correções da revisão da guarda da pasta da sessão", seguida do comando `/opsx:apply`
 - Aprovação anterior: Gilmar Campelo, 2026-10-30, apply; Condições: —; Origem: "Eu aprovo fazer a implementação da guarda da pasta da sessão", seguida do comando `/opsx:apply`; Conteúdo: sha256:e7cb95709dfc6e69c30d627009a8801fc9bca67a8c2f820dd80073623be98b57
 - Reconfirmação: 2026-10-30; Origem: "Confirma as 5 revisões e a reconfirmação do selo?" — "sim"; Conteúdo: sha256:4ec1e2f7a7eccc96f2f98abf23a1cf20c4c28bce01069ffef3ed6d10cfaa5d22
+- Reconfirmação: 2026-11-05; Origem: "Confirma as 5 revisões e a reconfirmação do selo?" (versão 1.18.0 e desmarcar as tarefas 1.1, 4.1 e 4.2) — "sim"; Conteúdo: sha256:45241c7f964374b30230181e3859096b334924f284e8bff30d9b2bb1e9893d03

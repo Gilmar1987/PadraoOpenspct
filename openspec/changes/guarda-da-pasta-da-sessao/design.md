@@ -99,7 +99,7 @@ O passo "Smoke test do script de entrada" ganha duas conferências: a saída com
 
 ### D6. Versão
 
-É a primeira change depois da v1.16.0, então abre a 1.17.0: `padrao-openspec/VERSION` e a seção `## 1.17.0` do `CHANGELOG.md`, com a data acertada na publicação. A ação no projeto é "Nenhuma": os comandos, as skills e as regras chegam com a atualização do padrão. A tarefa 1.1 combina a versão com a outra sessão antes do apply.
+É a primeira change depois da v1.17.0, publicada só com a atualização do OpenSpec CLI para a 1.15.0, então abre a 1.18.0: `padrao-openspec/VERSION` e uma seção `## 1.18.0` nova no topo do `CHANGELOG.md`, acima da 1.17.0, com a data acertada na publicação. A ação no projeto é "Nenhuma": os comandos, as skills e as regras chegam com a atualização do padrão. A tarefa 1.1 combina a versão com a outra sessão e rebaseia a branch na `main`.
 
 ## Risks / Trade-offs
 
