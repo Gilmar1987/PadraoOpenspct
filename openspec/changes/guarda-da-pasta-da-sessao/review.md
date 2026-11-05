@@ -52,3 +52,8 @@ Achados:
 - Intervalo: 85030c8..9ce6b66
 - Revisão: não aplicável (só artefatos de planejamento: `design.md` e duas specs da change)
 - Situação: o achado R2-I3 da segunda revisão foi resolvido em 9ce6b66 pelo `/opsx:update` (D1, D2 e D5 e os requisitos "Etapa pedida pelo nome fora do Claude Code", "Guarda da pasta da sessão nos fluxos" e "Guarda que não dispara fora da pasta errada" alinhados ao texto implementado), com a reconfirmação do selo pelo responsável. Nenhum achado crítico ou importante fica em aberto.
+
+## 2026-11-05 (rebase)
+
+- Revisão: não aplicável (rebase sobre a `main` com a v1.17.0, sem mudança de código desta change; o único conflito foi no `CHANGELOG.md`, prosa, resolvido com a seção `## 1.18.0`; a suíte local completa passou depois do rebase, veja a tarefa 4.2)
+- Os SHAs citados nas entradas anteriores são da branch antes do rebase, guardada em `backup/guarda-antes-rebase-1-18`.
