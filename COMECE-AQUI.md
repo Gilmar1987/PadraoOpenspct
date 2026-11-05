@@ -239,8 +239,11 @@ para você conferir.
 
 **Outros agentes:** os comandos `/opsx:*` são do Claude Code, mas as regras e o fluxo valem para
 qualquer agente. O setup põe as regras em `docs/openspec-regras.md` e um bloco
-`openspec-padrao` no arquivo que cada agente lê; num agente sem os comandos, peça para ele seguir o
-arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx/init.md`".
+`openspec-padrao` no arquivo que cada agente lê; num agente que não é o Claude Code, peça para ele
+seguir o arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx/init.md`". No
+Claude Code isso não vale: digite o comando sozinho, no início da mensagem (no meio do texto ele não é
+expandido, e o agente pede para reenviá-lo). Se o `/opsx` não aparece, a sessão foi aberta fora da
+pasta do código, e o agente para e pede para abri-la.
 
 | Agente | Arquivo que lê | Como rodar o fluxo |
 |---|---|---|
@@ -328,7 +331,7 @@ O registro vale para esta máquina: cada dev faz o passo 3 uma vez.
 | O agente rodou `openspec verify` ou `openspec archive` | Os `/opsx:*` são fluxos do agente, não comandos do CLI: não existe `openspec verify`, e o `openspec archive` direto pula aprovação, verificação e revisão. Peça que siga `.claude/commands/opsx/verify.md` ou `archive.md`, que rodam o portão `docs/openspec-portao.mjs` |
 | `openspec context --json` no código mostra a pasta do código como raiz, ou o erro cita `Declared in ...openspec/config.yaml` | O store não está registrado com o id da linha `store:`. Registre como no passo 3 da [seção 5](#projeto-em-andamento-à-mão) |
 | Registrei a pasta do store sem o `\padrao-openspec` | `openspec store unregister <id>` e registre de novo com `\padrao-openspec` no fim |
-| `/opsx` não aparece no Claude Code | Quase sempre o Claude Code foi aberto numa pasta acima do código. Abra a pasta do código como pasta do workspace (File → Open Folder) e uma conversa nova. Se a pasta certa já está aberta, o código não tem `.claude/` commitado: peça ao tech lead para commitar o que o setup instalou |
+| `/opsx` não aparece no Claude Code, ou o agente para dizendo que a sessão está fora da pasta do código | Quase sempre o Claude Code foi aberto numa pasta acima do código. Abra a pasta do código como pasta do workspace (File → Open Folder) e uma conversa nova. Se a pasta certa já está aberta, o código não tem `.claude/` commitado: peça ao tech lead para commitar o que o setup instalou |
 | O setup recusa `--stack` | A opção foi removida; a stack vem do `/opsx:init` |
 | O Claude Code negou um comando com "Papel somente leitura" | Um subagente de revisão tentou gravar algo. É o esperado: ele devolve o achado e quem corrige é o agente principal |
 | O turno não encerra e o agente cita "Tarefas marcadas sem a linha Evidência" | Acrescente a linha `Evidência:` a cada tarefa citada, ou desmarque a que não foi verificada. O hook bloqueia uma vez só |
