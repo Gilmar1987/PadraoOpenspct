@@ -352,10 +352,41 @@ Na semana seguinte, o workflow de cada projeto abre o PR de atualização.
 
 Mudanças no próprio padrão seguem o fluxo OpenSpec na raiz `openspec/` deste repositório.
 
-As skills `openspec-*` e os comandos `/opsx:*` foram gerados pelo OpenSpec CLI 1.14.2 e
-receberam trechos próprios do padrão. Ao regenerá-los com uma versão nova do CLI,
-reaplique estes trechos (o passo "Trechos customizados das skills" da CI falha se algum
-sumir):
+### Atualizar o OpenSpec CLI
+
+As skills `openspec-*` e os comandos `/opsx:*` foram gerados pelo OpenSpec CLI 1.15.0 e
+receberam trechos próprios do padrão. Para atualizar o CLI, não regenere os arquivos: aplique
+sobre eles a diferença entre a saída pura da versão atual e a da nova. Assim os trechos do
+padrão ficam no lugar.
+
+1. Numa pasta temporária fora do repositório, crie `xdg/openspec/config.json` com
+   `{"profile":"custom","delivery":"both","workflows":["propose","explore","apply","verify","update","sync","archive"]}`.
+   O `XDG_CONFIG_HOME` apontando para `xdg` faz o CLI usar essa configuração, sem ler nem
+   alterar a configuração global da máquina.
+2. Gere a saída pura das duas versões, cada uma numa pasta vazia com `git init`:
+
+   ```bash
+   export XDG_CONFIG_HOME="$PWD/xdg" OPEN_SPEC_INTERACTIVE=0 CI=1 DO_NOT_TRACK=true
+   (cd antiga && npx -y @fission-ai/openspec@<atual> init --tools claude --no-animation .)
+   (cd nova && npx -y @fission-ai/openspec@<nova> init --tools claude --no-animation .)
+   ```
+
+3. Monte o patch com os caminhos do padrão e aplique na branch da change:
+
+   ```bash
+   diff -ru antiga/.claude nova/.claude \
+     | sed -e 's#^--- antiga/.claude/#--- a/padrao-openspec/.claude/#' -e 's#^+++ nova/.claude/#+++ b/padrao-openspec/.claude/#' \
+     | grep -v '^diff ' > upstream.patch
+   git apply --reject -v upstream.patch
+   ```
+
+4. Um trecho rejeitado (arquivo `.rej`) cai onde o padrão inseriu texto próprio: aplique à mão
+   a linha nova do upstream, mantendo os trechos do padrão, e apague o `.rej`.
+5. Troque a versão em todos os lugares que a fixam (o passo "Versão do OpenSpec CLI coerente" da
+   CI lista cada um) e rode o `sync-root.mjs`.
+
+Os trechos próprios do padrão são estes (o passo "Trechos customizados das skills" da CI falha se
+algum sumir):
 
 | Trecho | Arquivos |
 |---|---|
@@ -400,7 +431,7 @@ Para rodar localmente:
 
 ```powershell
 node padrao-openspec/scripts/sync-root.mjs --check
-npx @fission-ai/openspec@1.14.2 validate --all --strict
+npx @fission-ai/openspec@1.15.0 validate --all --strict
 npx markdownlint-cli2@0.23.2 "**/*.md"
 ```
 

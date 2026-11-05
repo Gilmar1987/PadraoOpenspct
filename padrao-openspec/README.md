@@ -143,7 +143,7 @@ ativas são criados pelo OpenSpec CLI.
 ## Skills e subagentes
 
 O store empacota sete skills de workflow OpenSpec (geradas pelo OpenSpec CLI
-1.14.2), três skills de engenharia (`versioning-ci-cd`, `docker` e
+1.15.0), três skills de engenharia (`versioning-ci-cd`, `docker` e
 `requesting-code-review`), todas neutras quanto à stack, instalando-as junto
 dos comandos `/opsx:*` e dos agentes. Isso não ativa nem altera o perfil global da
 CLI. Os nomes correspondem aos arquivos `SKILL.md` incluídos:
@@ -327,7 +327,7 @@ está em dia com esta pasta (`sync-root.mjs --check`). Para rodar localmente, ne
 pasta:
 
 ```powershell
-npx @fission-ai/openspec@1.14.2 validate --all --strict
+npx @fission-ai/openspec@1.15.0 validate --all --strict
 npx markdownlint-cli2@0.23.2 "**/*.md"
 ```
 

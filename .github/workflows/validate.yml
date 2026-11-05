@@ -31,10 +31,10 @@ jobs:
       # Nunca reinstala por cima: numa máquina com outra suíte rodando, a reinstalação tira o CLI do ar.
       - name: Instalar OpenSpec CLI
         run: |
-          if [ "$(openspec --version 2>/dev/null)" = "1.14.2" ]; then
-            echo "OpenSpec CLI 1.14.2 já instalado"
+          if [ "$(openspec --version 2>/dev/null)" = "1.15.0" ]; then
+            echo "OpenSpec CLI 1.15.0 já instalado"
           else
-            npm install --global @fission-ai/openspec@1.14.2
+            npm install --global @fission-ai/openspec@1.15.0
           fi
 
       - name: Validar specs e changes OpenSpec
@@ -1586,10 +1586,10 @@ jobs:
       # Nunca reinstala por cima: numa máquina com outra suíte rodando, a reinstalação tira o CLI do ar.
       - name: Instalar OpenSpec CLI
         run: |
-          if [ "$(openspec --version 2>/dev/null)" = "1.14.2" ]; then
-            echo "OpenSpec CLI 1.14.2 já instalado"
+          if [ "$(openspec --version 2>/dev/null)" = "1.15.0" ]; then
+            echo "OpenSpec CLI 1.15.0 já instalado"
           else
-            npm install --global @fission-ai/openspec@1.14.2
+            npm install --global @fission-ai/openspec@1.15.0
           fi
 
       - name: Validar specs e changes OpenSpec da raiz

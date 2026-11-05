@@ -17,7 +17,7 @@ Instale:
 | Claude Code | Rodar os comandos `/opsx:*` | Abra o Claude Code no repositório de código e digite `/opsx` |
 
 O OpenSpec CLI também é necessário. Se ele faltar, o script oferece instalar a versão usada pelo
-padrão (`npm install -g @fission-ai/openspec@1.14.2`).
+padrão (`npm install -g @fission-ai/openspec@1.15.0`).
 
 E peça ao tech lead, antes de começar:
 
@@ -61,7 +61,7 @@ Padrão OpenSpec — comece aqui
 Conferindo o ambiente...
   Git .......... 2.52.0    ok
   Node.js ...... 24.12.0   ok
-  OpenSpec CLI . 1.14.2    ok
+  OpenSpec CLI . 1.15.0    ok
 
 O que você vai fazer?
   1) Criar um projeto novo
@@ -255,7 +255,7 @@ arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx
 Os mesmos passos, à mão. Os comandos são de PowerShell; no macOS e no Linux, troque
 `C:\openspec\` por `~/openspec/`, `\` por `/` nos caminhos e a crase do fim da linha por `\`.
 
-Instale o OpenSpec CLI, se faltar: `npm install -g @fission-ai/openspec@1.14.2`.
+Instale o OpenSpec CLI, se faltar: `npm install -g @fission-ai/openspec@1.15.0`.
 
 ### Projeto novo, à mão
 

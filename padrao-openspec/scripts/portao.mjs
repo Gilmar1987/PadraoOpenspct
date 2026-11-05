@@ -80,7 +80,7 @@ function openspecJson(args, store) {
   const result = process.platform === 'win32'
     ? spawnSync(['openspec', ...full.map((value) => `"${value}"`)].join(' '), { ...options, shell: true })
     : spawnSync('openspec', full, options);
-  if (result.error) throw new UsageError('OpenSpec CLI não encontrado. Instale com: npm install -g @fission-ai/openspec@1.14.2');
+  if (result.error) throw new UsageError('OpenSpec CLI não encontrado. Instale com: npm install -g @fission-ai/openspec@1.15.0');
   try {
     return JSON.parse(result.stdout);
   } catch {
