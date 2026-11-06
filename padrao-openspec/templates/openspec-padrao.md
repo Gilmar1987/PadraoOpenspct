@@ -189,7 +189,7 @@ deles.
 |---|---|---|---|
 | Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code 2.1.243 (Windows, com Git Bash) |
 | Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" | Regras e portão; ganchos não verificados |
-| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Em verificação no Copilot CLI do VS Code: até o roteiro ser registrado, valem as regras e o portão |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Verificados no Copilot CLI 1.0.100-1, no VS Code (comandos de shell liberados e o `--no-verify` negado); ganchos de papel e de edição de arquivo não verificados |
 | Gemini CLI | `GEMINI.md` | Idem | Regras e portão; ganchos não verificados |
 | Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem | Não se aplicam: o Amazon Q só tem ganchos de contexto; valem as regras e o portão |
 | Trae | `AGENTS.md` | Idem | Regras e portão; ganchos não verificados |
