@@ -1,9 +1,9 @@
 ---
 id: ADR-0006
-status: Accepted
+status: Superseded
 date: 2026-10-22
 supersedes:
-superseded_by:
+superseded_by: ADR-0012
 related_changes: [subagentes-e-ganchos]
 ---
 

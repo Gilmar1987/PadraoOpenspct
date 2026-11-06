@@ -1,6 +1,6 @@
 ---
 id: ADR-0012
-status: Proposed
+status: Accepted
 date: 2026-11-05
 supersedes: ADR-0006
 superseded_by:
