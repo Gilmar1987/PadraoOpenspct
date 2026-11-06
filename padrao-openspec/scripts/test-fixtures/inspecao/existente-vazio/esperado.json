@@ -1,0 +1,22 @@
+{
+  "projetos": [],
+  "sinais": {
+    "1.1": {
+      "valor": "Projeto vazio",
+      "confianca": "media"
+    },
+    "5.1": {
+      "valor": "4",
+      "confianca": "media"
+    },
+    "5.9": {
+      "valor": "1",
+      "confianca": "media"
+    }
+  },
+  "comandos": {},
+  "requerLeitura": [
+    "1.2"
+  ],
+  "avisos": []
+}
