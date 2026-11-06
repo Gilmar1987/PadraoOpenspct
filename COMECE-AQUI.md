@@ -294,7 +294,9 @@ qualquer agente. O setup põe as regras em `docs/openspec-regras.md` e um bloco
 seguir o arquivo do comando, por exemplo: "siga as instruções de `.claude/commands/opsx/init.md`". No
 Claude Code isso não vale: digite o comando sozinho, no início da mensagem (no meio do texto ele não é
 expandido, e o agente pede para reenviá-lo). Se o `/opsx` não aparece, a sessão foi aberta fora da
-pasta do código, e o agente para e pede para abri-la.
+pasta do código, e o agente para e pede para abri-la. Em qualquer agente, aberto na pasta do store (o clone, como
+`<id>-openspec`, que tem `padrao-openspec/.openspec-store/store.yaml`), o fluxo para sem gravar nada e pede
+para abrir a pasta do código: é nela que o agente trabalha, e o store só guarda os documentos.
 
 | Agente | Arquivo que lê | Como rodar o fluxo | Ganchos do padrão |
 |---|---|---|---|
