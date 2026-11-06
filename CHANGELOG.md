@@ -22,6 +22,12 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   de shell era negado. Um erro interno
   de um hook passa a liberar a chamada com um aviso, em vez de travar o agente. O guia e o `COMECE-AQUI.md`
   dizem em quais agentes os hooks foram verificados.
+- **Inspeção do código na adoção:** num projeto com a marca de adoção, o `/opsx:init` lê o código antes da
+  entrevista com o script novo `docs/openspec-inspecionar-codigo.mjs`, que só lê arquivos rastreados, não roda
+  nada do projeto, não usa a rede e nunca mostra valores de secrets nem dados pessoais. Cada pergunta que o
+  código responde aparece com a evidência (arquivo e linha) e pede `S/n`; `n`, detecção fraca ou conflito abrem
+  as opções de sempre. Ambiguidades de escopo são perguntadas antes, e o `project-setup.md` registra a origem
+  de cada resposta ([ADR-0010](openspec/adrs/0010-adocao-por-inspecao-e-confirmacao.md)).
 
 ### Ações no projeto
 

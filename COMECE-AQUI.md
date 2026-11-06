@@ -179,6 +179,13 @@ Confirmar? [S/n]: (Enter)
 No fim, abra a pasta do código como workspace, rode o `/opsx:init` e, depois dele, abra um PR da
 branch de adoção para a branch principal. O script não faz push nem abre o PR.
 
+Num projeto adotado, o `/opsx:init` lê o código antes da entrevista com `docs/openspec-inspecionar-codigo.mjs`,
+que só lê os arquivos rastreados, sem rodar nada do projeto. Quando há ambiguidade (vários projetos no mesmo
+repositório, pastas geradas), ele pergunta o escopo primeiro. Depois, cada pergunta que o código já responde
+aparece com a evidência (arquivo e linha) e pede `S/n`: Enter confirma, e `n` abre as opções de sempre. As
+perguntas que o código não responde, ou em que há conflito, seguem como num projeto novo. O
+`project-setup.md` registra a origem de cada resposta.
+
 A pasta base sugerida é a que contém o código, e o store fica ao lado dele. Com uma URL no lugar do
 caminho, o script clona o código na pasta base. Para usar outro nome de
 branch, passe `--branch <nome>`. Arquivos não rastreados não impedem a adoção: o resumo os lista,
