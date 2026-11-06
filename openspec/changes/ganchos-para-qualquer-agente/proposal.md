@@ -63,9 +63,10 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-06
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:21e322eb269f66e2c74f8f7db6b4ee5fb0d749d7349350b5db48f0d8ceb4c2b2
+- Origem: "Eu aprovo fazer a implementação dos ganchos do padrão com o lançador node -e", seguida do comando `/opsx:apply`
 - Aprovação anterior: Gilmar Campelo, 2026-11-05, apply; Condições: —; Origem: "Eu aprovo fazer a implementação dos ganchos do padrão compatíveis com qualquer agente", seguida do comando `/opsx:apply`; Conteúdo: sha256:929b371be1a8d6b89820ffc196a2f90b8d361ba4a6de02821d38f2eb8e909be3
