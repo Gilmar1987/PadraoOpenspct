@@ -23,3 +23,9 @@ Achados:
 - [menor] M7: o `gitIn` descarta o stderr, e um repositório com "dubious ownership" aparece como "não é um repositório Git" — justificado: a recusa continua segura e não escreve nada; o diagnóstico fino fica para quando aparecer um caso real
 - [menor] M8: depois do clone por URL, uma recusa de conteúdo manda apagar o clone e, no caso "sem commits", também mostra os comandos do primeiro commit — justificado: o D2 aceita essa escrita, e o clone de um repositório vazio é raro; a mensagem de "apague" vem do mecanismo comum de erros do script
 - [menor] M9: uma branch de adoção que já existe só no remoto não é detectada, e um hook de pre-commit que falha gera o aviso genérico de identidade — justificado: as duas situações aparecem no PR ou no aviso com o comando manual, e o comportamento do commit é o mesmo do modo 1
+
+## 2026-11-05 (fechamento)
+
+- Intervalo: 5db4d9f..1a402f9
+- Revisão: não aplicável a uma nova passada; as correções desta faixa respondem aos achados da revisão acima
+- Situação: I1, I3 e os menores corrigidos foram feitos em 67c8b7d. O I2 entrou no planejamento pelo `/opsx:update` (e451041, com o requisito "Store fora do código na adoção" e nova aprovação do responsável) e foi corrigido em 1a402f9: a adoção pergunta o código antes da pasta base, sugere a pasta que contém o código e recusa uma pasta base igual ao código ou dentro dele, com o caso na CI visto falhando sem a recusa e passando com ela. Nenhum achado crítico ou importante fica em aberto.
