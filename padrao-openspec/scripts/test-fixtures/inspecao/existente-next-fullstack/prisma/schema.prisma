@@ -1,0 +1,9 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Consulta {
+  id   Int      @id
+  data DateTime
+}

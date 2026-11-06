@@ -14,6 +14,12 @@
       "valor": "loja",
       "confianca": "media"
     },
+    "1.7": {
+      "valor": [
+        "4"
+      ],
+      "confianca": "media"
+    },
     "2.2": {
       "valor": "1",
       "confianca": "alta"
@@ -66,6 +72,10 @@
       "valor": "1",
       "confianca": "alta"
     },
+    "5.6": {
+      "valor": "4",
+      "confianca": "media"
+    },
     "5.9": {
       "valor": "1",
       "confianca": "media"
@@ -76,8 +86,10 @@
     }
   },
   "comandos": {
+    "Executar localmente": "pnpm --filter ./apps/web run dev",
     "Instalar dependências": "pnpm install --frozen-lockfile",
     "Lint": "pnpm lint",
+    "Migrações": "env DATABASE_URL=postgres://***@localhost/app pnpm prisma migrate deploy",
     "Testes": "pnpm test",
     "Typecheck/build": "pnpm typecheck"
   },

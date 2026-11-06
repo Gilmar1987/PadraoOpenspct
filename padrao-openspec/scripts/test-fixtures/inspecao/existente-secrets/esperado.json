@@ -12,7 +12,7 @@
     },
     "2.2": {
       "valor": "3",
-      "confianca": "alta"
+      "confianca": "media"
     },
     "3.1": {
       "valor": "1",
@@ -34,6 +34,10 @@
       "valor": "4",
       "confianca": "media"
     },
+    "5.2": {
+      "valor": "5",
+      "confianca": "media"
+    },
     "5.9": {
       "valor": "1",
       "confianca": "media"
@@ -49,8 +53,8 @@
     "7.4"
   ],
   "avisos": [
-    "achado: Nenhum framework de testes encontrado",
     "achado: Nenhum CI encontrado",
+    "achado: Nenhum framework de testes encontrado",
     "risco: Arquivo .env rastreado pelo Git (.env)"
   ]
 }

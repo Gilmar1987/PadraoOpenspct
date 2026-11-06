@@ -19,7 +19,8 @@ const failures = [];
 const fail = (message) => failures.push(message);
 
 const gitEnv = { ...process.env, GIT_AUTHOR_NAME: 'ci', GIT_AUTHOR_EMAIL: 'ci@example.invalid', GIT_COMMITTER_NAME: 'ci', GIT_COMMITTER_EMAIL: 'ci@example.invalid' };
-const git = (dir, args) => execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', env: gitEnv, stdio: ['ignore', 'pipe', 'ignore'] });
+// Signing and hooks from the developer's global configuration must not change the fixture commit.
+const git = (dir, args) => execFileSync('git', ['-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=', '-C', dir, ...args], { encoding: 'utf8', env: gitEnv, stdio: ['ignore', 'pipe', 'ignore'] });
 
 // Steps per fixture: files created before the commit (tracked) and after it (untracked).
 const setup = {
@@ -29,8 +30,10 @@ const setup = {
   'existente-dotnet': { untracked: { 'extra/package.json': '{ "dependencies": { "express": "^4.21.1" } }\n', 'extra/index.js': "require('express');\n" } },
 };
 
-function prepare(name) {
-  const repo = path.join(mkdtempSync(path.join(tmpdir(), 'inspecao-')), name);
+function prepare(name, temporary) {
+  const dir = mkdtempSync(path.join(tmpdir(), 'inspecao-'));
+  temporary.push(dir);
+  const repo = path.join(dir, name);
   cpSync(path.join(fixturesDir, name), repo, { recursive: true, filter: (source) => path.basename(source) !== 'esperado.json' });
   for (const [file, text] of Object.entries(setup[name]?.tracked ?? {})) writeFileSync(path.join(repo, file), text);
   git(repo, ['init', '-q', '-b', 'main']);
@@ -89,7 +92,9 @@ function allEvidence(data) {
   return list.filter((item) => item.arquivo);
 }
 
-const dataFile = (file) => /(^|\/)seed[^/]*$/i.test(file) || /\.csv$/i.test(file) || /(^|\/)(fixtures|testdata)\//i.test(file);
+// Files of the fixtures that hold (fictitious) personal data: a seed, a migration with INSERT and a pg_dump.
+const dataFiles = new Set(['db/seed.sql', 'migrations/002_dados.sql', 'db/backup.sql']);
+const personalValues = /fulano@example\.invalid|beltrano@example\.invalid|maria@example\.invalid|000\.000\.000-00|111\.111\.111-11|222\.222\.222-22/;
 
 const fixtures = readdirSync(fixturesDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
 if (fixtures.length === 0) fail('nenhum fixture em scripts/test-fixtures/inspecao');
@@ -103,8 +108,7 @@ for (const name of fixtures) {
   }
   let repo;
   try {
-    repo = prepare(name);
-    temporary.push(path.dirname(repo));
+    repo = prepare(name, temporary);
     const statusBefore = git(repo, ['status', '--porcelain', '--untracked-files=all']);
     const first = run(repo);
     const second = run(repo);
@@ -116,11 +120,16 @@ for (const name of fixtures) {
     if (existsSync(path.join(repo, 'SENTINELA'))) fail(`${name}: o postinstall do package.json foi executado`);
     // Requirement "Saída sem secrets nem dados pessoais".
     if (/VALOR_FALSO/.test(first.text)) fail(`${name}: um valor do .env apareceu na saída`);
-    if (/fulano@example\.invalid|000\.000\.000-00/.test(first.text)) fail(`${name}: um dado pessoal do seed apareceu na saída`);
+    if (personalValues.test(first.text)) fail(`${name}: um dado pessoal de arquivo de dados apareceu na saída`);
     // Requirement "Arquivos de dados sem trecho".
     for (const item of allEvidence(first.data)) {
-      if (dataFile(item.arquivo) && 'trecho' in item) fail(`${name}: evidência de arquivo de dados com trecho (${item.arquivo}:${item.linha})`);
+      if (dataFiles.has(item.arquivo) && 'trecho' in item) fail(`${name}: evidência de arquivo de dados com trecho (${item.arquivo}:${item.linha})`);
       if (item.trecho && item.trecho.length > 120) fail(`${name}: trecho com mais de 120 caracteres (${item.arquivo}:${item.linha})`);
+    }
+    // Requirement "Arquivos de dados sem trecho": the fixture's data files must show up as evidence.
+    if (name === 'existente-dados') {
+      const seen = new Set(allEvidence(first.data).map((item) => item.arquivo));
+      for (const file of dataFiles) if (!seen.has(file)) fail(`${name}: ${file} não apareceu como evidência da 1.5`);
     }
     // Scenario "Escopo restrito".
     if (name === 'existente-node-next') {

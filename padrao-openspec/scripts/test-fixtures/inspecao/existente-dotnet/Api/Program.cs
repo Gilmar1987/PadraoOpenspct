@@ -4,7 +4,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((ctx, cfg) => cfg.WriteTo.Console());
-builder.Services.AddDbContext<AppDb>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddDbContext<AppDb>(o => o.UseSqlServer("Server=db;Database=app;User Id=sa;Password=VALOR_FALSO_123;"));
 var app = builder.Build();
 app.MapGet("/health", () => "ok");
 app.Run();

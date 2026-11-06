@@ -6,6 +6,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
+      - run: env DATABASE_URL=postgres://ci:VALOR_FALSO_123@localhost/app pnpm prisma migrate deploy
+      - name: Verificações
+        run: |
+          pnpm lint
+          pnpm typecheck
+          pnpm test

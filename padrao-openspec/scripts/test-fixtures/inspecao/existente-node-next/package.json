@@ -5,6 +5,7 @@
     "postinstall": "node -e \"require('fs').writeFileSync('SENTINELA','x')\"",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "migrate": "DATABASE_URL=postgres://admin:VALOR_FALSO_123@prod.db.example/app prisma migrate deploy"
   }
 }

@@ -132,13 +132,13 @@ Rode o script uma vez, gravando a saída num arquivo temporário **fora** do rep
 node docs/openspec-inspecionar-codigo.mjs --json <arquivo-temporário>
 ```
 
-Leia `projetos`, `truncado` e `avisos`. Quando aparecer uma destas situações, faça a pergunta correspondente antes do Bloco 1, **uma por vez**, com opções numeradas e "Outro (digitar livremente)":
+Leia `projetos`, `submodulos`, `truncado`, `arquivosLidos` e `avisos`. Quando aparecer uma destas situações, faça a pergunta correspondente antes do Bloco 1, **uma por vez**, com opções numeradas e "Outro (digitar livremente)":
 
 | Situação | Pergunta |
 |---|---|
 | Mais de um projeto de back-end ou de front-end | Quais projetos fazem parte deste projeto OpenSpec (múltipla escolha, com "Todos")? Em seguida: qual é o back-end principal, que responde à 3.1? |
-| Pastas que parecem geradas ou de terceiros (`generated/`, `third_party/`, `legacy/`) | Estas pastas ficam fora da inspeção? 1) Sim, todas 2) Escolher quais 3) Não, inspecionar tudo |
-| Submódulos Git (`.gitmodules`) | 1) Ignorar 2) Inspecionar |
+| Pastas que parecem geradas ou de terceiros (`generated/`, `third_party/`, `legacy/`) | Estas pastas ficam fora da inspeção? 1) Sim, todas 2) Escolher quais 3) Não, inspecionar tudo. Para deixar pastas de fora, monte o `--escopo` com as pastas de primeiro nível que ficam, sem as excluídas |
+| Submódulos Git (`submodulos` não vazio) | O script não entra em submódulos. 1) Ignorar 2) Inspecionar cada submódulo à parte, rodando o script com `--raiz <pasta do submódulo>` e juntando as evidências com o caminho do submódulo |
 | Branch atual diferente da principal (`git.branchAtual` × `git.branchPrincipal`) | A inspeção deve refletir: 1) a branch atual 2) a principal (o script não troca de branch: oriente o dev a trocar e rodar o `/opsx:init` de novo) |
 | `truncado: true` | 1) Restringir a pastas que eu escolho 2) Seguir com o que foi lido |
 
@@ -152,7 +152,7 @@ Sem nenhuma dessas situações, pule as perguntas de escopo. Um `.env` rastreado
 4. Mostre o resumo numa mensagem, antes da pergunta A:
 
    ```text
-   Inspeção concluída (<n> arquivos, escopo: <pastas>).
+   Inspeção concluída (<arquivosLidos> arquivos lidos, escopo: <pastas ou "todo o repositório">).
    Respondidas com evidência: <n> de <n> perguntas (<n> alta, <n> média). Abertas para você escolher: <n>.
    Avisos: <n> conflitos (<perguntas>), <n> riscos (<arquivos>).
    Vou mostrar cada pergunta respondida com a evidência e pedir S/n.
@@ -187,7 +187,7 @@ Cada pergunta da entrevista usa o sinal da inspeção (do script ou da leitura d
 13. Com brief do ingest ou da descoberta, a detecção do código tem precedência: a pergunta com detecção `alta` ou `media` usa o `S/n`, e a recomendação do brief aparece só nas perguntas sem detecção.
 14. O resumo de cada bloco mostra a origem de cada resposta: `confirmada (detectada)`, `escolhida` ou `pulada`.
 
-Um sinal que nenhuma pergunta cobre (aviso `sem-pergunta`) vai para a 7.2, como sugestão. O `project-setup.md` registra a origem de cada resposta e a seção "Escopo da inspeção" (veja o Arquivo 1).
+Uma ferramenta que nenhuma pergunta cobre (aviso `sem-pergunta`, por exemplo feature flags) vai para a 7.2, como sugestão. Um aviso `achado` (manifesto que não deu para ler, nenhum CI, nenhum framework de testes) vai para o resumo da inspeção e, quando for débito, para "Fora do ciclo atual" do `estado-atual.md`. O `project-setup.md` registra a origem de cada resposta e a seção "Escopo da inspeção" (veja o Arquivo 1).
 
 ---
 

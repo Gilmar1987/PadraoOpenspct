@@ -5,7 +5,7 @@
 // touches the network and never writes to the repository. The output answers what it can of the init
 // interview, with confidence and evidence, and never carries secret values or personal data.
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
@@ -13,6 +13,8 @@ const maxFiles = 20000;
 const maxBytes = 1024 * 1024;
 const maxEvidence = 5;
 const maxSnippet = 120;
+// Masking runs on at most this many characters of a line, so a huge minified line cannot stall it.
+const maxMaskInput = 2000;
 const skippedSegments = new Set(['vendor', 'dist', 'build', 'out', 'target', 'bin', 'obj', 'coverage', '.next', 'node_modules']);
 const levels = { baixa: 1, media: 2, alta: 3 };
 // Questions whose answer is a list; every other question has one answer.
@@ -49,6 +51,9 @@ function parseArgs(args) {
 
 class UsageError extends Error {}
 
+// Ordering by code point, so the output is the same on every machine and locale.
+const byText = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
 // Git is the only program this script runs, always with fixed arguments and without a shell.
 function git(root, args) {
   try {
@@ -75,12 +80,15 @@ function managedPaths(root) {
 }
 
 function isGlobal(file) {
-  return !file.includes('/') || file.startsWith('.github/');
+  return !file.includes('/') || file.startsWith('.github/') || file.startsWith('.circleci/');
 }
 
 function listFiles(root, scope) {
   const out = git(root, ['ls-files', '-z']);
-  if (out === null) throw new UsageError(`${root} não é um repositório Git (git ls-files falhou).`);
+  if (out === null) {
+    if (git(root, ['--version']) === null) throw new UsageError('Git não encontrado: instale o Git e rode de novo.');
+    throw new UsageError(`${root} não é um repositório Git (git ls-files falhou).`);
+  }
   const managed = managedPaths(root);
   const files = out.split('\0').filter(Boolean)
     .filter((file) => !managed.has(file))
@@ -97,6 +105,8 @@ function readTexts(root, files) {
   for (const file of files) {
     let buffer;
     try {
+      // A tracked symbolic link may point outside the repository: it is never followed.
+      if (lstatSync(path.join(root, file)).isSymbolicLink()) continue;
       buffer = readFileSync(path.join(root, file));
     } catch {
       continue;
@@ -107,7 +117,7 @@ function readTexts(root, files) {
     }
     if (buffer.subarray(0, 8192).includes(0)) continue;
     // Line endings normalized, so line numbers are the same on Windows and Linux.
-    texts.set(file, buffer.toString('utf8').replace(/\r\n?/g, '\n').split('\n'));
+    texts.set(file, buffer.toString('utf8').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'));
   }
   return { texts, large };
 }
@@ -118,24 +128,30 @@ function readTexts(root, files) {
 const envFile = /(^|\/)\.env(\.[^/]*)?$/i;
 const envSample = /(^|\/)\.env\.(example|sample|template)$/i;
 
+// Data files can hold real people's data: their evidence never carries a snippet.
 function isDataFile(file, lines) {
-  if (/(^|\/)seed[^/]*$/i.test(file) || /\.csv$/i.test(file) || /(^|\/)(fixtures|testdata)\//i.test(file)) return true;
-  return /\.sql$/i.test(file) && (lines ?? []).some((line) => /\binsert\s+into\b/i.test(line));
+  if (/(^|\/)seed[^/]*$/i.test(file) || /\.csv$/i.test(file) || /(^|\/)(fixtures|testdata|seeds|dumps)\//i.test(file)) return true;
+  if (/\.sql$/i.test(file) && /(dump|backup)/i.test(path.posix.basename(file))) return true;
+  return /\.sql$/i.test(file) && (lines ?? []).some((line) => /\binsert\s+into\b|\bcopy\s+[\w."]+(\s*\([^)]*\))?\s+from\s+stdin\b/i.test(line));
 }
 
-// Values that look secret become ***; the result is cut to 120 characters.
-function mask(line) {
-  return line.trim()
+// Values that look secret become ***. Used on snippets and on commands; it does not cut the text.
+function maskText(text) {
+  return text.slice(0, maxMaskInput).trim()
     .replace(/(\/\/)[^\s/@:]+:[^\s/@]+@/g, '$1***@')
-    .replace(/((?:key|secret|token|password|passwd|pwd|credential|connection|dsn)[\w-]*["']?\s*[:=]\s*["']?)([^\s"',;]+)/gi, '$1***')
-    .replace(/(?=[A-Za-z0-9+/=_-]*\d)[A-Za-z0-9+/=_-]{32,}/g, '***')
-    .slice(0, maxSnippet);
+    .replace(/((?:key|secret|token|password|passwd|pwd|credential|connection|dsn)[\w-]*["']?\s*[:=]\s*)("[^"]*"|'[^']*'|[^\s"',;]+)/gi, '$1***')
+    .replace(/(\bbearer\s+)[^\s"']+/gi, '$1***')
+    .replace(/[A-Za-z0-9+/=_-]{24,}/g, (token) => (/\d/.test(token) ? '***' : token));
+}
+
+function snippet(line) {
+  return maskText(line).slice(0, maxSnippet);
 }
 
 function evidence(ctx, file, index) {
   const lines = ctx.texts.get(file);
   const item = { arquivo: file, linha: index + 1 };
-  if (lines && !isDataFile(file, lines)) item.trecho = mask(lines[index] ?? '');
+  if (lines && !isDataFile(file, lines)) item.trecho = snippet(lines[index] ?? '');
   return item;
 }
 
@@ -165,6 +181,7 @@ function parseManifests(ctx) {
       try {
         data = JSON.parse(lines.join('\n'));
       } catch {
+        ctx.unreadable.push(file);
         continue;
       }
       const names = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']
@@ -197,6 +214,9 @@ function parseManifests(ctx) {
         if (match) deps.push({ eco: 'java', name: match[1], file, line: index });
       });
       projects.push({ caminho: dir || '.', manifest: file, eco: 'java', nome: null });
+    } else if (['Gemfile', 'composer.json', 'mix.exs', 'Cargo.toml'].includes(base)) {
+      const nome = { Gemfile: 'Ruby', 'composer.json': 'PHP', 'mix.exs': 'Elixir', 'Cargo.toml': 'Rust' }[base];
+      projects.push({ caminho: dir || '.', manifest: file, eco: 'outro', nome: null, linguagem: nome });
     } else if (base === 'go.mod') {
       lines.forEach((line, index) => {
         const match = line.match(/^\s*(?:require\s+)?([a-z0-9.-]+\.[a-z]+\/[^\s]+)\s+v/);
@@ -311,13 +331,26 @@ const catalog = [
   r('3.10', '1', 'Amazon S3', { deps: ['@aws-sdk/client-s3', 'boto3'] }),
   r('3.10', '2', 'Azure Blob Storage', { deps: ['@azure/storage-blob', 'Azure.Storage.Blobs'] }),
   r('3.10', '3', 'Google Cloud Storage', { deps: ['@google-cloud/storage'] }),
+  r('3.10', '4', 'Cloudflare R2', { files: /(^|\/)wrangler\.toml$/, content: /r2_buckets/, nivel: 'alta' }),
+  r('3.2', '3', 'Renderizado pelo back-end', { files: /(^|\/)templates\/.+\.html$|\.cshtml$|(^|\/)src\/main\/resources\/templates\//i, nivel: 'alta' }),
   // Block 4
   r('4.1', '1', 'Vercel / Netlify', { files: /^(vercel\.json|netlify\.toml)$/, nivel: 'media' }),
+  r('4.1', '2', 'AWS', { files: /(^|\/)(serverless\.ya?ml|cdk\.json|samconfig\.toml)$/, nivel: 'media' }),
+  r('4.1', '2', 'AWS', { files: /\.tf$/, content: /provider\s+"aws"/, nivel: 'media' }),
+  r('4.1', '3', 'Azure', { files: /\.bicep$|(^|\/)azure\.yaml$/, nivel: 'media' }),
+  r('4.1', '3', 'Azure', { files: /\.tf$/, content: /provider\s+"azurerm"/, nivel: 'media' }),
   r('4.1', '4', 'Google Cloud', { files: /^app\.yaml$/, nivel: 'media' }),
+  r('4.1', '4', 'Google Cloud', { files: /\.tf$/, content: /provider\s+"google"/, nivel: 'media' }),
   r('4.1', '6', 'Fly.io / Render / Heroku', { files: /^(fly\.toml|render\.yaml|Procfile)$/, nivel: 'media' }),
   r('4.4', '1', '.env local + cofre em produção', { deps: ['@aws-sdk/client-secrets-manager', '@azure/keyvault-secrets', 'Azure.Security.KeyVault.Secrets'], max: 'media' }),
   r('4.4', '3', 'HashiCorp Vault', { deps: ['node-vault', 'hvac', 'VaultSharp'], max: 'media' }),
   r('4.4', '4', 'Doppler', { files: /(^|\/)doppler\.ya?ml$/, nivel: 'media' }),
+  r('4.3', '1', 'Development (local)', { files: /(^|\/)\.env\.(development|dev|local)(\.(example|sample|template))?$/i, nivel: 'media' }),
+  r('4.3', '2', 'Staging / Homologação', { files: /(^|\/)\.env\.(staging|homolog\w*|stage)(\.(example|sample|template))?$/i, nivel: 'media' }),
+  r('4.3', '2', 'Staging / Homologação', { files: /^\.github\/workflows\/[^/]+\.ya?ml$/, content: /environment:\s*["']?(staging|homolog\w*|stage)\b/i, nivel: 'media' }),
+  r('4.3', '3', 'QA / Testes', { files: /(^|\/)\.env\.qa(\.(example|sample|template))?$/i, nivel: 'media' }),
+  r('4.3', '3', 'QA / Testes', { files: /^\.github\/workflows\/[^/]+\.ya?ml$/, content: /environment:\s*["']?qa\b/i, nivel: 'media' }),
+  r('4.3', '4', 'Preview (por PR/branch)', { files: /^\.github\/workflows\/[^/]+\.ya?ml$/, content: /environment:\s*["']?preview\b/i, nivel: 'media' }),
   r('4.5', '1', 'Cloudflare', { files: /(^|\/)wrangler\.toml$/, nivel: 'media' }),
   r('4.5', '3', 'Vercel Edge Network', { files: /^vercel\.json$/, nivel: 'media' }),
   // Block 5
@@ -349,7 +382,9 @@ const catalog = [
   r('6.4', '1', 'Rate limiting', { deps: ['express-rate-limit', '@fastify/rate-limit', 'AspNetCoreRateLimit', 'django-ratelimit'], max: 'media' }),
   r('6.4', '3', 'CSRF protection', { deps: ['csurf', '@fastify/csrf-protection'], max: 'media' }),
   r('6.4', '4', 'Helmet / headers de segurança', { deps: ['helmet', '@fastify/helmet'], max: 'media' }),
-  r('6.6', '2', 'Criptografia de campos sensíveis', { files: /\.(sql|prisma)$/i, content: /pgcrypto/i, nivel: 'media' }),
+  r('6.6', '2', 'Criptografia de campos sensíveis', { files: /\.(sql|prisma|py|[jt]s|cs)$/i, content: /\bpgp_(sym|pub)_encrypt\s*\(|\bAlways\s?Encrypted\b|\bEncryptedType\b/i, nivel: 'media' }),
+  // A tool no question covers is offered in 7.2.
+  r('sem-pergunta', 'feature-flags', 'Feature flags', { deps: ['launchdarkly-node-server-sdk', '@launchdarkly/*', 'unleash-client', 'flagsmith', 'flagsmith-nodejs', 'LaunchDarkly.ServerSdk'], use: 'decl' }),
 ];
 
 function nameMatches(pattern, name) {
@@ -405,17 +440,26 @@ function applyCatalog(ctx) {
 // ---------------------------------------------------------------------------------------------
 // Signals that come from structure, not from a single rule
 
+// Next.js route handlers and API routes make a Next.js project a back-end too.
+function nextServerFile(ctx, project) {
+  const prefix = project.caminho === '.' ? '' : `${project.caminho}/`;
+  return ctx.files.find((file) => file.startsWith(prefix)
+    && /(^|\/)(src\/)?(app\/(.+\/)?route\.[jt]s|pages\/api\/.+\.[jt]sx?)$/.test(file.slice(prefix.length)));
+}
+
 function classifyProjects(ctx) {
   const result = [];
   for (const project of ctx.projects) {
     const own = ctx.deps.filter((dep) => dep.file === project.manifest).map((dep) => dep.name);
     const has = (...names) => own.some((name) => names.some((pattern) => nameMatches(pattern, name)));
-    let tipo = null;
-    if (has('express', 'fastify', 'hono', '@nestjs/core', 'koa', 'sdk:Microsoft.NET.Sdk.Web', 'django', 'fastapi', 'flask', 'spring-boot-starter-web', 'github.com/gin-gonic/gin', 'github.com/labstack/echo*', 'github.com/gofiber/fiber*')) tipo = 'backend';
-    else if (has('next', 'vite', '@angular/core', 'nuxt', 'react-native', 'expo')) tipo = 'frontend';
-    if (tipo) result.push({ caminho: project.caminho, tipo, manifest: project.manifest });
+    const backend = has('express', 'fastify', 'hono', '@nestjs/core', 'koa', 'sdk:Microsoft.NET.Sdk.Web', 'django', 'fastapi', 'flask', 'spring-boot-starter-web', 'github.com/gin-gonic/gin', 'github.com/labstack/echo*', 'github.com/gofiber/fiber*')
+      || (has('next') && Boolean(nextServerFile(ctx, project)));
+    const frontend = has('next', 'vite', '@angular/core', 'nuxt', 'react-native', 'expo');
+    if (backend) result.push({ caminho: project.caminho, tipo: 'backend', manifest: project.manifest });
+    if (frontend) result.push({ caminho: project.caminho, tipo: 'frontend', manifest: project.manifest });
+    if (!backend && !frontend && project.eco === 'outro') result.push({ caminho: project.caminho, tipo: 'outro', manifest: project.manifest, linguagem: project.linguagem });
   }
-  return result.sort((a, b) => a.caminho.localeCompare(b.caminho));
+  return result.sort((a, b) => byText(a.caminho, b.caminho) || byText(a.tipo, b.tipo));
 }
 
 function structuralSignals(ctx) {
@@ -438,13 +482,43 @@ function structuralSignals(ctx) {
     }
   }
 
-  // 2.2: what kinds of project live in this one repository.
-  if (backend && frontend) found.push({ q: '2.2', v: '1', rotulo: 'Monorepo — front-end e back-end no mesmo repositório', nivel: 'alta', evidencias: [fileEvidence(firstManifest('backend')), fileEvidence(firstManifest('frontend'))] });
-  else if (backend) found.push({ q: '2.2', v: '3', rotulo: 'Apenas back-end', nivel: 'alta', evidencias: [fileEvidence(firstManifest('backend'))] });
-  else if (frontend) found.push({ q: '2.2', v: '4', rotulo: 'Apenas front-end', nivel: 'alta', evidencias: [fileEvidence(firstManifest('frontend'))] });
+  // 2.2: what kinds of project live in this one repository. Back-end only or front-end only could also be one
+  // repository of a multi-repo project (option 2), so those stay at media.
+  if (backend && frontend) found.push({ q: '2.2', v: '1', rotulo: 'Monorepo — front-end e back-end no mesmo repositório', nivel: 'alta', evidencias: unique([fileEvidence(firstManifest('backend')), fileEvidence(firstManifest('frontend'))]) });
+  else if (backend) found.push({ q: '2.2', v: '3', rotulo: 'Apenas back-end', nivel: 'media', evidencias: [fileEvidence(firstManifest('backend'))] });
+  else if (frontend) found.push({ q: '2.2', v: '4', rotulo: 'Apenas front-end', nivel: 'media', evidencias: [fileEvidence(firstManifest('frontend'))] });
 
-  // 3.2 = 0: a back-end with no front-end project of its own.
-  if (backend && !frontend) found.push({ q: '3.2', v: '0', rotulo: 'Não há front-end próprio', nivel: 'media', evidencias: [fileEvidence(firstManifest('backend'))] });
+  // 3.1 = 1 for a Next.js app whose back-end is its own route handlers.
+  for (const project of ctx.projetos.filter((item) => item.tipo === 'backend')) {
+    const route = ctx.projects.find((item) => item.manifest === project.manifest) && nextServerFile(ctx, project);
+    const own = ctx.deps.filter((dep) => dep.file === project.manifest);
+    if (route && own.some((dep) => dep.name === 'next') && !own.some((dep) => ['express', 'fastify', 'hono', '@nestjs/core', 'koa'].includes(dep.name))) {
+      found.push({ q: '3.1', v: '1', rotulo: 'TypeScript + Node.js (Route Handlers do Next.js)', nivel: 'alta', evidencias: [fileEvidence(route)] });
+    }
+  }
+  // 3.1 = 6 for a stack outside the catalog, at low confidence.
+  for (const project of ctx.projetos.filter((item) => item.tipo === 'outro')) {
+    found.push({ q: '3.1', v: '6', rotulo: `Outro: ${project.linguagem}`, nivel: 'baixa', evidencias: [fileEvidence(project.manifest)] });
+  }
+
+  // 3.2 = 0: a back-end with no front-end project of its own and no server-rendered templates.
+  const templates = ctx.found.some((item) => item.q === '3.2' && item.v === '3');
+  if (backend && !frontend && !templates) found.push({ q: '3.2', v: '0', rotulo: 'Não há front-end próprio', nivel: 'media', evidencias: [fileEvidence(firstManifest('backend'))] });
+
+  // 1.7 = 4: a front-end with no translation files or library.
+  if (frontend && !ctx.found.some((item) => item.q === '1.7')) found.push({ q: '1.7', v: '4', rotulo: 'Apenas um idioma (sem i18n)', nivel: 'media', evidencias: [fileEvidence(firstManifest('frontend'))] });
+
+  // 3.3 and 3.4 from the env sample: the connection URL scheme and managed database keys.
+  for (const file of ctx.files.filter((item) => envSample.test(item))) {
+    const lines = ctx.texts.get(file) ?? [];
+    lines.forEach((line, index) => {
+      const value = line.split('=').slice(1).join('=').trim().replace(/^["']/, '');
+      const scheme = { postgres: '1', postgresql: '1', mysql: '2', mariadb: '2', sqlserver: '3', mssql: '3', file: '4', sqlite: '4', mongodb: '5', 'mongodb+srv': '5' }[value.match(/^([a-z+]+):/i)?.[1]?.toLowerCase()];
+      const rotulos = { 1: 'PostgreSQL', 2: 'MySQL / MariaDB', 3: 'SQL Server', 4: 'SQLite', 5: 'MongoDB' };
+      if (scheme) found.push({ q: '3.3', v: scheme, rotulo: rotulos[scheme], nivel: 'media', evidencias: [evidence(ctx, file, index)] });
+      if (/^(NEON|SUPABASE|PLANETSCALE|TURSO)_/i.test(line)) found.push({ q: '3.4', v: '1', rotulo: 'Gerenciado na cloud', nivel: 'media', evidencias: [evidence(ctx, file, index)] });
+    });
+  }
 
   // 4.2: containers in the repository.
   const dockerfile = ctx.files.find((file) => /(^|\/)Dockerfile[^/]*$/.test(file));
@@ -455,6 +529,10 @@ function structuralSignals(ctx) {
   else if (dockerfile) found.push({ q: '4.2', v: '2', rotulo: 'Docker apenas em produção', nivel: 'media', evidencias: [fileEvidence(dockerfile)] });
   else if (compose) found.push({ q: '4.2', v: '3', rotulo: 'Docker apenas em desenvolvimento', nivel: 'media', evidencias: [fileEvidence(compose)] });
   else if (backend) found.push({ q: '4.2', v: '4', rotulo: 'Sem contêiner', nivel: 'media', evidencias: [fileEvidence(firstManifest('backend'))] });
+
+  // 4.1 = 5: deploy over SSH from the CI.
+  const sshDeploy = ctx.ciSteps.find((step) => /\b(ssh|rsync|scp)\b/.test(step.command));
+  if (sshDeploy) found.push({ q: '4.1', v: '5', rotulo: 'VPS / servidor dedicado', nivel: 'media', evidencias: [evidence(ctx, sshDeploy.file, sshDeploy.line)] });
 
   // 4.4 = 5: only an env sample and no secrets vault.
   const sample = ctx.files.find((file) => envSample.test(file));
@@ -467,6 +545,8 @@ function structuralSignals(ctx) {
     found.push({ q: '5.1', v: '3', rotulo: 'Git Flow', nivel: 'media', evidencias: [{ arquivo: 'git: branches develop e release/*' }] });
   } else if (ctx.git.pessoas12Meses === 1 && branches.length === 1) {
     found.push({ q: '5.1', v: '4', rotulo: 'Apenas main', nivel: 'media', evidencias: [{ arquivo: `git: uma branch (${branches[0]}) e uma pessoa` }] });
+  } else if (ctx.git.pessoas12Meses > 1 && ctx.git.branchPrincipal && branches.length > 1 && !branches.includes('develop')) {
+    found.push({ q: '5.1', v: '2', rotulo: 'GitHub Flow', nivel: 'media', evidencias: [{ arquivo: `git: ${branches.length} branches locais, sem develop` }] });
   }
   const people = ctx.git.pessoas12Meses;
   if (people > 0) {
@@ -494,6 +574,12 @@ function structuralSignals(ctx) {
     found.push({ q: '5.6', v: value === '70' ? '2' : '6', rotulo: value ? `Limite de ${value}%` : 'Limite configurado', nivel: 'alta', evidencias: [evidence(ctx, file, index)] });
   }
 
+  // 5.2 = 5 and 5.6 = 4: code without a CI, and tests without a coverage threshold.
+  const hasCode = ctx.projetos.length > 0;
+  if (hasCode && !ctx.found.some((item) => item.q === '5.2')) found.push({ q: '5.2', v: '5', rotulo: 'Sem CI', nivel: 'media', evidencias: [fileEvidence(ctx.projetos[0].manifest)] });
+  const hasTests = ctx.found.some((item) => item.q === '5.4');
+  if (hasTests && !found.some((item) => item.q === '5.6')) found.push({ q: '5.6', v: '4', rotulo: 'Sem cobertura mínima definida', nivel: 'media', evidencias: [{ arquivo: 'nenhuma configuração de cobertura mínima' }] });
+
   // 5.8: the remote host.
   if (ctx.git.remoto) found.push({ q: '5.8', v: ctx.git.remoto.host, rotulo: ctx.git.remoto.host, nivel: 'alta', evidencias: [{ arquivo: 'git: remote origin' }] });
 
@@ -507,12 +593,27 @@ function ciSteps(ctx) {
   const steps = [];
   for (const [file, lines] of ctx.texts) {
     if (!/^(\.github\/workflows\/[^/]+\.ya?ml|\.gitlab-ci\.ya?ml|azure-pipelines\.ya?ml)$/.test(file)) continue;
-    // A command is a "run:" or "script:" value, or a list item inside a "script:" block (GitLab CI).
+    // A command is a "run:" or "script:" value, each line of a "run: |" block, or a list item inside a
+    // "script:" block (GitLab CI and Azure Pipelines).
     let scriptIndent = null;
+    let blockIndent = null;
     lines.forEach((line, index) => {
       const indent = line.match(/^\s*/)[0].length;
+      if (blockIndent !== null) {
+        if (!line.trim()) return;
+        if (indent > blockIndent) {
+          steps.push({ file, line: index, command: line.trim() });
+          return;
+        }
+        blockIndent = null;
+      }
       const inline = line.match(/^\s*-?\s*(?:run|script):\s*(\S.*)$/);
-      if (inline && !/^[|>]/.test(inline[1])) {
+      if (inline && /^[|>][-+]?\s*$/.test(inline[1])) {
+        blockIndent = indent + (line.trimStart().startsWith('-') ? 2 : 0);
+        scriptIndent = null;
+        return;
+      }
+      if (inline) {
         steps.push({ file, line: index, command: inline[1].trim().replace(/^["']|["']$/g, '') });
         scriptIndent = null;
         return;
@@ -556,21 +657,38 @@ function verificationCommands(ctx) {
   for (const step of ctx.ciSteps) {
     for (const [purpose, pattern] of purposes) {
       if (pattern.test(step.command) && !(purpose === 'Testes' && /e2e/i.test(step.command))) {
-        add(purpose, { comando: step.command, origem: `${step.file}:${step.line + 1}`, nivel: 'alta' });
+        add(purpose, { comando: maskText(step.command), origem: `${step.file}:${step.line + 1}`, nivel: 'alta' });
       }
     }
   }
   const runner = packageRunner(ctx);
-  const scriptPurposes = { test: 'Testes', lint: 'Lint', typecheck: 'Typecheck/build', build: 'Typecheck/build', migrate: 'Migrações' };
+  const scriptPurposes = { test: 'Testes', lint: 'Lint', typecheck: 'Typecheck/build', build: 'Typecheck/build', migrate: 'Migrações', dev: 'Executar localmente', start: 'Executar localmente' };
   for (const script of ctx.scripts) {
     const purpose = scriptPurposes[script.name];
     if (!purpose) continue;
     const prefix = script.dir ? `${runner} --filter ./${script.dir} ` : `${runner} `;
     const call = script.name === 'test' ? `${prefix}test` : `${prefix}run ${script.name}`;
-    add(purpose, { comando: call, origem: `${script.file}:${script.line + 1} (scripts.${script.name} → ${script.command})`, nivel: 'media' });
+    add(purpose, { comando: call, origem: `${script.file}:${script.line + 1} (scripts.${script.name} → ${maskText(script.command)})`, nivel: 'media' });
+  }
+  // Makefile and justfile targets, tox environments, and secret scanning configuration.
+  const targetPurposes = { test: 'Testes', tests: 'Testes', lint: 'Lint', typecheck: 'Typecheck/build', build: 'Typecheck/build', run: 'Executar localmente', dev: 'Executar localmente', migrate: 'Migrações', audit: 'Auditoria de dependências' };
+  for (const [file, lines] of ctx.texts) {
+    const base = path.posix.basename(file);
+    if (base === 'Makefile' || base === 'justfile') {
+      lines.forEach((line, index) => {
+        const target = line.match(/^([a-z][\w-]*)\s*:(?!=)/)?.[1];
+        if (target && targetPurposes[target]) add(targetPurposes[target], { comando: `${base === 'Makefile' ? 'make' : 'just'} ${target}`, origem: `${file}:${index + 1}`, nivel: 'media' });
+      });
+    } else if (base === 'tox.ini') {
+      add('Testes', { comando: 'tox', origem: `${file}:1`, nivel: 'media' });
+    } else if (base === '.pre-commit-config.yaml' && lines.some((line) => /id:\s*gitleaks/.test(line))) {
+      add('Varredura de secrets', { comando: 'pre-commit run gitleaks --all-files', origem: `${file}:${lineOf(lines, /id:\s*gitleaks/) + 1}`, nivel: 'media' });
+    } else if (base === '.gitleaks.toml') {
+      add('Varredura de secrets', { comando: 'gitleaks detect', origem: `${file}:1`, nivel: 'media' });
+    }
   }
   for (const purpose of Object.keys(commands)) commands[purpose].sort((a, b) => levels[b.nivel] - levels[a.nivel]);
-  return Object.fromEntries(Object.entries(commands).sort(([a], [b]) => a.localeCompare(b)));
+  return Object.fromEntries(Object.entries(commands).sort(([a], [b]) => byText(a, b)));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -588,7 +706,7 @@ function readingHints(ctx) {
   };
   const hasCode = ctx.projetos.length > 0;
   if (hasCode) for (const q of readingOnly) add(q);
-  if (ctx.projetos.some((project) => project.tipo === 'backend')) for (const q of ['2.1', '2.4']) add(q);
+  if (ctx.projetos.some((project) => project.tipo === 'backend' || project.tipo === 'outro')) for (const q of ['2.1', '2.4']) add(q);
 
   for (const file of ['README.md', 'readme.md', 'README']) {
     const lines = ctx.texts.get(file);
@@ -634,12 +752,12 @@ function unique(items) {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).sort((a, b) => (a.arquivo ?? '').localeCompare(b.arquivo ?? '') || (a.linha ?? 0) - (b.linha ?? 0));
+  }).sort((a, b) => byText(a.arquivo ?? '', b.arquivo ?? '') || (a.linha ?? 0) - (b.linha ?? 0));
 }
 
 function combine(found) {
   const byQuestion = new Map();
-  for (const item of found) {
+  for (const item of found.filter((entry) => /^\d+\.\d+$/.test(entry.q))) {
     if (!byQuestion.has(item.q)) byQuestion.set(item.q, new Map());
     const options = byQuestion.get(item.q);
     const current = options.get(item.v) ?? { valor: item.v, rotulo: item.rotulo, nivel: 'baixa', evidencias: [] };
@@ -656,7 +774,7 @@ function combine(found) {
       options.set('4', both);
     }
     const list = [...options.values()].map((item) => ({ ...item, evidencias: limited(item.evidencias) }))
-      .sort((a, b) => String(a.valor).localeCompare(String(b.valor), undefined, { numeric: true }));
+      .sort((a, b) => Number(a.valor) - Number(b.valor) || byText(String(a.valor), String(b.valor)));
     if (multiple.has(q)) {
       const nivel = list.reduce((min, item) => (levels[item.nivel] < levels[min] ? item.nivel : min), 'alta');
       signals.push({ pergunta: q, valor: list.map((item) => item.valor), rotulo: list.map((item) => item.rotulo).join(', '), confianca: nivel, evidencias: limited(list.flatMap((item) => item.evidencias)), conflitos: [] });
@@ -698,21 +816,28 @@ function warnings(ctx) {
     if (envFile.test(file) && !envSample.test(file)) list.push({ tipo: 'risco', texto: 'Arquivo .env rastreado pelo Git', arquivo: file });
   }
   if (ctx.projetos.length > 0 && !ctx.signals.some((signal) => signal.pergunta === '5.4')) list.push({ tipo: 'achado', texto: 'Nenhum framework de testes encontrado' });
-  if (ctx.projetos.length > 0 && !ctx.signals.some((signal) => signal.pergunta === '5.2')) list.push({ tipo: 'achado', texto: 'Nenhum CI encontrado' });
+  if (ctx.projetos.length > 0 && !ctx.signals.some((signal) => signal.pergunta === '5.2' && signal.valor !== '5')) list.push({ tipo: 'achado', texto: 'Nenhum CI encontrado' });
+  for (const file of ctx.unreadable) list.push({ tipo: 'achado', texto: 'Manifesto que não deu para ler', arquivo: file });
+  for (const item of ctx.found.filter((entry) => entry.q === 'sem-pergunta')) {
+    list.push({ tipo: 'sem-pergunta', texto: `${item.rotulo} (sem pergunta no init; oferecer na 7.2)`, arquivo: item.evidencias[0]?.arquivo });
+  }
   for (const signal of ctx.signals.filter((item) => item.confianca === 'conflito')) {
     list.push({ tipo: 'ambiguidade', texto: `Respostas em conflito: ${signal.conflitos.map((item) => item.rotulo).join(' e ')}`, pergunta: signal.pergunta });
   }
-  return list.sort((a, b) => a.tipo.localeCompare(b.tipo) || (a.arquivo ?? a.pergunta ?? '').localeCompare(b.arquivo ?? b.pergunta ?? ''));
+  return list.sort((a, b) => byText(a.tipo, b.tipo) || byText(a.arquivo ?? a.pergunta ?? a.texto, b.arquivo ?? b.pergunta ?? b.texto));
 }
 
 function inspect({ raiz, escopo = [] }) {
-  const root = path.resolve(raiz);
-  const allTracked = (git(root, ['ls-files', '-z']) ?? '').split('\0').filter(Boolean);
+  // The repository root, even when --raiz points to a folder inside it: paths and root files are relative to it.
+  const given = path.resolve(raiz);
+  const top = git(given, ['rev-parse', '--show-toplevel'])?.trim();
+  const root = top ? path.resolve(top) : given;
   const { files, beyondLimit } = listFiles(root, escopo);
+  const allTracked = (git(root, ['ls-files', '-z']) ?? '').split('\0').filter(Boolean);
   // .env files other than samples are never read: only their existence matters.
   const readable = files.filter((file) => !envFile.test(file) || envSample.test(file));
   const { texts, large } = readTexts(root, readable);
-  const ctx = { root, files, texts, allTracked };
+  const ctx = { root, files, texts, allTracked, unreadable: [] };
   Object.assign(ctx, parseManifests(ctx));
   ctx.imports = collectImports(ctx);
   ctx.git = gitInfo(root);
@@ -723,13 +848,15 @@ function inspect({ raiz, escopo = [] }) {
   ctx.signals = combine(ctx.found);
   const contratos = ctx.found.filter((item) => item.contrato)
     .map((item) => ({ tipo: item.contrato, caminho: item.arquivo }))
-    .sort((a, b) => a.caminho.localeCompare(b.caminho));
+    .sort((a, b) => byText(a.caminho, b.caminho));
   return {
     versao: 1,
     raiz: root.split(path.sep).join('/'),
     truncado: beyondLimit > 0 || large > 0,
     ...(beyondLimit > 0 || large > 0 ? { foraDoLimite: { arquivos: beyondLimit, grandes: large } } : {}),
     escopo,
+    arquivosLidos: texts.size,
+    submodulos: submodules(ctx),
     git: ctx.git,
     projetos: ctx.projetos.map(({ caminho, tipo, manifest }) => ({ caminho, tipo, manifest })),
     sinais: ctx.signals,
@@ -738,6 +865,12 @@ function inspect({ raiz, escopo = [] }) {
     requerLeitura: readingHints(ctx),
     avisos: warnings(ctx),
   };
+}
+
+// Submodules are not inspected (git ls-files does not enter them); the init offers to inspect them apart.
+function submodules(ctx) {
+  const lines = ctx.texts.get('.gitmodules') ?? [];
+  return lines.map((line) => line.match(/^\s*path\s*=\s*(.+)$/)?.[1]?.trim()).filter(Boolean).sort(byText);
 }
 
 function main() {
