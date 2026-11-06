@@ -60,8 +60,9 @@ A change 1 da adoção (`adocao-entrada-no-comecar`, no #57) leva o padrão a um
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-05
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:3f396b05fb525af3cf8d0e570d6af3013976ad6b2931f470796446baf7729a6a
+- Origem: "Eu aprovo fazer a implementação da inspeção do código e da entrevista por confirmação na adoção do padrão", seguida do comando `/opsx:apply`
