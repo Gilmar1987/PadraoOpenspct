@@ -25,9 +25,9 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
 - **Guarda do clone do store em qualquer agente:** os 10 comandos `/opsx:*` e as skills do fluxo ganham uma guarda
   que vale para qualquer agente, inclusive o Claude Code com o comando expandido. Quando a pasta aberta é o clone
   do store (tem `padrao-openspec/.openspec-store/store.yaml`), o agente para antes de qualquer passo, sem gravar
-  nada, e pede para abrir a pasta do código que declara `store: <id>`. Antes, um agente aberto no clone seguia os
-  comandos da raiz dele e gravava specs, changes e ADRs no `openspec/` do próprio padrão. As regras e o bloco de
-  agentes dizem o mesmo.
+  nada, e pede para abrir a pasta do código que declara `store: <id>`. Vale também na pasta `padrao-openspec/` do
+  clone. Antes, um agente aberto no clone seguia os comandos da raiz dele e gravava o projeto no `openspec/` do
+  próprio padrão. As regras e o bloco de agentes dizem o mesmo.
 
 ### Ações no projeto
 
@@ -36,8 +36,9 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   nova e não mexe nas entradas do projeto. Sem a atualização, os hooks continuam funcionando no Claude Code, mas
   travam os comandos no Copilot CLI. A mesma atualização traz a guarda do clone do store aos comandos e às
   skills do código.
-- No clone do store, atualize a raiz com o padrão novo (o `git pull` do clone), para que os comandos da raiz
-  também tenham a guarda.
+- Só os clones do store criados a partir desta versão têm a guarda nos comandos da raiz e da pasta
+  `padrao-openspec/`. Num clone criado antes, a guarda chega aos comandos da pasta do código pelo `--update`, mas a
+  raiz do clone continua com os comandos antigos.
 - O script de entrada é baixado da release, e o setup e o instalador da adoção chegam com a atualização do
   padrão.
 

@@ -118,9 +118,10 @@ nenhuma delas.
   pedir para reenviar só o comando no início de uma mensagem nova, mostrando o `/opsx:<etapa>`.
   O arquivo do comando lido à mão segue a guarda
   da pasta da sessão, no topo do próprio arquivo;
-- na pasta do clone de um store (a que tem `padrao-openspec/.openspec-store/store.yaml`), em qualquer
-  agente: não seguir os fluxos `/opsx` nem gravar specs, changes ou ADRs, e pedir para abrir a pasta do
-  código, a que declara `store: <id>` no `openspec/config.yaml`, com o `<id>` lido desse arquivo.
+- em qualquer agente, na pasta do clone de um store (a que tem `padrao-openspec/.openspec-store/store.yaml`)
+  ou na pasta `padrao-openspec/` dele (a que tem `.openspec-store/store.yaml`): não seguir os fluxos `/opsx`
+  nem gravar nada em `openspec/`, e pedir para abrir a pasta do código, a que declara `store: <id>` no
+  `openspec/config.yaml`, com o `<id>` lido do `store.yaml`.
 
 Especificamente:
 
