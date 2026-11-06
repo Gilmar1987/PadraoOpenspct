@@ -44,7 +44,8 @@
   - pedir a edição de um arquivo e registrar se houve pergunta e o nome da ferramenta no log do Copilot.
 
   Registrar a versão do Copilot CLI (`copilotVersion` em `~/.copilot/session-state/*/events.jsonl`) e o resultado de cada passo no `verification.md` como cobertura fora da suíte. Verificar com o registro do responsável citado na evidência.
-- [ ] 4.4 Repetir o roteiro da 4.1 com o lançador da 2.5: pasta de teste reinstalada desta branch, `claude -p` com `git commit --allow-empty --no-verify -m teste` (negado, citando o hook commit-msg) e com `git status` (roda). Registrar a versão do Claude Code e o resultado na evidência. Se o gancho não disparar, parar e voltar ao design.
+- [x] 4.4 Repetir o roteiro da 4.1 com o lançador da 2.5: pasta de teste reinstalada desta branch, `claude -p` com `git commit --allow-empty --no-verify -m teste` (negado, citando o hook commit-msg) e com `git status` (roda). Registrar a versão do Claude Code e o resultado na evidência. Se o gancho não disparar, parar e voltar ao design.
+  - Evidência: Claude Code 2.1.243; pasta nova no scratchpad (`roteiro-claude2`) com `git init`, um commit vazio e o padrão instalado pelo `install-skills.mjs` da branch em f966ad8 ("37 installed"; `grep -c 'node -e' .claude/settings.json` → 7), sem registrar store; `claude -p "... git commit --allow-empty --no-verify -m teste" --allowedTools "Bash(git commit:*)"` → `tool_result` "O hook commit-msg do padrão confere a change de cada commit (trailer OpenSpec-Change) e não pode ser pulado nem desligado..." e o `git log` só com `init` (exit 0); `claude -p "... git status --short --branch"` → rodou e devolveu `## master` e os arquivos do padrão (exit 0)
 - [ ] 4.3 Trocar o texto provisório da 3.1 e da 3.2 pelas versões verificadas em 4.4 e 4.2. Verificar com o lint de Markdown (exit 0) e com o `grep` das duas versões nos dois arquivos.
 
 ## 5. Integração
