@@ -657,6 +657,76 @@ jobs:
           expect allow exige-change.mjs "$(write_in src/app.ts)"
           expect allow contexto-de-sessao.mjs "$(session)"
           rm -rf "$w"
+          # Ganchos executáveis por qualquer agente (ADR-0012; requisitos "Ganchos executáveis por qualquer
+          # agente" e "Falha interna do gancho não bloqueia o agente"): o template não usa args, e cada
+          # entrada roda pelo texto do command, como fazem o Claude Code (pelo shell, que expande a
+          # variável) e o Copilot CLI (que substitui o texto ${CLAUDE_PROJECT_DIR}; no Windows, também
+          # pelo PowerShell). A resposta tem de ser a mesma do gancho chamado direto pelo caminho.
+          proj_native=$(cygpath -m "$(pwd)" 2>/dev/null || pwd)
+          node -e '
+            const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            let bad = 0;
+            for (const [event, groups] of Object.entries(s.hooks || {})) for (const g of groups) for (const e of g.hooks || []) {
+              const file = (String(e.command).match(/openspec-padrao\/([a-z-]+\.mjs)/) || [])[1] || "?";
+              if (e.args !== undefined) { console.error(`::error::${event} ${file}: entrada com args, que o Copilot CLI ignora`); bad = 1; }
+              console.log([file, e.command].join("\t"));
+            }
+            process.exit(bad);
+          ' templates/claude-settings.json > "$RUNNER_TEMP/entradas.txt" || fail=1
+          a=$(mktemp -d)
+          git -C "$a" init -q
+          a_native=$(cygpath -m "$a" 2>/dev/null || echo "$a")
+          shell_in() { node -e 'const [tool, command, cwd, agent] = process.argv.slice(1); const p = { tool_name: tool, cwd, tool_input: { command } }; if (agent) p.agent_type = agent; process.stdout.write(JSON.stringify(p));' "$@"; }
+          write_a() { node -e 'const [file_path, cwd, agent] = process.argv.slice(1); const p = { tool_name: "Write", cwd, tool_input: { file_path } }; if (agent) p.agent_type = agent; process.stdout.write(JSON.stringify(p));' "$@"; }
+          casos() {
+            case "$1" in
+              protege-ganchos.mjs) shell_in Bash 'git commit --no-verify -m x' "$a_native"; echo; shell_in Bash 'git status' "$a_native"; echo ;;
+              somente-leitura.mjs) shell_in Bash 'echo x > a.txt' "$a_native" openspec-qa-validator; echo; shell_in Bash 'git status' "$a_native" openspec-qa-validator; echo ;;
+              portao-do-archive.mjs) shell_in Bash 'openspec archive demo' "$a_native"; echo; shell_in Bash 'git status' "$a_native"; echo ;;
+              escopo-de-escrita.mjs) write_a .claude/settings.json "$a_native" openspec-code-implementer; echo; write_a src/app.ts "$a_native" openspec-code-implementer; echo ;;
+              exige-change.mjs) write_a src/app.ts "$a_native"; echo ;;
+              contexto-de-sessao.mjs) node -e 'process.stdout.write(JSON.stringify({ hook_event_name: "SessionStart", source: "startup", cwd: process.argv[1] }))' "$a_native"; echo ;;
+              cobra-evidencia.mjs) node -e 'process.stdout.write(JSON.stringify({ hook_event_name: "Stop", cwd: process.argv[1], stop_hook_active: true }))' "$a_native"; echo ;;
+              *) echo "::error::gancho sem caso no smoke: $1" >&2; return 1 ;;
+            esac
+          }
+          compara() {
+            local via="$1" file="$2" json="$3" got="$4" code="$5" want
+            want=$(printf '%s' "$json" | node "$h/$file")
+            [ "$code" = 0 ] || { echo "::error::$file pelo command ($via) saiu com $code: $json"; fail=1; }
+            [ "$got" = "$want" ] || { echo "::error::$file pelo command ($via) respondeu diferente do gancho direto: $json -> [$got] em vez de [$want]"; fail=1; }
+          }
+          n=0
+          while IFS="$(printf '\t')" read -r file cmd; do
+            n=$((n + 1))
+            casos "$file" > "$RUNNER_TEMP/casos.txt" || { fail=1; continue; }
+            while IFS= read -r json; do
+              [ -n "$json" ] || continue
+              code=0
+              got=$(printf '%s' "$json" | CLAUDE_PROJECT_DIR="$proj_native" bash -c "$cmd") || code=$?
+              compara bash "$file" "$json" "$got" "$code"
+              if [ "$RUNNER_OS" = Windows ]; then
+                code=0
+                got=$(printf '%s' "$json" | powershell -NoProfile -Command "${cmd//'${CLAUDE_PROJECT_DIR}'/$proj_native}") || code=$?
+                compara powershell "$file" "$json" "$(printf '%s' "$got" | tr -d '\r')" "$code"
+              fi
+            done < "$RUNNER_TEMP/casos.txt"
+          done < "$RUNNER_TEMP/entradas.txt"
+          [ "$n" = 7 ] || { echo "::error::o template deveria ter 7 entradas de gancho, tem $n"; fail=1; }
+          rm -rf "$a"
+          # Exceção interna: o gancho sai com 0, avisa na saída de erro com o nome dele e não responde nada.
+          t=$(mktemp -d)
+          cp "$h"/*.mjs "$t"/
+          printf "import './comum.mjs';\nthrow new Error('falha injetada');\n" > "$t/explode.mjs"
+          printf "import './comum.mjs';\nPromise.reject(new Error('rejeição injetada'));\n" > "$t/rejeita.mjs"
+          for g in explode rejeita; do
+            code=0
+            out=$(printf '{}' | node "$t/$g.mjs" 2> "$RUNNER_TEMP/erro.txt") || code=$?
+            [ "$code" = 0 ] || { echo "::error::$g.mjs com erro interno saiu com $code, e não com 0"; fail=1; }
+            [ -z "$out" ] || { echo "::error::$g.mjs com erro interno respondeu: $out"; fail=1; }
+            grep -qF "[$g] erro interno" "$RUNNER_TEMP/erro.txt" || { echo "::error::$g.mjs não avisou o erro interno: $(cat "$RUNNER_TEMP/erro.txt")"; fail=1; }
+          done
+          rm -rf "$t"
           exit $fail
 
       - name: Smoke test do instalador
@@ -940,6 +1010,23 @@ jobs:
           node scripts/install-skills.mjs "$u" --in-place > /dev/null
           grep -qF 'echo meu-bash' "$u/.claude/settings.json"
           grep -qF 'escopo-de-escrita.mjs' "$u/.claude/settings.json"
+          # Requisito "Troca das entradas de gancho na forma antiga" (ADR-0012): nenhuma entrada do padrão
+          # fica com args, e cada um dos 7 ganchos aparece uma vez.
+          node -e '
+            const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            const seen = {};
+            let bad = 0;
+            for (const groups of Object.values(s.hooks || {})) for (const g of groups) for (const e of g.hooks || []) {
+              const text = [e.command, ...(e.args || [])].join(" ");
+              const file = (text.match(/openspec-padrao\/([a-z-]+\.mjs)/) || [])[1];
+              if (!file) continue;
+              seen[file] = (seen[file] || 0) + 1;
+              if (e.args !== undefined) { console.error(`::error::${file} ficou com args depois da atualização`); bad = 1; }
+            }
+            const files = Object.keys(seen);
+            if (files.length !== 7 || files.some((f) => seen[f] !== 1)) { console.error(`::error::ganchos do padrão depois da atualização: ${JSON.stringify(seen)}`); bad = 1; }
+            process.exit(bad);
+          ' "$u/.claude/settings.json"
           cp "$u/.claude/settings.json" "$RUNNER_TEMP/misto.json"
           node scripts/install-skills.mjs "$u" > /dev/null
           cmp "$RUNNER_TEMP/misto.json" "$u/.claude/settings.json"
