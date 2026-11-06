@@ -14,11 +14,21 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   commit, HEAD destacado ou operação em andamento. Depois, cria a branch `chore/adota-padrao-openspec` (ou a do
   `--branch`), clona o store, roda o setup e commita nela só os arquivos do padrão, para revisão por PR. O
   manifesto `.openspec-padrao.json` ganha a marca `"adoption": true`, mantida nas atualizações.
+- **Ganchos em qualquer agente:** os hooks do padrão no `.claude/settings.json` passam de `"command": "node"`
+  com o caminho em `"args"` para um comando único, `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/<hook>.mjs"`
+  ([ADR-0012](openspec/adrs/0012-ganchos-em-forma-neutra-de-agente.md)). O Copilot CLI do VS Code lê esse
+  arquivo, mas ignora o `args`; antes, todo hook falhava nele e todo comando de shell era negado. Um erro interno
+  de um hook passa a liberar a chamada com um aviso, em vez de travar o agente. O guia e o `COMECE-AQUI.md`
+  dizem em quais agentes os hooks foram verificados.
 
 ### Ações no projeto
 
-- Nenhuma. O script de entrada é baixado da release, e o setup e o instalador chegam com a
-  atualização do padrão.
+- Atualize o padrão com `--update` (pelo PR de atualização ou por "Atualizar à mão" em
+  `docs/openspec-padrao.md`): o instalador troca as 7 entradas de hook do `.claude/settings.json` pela forma
+  nova e não mexe nas entradas do projeto. Sem a atualização, os hooks continuam funcionando no Claude Code, mas
+  travam os comandos no Copilot CLI.
+- O script de entrada é baixado da release, e o setup e o instalador da adoção chegam com a atualização do
+  padrão.
 
 ## 1.18.0 — 2026-11-05
 

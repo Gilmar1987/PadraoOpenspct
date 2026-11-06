@@ -214,7 +214,10 @@ Fonte em `padrao-openspec/.github/agents/`, espelhados em `.github/agents/`:
 
 Fonte em `padrao-openspec/.claude/agents/` e `padrao-openspec/.claude/hooks/openspec-padrao/`, com as entradas do
 `.claude/settings.json` em `padrao-openspec/templates/claude-settings.json`
-([ADR-0006](openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)). Cada papel do Copilot tem um
+([ADR-0012](openspec/adrs/0012-ganchos-em-forma-neutra-de-agente.md), que substitui a
+[ADR-0006](openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)). Cada entrada de hook é um
+comando único, sem `args`, para que outros agentes que leem o arquivo, como o Copilot CLI, também a executem.
+Cada papel do Copilot tem um
 subagente `openspec-<papel>` (o `business-requirements-ingestor` vira `openspec-requirements-ingestor`), e a CI
 confere a paridade. Dois papéis existem só no Claude Code:
 

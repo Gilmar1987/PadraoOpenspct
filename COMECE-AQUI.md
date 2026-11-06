@@ -296,13 +296,17 @@ Claude Code isso não vale: digite o comando sozinho, no início da mensagem (no
 expandido, e o agente pede para reenviá-lo). Se o `/opsx` não aparece, a sessão foi aberta fora da
 pasta do código, e o agente para e pede para abri-la.
 
-| Agente | Arquivo que lê | Como rodar o fluxo |
-|---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` |
-| Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
-| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
-| Gemini CLI | `GEMINI.md` | Idem |
-| Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem |
+| Agente | Arquivo que lê | Como rodar o fluxo | Ganchos do padrão |
+|---|---|---|---|
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code (versão: verificação pendente) |
+| Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" | Regras e portão; ganchos não verificados |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Verificados no Copilot CLI (versão: verificação pendente), no VS Code; ganchos de papel não verificados |
+| Gemini CLI | `GEMINI.md` | Idem | Regras e portão; ganchos não verificados |
+| Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem | Não se aplicam: o Amazon Q só tem ganchos de contexto; valem as regras e o portão |
+| Trae | `AGENTS.md` | Idem | Regras e portão; ganchos não verificados |
+
+Os ganchos do padrão são os hooks do `.claude/settings.json` que conferem a evidência das tarefas, o
+archive pelo portão e os ganchos do Git (veja `docs/openspec-padrao.md`).
 
 ## 5. Sem o script
 

@@ -83,7 +83,11 @@ seção "Avaliação do validador" do relatório; o `/opsx:verify` exige "médio
 ## Camada do Claude Code
 
 No Claude Code, o padrão também impõe limites por mecanismo, e não só por instrução
-([ADR-0006](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/openspec/adrs/0006-camada-do-claude-code-por-entradas-gerenciadas.md)).
+([ADR-0012](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/openspec/adrs/0012-ganchos-em-forma-neutra-de-agente.md)).
+Os hooks ficam registrados no `.claude/settings.json` como um comando único
+(`node "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/<hook>.mjs"`), que outros agentes que leem
+esse arquivo, como o Copilot CLI, também executam. Um erro interno de um hook libera a chamada com um
+aviso, e nunca trava o agente.
 
 **Subagentes** em `.claude/agents/openspec-*.md`, um por papel, com ferramentas e modelo próprios:
 
@@ -145,7 +149,8 @@ Avisos:
   comando por outro caminho (o caminho absoluto de outro interpretador, uma expansão de variável,
   `$( )`) pode escapar. As regras
   de `docs/openspec-regras.md` continuam valendo.
-- **Outros agentes** não recebem esta camada; para eles valem os blocos de instrução e o portão.
+- **Outros agentes:** a coluna "Ganchos do padrão" da tabela de [Usar com outros agentes](#usar-com-outros-agentes)
+  diz em quais agentes os hooks foram verificados. Onde não foram, valem os blocos de instrução e o portão.
 - **Versão:** os hooks de papel dependem do campo `agent_type`, que o Claude Code envia nas chamadas
   de subagente; o roteiro abaixo foi validado no Claude Code 2.1.243. Sem esse campo, os hooks de papel
   liberam tudo sem aviso: repita o passo 1 do roteiro no ambiente que o time usa (terminal, VS Code).
@@ -179,13 +184,18 @@ um bloco entre `<!-- BEGIN:openspec-padrao -->` e `<!-- END:openspec-padrao -->`
 instrução que ele lê. O padrão só altera o texto entre os marcadores; escreva instruções próprias fora
 deles.
 
-| Agente | Arquivo que lê | Como rodar o fluxo |
-|---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` |
-| Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" |
-| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel |
-| Gemini CLI | `GEMINI.md` | Idem |
-| Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem |
+| Agente | Arquivo que lê | Como rodar o fluxo | Ganchos do padrão |
+|---|---|---|---|
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code (versão: verificação pendente) |
+| Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" | Regras e portão; ganchos não verificados |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Verificados no Copilot CLI (versão: verificação pendente), no VS Code; ganchos de papel não verificados |
+| Gemini CLI | `GEMINI.md` | Idem | Regras e portão; ganchos não verificados |
+| Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem | Não se aplicam: o Amazon Q só tem ganchos de contexto; valem as regras e o portão |
+| Trae | `AGENTS.md` | Idem | Regras e portão; ganchos não verificados |
+
+Os ganchos do padrão ficam no `.claude/settings.json`. Um agente só consta como verificado depois de um
+roteiro real registrado no `verification.md` de uma change do padrão. No Windows sem Git Bash, os ganchos
+não foram verificados no Claude Code.
 
 Apagar um desses arquivos não quebra nada, mas a próxima atualização do padrão o recria.
 
