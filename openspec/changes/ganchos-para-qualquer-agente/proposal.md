@@ -62,8 +62,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-05
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:929b371be1a8d6b89820ffc196a2f90b8d361ba4a6de02821d38f2eb8e909be3
+- Origem: "Eu aprovo fazer a implementação dos ganchos do padrão compatíveis com qualquer agente", seguida do comando `/opsx:apply`
