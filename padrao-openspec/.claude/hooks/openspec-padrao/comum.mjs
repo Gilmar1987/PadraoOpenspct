@@ -1,13 +1,28 @@
-// Shared helpers for the standard's Claude Code hooks (ADR-0006). A hook reads one JSON payload on
-// stdin and answers on stdout; printing nothing lets the tool call or the stop go ahead.
+// Shared helpers for the standard's hooks (ADR-0012). A hook reads one JSON payload on stdin and
+// answers on stdout; printing nothing lets the tool call or the stop go ahead.
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
+// An internal error ends the hook with exit 0 and a warning on stderr, never with another exit code:
+// some agents (the Copilot CLI) deny the tool when a hook fails, and a defect of the standard must not
+// stall the conversation. Denying or asking happens only through the JSON answer on stdout. The hooks
+// run through `node -e`, so the name comes from readPayload; process.argv[1] is only a fallback.
+let currentHook = process.argv[1] ? path.basename(process.argv[1], '.mjs') : 'gancho';
+function letThrough(error) {
+  const hookName = currentHook;
+  const message = error instanceof Error ? error.message : String(error);
+  process.stderr.write(`[${hookName}] erro interno: ${message}; a chamada segue sem checagem.\n`);
+  process.exit(0);
+}
+process.on('uncaughtException', letThrough);
+process.on('unhandledRejection', letThrough);
+
 // Returns the parsed payload, or null when stdin is empty or not JSON. A hook that cannot read its
 // input lets the call through: blocking on a broken environment would stall every conversation.
 export function readPayload(hookName) {
+  currentHook = hookName;
   let raw = '';
   try {
     raw = readFileSync(0, 'utf8');

@@ -657,6 +657,107 @@ jobs:
           expect allow exige-change.mjs "$(write_in src/app.ts)"
           expect allow contexto-de-sessao.mjs "$(session)"
           rm -rf "$w"
+          # Ganchos executáveis por qualquer agente (ADR-0012; requisitos "Ganchos executáveis por qualquer
+          # agente" e "Falha interna do gancho não bloqueia o agente"): o template não usa args, e cada
+          # entrada roda pelo texto do command, sem nenhuma substituição, como fazem o Claude Code (pelo
+          # Git Bash, com CLAUDE_PROJECT_DIR no ambiente) e o Copilot CLI (no Windows, pelo PowerShell).
+          # Cenários "Gancho rodado pelo Git Bash" (variável definida, pasta atual fora do projeto) e
+          # "Gancho rodado pelo PowerShell" (com a variável e sem ela, na pasta do projeto). A resposta
+          # tem de ser a mesma do gancho chamado direto pelo caminho.
+          proj_native=$(cygpath -m "$(pwd)" 2>/dev/null || pwd)
+          proj_win=$(cygpath -w "$(pwd)" 2>/dev/null || pwd)
+          tab="$(printf '\t')"
+          node -e '
+            const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            let bad = 0;
+            for (const [event, groups] of Object.entries(s.hooks || {})) for (const g of groups) for (const e of g.hooks || []) {
+              const file = (String(e.command).match(/openspec-padrao\/([a-z-]+\.mjs)/) || [])[1] || "?";
+              if (e.args !== undefined) { console.error(`::error::${event} ${file}: entrada com args, que o Copilot CLI ignora`); bad = 1; }
+              console.log([file, e.command].join("\t"));
+            }
+            process.exit(bad);
+          ' templates/claude-settings.json > "$RUNNER_TEMP/entradas.txt" || fail=1
+          a=$(mktemp -d)
+          git -C "$a" init -q
+          a_native=$(cygpath -m "$a" 2>/dev/null || echo "$a")
+          shell_in() { node -e 'const [tool, command, cwd, agent] = process.argv.slice(1); const p = { tool_name: tool, cwd, tool_input: { command } }; if (agent) p.agent_type = agent; process.stdout.write(JSON.stringify(p));' "$@"; }
+          write_a() { node -e 'const [file_path, cwd, agent] = process.argv.slice(1); const p = { tool_name: "Write", cwd, tool_input: { file_path } }; if (agent) p.agent_type = agent; process.stdout.write(JSON.stringify(p));' "$@"; }
+          # Cada caso sai como "<neg|lib><TAB><payload>": neg exige uma negação ou um pedido de
+          # confirmação na resposta, para a comparação não passar com duas respostas vazias.
+          neg() { printf 'neg%s' "$tab"; "$@"; echo; }
+          lib() { printf 'lib%s' "$tab"; "$@"; echo; }
+          casos() {
+            case "$1" in
+              protege-ganchos.mjs) neg shell_in Bash 'git commit --no-verify -m x' "$a_native"; lib shell_in Bash 'git status' "$a_native" ;;
+              somente-leitura.mjs) neg shell_in Bash 'echo x > a.txt' "$a_native" openspec-qa-validator; lib shell_in Bash 'git status' "$a_native" openspec-qa-validator ;;
+              portao-do-archive.mjs) neg shell_in Bash 'openspec archive demo' "$a_native"; lib shell_in Bash 'git status' "$a_native" ;;
+              escopo-de-escrita.mjs) neg write_a .claude/settings.json "$a_native" openspec-code-implementer; lib write_a src/app.ts "$a_native" openspec-code-implementer ;;
+              exige-change.mjs) lib write_a src/app.ts "$a_native" ;;
+              contexto-de-sessao.mjs) lib node -e 'process.stdout.write(JSON.stringify({ hook_event_name: "SessionStart", source: "startup", cwd: process.argv[1] }))' "$a_native" ;;
+              cobra-evidencia.mjs) lib node -e 'process.stdout.write(JSON.stringify({ hook_event_name: "Stop", cwd: process.argv[1], stop_hook_active: true }))' "$a_native" ;;
+              *) echo "::error::gancho sem caso no smoke: $1" >&2; return 1 ;;
+            esac
+          }
+          compara() {
+            local via="$1" file="$2" json="$3" got="$4" code="$5" kind="$6" want
+            want=$(printf '%s' "$json" | node "$h/$file") || { echo "::error::$file chamado direto falhou: $json"; fail=1; return 0; }
+            if [ "$kind" = neg ]; then
+              case "$want" in *'"deny"'*|*'"ask"'*) ;; *) echo "::error::$file deveria negar ou perguntar: $json -> [$want]"; fail=1 ;; esac
+            fi
+            [ "$code" = 0 ] || { echo "::error::$file pelo command ($via) saiu com $code: $json"; fail=1; }
+            [ "$got" = "$want" ] || { echo "::error::$file pelo command ($via) respondeu diferente do gancho direto: $json -> [$got] em vez de [$want]"; fail=1; }
+          }
+          n=0
+          while IFS="$tab" read -r file cmd; do
+            n=$((n + 1))
+            casos "$file" > "$RUNNER_TEMP/casos.txt" || { fail=1; continue; }
+            while IFS="$tab" read -r kind json; do
+              [ -n "$json" ] || continue
+              code=0
+              got=$(cd "$a" && printf '%s' "$json" | CLAUDE_PROJECT_DIR="$proj_native" bash -c "$cmd") || code=$?
+              compara bash "$file" "$json" "$got" "$code" "$kind"
+              if [ "$RUNNER_OS" = Windows ]; then
+                code=0
+                got=$(cd "$a" && printf '%s' "$json" | CLAUDE_PROJECT_DIR="$proj_win" powershell -NoProfile -Command "$cmd") || code=$?
+                compara "powershell com a variável" "$file" "$json" "$(printf '%s' "$got" | tr -d '\r')" "$code" "$kind"
+                code=0
+                got=$(printf '%s' "$json" | env -u CLAUDE_PROJECT_DIR powershell -NoProfile -Command "$cmd") || code=$?
+                compara "powershell sem a variável" "$file" "$json" "$(printf '%s' "$got" | tr -d '\r')" "$code" "$kind"
+              fi
+            done < "$RUNNER_TEMP/casos.txt"
+          done < "$RUNNER_TEMP/entradas.txt"
+          [ "$n" = 7 ] || { echo "::error::o template deveria ter 7 entradas de gancho, tem $n"; fail=1; }
+          rm -rf "$a"
+          # Exceção interna: o gancho sai com 0, avisa na saída de erro com o nome dele e não responde nada,
+          # chamado direto e pelo lançador do template (bash e, no Windows, PowerShell), como os agentes o rodam.
+          tp=$(mktemp -d)
+          t="$tp/.claude/hooks/openspec-padrao"
+          mkdir -p "$t"
+          cp "$h"/*.mjs "$t"/
+          tp_native=$(cygpath -m "$tp" 2>/dev/null || echo "$tp")
+          tp_win=$(cygpath -w "$tp" 2>/dev/null || echo "$tp")
+          printf "import { readPayload } from './comum.mjs';\nreadPayload('explode');\nthrow new Error('falha injetada');\n" > "$t/explode.mjs"
+          printf "import { readPayload } from './comum.mjs';\nreadPayload('rejeita');\nPromise.reject(new Error('rejeição injetada'));\n" > "$t/rejeita.mjs"
+          lancador=$(head -n 1 "$RUNNER_TEMP/entradas.txt" | cut -f 2)
+          interno() {
+            local g="$1" via="$2" out code=0
+            case "$via" in
+              direto) out=$(printf '{}' | node "$t/$g.mjs" 2> "$RUNNER_TEMP/erro.txt") || code=$? ;;
+              bash) out=$(cd "$a_fora" && printf '{}' | CLAUDE_PROJECT_DIR="$tp_native" bash -c "${lancador//openspec-padrao\/[a-z-]*.mjs/openspec-padrao/$g.mjs}" 2> "$RUNNER_TEMP/erro.txt") || code=$? ;;
+              powershell) out=$(cd "$a_fora" && printf '{}' | CLAUDE_PROJECT_DIR="$tp_win" powershell -NoProfile -Command "${lancador//openspec-padrao\/[a-z-]*.mjs/openspec-padrao/$g.mjs}" 2> "$RUNNER_TEMP/erro.txt") || code=$? ;;
+            esac
+            [ "$code" = 0 ] || { echo "::error::$g.mjs ($via) com erro interno saiu com $code, e não com 0: $(cat "$RUNNER_TEMP/erro.txt")"; fail=1; }
+            [ -z "$out" ] || { echo "::error::$g.mjs ($via) com erro interno respondeu: $out"; fail=1; }
+            grep -qF "[$g] erro interno" "$RUNNER_TEMP/erro.txt" || { echo "::error::$g.mjs ($via) não avisou o erro interno com o nome: $(cat "$RUNNER_TEMP/erro.txt")"; fail=1; }
+          }
+          a_fora=$(mktemp -d)
+          for g in explode rejeita; do
+            interno "$g" direto
+            case "$lancador" in *'node -e'*) ;; *) echo "::error::a primeira entrada do template não é o lançador node -e: $lancador"; fail=1; continue ;; esac
+            interno "$g" bash
+            [ "$RUNNER_OS" != Windows ] || interno "$g" powershell
+          done
+          rm -rf "$tp" "$a_fora"
           exit $fail
 
       - name: Smoke test do instalador
@@ -940,9 +1041,51 @@ jobs:
           node scripts/install-skills.mjs "$u" --in-place > /dev/null
           grep -qF 'echo meu-bash' "$u/.claude/settings.json"
           grep -qF 'escopo-de-escrita.mjs' "$u/.claude/settings.json"
+          # Requisito "Troca das entradas de gancho na forma antiga" (ADR-0012): nenhuma entrada do padrão
+          # fica com args, e cada um dos 7 ganchos aparece uma vez.
+          sem_args() {
+            node -e '
+              const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+              const seen = {};
+              let bad = 0;
+              for (const groups of Object.values(s.hooks || {})) for (const g of groups) for (const e of g.hooks || []) {
+                const text = [e.command, ...(e.args || [])].join(" ");
+                const file = (text.match(/openspec-padrao\/([a-z-]+\.mjs)/) || [])[1];
+                if (!file) continue;
+                seen[file] = (seen[file] || 0) + 1;
+                if (e.args !== undefined) { console.error(`::error::${file} ficou com args depois da atualização`); bad = 1; }
+              }
+              const files = Object.keys(seen);
+              if (files.length !== 7 || files.some((f) => seen[f] !== 1)) { console.error(`::error::ganchos do padrão depois da atualização: ${JSON.stringify(seen)}`); bad = 1; }
+              process.exit(bad);
+            ' "$1"
+          }
+          sem_args "$u/.claude/settings.json"
           cp "$u/.claude/settings.json" "$RUNNER_TEMP/misto.json"
           node scripts/install-skills.mjs "$u" > /dev/null
           cmp "$RUNNER_TEMP/misto.json" "$u/.claude/settings.json"
+          rm -rf "$u"
+          # Cenário "Atualização de um projeto da v1.18.0": o settings.json inteiro daquela versão (as 7
+          # entradas com args, em 4 grupos), com um hook do projeto no grupo Bash|PowerShell. Depois do
+          # --in-place, cada gancho aparece uma vez e sem args, e o hook do projeto continua.
+          u="$(mktemp -d)"
+          git -C "$u" init -q
+          mkdir -p "$u/.claude"
+          node -e '
+            const s = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            for (const groups of Object.values(s.hooks)) for (const g of groups) {
+              g.hooks = g.hooks.map((e) => {
+                const file = e.command.match(/openspec-padrao\/([a-z-]+\.mjs)/)[1];
+                return { type: e.type, command: "node", args: ["${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/" + file], timeout: e.timeout };
+              });
+              if (g.matcher === "Bash|PowerShell") g.hooks.push({ type: "command", command: "echo meu-bash-v118" });
+            }
+            process.stdout.write(JSON.stringify(s, null, 2) + "\n");
+          ' templates/claude-settings.json > "$u/.claude/settings.json"
+          grep -c '"args"' "$u/.claude/settings.json" | grep -qx 7
+          node scripts/install-skills.mjs "$u" --in-place > /dev/null
+          grep -qF 'echo meu-bash-v118' "$u/.claude/settings.json"
+          sem_args "$u/.claude/settings.json"
           rm -rf "$u"
           # JSON inválido: erro e nada escrito.
           q="$(mktemp -d)"
