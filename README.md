@@ -114,6 +114,12 @@ store e registre a pasta `padrao-openspec` dele com esse id:
 `openspec store register <pasta-do-store>\padrao-openspec --id <id> --yes`
 (veja [Sem o script](COMECE-AQUI.md#5-sem-o-script)).
 
+Quem tem um projeto com código e histórico que nunca usou o padrão roda o script no modo adoção
+(`node comecar.mjs --modo adotar`): ele recusa árvore suja e projetos que já usam o OpenSpec, cria a
+branch `chore/adota-padrao-openspec` no código, roda o setup com a marca `"adoption": true` no
+`.openspec-padrao.json` e commita só os arquivos do padrão nessa branch, para revisão por PR (veja
+[Projeto que nunca usou o padrão](COMECE-AQUI.md#projeto-que-nunca-usou-o-padrão)).
+
 Sem registrar o store (por exemplo, em CI), troque `--register-id <projeto>` por
 `--no-register`. O setup mostra ao final o comando de registro e a linha `store:` a
 declarar quando você quiser ligar os dois repositórios. Use `--target agents` ou

@@ -3,8 +3,8 @@
 > **Não clone este repositório para começar.** Baixe e rode o script de entrada: ele pergunta o
 > que você vai fazer e faz o único clone necessário, já na pasta e na versão certas.
 
-Guia para quem vai trabalhar com o padrão OpenSpec do PadraoOpenspct, num projeto novo ou num
-projeto que já usa o padrão. O [README](README.md) é a referência completa.
+Guia para quem vai trabalhar com o padrão OpenSpec do PadraoOpenspct, num projeto novo, num
+projeto que já usa o padrão ou num projeto que já existe e nunca usou o padrão. O [README](README.md) é a referência completa.
 
 ## 1. Antes de começar
 
@@ -25,6 +25,7 @@ E peça ao tech lead, antes de começar:
 |---|---|
 | Vou criar um projeto que ainda não existe | O nome do projeto; quem responde a entrevista do `/opsx:init` (visão, arquitetura, stack); permissão para criar os dois repositórios no GitHub e mudar as configurações de Actions |
 | Vou trabalhar num projeto que já usa o padrão | A URL do repositório de código e a URL do repositório do store, com acesso aos dois |
+| Vou adotar o padrão num projeto que já existe e nunca o usou | O caminho ou a URL do repositório de código, com permissão para criar uma branch e abrir um PR; quem responde a entrevista do `/opsx:init` |
 
 Na dúvida, pergunte se o projeto já tem um repositório de store. Se tem, é um projeto em andamento.
 
@@ -66,6 +67,7 @@ Conferindo o ambiente...
 O que você vai fazer?
   1) Criar um projeto novo
   2) Entrar num projeto que já usa o padrão
+  3) Adotar o padrão num projeto que já existe
 > 1
 Pasta onde os repositórios vão ficar [C:\openspec]: (Enter)
 Nome do projeto, como as pessoas o chamam: Livraria Online
@@ -117,6 +119,7 @@ Exemplo com as URLs que o tech lead passou:
 O que você vai fazer?
   1) Criar um projeto novo
   2) Entrar num projeto que já usa o padrão
+  3) Adotar o padrão num projeto que já existe
 > 2
 Pasta onde os repositórios vão ficar [C:\openspec]: (Enter)
 URL do repositório de código: https://github.com/empresa/livraria-online
@@ -146,6 +149,53 @@ Pronto. O projeto já está inicializado: não rode /opsx:init.
 Siga para a [Primeira change](#4-primeira-change). Se o projeto tiver uma atualização do padrão
 pendente, ela chega por PR no repositório de código; não atualize à mão no primeiro dia.
 
+### Projeto que nunca usou o padrão
+
+Para um projeto que já tem código e histórico no Git, mas nunca usou o OpenSpec nem o padrão,
+escolha a opção 3. O script cria uma **branch de adoção** no código, a partir da branch atual, e
+deixa nela só os arquivos do padrão. A adoção vira um PR revisável, sem misturar o trabalho em curso.
+
+```text
+O que você vai fazer?
+  1) Criar um projeto novo
+  2) Entrar num projeto que já usa o padrão
+  3) Adotar o padrão num projeto que já existe
+> 3
+Código existente: caminho local ou URL do repositório: C:\repos\loja
+Pasta onde os repositórios vão ficar [C:\repos]: (Enter)
+Nome do projeto, como as pessoas o chamam [loja]: Loja
+Id do projeto, usado nas pastas e no store [loja]: (Enter)
+
+Resumo:
+  - Código: C:\repos\loja (repositório existente, branch atual: main, 1284 commits)
+  - Branch de adoção no código: chore/adota-padrao-openspec (criada a partir de main)
+  - Store: C:\repos\loja-openspec (clone da release vX.Y.Z de https://github.com/Gilmar1987/PadraoOpenspct, branch main)
+  - Setup: comandos /opsx:*, skills, agentes e hooks no código; store registrado como "loja"; código marcado como adotado
+  - Commit: só os arquivos do padrão, na branch de adoção (perguntado no fim)
+
+Confirmar? [S/n]: (Enter)
+```
+
+No fim, abra a pasta do código como workspace, rode o `/opsx:init` e, depois dele, abra um PR da
+branch de adoção para a branch principal. O script não faz push nem abre o PR.
+
+A pasta base sugerida é a que contém o código, e o store fica ao lado dele. Com uma URL no lugar do
+caminho, o script clona o código na pasta base. Para usar outro nome de
+branch, passe `--branch <nome>`. Arquivos não rastreados não impedem a adoção: o resumo os lista,
+e eles ficam fora do commit. O script para sem alterar nada quando:
+
+| Situação | O que fazer |
+|---|---|
+| O código já declara um store (`store:` no `openspec/config.yaml`) | Use a opção 2 |
+| O código usa o OpenSpec sem o padrão (`openspec/` sem `store:`) | Esse caso não é coberto pela adoção: fale com o tech lead sobre levar as specs para um store do padrão |
+| A pasta não é um repositório Git, ou não tem commits | Faça o primeiro commit do código e rode de novo |
+| Há arquivos rastreados com alterações sem commit | Faça commit ou stash e rode de novo |
+| HEAD destacado, ou rebase, merge, cherry-pick ou revert em andamento | Volte para uma branch e termine ou cancele a operação |
+| A branch de adoção já existe | Apague-a ou use `--branch` |
+| A pasta informada é uma subpasta do repositório | Informe a raiz do repositório de código |
+| A pasta base fica dentro do código (o store ficaria dentro do repositório) | Escolha uma pasta fora do código, por exemplo a que o contém |
+| A pasta do store (`<id>-openspec`) já existe, ou o id já está registrado | Escolha outro id ou outra pasta base |
+
 ### Sem perguntas
 
 Toda pergunta tem uma opção, útil em automações ou para quem já sabe as respostas
@@ -154,6 +204,7 @@ Toda pergunta tem uma opção, útil em automações ou para quem já sabe as re
 ```powershell
 node comecar.mjs --modo novo --pasta D:\Trabalho --nome "Livraria Online" --id livraria-online
 node comecar.mjs --modo existente --url-codigo <url-do-codigo> --url-store <url-do-store>
+node comecar.mjs --modo adotar --pasta C:\repos --codigo C:\repos\loja --nome "Loja" --id loja
 ```
 
 ## 3. Depois do script, no projeto novo

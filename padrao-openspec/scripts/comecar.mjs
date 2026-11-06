@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 // Entry point for a developer who only has the standard's link. Downloaded alone from the
-// latest release, it creates a new project (one clone of the standard, at the latest tag) or
-// joins a project in progress (clones its code and store and registers the store).
+// latest release, it creates a new project (one clone of the standard, at the latest tag), joins a
+// project in progress (clones its code and store and registers the store) or adopts the standard in
+// existing code that never used it (on a branch of its own).
 
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -20,19 +21,23 @@ const minGit = [2, 28];
 function usage() {
   console.log(`Uso: node comecar.mjs [opções]
 
-Cria um projeto novo com o padrão OpenSpec ou entra num projeto que já usa o padrão.
+Cria um projeto novo com o padrão OpenSpec, entra num projeto que já usa o padrão ou adota o
+padrão num projeto que já existe.
 Sem opções, o script pergunta tudo. Sem terminal interativo, informe as respostas por opção.
 
 Opções:
-  --modo <novo|existente>   Projeto novo ou projeto em andamento
+  --modo <novo|existente|adotar>
+                            Projeto novo, projeto em andamento ou adoção num projeto existente
   --pasta <dir>             Pasta onde os repositórios ficam (sugestão: a pasta atual)
-  --nome <texto>            Projeto novo: nome do projeto
-  --id <id>                 Projeto novo: id usado nas pastas e no store (sugestão: derivado do nome)
-  --codigo <dir>            Projeto novo: pasta do código já criada por um gerador de projeto
+  --nome <texto>            Projeto novo e adoção: nome do projeto
+  --id <id>                 Projeto novo e adoção: id usado nas pastas e no store (sugestão: derivado do nome)
+  --codigo <dir|url>        Projeto novo: pasta do código já criada por um gerador de projeto;
+                            adoção: pasta ou URL do repositório do código existente
+  --branch <nome>           Adoção: branch criada no código (padrão: chore/adota-padrao-openspec)
   --url-codigo <url>        Projeto em andamento: URL do repositório de código
   --url-store <url>         Projeto em andamento: URL do repositório do store
   --yes                     Não pedir confirmações
-  --sem-commit              Projeto novo: não fazer o commit inicial do código e do store
+  --sem-commit              Projeto novo e adoção: não fazer o commit do código e do store
   --origem <url-ou-pasta>   Repositório do padrão (padrão: ${defaultSource})
   --tag <vX.Y.Z>            Release do padrão (padrão: a mais recente)
   -h, --help                Mostra esta ajuda`);
@@ -40,12 +45,12 @@ Opções:
 
 function parseArgs(args) {
   const options = {
-    modo: null, pasta: null, nome: null, id: null, codigo: null, urlCodigo: null, urlStore: null,
+    modo: null, pasta: null, nome: null, id: null, codigo: null, urlCodigo: null, urlStore: null, branch: null,
     yes: false, semCommit: false, origem: defaultSource, tag: null,
   };
   const valued = {
     '--modo': 'modo', '--pasta': 'pasta', '--nome': 'nome', '--id': 'id', '--codigo': 'codigo',
-    '--url-codigo': 'urlCodigo', '--url-store': 'urlStore', '--origem': 'origem', '--tag': 'tag',
+    '--url-codigo': 'urlCodigo', '--url-store': 'urlStore', '--origem': 'origem', '--tag': 'tag', '--branch': 'branch',
   };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -59,8 +64,8 @@ function parseArgs(args) {
       index += 1;
     } else throw new Error(`Opção desconhecida: ${arg}`);
   }
-  if (options.modo !== null && !['novo', 'existente'].includes(options.modo)) {
-    throw new Error(`--modo inválido: "${options.modo}". Use novo ou existente.`);
+  if (options.modo !== null && !['novo', 'existente', 'adotar'].includes(options.modo)) {
+    throw new Error(`--modo inválido: "${options.modo}". Use novo, existente ou adotar.`);
   }
   if (options.id !== null && !idPattern.test(options.id)) throw new Error(invalidIdMessage(options.id));
   if (options.tag !== null && !/^v\d+\.\d+\.\d+$/.test(options.tag)) {
@@ -189,8 +194,8 @@ function isSyncedFolder(dir) {
   });
 }
 
-async function askBaseFolder(rl, options) {
-  const base = path.resolve(options.pasta ?? await ask(rl, 'Pasta onde os repositórios vão ficar', '--pasta', process.cwd()));
+async function askBaseFolder(rl, options, suggestion = process.cwd()) {
+  const base = path.resolve(options.pasta ?? await ask(rl, 'Pasta onde os repositórios vão ficar', '--pasta', suggestion));
   const plan = [];
   if (existsSync(base)) {
     if (!statSync(base).isDirectory()) throw new Error(`${base} existe e não é uma pasta.`);
@@ -355,7 +360,10 @@ function editedStandardBefore(before) {
 
 const quoted = (file) => `"${file}"`;
 
-async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, dirtyBefore }) {
+async function initialCommit(rl, options, {
+  codeDir, storeDir, id, codeHadWork, dirtyBefore, codeMessage = null,
+  prompt = 'Fazer o commit inicial do código e do store?',
+}) {
   const version = readFileSync(path.join(storeDir, 'padrao-openspec', 'VERSION'), 'utf8').trim();
   // A code folder that already had commits or uncommitted work gets only the standard's files,
   // so the developer's own changes (and secrets such as .env.local) never land in this commit.
@@ -366,7 +374,7 @@ async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, 
   const reviewMessage = 'chore: inclui o padrão OpenSpec nos arquivos já editados';
   const skipCode = codePaths?.length === 0;
   const repos = [
-    { label: 'código', dir: codeDir, message: skipCode ? reviewMessage : `chore: instala o padrão OpenSpec v${version}`, paths: skipCode ? allPaths : codePaths, skip: skipCode },
+    { label: 'código', dir: codeDir, message: skipCode ? reviewMessage : (codeMessage ?? `chore: instala o padrão OpenSpec v${version}`), paths: skipCode ? allPaths : codePaths, skip: skipCode },
     { label: 'store', dir: storeDir, message: `chore: configura o store do projeto ${id}`, paths: null },
   ];
   const manualFor = (repo) => {
@@ -396,7 +404,7 @@ async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, 
   if (rl && !options.yes) {
     let accepted;
     try {
-      accepted = await askYesNo(rl, '\nFazer o commit inicial do código e do store?', options);
+      accepted = await askYesNo(rl, `\n${prompt}`, options);
     } catch {
       accepted = false; // Input ended (Ctrl+D / Ctrl+Z): the setup is done; treat it as "no".
     }
@@ -420,9 +428,7 @@ async function initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, 
   return result();
 }
 
-async function newProject(rl, options) {
-  const { base, plan } = await askBaseFolder(rl, options);
-  const name = options.nome ?? await ask(rl, 'Nome do projeto, como as pessoas o chamam', '--nome');
+async function askId(rl, options, name) {
   let id = options.id;
   while (id === null) {
     const answer = await ask(rl, 'Id do projeto, usado nas pastas e no store', '--id', slugify(name) || null);
@@ -430,6 +436,39 @@ async function newProject(rl, options) {
     else if (!rl) throw new Error(invalidIdMessage(answer));
     else console.log(invalidIdMessage(answer));
   }
+  return id;
+}
+
+function cloneStore(options, tag, storeDir) {
+  step(`Store clonado da ${tag}`, () => {
+    git(['-c', 'advice.detachedHead=false', 'clone', '--branch', tag, '--', options.origem, storeDir]);
+    progress.created.push(storeDir);
+  });
+  step('Branch main criada no store', () => git(['-C', storeDir, 'switch', '-q', '-c', 'main']));
+}
+
+function runSetup(storeDir, codeDir, name, id, extraArgs = []) {
+  console.log('  … Rodando o setup (pode levar alguns segundos)');
+  step('Setup concluído (skills, comandos e agentes no código; store registrado e ligado ao código)', () => {
+    const setup = path.join(storeDir, 'padrao-openspec', 'scripts', 'setup-project.mjs');
+    // The setup's own summary and next steps would repeat this script's; show them only on failure.
+    const result = spawnSync(process.execPath, [setup, codeDir, '--name', name, '--register-id', id, '--yes', ...extraArgs], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    if (result.status !== 0) throw new Error(`O setup falhou:\n${`${result.stdout ?? ''}${result.stderr ?? ''}`.trim()}`);
+  });
+}
+
+function commitNoteFor(commit) {
+  return commit.done
+    ? 'Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.'
+    : `Falta o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
+}
+
+async function newProject(rl, options) {
+  const { base, plan } = await askBaseFolder(rl, options);
+  const name = options.nome ?? await ask(rl, 'Nome do projeto, como as pessoas o chamam', '--nome');
+  const id = await askId(rl, options, name);
 
   let generated = options.codigo;
   if (generated === null && rl) {
@@ -469,11 +508,7 @@ async function newProject(rl, options) {
     step(`Pasta ${base} criada`, () => mkdirSync(base, { recursive: true }));
     progress.created.push(base);
   }
-  step(`Store clonado da ${tag}`, () => {
-    git(['-c', 'advice.detachedHead=false', 'clone', '--branch', tag, '--', options.origem, storeDir]);
-    progress.created.push(storeDir);
-  });
-  step('Branch main criada no store', () => git(['-C', storeDir, 'switch', '-q', '-c', 'main']));
+  cloneStore(options, tag, storeDir);
   if (!existsSync(path.join(codeDir, '.git'))) {
     step('Repositório de código criado', () => {
       if (!generated) {
@@ -483,25 +518,14 @@ async function newProject(rl, options) {
       git(['init', '-q', '-b', 'main', codeDir]);
     });
   }
-  console.log('  … Rodando o setup (pode levar alguns segundos)');
-  step('Setup concluído (skills, comandos e agentes no código; store registrado e ligado ao código)', () => {
-    const setup = path.join(storeDir, 'padrao-openspec', 'scripts', 'setup-project.mjs');
-    // The setup's own summary and next steps would repeat this script's; show them only on failure.
-    const result = spawnSync(process.execPath, [setup, codeDir, '--name', name, '--register-id', id, '--yes'], {
-      encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    if (result.status !== 0) throw new Error(`O setup falhou:\n${`${result.stdout ?? ''}${result.stderr ?? ''}`.trim()}`);
-  });
+  runSetup(storeDir, codeDir, name, id);
 
   const commit = await initialCommit(rl, options, { codeDir, storeDir, id, codeHadWork, dirtyBefore });
-  const commitNote = commit.done
-    ? 'Os dois repositórios já têm o commit inicial, e o /opsx:init commita o que gerar no store.'
-    : `Falta o commit inicial. Para fazê-lo:\n${commit.manual.map((line) => `  ${line}`).join('\n')}`;
   const hasCode = hasVsCode();
   console.log(`
 Pronto. Próximo passo:
 ${openWorkspaceSteps(codeDir, 'rode: /opsx:init', hasCode)}
-${commitNote}
+${commitNoteFor(commit)}
 Para publicar, crie os remotos e faça o push (veja o COMECE-AQUI.md, "Commitar e publicar").
 No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
 pull requests" para receber as atualizações do padrão por PR.`);
@@ -624,6 +648,236 @@ ${openWorkspaceSteps(codeDir, 'comece pela primeira change: /opsx:propose <nome-
   await offerToOpenVsCode(rl, options, codeDir, hasCode);
 }
 
+// Adoption: existing code that never used the standard gets it on a branch of its own, reviewed by a PR.
+const adoptionBranch = 'chore/adota-padrao-openspec';
+const urlPattern = /^(?:[a-z][a-z0-9+.-]*:\/\/|git@)|\.git[\\/]?$/i;
+const inProgressOperations = [
+  ['rebase-merge', 'um rebase'], ['rebase-apply', 'um rebase ou git am'], ['MERGE_HEAD', 'um merge'],
+  ['CHERRY_PICK_HEAD', 'um cherry-pick'], ['REVERT_HEAD', 'um revert'],
+];
+
+function gitIn(dir, args) {
+  const result = spawnSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  // Only the end is trimmed: porcelain status lines start with a space that is part of the format.
+  return { ok: !result.error && result.status === 0, out: `${result.stdout ?? ''}`.trimEnd() };
+}
+
+function checkBranchName(branch) {
+  if (spawnSync('git', ['check-ref-format', '--branch', branch], { stdio: 'ignore' }).status !== 0) {
+    throw new Error(`Nome de branch inválido: "${branch}" (--branch).`);
+  }
+}
+
+// What the code folder holds: refused when it already uses the standard or OpenSpec, or has no history.
+function checkAdoptableCode(codeDir) {
+  if (!existsSync(codeDir) || !statSync(codeDir).isDirectory()) throw new Error(`A pasta do código ${codeDir} não existe.`);
+  const isRepo = gitIn(codeDir, ['rev-parse', '--is-inside-work-tree']).out === 'true';
+  if (isRepo) {
+    const top = gitIn(codeDir, ['rev-parse', '--show-toplevel']).out;
+    if (realpathSync.native(top) !== realpathSync.native(codeDir)) {
+      throw new Error(`${codeDir} é uma subpasta do repositório ${top}. Informe a raiz do repositório: o padrão fica na raiz do código.`);
+    }
+  }
+  for (const file of ['config.yaml', 'config.yml']) {
+    const config = path.join(codeDir, 'openspec', file);
+    const match = existsSync(config) ? readFileSync(config, 'utf8').match(storeDeclarationPattern) : null;
+    if (match?.[1]) {
+      throw new Error(`Este projeto já usa o padrão (store: ${match[1]} em ${config}). Use a opção 2, "Entrar num projeto que já usa o padrão" (--modo existente).`);
+    }
+  }
+  if (existsSync(path.join(codeDir, 'openspec'))) {
+    throw new Error(`Este projeto já usa o OpenSpec sem o padrão (pasta ${path.join(codeDir, 'openspec')} sem a linha "store:"). A migração desse caso não é coberta pela adoção: fale com o tech lead sobre levar essas specs para um store do padrão (veja "Sem o script" no COMECE-AQUI.md).`);
+  }
+  if (!isRepo || !gitIn(codeDir, ['rev-parse', '-q', '--verify', 'HEAD']).ok) {
+    const what = isRepo ? 'é um repositório Git sem nenhum commit' : 'não é um repositório Git';
+    throw new Error(
+      `A pasta ${codeDir} ${what}. A adoção acontece numa branch própria e precisa de uma branch principal com histórico.\n` +
+      'Faça o primeiro commit do código e rode de novo:\n' +
+      `${isRepo ? '' : `  git -C "${codeDir}" init -b main\n`}  git -C "${codeDir}" add -A\n  git -C "${codeDir}" commit -m "primeiro commit"`,
+    );
+  }
+}
+
+// The repository state: the adoption branch starts from a clean, named branch with nothing in progress.
+function checkRepository(codeDir, branch) {
+  const dirty = statusEntries(codeDir, 'no').map((entry) => entry.path);
+  if (dirty.length) {
+    const shown = dirty.slice(0, 10).join(', ') + (dirty.length > 10 ? ` e mais ${dirty.length - 10}` : '');
+    throw new Error(`Há alterações sem commit em ${shown}. A adoção acontece numa branch própria e não leva esse trabalho junto. Faça commit ou stash e rode de novo.`);
+  }
+  for (const [name, label] of inProgressOperations) {
+    const marker = gitIn(codeDir, ['rev-parse', '--git-path', name]).out;
+    if (marker && existsSync(path.resolve(codeDir, marker))) {
+      throw new Error(`O repositório ${codeDir} está no meio de ${label}. Termine ou cancele e rode de novo.`);
+    }
+  }
+  if (!gitIn(codeDir, ['symbolic-ref', '-q', 'HEAD']).ok) {
+    throw new Error(`O repositório ${codeDir} está com o HEAD destacado. Volte para uma branch (git switch <branch>) e rode de novo.`);
+  }
+  if (gitIn(codeDir, ['show-ref', '--verify', '-q', `refs/heads/${branch}`]).ok) {
+    throw new Error(`A branch ${branch} já existe em ${codeDir}. Apague-a (git -C "${codeDir}" branch -D ${branch}) ou use --branch <outro-nome>.`);
+  }
+}
+
+// NUL-separated status, so paths with accents or spaces come out as they are (no core.quotePath escapes).
+function statusEntries(codeDir, untracked) {
+  const result = spawnSync('git', ['-C', codeDir, 'status', '--porcelain=v1', '-z', `--untracked-files=${untracked}`], {
+    encoding: 'utf8', maxBuffer: 256 * 1024 * 1024,
+  });
+  const entries = `${result.stdout ?? ''}`.split('\0');
+  const parsed = [];
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (entry.length < 4) continue;
+    parsed.push({ status: entry.slice(0, 2), path: entry.slice(3) });
+    // A rename or copy is followed by its original path.
+    if (/[RC]/.test(entry.slice(0, 2))) index += 1;
+  }
+  return parsed;
+}
+
+function untrackedPaths(codeDir) {
+  return statusEntries(codeDir, 'normal').filter((entry) => entry.status === '??').map((entry) => entry.path);
+}
+
+function suggestedName(codeDir) {
+  try {
+    const name = JSON.parse(readFileSync(path.join(codeDir, 'package.json'), 'utf8')).name;
+    if (typeof name === 'string' && name.trim()) return name.replace(/^@[^/]+\//, '');
+  } catch {
+    // No package.json, or one without a name: the folder names the project.
+  }
+  return path.basename(codeDir);
+}
+
+// A path that may not exist yet, with its existing part resolved (case and links), so two spellings of
+// the same folder compare equal on Windows.
+function resolvedPath(dir) {
+  const rest = [];
+  let current = path.resolve(dir);
+  while (!existsSync(current)) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    rest.unshift(path.basename(current));
+    current = parent;
+  }
+  return path.join(existsSync(current) ? realpathSync.native(current) : current, ...rest);
+}
+
+function insideFolder(parent, child) {
+  const relative = path.relative(resolvedPath(parent), resolvedPath(child));
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+async function adoptProject(rl, options) {
+  // The code comes first, so the base folder can default to the folder that holds it: a store inside
+  // the code would be a nested repository that blocks the standard's updates.
+  const source = options.codigo ?? await ask(rl, 'Código existente: caminho local ou URL do repositório', '--codigo');
+  const fromUrl = urlPattern.test(source);
+  const localCode = fromUrl ? null : path.resolve(options.pasta ?? process.cwd(), source);
+  const { base, plan } = await askBaseFolder(rl, options, localCode ? path.dirname(localCode) : process.cwd());
+  const codeDir = fromUrl ? path.join(base, repoName(source)) : localCode;
+  const branch = options.branch ?? adoptionBranch;
+  checkBranchName(branch);
+  if (fromUrl) {
+    refuseExisting(codeDir);
+  } else {
+    checkAdoptableCode(codeDir);
+    checkRepository(codeDir, branch);
+    if (insideFolder(codeDir, base)) {
+      throw new Error(`A pasta base ${base} fica dentro do código ${codeDir}, e o store ficaria dentro do repositório de código. ` +
+        `Escolha uma pasta fora do código, por exemplo ${path.dirname(codeDir)} (--pasta).`);
+    }
+  }
+  const name = options.nome ?? await ask(rl, 'Nome do projeto, como as pessoas o chamam', '--nome',
+    fromUrl ? repoName(source) : suggestedName(codeDir));
+  const id = await askId(rl, options, name);
+  const storeDir = path.join(base, `${id}-openspec`);
+  refuseExisting(storeDir);
+  refuseRegisteredId(id);
+  const tag = options.tag ?? latestTag(options.origem);
+
+  let current = null;
+  let untracked = [];
+  if (fromUrl) {
+    plan.push(`Código: ${codeDir} (clone de ${source})`, `Branch de adoção no código: ${branch} (criada a partir da branch do clone)`);
+  } else {
+    current = gitIn(codeDir, ['symbolic-ref', '--short', 'HEAD']).out;
+    const commits = gitIn(codeDir, ['rev-list', '--count', 'HEAD']).out;
+    untracked = untrackedPaths(codeDir);
+    plan.push(`Código: ${codeDir} (repositório existente, branch atual: ${current}, ${commits} ${commits === '1' ? 'commit' : 'commits'})`,
+      `Branch de adoção no código: ${branch} (criada a partir de ${current})`);
+  }
+  plan.push(
+    `Store: ${storeDir} (clone da release ${tag} de ${options.origem}, branch main)`,
+    `Setup: comandos /opsx:*, skills, agentes e hooks no código; store registrado como "${id}"; código marcado como adotado`,
+  );
+  if (untracked.length) {
+    plan.push(`Arquivos não rastreados, que ficam fora do commit: ${untracked.slice(0, 10).join(', ')}` +
+      `${untracked.length > 10 ? ` e mais ${untracked.length - 10} (${untracked.length} no total)` : ''}`);
+    // A standard path that is already untracked keeps the developer's content: it stays out of the commit too.
+    const editedStandard = editedStandardBefore(uncommittedPaths(codeDir));
+    if (editedStandard.length) plan.push(`Arquivos do padrão que já existem sem commit e ficam fora do commit: ${editedStandard.join(', ')}`);
+  }
+  plan.push(options.semCommit
+    ? 'Commit: não (--sem-commit)'
+    : 'Commit: só os arquivos do padrão, na branch de adoção (perguntado no fim)');
+  await confirmPlan(rl, plan, options);
+
+  console.log('');
+  if (!existsSync(base)) {
+    step(`Pasta ${base} criada`, () => mkdirSync(base, { recursive: true }));
+    progress.created.push(base);
+  }
+  if (fromUrl) {
+    step('Código clonado', () => {
+      git(['clone', '--', source, codeDir]);
+      progress.created.push(codeDir);
+    });
+    checkAdoptableCode(codeDir);
+    checkRepository(codeDir, branch);
+    current = gitIn(codeDir, ['symbolic-ref', '--short', 'HEAD']).out;
+  }
+  step(`Branch ${branch} criada a partir de ${current}`, () => git(['-C', codeDir, 'switch', '-q', '-c', branch]));
+  // Read before the setup: only untracked paths are possible here, and they stay out of the commit.
+  const dirtyBefore = uncommittedPaths(codeDir);
+  const untrackedBefore = new Set(untrackedPaths(codeDir));
+  try {
+    cloneStore(options, tag, storeDir);
+    runSetup(storeDir, codeDir, name, id, ['--adoption']);
+  } catch (error) {
+    error.message += undoAdoptionHint(codeDir, current, branch, untrackedBefore);
+    throw error;
+  }
+
+  const commit = await initialCommit(rl, options, {
+    codeDir, storeDir, id, codeHadWork: true, dirtyBefore, codeMessage: 'chore: adota o padrão OpenSpec',
+    prompt: 'Fazer o commit dos arquivos do padrão na branch de adoção e o commit inicial do store?',
+  });
+  const hasCode = hasVsCode();
+  console.log(`
+Pronto. O código está na branch ${branch}, com os arquivos do padrão.
+${openWorkspaceSteps(codeDir, 'rode: /opsx:init', hasCode)}
+  3. Depois do /opsx:init, abra um PR da branch ${branch} para ${current}.
+${commitNoteFor(commit)}
+No GitHub do código, ligue Settings → Actions → General → "Allow GitHub Actions to create and approve
+pull requests" para receber as atualizações do padrão por PR.`);
+  await offerToOpenVsCode(rl, options, codeDir, hasCode);
+}
+
+// The tree was clean before the adoption branch, so the setup's changes are the only tracked ones; the
+// new untracked paths are the files it created.
+function undoAdoptionHint(codeDir, current, branch, untrackedBefore) {
+  const created = untrackedPaths(codeDir).filter((file) => !untrackedBefore.has(file));
+  return [
+    '\n\nPara voltar o código ao estado de antes da adoção:',
+    `  git -C "${codeDir}" reset -q --hard`,
+    `  git -C "${codeDir}" switch ${current}`,
+    `  git -C "${codeDir}" branch -D ${branch}`,
+    ...(created.length ? [`e apague o que o setup criou: ${created.join(', ')}`] : []),
+  ].join('\n');
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -640,11 +894,13 @@ async function main() {
     await checkEnvironment(rl, options);
     let modo = options.modo;
     while (modo === null) {
-      if (!rl) throw new Error('Falta --modo: sem terminal interativo, informe novo ou existente.');
-      const answer = await rl.question('\nO que você vai fazer?\n  1) Criar um projeto novo\n  2) Entrar num projeto que já usa o padrão\n> ');
-      modo = { 1: 'novo', 2: 'existente' }[answer] ?? null;
+      if (!rl) throw new Error('Falta --modo: sem terminal interativo, informe novo, existente ou adotar.');
+      const answer = await rl.question('\nO que você vai fazer?\n  1) Criar um projeto novo\n  2) Entrar num projeto que já usa o padrão\n  3) Adotar o padrão num projeto que já existe\n> ');
+      modo = { 1: 'novo', 2: 'existente', 3: 'adotar' }[answer] ?? null;
     }
+    if (options.branch !== null && modo !== 'adotar') console.warn('Aviso: --branch só tem efeito no modo adotar.');
     if (modo === 'novo') await newProject(rl, options);
+    else if (modo === 'adotar') await adoptProject(rl, options);
     else await joinProject(rl, options);
   } finally {
     rl?.close();
