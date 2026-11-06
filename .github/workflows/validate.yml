@@ -340,7 +340,12 @@ jobs:
           check "$f" 'registre `escolhida (detecção recusada: <valor detectado>)`'
           check "$f" "## Escopo da inspeção"
           check "$f" "**Branch de adoção:**"
-          check "$f" "Até as respostas de escopo, não leia nenhum arquivo do código"
+          check "$f" "Até terminar as perguntas de escopo, ou concluir que não há nenhuma, não leia nenhum arquivo do código"
+          check "$f" "Pule a pergunta só quando os dois comandos funcionarem, a contagem for 0"
+          check "$f" "entra mesmo sem pergunta feita"
+          check "$f" "reaproveite a saída da pré-inspeção"
+          check "$f" 'Use sempre a forma `Sugestão`, mesmo com detecção'
+          check "$f" 'Registre a resposta como `escolhida`, mesmo quando o dev escolhe a opção detectada'
           check "$f" '**Detecção incompatível:** se o filtro ocultaria a opção detectada (por exemplo, Prisma na 3.5'
           # Princípios de engenharia (principios-de-engenharia): 7.4 no init, revisão, regras e modelo de project.md.
           check "$f" "**7.4 — Princípios de engenharia"
