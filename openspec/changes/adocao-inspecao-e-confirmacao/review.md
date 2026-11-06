@@ -28,3 +28,23 @@ Achados:
 - [menor] M7: `--raiz` numa subpasta e mensagem enganosa sem o Git — corrigido em c674d44 (`rev-parse --show-toplevel` e "Git não encontrado")
 - [menor] M8: com `--escopo`, a 5.2 do CircleCI sumia; no teste, `commit.gpgsign` e hooks globais e a pasta temporária que vazava — corrigidos em c674d44
 - [menor] M9: a conferência estática não pega `execFileSync as x`, e a 5.9 conta duas vezes a mesma pessoa com dois e-mails — justificado: a conferência é uma guarda, não uma prova, e a 5.9 é `media` com `S/n`
+
+## 2026-11-06 (correções do init depois do teste)
+
+- Intervalo: 6d4cb82..7900094 (antes do rebase sobre 2ea1542: 6868bf4..94813a7)
+- Revisor: subagente requesting-code-review (general-purpose, só leitura; rodou o `sync-root.mjs --check`)
+- Críticos: 0
+- Importantes: 3 (corrigidos 3)
+- Menores: 5 (corrigidos 4, justificado 1)
+- Segurança: varredura de secrets "Adiado" no `project.md` (não verificado); auditoria de dependências "Não aplicável" (sem dependências novas)
+
+Achados:
+
+- [importante] I1: a regra da branch de adoção pulava a pergunta com a lista do `git diff` vazia ou com a principal à frente da branch, e a inspeção podia refletir um código mais velho que o da principal — corrigido em 07f17c3 (antes do rebase: 125ad9a): a pergunta só é pulada quando `git rev-list --count HEAD..<principal>` dá 0, os dois comandos funcionam, a lista não está vazia e só tem arquivos do padrão; em qualquer outro caso, é feita
+- [importante] I2: o modelo do Arquivo 1 mandava trocar a tabela "Escopo da inspeção" por "Inspeção sem perguntas de escopo" sem a linha da branch de adoção, contra o cenário "Branch de adoção" — corrigido em 07f17c3: o comentário do modelo diz que a linha da branch entra mesmo sem pergunta feita
+- [importante] I3: a Ativação descontava menos arquivos do padrão que a regra da branch (sem `.gitignore`, `.gitattributes` e `.claude/settings.json`), e um projeto novo sem a marca podia receber "Encontrei código existente" — corrigido em 07f17c3: a lista dos arquivos do padrão fica definida uma vez, na Ativação (a mesma do `standardPaths` do `comecar.mjs`, com o `.gitattributes` só com o bloco do padrão), e a regra da branch cita essa definição
+- [menor] M4: arquivos inteiros (`.gitignore`, `AGENTS.md` e outros de bloco) entram na lista, e edições do projeto neles também pulam a pergunta — justificado: o script não tira desses arquivos nenhuma resposta de stack, então a inspeção da branch atual dá o mesmo resultado que a da principal
+- [menor] M5: a regra 9 não dizia se mostra a evidência nem qual origem registrar — corrigido em 07f17c3: mostra a evidência, sem linha de recomendação para a opção oculta, e registra `escolhida`
+- [menor] M6: "até as respostas de escopo" era ambíguo sem pergunta de escopo — corrigido em 07f17c3 ("até terminar as perguntas de escopo, ou concluir que não há nenhuma")
+- [menor] M7: a regra 6 e a reutilização da pré-inspeção sem conferência na CI — corrigido em 07f17c3: 5 conferências novas no "Trechos customizados das skills"; passo → PASS (exit 0) e, sem a condição nova da branch, FAIL (exit 1, "Trecho customizado ausente: Pule a pergunta só quando os dois comandos funcionarem, a contagem for 0")
+- [menor] M8: a reutilização da pré-inspeção não cobria os submódulos inspecionados à parte nem a escolha do back-end principal — corrigido em 07f17c3
