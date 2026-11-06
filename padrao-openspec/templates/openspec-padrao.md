@@ -84,10 +84,10 @@ seção "Avaliação do validador" do relatório; o `/opsx:verify` exige "médio
 
 No Claude Code, o padrão também impõe limites por mecanismo, e não só por instrução
 ([ADR-0012](https://github.com/Gilmar1987/PadraoOpenspct/blob/main/openspec/adrs/0012-ganchos-em-forma-neutra-de-agente.md)).
-Os hooks ficam registrados no `.claude/settings.json` como um comando único
-(`node "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/<hook>.mjs"`), que outros agentes que leem
-esse arquivo, como o Copilot CLI, também executam. Um erro interno de um hook libera a chamada com um
-aviso, e nunca trava o agente.
+Os hooks ficam registrados no `.claude/settings.json` como um comando único, um lançador `node -e` que
+acha o script pela variável `CLAUDE_PROJECT_DIR` ou pela pasta atual. Ele roda igual no Git Bash, no
+PowerShell e no cmd, e por isso outros agentes que leem esse arquivo, como o Copilot CLI, também o executam. Uma exceção não tratada dentro do script de um hook
+libera a chamada com um aviso na saída de erro, em vez de travar o agente.
 
 **Subagentes** em `.claude/agents/openspec-*.md`, um por papel, com ferramentas e modelo próprios:
 
@@ -186,9 +186,9 @@ deles.
 
 | Agente | Arquivo que lê | Como rodar o fluxo | Ganchos do padrão |
 |---|---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code (versão: verificação pendente) |
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code 2.1.243 (Windows, com Git Bash) |
 | Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" | Regras e portão; ganchos não verificados |
-| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Verificados no Copilot CLI (versão: verificação pendente), no VS Code; ganchos de papel não verificados |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Em verificação no Copilot CLI do VS Code: até o roteiro ser registrado, valem as regras e o portão |
 | Gemini CLI | `GEMINI.md` | Idem | Regras e portão; ganchos não verificados |
 | Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem | Não se aplicam: o Amazon Q só tem ganchos de contexto; valem as regras e o portão |
 | Trae | `AGENTS.md` | Idem | Regras e portão; ganchos não verificados |

@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/contexto-de-sessao.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/contexto-de-sessao.mjs')))\"",
             "timeout": 30
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/cobra-evidencia.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/cobra-evidencia.mjs')))\"",
             "timeout": 30
           }
         ]
@@ -28,17 +28,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/protege-ganchos.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/protege-ganchos.mjs')))\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/portao-do-archive.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/portao-do-archive.mjs')))\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/somente-leitura.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/somente-leitura.mjs')))\"",
             "timeout": 30
           }
         ]
@@ -48,12 +48,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/escopo-de-escrita.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/escopo-de-escrita.mjs')))\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/exige-change.mjs\"",
+            "command": "node -e \"import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/exige-change.mjs')))\"",
             "timeout": 30
           }
         ]

@@ -7,9 +7,11 @@ import path from 'node:path';
 
 // An internal error ends the hook with exit 0 and a warning on stderr, never with another exit code:
 // some agents (the Copilot CLI) deny the tool when a hook fails, and a defect of the standard must not
-// stall the conversation. Denying or asking happens only through the JSON answer on stdout.
+// stall the conversation. Denying or asking happens only through the JSON answer on stdout. The hooks
+// run through `node -e`, so the name comes from readPayload; process.argv[1] is only a fallback.
+let currentHook = process.argv[1] ? path.basename(process.argv[1], '.mjs') : 'gancho';
 function letThrough(error) {
-  const hookName = path.basename(process.argv[1] ?? 'gancho', '.mjs');
+  const hookName = currentHook;
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`[${hookName}] erro interno: ${message}; a chamada segue sem checagem.\n`);
   process.exit(0);
@@ -20,6 +22,7 @@ process.on('unhandledRejection', letThrough);
 // Returns the parsed payload, or null when stdin is empty or not JSON. A hook that cannot read its
 // input lets the call through: blocking on a broken environment would stall every conversation.
 export function readPayload(hookName) {
+  currentHook = hookName;
   let raw = '';
   try {
     raw = readFileSync(0, 'utf8');

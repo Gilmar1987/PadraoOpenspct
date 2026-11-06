@@ -298,9 +298,9 @@ pasta do código, e o agente para e pede para abri-la.
 
 | Agente | Arquivo que lê | Como rodar o fluxo | Ganchos do padrão |
 |---|---|---|---|
-| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code (versão: verificação pendente) |
+| Claude Code | `CLAUDE.md` (importa o `AGENTS.md`); subagentes em `.claude/agents/` | Comandos `/opsx:*` | Verificados no Claude Code 2.1.243 (Windows, com Git Bash) |
 | Cursor, Codex, Windsurf | `AGENTS.md` | "Siga `.claude/commands/opsx/<comando>.md`" | Regras e portão; ganchos não verificados |
-| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Verificados no Copilot CLI (versão: verificação pendente), no VS Code; ganchos de papel não verificados |
+| GitHub Copilot | `.github/copilot-instructions.md` e `AGENTS.md`; subagentes em `.github/agents/` | Idem, ou os subagentes por papel | Em verificação no Copilot CLI do VS Code: até o roteiro ser registrado, valem as regras e o portão |
 | Gemini CLI | `GEMINI.md` | Idem | Regras e portão; ganchos não verificados |
 | Amazon Q | `.amazonq/rules/openspec-padrao.md` | Idem | Não se aplicam: o Amazon Q só tem ganchos de contexto; valem as regras e o portão |
 | Trae | `AGENTS.md` | Idem | Regras e portão; ganchos não verificados |

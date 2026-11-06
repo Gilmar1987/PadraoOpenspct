@@ -15,9 +15,11 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   `--branch`), clona o store, roda o setup e commita nela só os arquivos do padrão, para revisão por PR. O
   manifesto `.openspec-padrao.json` ganha a marca `"adoption": true`, mantida nas atualizações.
 - **Ganchos em qualquer agente:** os hooks do padrão no `.claude/settings.json` passam de `"command": "node"`
-  com o caminho em `"args"` para um comando único, `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/<hook>.mjs"`
+  com o caminho em `"args"` para um comando único, um lançador `node -e` que acha o script pela variável
+  `CLAUDE_PROJECT_DIR` ou pela pasta atual e roda igual no Git Bash, no PowerShell e no cmd
   ([ADR-0012](openspec/adrs/0012-ganchos-em-forma-neutra-de-agente.md)). O Copilot CLI do VS Code lê esse
-  arquivo, mas ignora o `args`; antes, todo hook falhava nele e todo comando de shell era negado. Um erro interno
+  arquivo, mas ignora o `args` e roda o comando pelo PowerShell; antes, todo hook falhava nele e todo comando de
+  shell era negado. Um erro interno
   de um hook passa a liberar a chamada com um aviso, em vez de travar o agente. O guia e o `COMECE-AQUI.md`
   dizem em quais agentes os hooks foram verificados.
 
