@@ -467,6 +467,16 @@ jobs:
               missing=1
             fi
           done
+          # Guarda do clone do store (guarda-da-pasta-para-qualquer-agente), requisitos "Guarda do clone do store
+          # em qualquer agente", "Regras param no clone do store" e "Guarda do clone do store protegida pela CI":
+          # o parágrafo nos 10 comandos e nas 7 skills, para qualquer agente, e a frase nas regras e no bloco de agentes.
+          for g in .claude/commands/opsx/*.md .claude/skills/openspec-*/SKILL.md; do
+            check "$g" "**Store clone guard**"
+            check "$g" "this applies to any agent, Claude Code included"
+            check "$g" 'also has `padrao-openspec/.openspec-store/store.yaml`'
+          done
+          check openspec/rules.md 'padrao-openspec/.openspec-store/store.yaml'
+          check templates/agents-block.md 'padrao-openspec/.openspec-store/store.yaml'
           exit $missing
 
       - name: Paridade de papéis
