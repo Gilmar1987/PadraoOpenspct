@@ -119,7 +119,7 @@ for (const name of fixtures) {
     if (git(repo, ['status', '--porcelain', '--untracked-files=all']) !== statusBefore) fail(`${name}: o git status mudou depois da inspeção`);
     if (existsSync(path.join(repo, 'SENTINELA'))) fail(`${name}: o postinstall do package.json foi executado`);
     // Requirement "Saída sem secrets nem dados pessoais".
-    if (/VALOR_FALSO/.test(first.text)) fail(`${name}: um valor do .env apareceu na saída`);
+    if (/VALOR_FALSO/.test(first.text)) fail(`${name}: um valor de segredo (VALOR_FALSO) apareceu na saída`);
     if (personalValues.test(first.text)) fail(`${name}: um dado pessoal de arquivo de dados apareceu na saída`);
     // Requirement "Arquivos de dados sem trecho".
     for (const item of allEvidence(first.data)) {
