@@ -341,7 +341,7 @@ jobs:
           check "$f" "## Escopo da inspeção"
           check "$f" "**Branch de adoção:**"
           check "$f" "Até as respostas de escopo, não leia nenhum arquivo do código"
-          check "$f" '**Detecção incompatível:** se o filtro ocultaria a opção detectada'
+          check "$f" '**Detecção incompatível:** se o filtro ocultaria a opção detectada (por exemplo, Prisma na 3.5'
           # Princípios de engenharia (principios-de-engenharia): 7.4 no init, revisão, regras e modelo de project.md.
           check "$f" "**7.4 — Princípios de engenharia"
           check .claude/skills/requesting-code-review/code-reviewer.md "Engineering principles"
