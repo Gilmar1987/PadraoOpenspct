@@ -1,0 +1,43 @@
+# Tasks
+
+## 1. Preparação e testes primeiro
+
+- [ ] 1.1 Combinar a versão com a outra sessão (`adocao-entrada-no-comecar`). Se a adoção já estiver na `main`, rebasear esta branch e acrescentar itens à 1.19.0 que ela abriu. Senão, esta change abre a 1.19.0 na tarefa 3.3, e a outra rebaseia depois. Avisar a outra sessão antes de qualquer tarefa que use o registro de stores ou o CLI global. Verificar com `git log --oneline HEAD..origin/main` vazio e com a decisão citada na evidência.
+- [ ] 1.2 Escrever no "Smoke test dos hooks do Claude Code" do `.github/workflows/validate.yml` o bloco da D3: template sem `args`, cada entrada rodada pelo texto do `command` (pelo `bash` e, no Windows, também pelo `pwsh`), a resposta igual à do gancho chamado direto, e o gancho com exceção injetada saindo com 0. Citar num comentário os requisitos "Ganchos executáveis por qualquer agente" e "Falha interna do gancho não bloqueia o agente" e a ADR-0012. Verificar rodando o passo a partir de um arquivo (`bash -e -o pipefail step.sh`, em `padrao-openspec/`) antes da implementação: ele deve falhar só nos casos novos, acusando as 7 entradas com `args` e a exceção que sai com 1. Registrar o código de saída e as violações na evidência.
+- [ ] 1.3 Acrescentar ao caso de atualização com entradas antigas do "Smoke test da camada do Claude Code no instalador" a conferência de que, depois do `--in-place`, nenhuma entrada do padrão tem `args` e cada um dos 7 ganchos aparece uma vez, citando o requisito "Troca das entradas de gancho na forma antiga" num comentário. Verificar rodando o passo a partir de um arquivo antes da implementação: ele falha na conferência nova (exit diferente de 0), com o motivo na evidência.
+
+## 2. Ganchos, template e instalador
+
+- [ ] 2.1 Acrescentar ao `padrao-openspec/.claude/hooks/openspec-padrao/comum.mjs` o tratador da D2 para `uncaughtException` e `unhandledRejection`: aviso `[<gancho>] erro interno: <mensagem>; a chamada segue sem checagem.` na saída de erro, código 0, e nada acrescentado à saída JSON. Verificar com `node --check` nos 8 arquivos e com o caso de exceção injetada do bloco da 1.2 passando (exit 0, saída de erro citando o gancho).
+- [ ] 2.2 Trocar as 7 entradas de `padrao-openspec/templates/claude-settings.json` para a forma da D1 (`node "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/<gancho>.mjs"`, sem `args`), mantendo eventos, `matcher` e `timeout`. Verificar com a contagem do "Impacto medido" dando `entradas 7 com args 0` e com o "Smoke test dos hooks do Claude Code" passando inteiro (exit 0).
+- [ ] 2.3 Conferir o instalador pela D4: rodar o "Smoke test da camada do Claude Code no instalador" e o "Smoke test do instalador". Se passarem sem mudar o `install-skills.mjs`, registrar isso. Se falharem, mudar só o `isStandardHook` ou o `mergeHooks` e rodar de novo. Verificar com os dois passos em exit 0 e com `git diff --stat -- padrao-openspec/scripts/install-skills.mjs` citado na evidência.
+- [ ] 2.4 Rodar `node padrao-openspec/scripts/sync-root.mjs` para levar os ganchos à cópia da raiz. Verificar com `node padrao-openspec/scripts/sync-root.mjs --check` em dia (exit 0) e com o passo "Sintaxe dos scripts" passando.
+
+## 3. Documentação e versão
+
+- [ ] 3.1 Atualizar o `padrao-openspec/templates/openspec-padrao.md` pela D5: coluna "Ganchos do padrão" na tabela "Usar com outros agentes", linha do Trae, linha do Amazon Q com "Não se aplicam", link da ADR-0012 no lugar da ADR-0006 e o aviso sobre outros agentes trocado. As versões verificadas ficam como texto provisório até a tarefa 4.3. Verificar com o lint de Markdown (exit 0) e com `grep -c "0006-camada" padrao-openspec/templates/openspec-padrao.md` dando 0.
+- [ ] 3.2 Atualizar a tabela de agentes do `COMECE-AQUI.md` com a mesma coluna e as mesmas linhas da 3.1. Verificar com o lint de Markdown (exit 0) e com o passo "Guia de primeiros passos" passando.
+- [ ] 3.3 Atualizar o `CHANGELOG.md`: item "Ganchos em qualquer agente" na seção 1.19.0, e "Ações no projeto" pedindo o `--update` do padrão para trocar as entradas do `.claude/settings.json`. Se esta change abrir a versão (1.1), também atualizar o `padrao-openspec/VERSION` e abrir a seção. Verificar com os passos "Versão e changelog" e "Smoke test do changelog-range" passando.
+
+## 4. Verificação real nos agentes
+
+- [ ] 4.1 Roteiro no Claude Code com `claude -p`, numa pasta de teste fora do repositório, com o padrão instalado pelo `install-skills.mjs` desta branch e sem registrar store. Pedir `git commit --allow-empty --no-verify -m teste` e conferir que o gancho nega o comando citando o hook commit-msg. Pedir um comando de leitura (`git status`) e conferir que ele roda. Registrar a versão do Claude Code, os comandos e o resultado na evidência. Se o gancho não disparar, parar e voltar ao design (D1), sem trocar a forma por conta própria.
+- [ ] 4.2 Roteiro no Copilot do VS Code, feito pelo responsável numa pasta de teste instalada pela branch, aberta como workspace. Os passos:
+  - `openspec context --json` roda, sem "hook errored";
+  - `git commit --allow-empty --no-verify -m teste` é negado, citando o hook commit-msg;
+  - `openspec archive <change de teste>` é negado pelo portão;
+  - pedir a edição de um arquivo e registrar se houve pergunta e o nome da ferramenta no log do Copilot.
+
+  Registrar a versão do Copilot CLI (`copilotVersion` em `~/.copilot/session-state/*/events.jsonl`) e o resultado de cada passo no `verification.md` como cobertura fora da suíte. Verificar com o registro do responsável citado na evidência.
+- [ ] 4.3 Trocar o texto provisório da 3.1 e da 3.2 pelas versões verificadas em 4.1 e 4.2. Verificar com o lint de Markdown (exit 0) e com o `grep` das duas versões nos dois arquivos.
+
+## 5. Integração
+
+- [ ] 5.1 Rodar `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares, `sync-root.mjs --check` e todos os passos dos jobs `store` e `root` localmente, um arquivo por passo, com tempo limite de 15 minutos por passo. Antes, avisar a outra sessão e esperar que ela não esteja rodando a suíte dela. Verificar com todos saindo com código 0 e nenhum `ci-*` no registro (`openspec store list --json`). Uma falha intermitente vai para o `review.md` com o tempo medido, sem repetir até passar.
+- [ ] 5.2 Conferir se alguma instrução do padrão (`openspec/rules.md`, `padrao-openspec/openspec/rules.md`, `README.md` e `padrao-openspec/README.md`) ainda descreve os ganchos "com `args`" ou só para o Claude Code. Verificar com `grep -rn -i "com \`args\`\|\"args\"" --include=*.md` fora de `openspec/changes/archive/` e das ADRs, sem resultado.
+- [ ] 5.3 Promover a ADR-0012 a `Accepted` e marcar a ADR-0006 como `Superseded`, com `superseded_by: ADR-0012`, no commit que a revisão do PR aprovar, antes do archive. Verificar com `grep -n "^status\|^superseded_by" openspec/adrs/0006-*.md openspec/adrs/0012-*.md`.
+
+## Workflow follow-up
+
+- Revisão de código do intervalo da change (passo 6a do apply), `/opsx:verify` e `/opsx:archive`, cada um com a aprovação e o comando do responsável.
+- Push, PR, merge e release só com pedido explícito do responsável.
