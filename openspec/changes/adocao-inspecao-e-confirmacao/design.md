@@ -184,7 +184,7 @@ Para a saída ser repetível:
 - nenhum carimbo de data ou de tempo;
 - `raiz` como o caminho informado, com `/`.
 
-O teste compara a saída sem `raiz` com o `esperado.json` do fixture.
+O teste compara com o `esperado.json` do fixture uma projeção da saída: os projetos, a resposta e o nível (ou os conflitos) de cada pergunta, o primeiro comando de cada finalidade, as perguntas de leitura e os avisos. As evidências não entram no arquivo, porque linha e trecho o tornariam frágil. O teste as confere por regra: arquivo de dados sem trecho, trecho com até 120 caracteres e escopo.
 
 ### D8. Init: ativação e preparação
 
@@ -192,13 +192,13 @@ A seção nova "Modo adoção" do `init.md` entra antes de "Antes da entrevista"
 
 1. **Ativação:** ler o `.openspec-padrao.json` do código.
    - Com `"adoption": true`, seguir para o passo 2.
-   - Sem a marca, conferir com `git ls-files` se há arquivos rastreados além dos de `managedFiles`, do manifesto e do `openspec/config.yaml`. Havendo, perguntar uma vez se inspeciona. Com `n`, seguir como hoje e registrar "Inspeção recusada pelo dev" no `estado-atual.md`, na seção "Fora do ciclo atual".
+   - Sem a marca, conferir com `git ls-files` se há arquivos rastreados além dos arquivos do padrão, os que o script de entrada grava no commit da adoção (a lista do `standardPaths` do `comecar.mjs`): os de `managedFiles` e `managedBlocks`, o manifesto, o `openspec/config.yaml`, o `.gitignore`, o `.claude/settings.json` e o `.gitattributes` com o bloco do padrão. Havendo, perguntar uma vez se inspeciona. Com `n`, seguir como hoje e registrar "Inspeção recusada pelo dev" no `estado-atual.md`, na seção "Fora do ciclo atual".
 2. **Pré-inspeção:** rodar `node docs/openspec-inspecionar-codigo.mjs --json <arquivo temporário fora do repositório>` e ler `projetos`, `truncado` e `avisos`.
 3. **Perguntas de escopo:** as da seção 6.2 do rascunho original, uma por vez, com opções e "Outro", só quando a situação aparece. Saída de cada uma:
    - vários projetos → escolher os projetos e o back-end principal;
    - pastas que parecem geradas (`generated/`, `third_party/`, `legacy/`) → entram ou ficam fora;
    - submódulos → ignorar ou inspecionar;
-   - branch atual diferente da principal → o script não troca de branch; o agente orienta trocar e rodar de novo. Exceção: quando `git diff --name-only <principal>...HEAD` só lista arquivos de `managedFiles`, o `.openspec-padrao.json` e o `openspec/config.yaml` (a branch de adoção criada pelo script de entrada), a pergunta não aparece e o escopo registra a branch atual;
+   - branch atual diferente da principal → o script não troca de branch; o agente orienta trocar e rodar de novo. Exceção: a pergunta não aparece só quando os dois comandos funcionam, `git rev-list --count HEAD..<principal>` dá 0, `git diff --name-only <principal>...HEAD` lista algum arquivo e todos eles são arquivos do padrão (passo 1). Nesse caso, o escopo registra a branch atual numa linha da tabela "Escopo da inspeção", mesmo sem pergunta feita. Em qualquer outro caso, a pergunta é feita;
    - leitura truncada → restringir a pastas ou seguir com o que foi lido;
    - `.env` rastreado → só aviso, que vai para o `estado-atual.md`.
 
@@ -236,13 +236,15 @@ O `project-setup.md` ganha a coluna ou o sufixo de origem em cada resposta e a s
   - `existente-conflito`;
   - `existente-secrets`, cujo `.env` o teste cria na pasta temporária, com `VALOR_FALSO_123`, para não haver `.env` no repositório do padrão;
   - `existente-dados`;
-  - `existente-vazio`.
+  - `existente-vazio`;
+  - `existente-next-fullstack`, Next.js com Route Handlers, que conta como back-end e front-end;
+  - `existente-express-vite`, Express e Vite no mesmo pacote.
 - **Teste** `padrao-openspec/scripts/test-inspecionar-codigo.mjs`, sem dependências. Para cada fixture:
   1. copia para uma pasta temporária;
   2. roda `git init`, `git add -A` e `git commit` com identidade fixa;
   3. cria os arquivos não rastreados do caso;
   4. roda o script;
-  5. compara com o `esperado.json`.
+  5. compara a projeção da saída (D7) com o `esperado.json`.
 
   Ele também confere:
   - a ausência de `VALOR_FALSO_123` na saída;
