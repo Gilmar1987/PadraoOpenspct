@@ -84,6 +84,8 @@ jobs:
           node --check .claude/hooks/openspec-padrao/exige-change.mjs
           node --check scripts/validar-interface.mjs
           node --check scripts/lacunas.mjs
+          node --check scripts/inspecionar-codigo.mjs
+          node --check scripts/test-inspecionar-codigo.mjs
           node --check scripts/test-fixtures/interface/servidor.mjs
           # No Windows o Python se chama python e pode não ter o PyYAML.
           py="$(command -v python3 || command -v python)"
@@ -93,6 +95,12 @@ jobs:
           fi
           "$py" -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' templates/openspec-padrao-update.yml
           "$py" -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1], encoding="utf-8"))' ../.github/workflows/release.yml
+
+      # Requisitos de code-inspection e "Inspeção do código conferida contra fixtures" (continuous-validation):
+      # cada fixture vira um repositório temporário, e a saída do script é comparada com o esperado (ADR-0010).
+      - name: Teste da inspeção do código
+        run: |
+          node scripts/test-inspecionar-codigo.mjs
 
       # VERSION é a versão do padrão; a primeira seção do CHANGELOG da raiz tem de ser ela,
       # com "O que mudou" e "Ações no projeto" (ADR-0004).
@@ -883,10 +891,12 @@ jobs:
           node scripts/install-skills.mjs "$man" > /dev/null
           test -f "$man/.github/workflows/openspec-padrao-update.yml"
           test -f "$man/docs/openspec-padrao.md"
+          # Requisito "Script de inspeção entregue ao código" (skill-installation): igual ao do padrão e gerenciado.
+          cmp "$man/docs/openspec-inspecionar-codigo.mjs" scripts/inspecionar-codigo.mjs
           node -e '
             const m = JSON.parse(require("fs").readFileSync(process.argv[1] + "/.openspec-padrao.json", "utf8"));
             const v = require("fs").readFileSync("VERSION", "utf8").trim();
-            const need = [".claude/commands/opsx/apply.md", ".github/workflows/openspec-padrao-update.yml", "docs/openspec-padrao.md"];
+            const need = [".claude/commands/opsx/apply.md", ".github/workflows/openspec-padrao-update.yml", "docs/openspec-padrao.md", "docs/openspec-inspecionar-codigo.mjs"];
             if (m.version !== v || m.target !== "both" || !need.every((f) => m.managedFiles.includes(f))) process.exit(1);
           ' "$man"
           # Reinstalação sem mudança passa sem modo.
