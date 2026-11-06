@@ -18,11 +18,12 @@
 
 ## 3. Verificação real e integração
 
-- [ ] 3.1 Roteiro no Claude Code com `claude -p`, sem registrar store:
+- [x] 3.1 Roteiro no Claude Code com `claude -p`, sem registrar store:
   - **clone de teste:** uma cópia dos arquivos rastreados desta branch numa pasta fora do repositório, com `padrao-openspec/.openspec-store/store.yaml` (`id: clone-teste`). `claude -p "/opsx:propose teste"` deve parar citando o clone do store `clone-teste`, sem criar `openspec/changes/teste`;
   - **pasta do código:** uma pasta de teste com o padrão instalado desta branch. `claude -p "/opsx:explore qual o estado do projeto"` deve seguir sem citar clone do store.
 
   Registrar a versão do Claude Code, os comandos e o resultado na evidência.
+  - Evidência: Claude Code 2.1.243; clone de teste em `C:\tmp\clone-teste-openspec`, com os arquivos rastreados da branch em 88ae213 (`git archive`), `git init` e `padrao-openspec/.openspec-store/store.yaml` com `id: clone-teste`, sem registrar store; `claude -p "/opsx:propose teste"` com Read, Glob, Grep, Write, Edit e Bash de `openspec`, `git`, `ls` e `cat` liberados → o agente testou o `store.yaml`, leu o `id` e respondeu "This folder (`C:\tmp\clone-teste-openspec`) is the clone of the OpenSpec store `clone-teste` — not the code folder. Per the store clone guard, I need to stop here and write nothing.", pedindo a pasta do código com `store: clone-teste` (exit 0); `ls openspec/changes` → sem `teste`, e `git status --short` → limpo; pasta do código `C:\tmp\copilot-ganchos` reinstalada desta branch com `--in-place` ("21 installed") e commitada; `claude -p "/opsx:explore qual o estado do projeto"` → seguiu o explore e descreveu o projeto, sem citar clone nem `store.yaml` (exit 0)
 - [ ] 3.2 Roteiro no Copilot do VS Code, feito pelo responsável no clone de teste da 3.1, aberto como workspace: pedir "siga as instruções de `.claude/commands/opsx/init.md`". O agente deve parar sem gravar e pedir a pasta do código com `store: clone-teste`. Registrar a versão do Copilot e o resultado, lidos do log da sessão. Verificar com o registro citado na evidência.
 - [ ] 3.3 Rodar `openspec validate --all --strict` na raiz e em `padrao-openspec/`, o lint nos dois lugares, o `sync-root.mjs --check` e os passos dos jobs `store` e `root` localmente, um arquivo por passo, com tempo limite. Antes, avisar a outra sessão e esperar que ela não esteja usando o registro de stores. Verificar com todos saindo com código 0 e nenhum `ci-*` no registro.
 
