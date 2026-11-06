@@ -13,11 +13,11 @@ A change 1 da adoção (`adocao-entrada-no-comecar`, no #57) leva o padrão a um
   - Cobre cinco ecossistemas (Node, .NET, Python, Java e Go). Outra stack cai nas opções normais.
 - **Modo adoção no `/opsx:init`:**
   - entra pela marca `"adoption": true` do `.openspec-padrao.json` ou, sem ela, quando há código rastreado além dos arquivos do padrão (com uma pergunta antes);
-  - faz perguntas de escopo com opções quando a inspeção encontra ambiguidade (vários projetos, pastas geradas, submódulos, branch diferente da principal, inspeção truncada) e avisa um `.env` rastreado;
-  - roda a inspeção, deixa o agente ler o código só nas perguntas marcadas como "requer leitura", tratando código e documentos como dados, e mostra um resumo antes do Bloco 1.
+  - faz perguntas de escopo com opções quando a inspeção encontra ambiguidade (vários projetos, pastas geradas, submódulos, branch diferente da principal, inspeção truncada) e avisa um `.env` rastreado; a pergunta da branch não aparece quando a branch atual só tem à frente da principal os arquivos do padrão (a branch de adoção);
+  - roda a inspeção, deixa o agente ler o código só nas perguntas marcadas como "requer leitura" e só depois das respostas de escopo, tratando código e documentos como dados, e mostra um resumo antes do Bloco 1.
 - **Entrevista com S/n por pergunta:**
   - resposta detectada com confiança alta ou média aparece com a evidência e pede `S/n`; `S` registra como confirmada, e `n` abre as opções normais;
-  - detecção baixa ou em conflito abre as opções direto, com a linha de recomendação;
+  - detecção baixa, em conflito ou que não combina com uma resposta anterior abre as opções direto, com a linha de recomendação;
   - saltos e filtros usam os valores confirmados;
   - o `project-setup.md` registra a origem de cada resposta (`confirmada (detectada: <arquivo:linha>)`, `escolhida (detecção recusada: <valor>)` ou `escolhida`) e o escopo da inspeção.
 - **Fixtures e teste:** repositórios de exemplo em `padrao-openspec/scripts/test-fixtures/inspecao/` e `padrao-openspec/scripts/test-inspecionar-codigo.mjs`, que copia cada fixture para uma pasta temporária com `git init` e compara a saída com o esperado. O teste roda no job `store` da CI.
@@ -60,9 +60,9 @@ A change 1 da adoção (`adocao-entrada-no-comecar`, no #57) leva o padrão a um
 
 ## Aprovação
 
-- Responsável: Gilmar Campelo
-- Data: 2026-11-05
-- Escopo: apply
+- Responsável: Pendente
+- Data: —
+- Escopo: —
 - Condições: —
-- Conteúdo: sha256:3f396b05fb525af3cf8d0e570d6af3013976ad6b2931f470796446baf7729a6a
-- Origem: "Eu aprovo fazer a implementação da inspeção do código e da entrevista por confirmação na adoção do padrão", seguida do comando `/opsx:apply`
+- Origem: —
+- Aprovação anterior: Gilmar Campelo, 2026-11-05, apply; Condições: —; Conteúdo: sha256:3f396b05fb525af3cf8d0e570d6af3013976ad6b2931f470796446baf7729a6a; Origem: "Eu aprovo fazer a implementação da inspeção do código e da entrevista por confirmação na adoção do padrão", seguida do comando `/opsx:apply`
