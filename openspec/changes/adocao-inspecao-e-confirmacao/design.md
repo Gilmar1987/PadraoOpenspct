@@ -217,7 +217,7 @@ As formas de apresentação são as da seção 7.1 do rascunho original: opção
 2. **`S`:** registra `confirmada (detectada: <arquivo:linha>)`, sem `[INFERIDO]`.
 3. **`n`:** abre as opções normais, com filtros e saltos. A escolha vale e é registrada `escolhida (detecção recusada: <valor>)`.
 4. **Sem `S/n`:** `baixa`, conflito ou sem sinal abrem as opções. A linha de recomendação usa a evidência no formato do init (`Recomendação: 1) — PostgreSQL está no docker-compose.yml:8 …`).
-5. **Saltos e filtros:** usam os valores confirmados. Se o filtro ocultaria a opção detectada (a detecção não combina com uma resposta anterior, como Zod depois de C# + .NET na 3.1), não há `S/n`: a lista inteira aparece, com o motivo.
+5. **Saltos e filtros:** usam os valores confirmados. Se o filtro ocultaria a opção detectada (a detecção não combina com uma resposta anterior, como Prisma na 3.5 depois de C# + .NET na 3.1), não há `S/n`: a lista inteira aparece, com o motivo. Uma opção que o filtro mantém (Zod na 3.7 com front-end em TypeScript) segue com `S/n`.
 6. **Tempo verbal:** as perguntas descrevem o que existe hoje. O alvo fica para a change 3.
 7. **Resumo do bloco:** mostra a origem de cada resposta.
 8. **`evidência`:** digitado numa pergunta `S/n`, mostra todas as evidências antes da resposta.

@@ -67,8 +67,8 @@ Uma pergunta com detecção `baixa`, em conflito, não detectável ou que não c
 
 #### Scenario: Detecção incompatível com a stack escolhida
 
-- **WHEN** a 3.1 é C# + .NET, escolhida contra a detecção, e a 3.7 vem detectada como Zod
-- **THEN** o init mostra a lista inteira da 3.7, sem `S/n`, e diz que a detecção não combina com a 3.1
+- **WHEN** a 3.1 é C# + .NET, escolhida contra a detecção, e a 3.5 vem detectada como Prisma
+- **THEN** o init mostra a lista inteira da 3.5, sem `S/n`, e diz que a detecção não combina com a 3.1
 
 ### Requirement: Origem de cada resposta no registro do init
 
