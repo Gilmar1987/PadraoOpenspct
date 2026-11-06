@@ -8,12 +8,13 @@ O defeito não é do Copilot. O padrão registra os ganchos numa forma que só o
 
 ## What Changes
 
-- **Registro dos ganchos numa forma neutra de agente:** cada entrada de gancho do `templates/claude-settings.json` passa de `"command": "node"` com o caminho em `"args"` para um comando único em texto, `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/openspec-padrao/<gancho>.mjs"`, sem `args`.
-  - O Claude Code e o Copilot CLI executam essa forma, e os dois resolvem o `${CLAUDE_PROJECT_DIR}`.
+- **Registro dos ganchos numa forma neutra de agente:** cada entrada de gancho do `templates/claude-settings.json` passa de `"command": "node"` com o caminho em `"args"` para um comando único em texto que não depende do shell, sem `args`: o lançador `node -e "import(require('url').pathToFileURL(require('path').resolve(process.env.CLAUDE_PROJECT_DIR||'.','.claude/hooks/openspec-padrao/<gancho>.mjs')))"`, que acha o script pela variável de ambiente `CLAUDE_PROJECT_DIR` ou, sem ela, pela pasta atual.
+  - O Claude Code roda o comando pelo Git Bash, e o Copilot CLI pelo PowerShell. O lançador roda igual nos dois e também no cmd.
+  - A primeira forma tentada nesta change, `node "${CLAUDE_PROJECT_DIR}/..."`, falhou no roteiro de 2026-11-06 com o Copilot CLI 1.0.106. No PowerShell, `${CLAUDE_PROJECT_DIR}` é uma variável vazia do próprio PowerShell, e o gancho não foi achado (`Cannot find module 'C:\.claude\hooks\...'`).
   - O instalador reconhece as entradas antigas pelo caminho `.claude/hooks/openspec-padrao/` e as troca pelas novas no `--update`, sem tocar nas entradas do projeto.
 - **Falha interna do gancho não bloqueia:** uma exceção não tratada num gancho do padrão passa a terminar com código 0 e um aviso na saída de erro. Uma negação ou um pedido de confirmação continuam saindo só pela resposta JSON. Assim um agente que nega a ferramenta quando o gancho falha, como o Copilot, não fica travado por um defeito do padrão.
 - **Suporte declarado por agente:** o guia do padrão (`templates/openspec-padrao.md`) e o `COMECE-AQUI.md` passam a dizer que os ganchos foram verificados no Claude Code e no Copilot CLI. Para Cursor, Codex, Windsurf, Gemini CLI e Trae, o suporte fica dito como "regras e portão; ganchos não verificados". Para o Amazon Q, fica dito que os ganchos não se aplicam, porque ele só tem ganchos de contexto (`agentSpawn` e `userPromptSubmit`) num arquivo próprio. O aviso atual de que "outros agentes não recebem esta camada" é corrigido.
-- **CI:** o "Smoke test dos hooks do Claude Code" passa a rodar cada gancho exatamente pelo `command` do template, sem `args`, como faz um agente. O teste também confere que um gancho com exceção interna sai com 0 e libera a chamada. O "Smoke test da camada do Claude Code no instalador" confere a troca das entradas antigas, com `args`, pelas novas.
+- **CI:** o "Smoke test dos hooks do Claude Code" passa a rodar cada gancho exatamente pelo `command` do template, sem `args`, como faz um agente: pelo Git Bash e, no Windows, pelo PowerShell, sem substituir o texto, com e sem a variável `CLAUDE_PROJECT_DIR`. O teste também confere que um gancho com exceção interna sai com 0 e libera a chamada. O "Smoke test da camada do Claude Code no instalador" confere a troca das entradas antigas, com `args`, pelas novas.
 - **Verificação real nos dois agentes:**
   - um roteiro com `claude -p` numa pasta de teste confere que os ganchos disparam no Claude Code;
   - o responsável roda, no Copilot do VS Code, um roteiro que confere que os comandos de leitura passam e que as negações do padrão continuam negando. O resultado vai para o `verification.md`.
@@ -50,7 +51,7 @@ Nenhuma.
 - **Dependências:** nenhuma nova.
 - **Riscos:**
   - Dados pessoais, autenticação, esquema de dados e variáveis de ambiente: não se aplicam.
-  - Shell do comando: no Claude Code para Windows, o comando em texto passa pelo Git Bash. O roteiro com `claude -p` confere isso antes do commit, e a tarefa para se o gancho não disparar.
+  - Shell do comando: o lançador não usa expansão de shell, então roda igual no Git Bash (Claude Code), no PowerShell (Copilot CLI) e no cmd. A reserva da pasta atual só vale se o agente rodar o gancho na pasta do projeto, e o roteiro do Copilot confere isso. Os roteiros com `claude -p` e no Copilot rodam de novo com o lançador.
   - Gancho que libera por exceção: um defeito num gancho deixa de bloquear e passa a liberar. O portão continua sendo a garantia de aprovação, apply e archive, e o aviso na saída de erro mostra o defeito.
   - Projetos com a v1.18.0 ou anterior: as entradas antigas continuam funcionando no Claude Code até o `--update`.
 - **Interface com outros sistemas:** não se aplica.
@@ -62,9 +63,9 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Gilmar Campelo
-- Data: 2026-11-05
-- Escopo: apply
+- Responsável: Pendente
+- Data: —
+- Escopo: —
 - Condições: —
-- Conteúdo: sha256:929b371be1a8d6b89820ffc196a2f90b8d361ba4a6de02821d38f2eb8e909be3
-- Origem: "Eu aprovo fazer a implementação dos ganchos do padrão compatíveis com qualquer agente", seguida do comando `/opsx:apply`
+- Origem: —
+- Aprovação anterior: Gilmar Campelo, 2026-11-05, apply; Condições: —; Origem: "Eu aprovo fazer a implementação dos ganchos do padrão compatíveis com qualquer agente", seguida do comando `/opsx:apply`; Conteúdo: sha256:929b371be1a8d6b89820ffc196a2f90b8d361ba4a6de02821d38f2eb8e909be3

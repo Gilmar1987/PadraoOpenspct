@@ -2,7 +2,7 @@
 
 ### Requirement: Ganchos executáveis por qualquer agente
 
-Cada entrada de gancho do padrão no `.claude/settings.json` SHALL ser um comando único em texto, sem o campo `args`: `node` seguido do caminho do script entre aspas, a partir de `${CLAUDE_PROJECT_DIR}`. Um agente que execute o `command` das entradas desse arquivo SHALL rodar o gancho do padrão com o payload que recebe na entrada.
+Cada entrada de gancho do padrão no `.claude/settings.json` SHALL ser um comando único em texto, sem o campo `args`, que rode igual no Git Bash, no PowerShell e no cmd. O `node` acha o script do gancho pela variável de ambiente `CLAUDE_PROJECT_DIR` ou, sem ela, pela pasta atual. Um agente que execute o `command` das entradas desse arquivo SHALL rodar o gancho do padrão com o payload que recebe na entrada.
 
 #### Scenario: Gancho no Claude Code
 
@@ -19,10 +19,15 @@ Cada entrada de gancho do padrão no `.claude/settings.json` SHALL ser um comand
 - **WHEN** o Copilot CLI, aberto na pasta do código, roda `git commit --allow-empty --no-verify -m teste`
 - **THEN** o gancho do padrão nega o comando, citando o hook commit-msg
 
-#### Scenario: Gancho rodado pelo comando do template
+#### Scenario: Gancho rodado pelo Git Bash
 
-- **WHEN** a CI roda cada entrada do template exatamente pelo `command`, sem `args`, com um payload simulado
+- **WHEN** a CI roda cada entrada do template pelo `command`, sem `args`, num Git Bash com a variável `CLAUDE_PROJECT_DIR` definida e fora da pasta do projeto, com um payload simulado
 - **THEN** cada gancho dá a mesma resposta que dá quando chamado com o caminho do script
+
+#### Scenario: Gancho rodado pelo PowerShell
+
+- **WHEN** a CI no Windows roda cada entrada do template pelo `command`, sem substituir o texto, no PowerShell, com a variável `CLAUDE_PROJECT_DIR` e também sem ela, na pasta do projeto
+- **THEN** cada gancho dá, nos dois casos, a mesma resposta que dá quando chamado com o caminho do script
 
 ### Requirement: Falha interna do gancho não bloqueia o agente
 
