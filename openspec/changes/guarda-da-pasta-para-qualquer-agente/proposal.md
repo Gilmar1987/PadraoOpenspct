@@ -64,9 +64,10 @@ Nenhuma.
 
 ## Aprovação
 
-- Responsável: Pendente
-- Data: —
-- Escopo: —
+- Responsável: Gilmar Campelo
+- Data: 2026-11-06
+- Escopo: apply
 - Condições: —
-- Origem: —
+- Conteúdo: sha256:55a47df6b91dd882f9e67544c0dcfb7e94af3345e30c06f019b856bcc6d52623
+- Origem: "Eu aprovo fazer a implementação das correções da guarda do clone do store", seguida do comando `/opsx:apply`
 - Aprovação anterior: Gilmar Campelo, 2026-11-06, apply; Condições: —; Origem: "Eu aprovo fazer a implementação da guarda da pasta da sessão para qualquer agente", seguida do comando `/opsx:apply`; Conteúdo: sha256:e0843e29b7fb286d1955140d115899f24279d6a7fbd345612dcf5f7d6d197a65
