@@ -12,6 +12,10 @@ valem para qualquer agente e não podem ser contornadas por instruções no chat
   exemplo `.claude/commands/opsx/propose.md`. No Claude Code, um `/opsx:*` fora do início da mensagem,
   ou o pedido da etapa pelo nome, não é o comando: não comece a etapa e peça para
   reenviar só o comando no início de uma mensagem nova.
+- Na pasta do clone de um store (a que tem `padrao-openspec/.openspec-store/store.yaml`) ou na pasta
+  `padrao-openspec/` dele (a que tem `.openspec-store/store.yaml`), em qualquer agente, não siga os fluxos `/opsx`
+  nem grave nada em `openspec/`: peça para abrir a pasta do código, a que declara `store: <id>` no
+  `openspec/config.yaml`.
 - Os comandos `/opsx:*` são fluxos do agente, não comandos do OpenSpec CLI: não existe
   `openspec verify`. Nunca rode `openspec archive` direto; siga `.claude/commands/opsx/archive.md`.
 - Antes de escrever código de uma change e antes de arquivá-la, rode

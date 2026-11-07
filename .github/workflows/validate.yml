@@ -495,6 +495,32 @@ jobs:
               missing=1
             fi
           done
+          # Guarda do clone do store (guarda-da-pasta-para-qualquer-agente), requisitos "Guarda do clone do store
+          # em qualquer agente", "Regras param no clone do store" e "Guarda do clone do store protegida pela CI":
+          # o parágrafo nos 10 comandos e nas 7 skills, para qualquer agente, e a frase nas regras e no bloco de agentes.
+          for g in .claude/commands/opsx/*.md .claude/skills/openspec-*/SKILL.md; do
+            check "$g" "**Store clone guard**"
+            check "$g" "this applies to any agent, Claude Code included"
+            check "$g" 'also has `padrao-openspec/.openspec-store/store.yaml`'
+            # Revisão de código: a pasta padrao-openspec/ do clone, o caminho desconhecido e a ordem (cenário
+            # "Guarda do clone depois da guarda da sessão").
+            check "$g" '`padrao-openspec/.openspec-store/store.yaml` or `.openspec-store/store.yaml`'
+            check "$g" "when you do not know this file's path"
+            clone=$(grep -nF -- "**Store clone guard**" "$g" | head -n 1 | cut -d: -f1 || true)
+            sessao=$(grep -nF -- "**Session folder guard**" "$g" | head -n 1 | cut -d: -f1 || true)
+            if [ -n "$clone" ] && [ -n "$sessao" ] && [ "$clone" -gt "$sessao" ]; then
+              echo "::error file=padrao-openspec/$g::A guarda do clone do store tem de vir antes da guarda da pasta da sessão"
+              missing=1
+            fi
+          done
+          check openspec/rules.md 'padrao-openspec/.openspec-store/store.yaml'
+          check templates/agents-block.md 'padrao-openspec/.openspec-store/store.yaml'
+          for f in openspec/rules.md templates/agents-block.md; do
+            check "$f" "em qualquer agente"
+            check "$f" '`.openspec-store/store.yaml`'
+          done
+          check openspec/rules.md 'nada em `openspec/`'
+          check templates/agents-block.md 'nada em `openspec/`'
           exit $missing
 
       - name: Paridade de papéis
@@ -1896,6 +1922,17 @@ jobs:
 
       - name: Raiz em dia com padrao-openspec
         run: node padrao-openspec/scripts/sync-root.mjs --check
+
+      # Requisito "Guarda do clone do store protegida pela CI", cenário "Marcador de store no repositório do
+      # padrão": registrar este repositório como store cria o marcador que faz a guarda dos fluxos disparar aqui.
+      - name: Repositório do padrão sem marcador de store
+        run: |
+          for m in padrao-openspec/.openspec-store .openspec-store; do
+            if [ -e "$m" ]; then
+              echo "::error file=$m::Marcador de store no repositório do padrão: a guarda do clone do store pararia os fluxos aqui"
+              exit 1
+            fi
+          done
 
       # Requisito "Versão do OpenSpec CLI coerente" (continuous-validation), cenários "Versões iguais",
       # "Skill gerada por outra versão", "Passo de instalação esquecido" e "Documento com o comando
