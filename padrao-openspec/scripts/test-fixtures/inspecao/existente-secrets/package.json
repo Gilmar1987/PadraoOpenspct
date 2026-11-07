@@ -1,0 +1,6 @@
+{
+  "name": "segredos",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
