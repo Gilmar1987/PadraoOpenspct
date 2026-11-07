@@ -119,6 +119,9 @@ Quem tem um projeto com código e histórico que nunca usou o padrão roda o scr
 branch `chore/adota-padrao-openspec` no código, roda o setup com a marca `"adoption": true` no
 `.openspec-padrao.json` e commita só os arquivos do padrão nessa branch, para revisão por PR (veja
 [Projeto que nunca usou o padrão](COMECE-AQUI.md#projeto-que-nunca-usou-o-padrão)).
+Com a marca, o `/opsx:init` entra no modo adoção: inspeciona o código com `docs/openspec-inspecionar-codigo.mjs`
+(somente leitura, só arquivos rastreados, sem rede) e pede `S/n` nas perguntas que o código responde, com a
+evidência de cada uma ([ADR-0010](openspec/adrs/0010-adocao-por-inspecao-e-confirmacao.md)).
 
 Sem registrar o store (por exemplo, em CI), troque `--register-id <projeto>` por
 `--no-register`. O setup mostra ao final o comando de registro e a linha `store:` a

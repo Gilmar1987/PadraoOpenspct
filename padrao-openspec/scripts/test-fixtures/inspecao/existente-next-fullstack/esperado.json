@@ -1,0 +1,76 @@
+{
+  "projetos": [
+    [
+      ".",
+      "backend"
+    ],
+    [
+      ".",
+      "frontend"
+    ]
+  ],
+  "sinais": {
+    "1.1": {
+      "valor": "agenda",
+      "confianca": "media"
+    },
+    "1.7": {
+      "valor": [
+        "4"
+      ],
+      "confianca": "media"
+    },
+    "2.2": {
+      "valor": "1",
+      "confianca": "alta"
+    },
+    "3.1": {
+      "valor": "1",
+      "confianca": "alta"
+    },
+    "3.2": {
+      "valor": "1",
+      "confianca": "alta"
+    },
+    "3.3": {
+      "valor": "1",
+      "confianca": "alta"
+    },
+    "3.5": {
+      "valor": "1",
+      "confianca": "alta"
+    },
+    "4.2": {
+      "valor": "4",
+      "confianca": "media"
+    },
+    "5.1": {
+      "valor": "4",
+      "confianca": "media"
+    },
+    "5.2": {
+      "valor": "5",
+      "confianca": "media"
+    },
+    "5.9": {
+      "valor": "1",
+      "confianca": "media"
+    }
+  },
+  "comandos": {
+    "Executar localmente": "npm run dev",
+    "Typecheck/build": "npm run build"
+  },
+  "requerLeitura": [
+    "1.3",
+    "2.1",
+    "2.3",
+    "2.4",
+    "6.5",
+    "7.4"
+  ],
+  "avisos": [
+    "achado: Nenhum CI encontrado",
+    "achado: Nenhum framework de testes encontrado"
+  ]
+}

@@ -30,6 +30,7 @@ const templateFiles = [
   { source: '../openspec/rules.md', destination: 'docs/openspec-regras.md', label: 'standard rules' },
   { source: '../scripts/portao.mjs', destination: 'docs/openspec-portao.mjs', label: 'standard gate' },
   { source: '../scripts/validar-interface.mjs', destination: 'docs/openspec-validar-interface.mjs', label: 'interface validation' },
+  { source: '../scripts/inspecionar-codigo.mjs', destination: 'docs/openspec-inspecionar-codigo.mjs', label: 'code inspection' },
 ];
 
 // Agent instruction files that carry the standard's managed block (ADR-0005). Only the text between

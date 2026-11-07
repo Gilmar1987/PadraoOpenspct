@@ -285,3 +285,12 @@ Quando o `.claude/settings.json` do código tiver entradas de gancho do padrão 
 
 - **WHEN** o projeto tem as entradas da v1.18.0 e o instalador roda sem `--update` nem `--in-place`
 - **THEN** o instalador termina com erro citando `--update` e `--in-place`, e o `settings.json` não muda
+
+### Requirement: Script de inspeção entregue ao código
+
+O instalador SHALL entregar ao repositório de código o script de inspeção como o arquivo gerenciado `docs/openspec-inspecionar-codigo.mjs`, idêntico a `padrao-openspec/scripts/inspecionar-codigo.mjs` da versão instalada, e listá-lo em `managedFiles` do manifesto.
+
+#### Scenario: Instalação do padrão
+
+- **WHEN** o instalador roda num repositório de código
+- **THEN** o código tem `docs/openspec-inspecionar-codigo.mjs` igual ao script do padrão, e o manifesto o lista
