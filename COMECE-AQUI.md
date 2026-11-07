@@ -297,7 +297,7 @@ expandido, e o agente pede para reenviá-lo). Se o `/opsx` não aparece, a sess�
 pasta do código, e o agente para e pede para abri-la. Em qualquer agente, aberto na pasta do store (o clone, como
 `<id>-openspec`, que tem `padrao-openspec/.openspec-store/store.yaml`), o fluxo para sem gravar nada e pede
 para abrir a pasta do código: é nela que o agente trabalha, e o store só guarda os documentos. Isso vale
-também na pasta `padrao-openspec/` do clone, e só em clones criados a partir da versão 1.19.0 do padrão.
+também na pasta `padrao-openspec/` do clone, e só em stores criados a partir da versão 1.19.0 do padrão.
 
 | Agente | Arquivo que lê | Como rodar o fluxo | Ganchos do padrão |
 |---|---|---|---|

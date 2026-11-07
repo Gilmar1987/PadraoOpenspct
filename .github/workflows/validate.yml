@@ -478,8 +478,8 @@ jobs:
             # "Guarda do clone depois da guarda da sessão").
             check "$g" '`padrao-openspec/.openspec-store/store.yaml` or `.openspec-store/store.yaml`'
             check "$g" "when you do not know this file's path"
-            clone=$(grep -nF -- "**Store clone guard**" "$g" | head -n 1 | cut -d: -f1)
-            sessao=$(grep -nF -- "**Session folder guard**" "$g" | head -n 1 | cut -d: -f1)
+            clone=$(grep -nF -- "**Store clone guard**" "$g" | head -n 1 | cut -d: -f1 || true)
+            sessao=$(grep -nF -- "**Session folder guard**" "$g" | head -n 1 | cut -d: -f1 || true)
             if [ -n "$clone" ] && [ -n "$sessao" ] && [ "$clone" -gt "$sessao" ]; then
               echo "::error file=padrao-openspec/$g::A guarda do clone do store tem de vir antes da guarda da pasta da sessão"
               missing=1
@@ -492,6 +492,7 @@ jobs:
             check "$f" '`.openspec-store/store.yaml`'
           done
           check openspec/rules.md 'nada em `openspec/`'
+          check templates/agents-block.md 'nada em `openspec/`'
           exit $missing
 
       - name: Paridade de papéis
@@ -1896,10 +1897,12 @@ jobs:
       # padrão": registrar este repositório como store cria o marcador que faz a guarda dos fluxos disparar aqui.
       - name: Repositório do padrão sem marcador de store
         run: |
-          if [ -e padrao-openspec/.openspec-store ]; then
-            echo "::error file=padrao-openspec/.openspec-store::Marcador de store no repositório do padrão: a guarda do clone do store pararia os fluxos aqui"
-            exit 1
-          fi
+          for m in padrao-openspec/.openspec-store .openspec-store; do
+            if [ -e "$m" ]; then
+              echo "::error file=$m::Marcador de store no repositório do padrão: a guarda do clone do store pararia os fluxos aqui"
+              exit 1
+            fi
+          done
 
       # Requisito "Versão do OpenSpec CLI coerente" (continuous-validation), cenários "Versões iguais",
       # "Skill gerada por outra versão", "Passo de instalação esquecido" e "Documento com o comando

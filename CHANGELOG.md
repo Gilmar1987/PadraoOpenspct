@@ -36,9 +36,10 @@ versão publicada tem uma tag `vX.Y.Z` com uma GitHub Release ([ADR-0004](opensp
   nova e não mexe nas entradas do projeto. Sem a atualização, os hooks continuam funcionando no Claude Code, mas
   travam os comandos no Copilot CLI. A mesma atualização traz a guarda do clone do store aos comandos e às
   skills do código.
-- Só os clones do store criados a partir desta versão têm a guarda nos comandos da raiz e da pasta
-  `padrao-openspec/`. Num clone criado antes, a guarda chega aos comandos da pasta do código pelo `--update`, mas a
-  raiz do clone continua com os comandos antigos.
+- Só os stores criados (projeto novo ou adoção) a partir desta versão têm a guarda nos comandos da raiz e da pasta
+  `padrao-openspec/` do clone. Clonar hoje o store de um projeto criado antes, inclusive pela opção "projeto em
+  andamento" do script de entrada, traz a raiz antiga; nesses projetos, a guarda chega aos comandos da pasta do
+  código pelo `--update`.
 - O script de entrada é baixado da release, e o setup e o instalador da adoção chegam com a atualização do
   padrão.
 
